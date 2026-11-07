@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="102" viewBox="0 0 280 102" role="img" aria-labelledby="titolo descrizione">
+<title id="titolo">Decodifica di una voce della tabella delle pagine</title><desc id="descrizione">La voce esadecimale 23 codifica il frame 17 e il bit di validità 1.</desc>
+<g id="campi-pte">
+<polygon points="10,32 30,32 30,55 10,55" fill="#0d241a" stroke="#386b50" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<text x="20" y="47" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#82c79a">0</text>
+<polygon points="30,32 50,32 50,55 30,55" fill="#0d241a" stroke="#386b50" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<text x="40" y="47" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#82c79a">0</text>
+<polygon points="50,32 70,32 70,55 50,55" fill="#0d241a" stroke="#386b50" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<text x="60" y="47" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#82c79a">1</text>
+<polygon points="70,32 90,32 90,55 70,55" fill="#0d241a" stroke="#386b50" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<text x="80" y="47" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#82c79a">0</text>
+<polygon points="90,32 110,32 110,55 90,55" fill="#0d241a" stroke="#386b50" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<text x="100" y="47" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#82c79a">0</text>
+<polygon points="110,32 130,32 130,55 110,55" fill="#0d241a" stroke="#386b50" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<text x="120" y="47" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#82c79a">0</text>
+<polygon points="130,32 150,32 150,55 130,55" fill="#0d241a" stroke="#386b50" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<text x="140" y="47" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#82c79a">1</text>
+<polygon points="150,32 170,32 170,55 150,55" fill="#241e12" stroke="#bb8354" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<text x="160" y="47" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#f5bb72">1</text>
+<text x="217" y="48" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="14" text-anchor="middle" fill="#82c79a">0x23</text>
+<polyline points="10,61 10,65 150,65 150,61" fill="none" stroke="#82c79a" stroke-width="0.85" stroke-linejoin="round" stroke-linecap="round" />
+<polyline points="80,65 80,73 68,82 41,82" fill="none" stroke="#82c79a" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" />
+<circle cx="41" cy="82" r="2" fill="#b6ffd0"/>
+<text x="24" y="86" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#b6ffd0">17</text>
+<polyline points="160,56 160,68 176,82 190,82" fill="none" stroke="#f5bb72" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" />
+<circle cx="190" cy="82" r="2" fill="#f5bb72"/>
+<text x="201" y="86" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" text-anchor="middle" fill="#f5bb72">1</text>
+</g>
+</svg>

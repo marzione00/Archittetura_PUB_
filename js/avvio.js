@@ -9,12 +9,14 @@
       section='esercitazioni';num=id.split('.')[2];id='6.3';
     }
     const chapter=SL.chapters.get(id);
+    const moduleNumber=Number((id||'').split('.')[0]);
+    SL.view={section,module:Number.isInteger(moduleNumber)&&moduleNumber>=1&&moduleNumber<=6?moduleNumber:0};
     SL.stopFilm();SL.after=null;let html='';
     if(!extra){
       if(section==='indice'&&!id)html=SL.home();
       else if(['laboratorio','esercitazioni','mappa'].includes(section)&&(!id||/^parte-[1-6]$/.test(id)||chapter)&&!num)html=SL.directory(section,id,params);
       else if(section==='modulo'&&/^[1-6]$/.test(id||'')&&!num)html=SL.esperimento(id,params,true);
-      else if(section==='problema'&&!num&&SL.casiSvolti[id])html=SL.problemaSvolto(id);
+      else if(section==='problema'&&!num&&Object.hasOwn(SL.casiSvolti,id))html=SL.problemaSvolto(id);
       else if(section==='lab'&&!num){
         if(/^6\.3\.[1-4]$/.test(id||''))html=SL.laboratorio(Number(id.split('.')[2]),params);
         else if(Object.hasOwn(SL.unita,id))html=SL.esperimento(id,params);
@@ -34,6 +36,8 @@
     if(move){window.scrollTo({top:0,behavior:'instant'});root.focus({preventScroll:true});}
   }
   root.addEventListener('click',event=>{
+    const freccia=event.target.closest('.ordine [data-passo]');
+    if(freccia){SL.spostaFase(freccia);return;}
     if(!event.target.closest('[data-salta-teoria]'))return;
     const attivita=document.getElementById('inizio-attivita');
     if(attivita){

@@ -1,15 +1,12 @@
 'use strict';
 (() => {
   const {$,esc:E,hex:H}=SL;
-  const storeKey='sistemilab.esercizi.v1',drafts=new Map();
+  const drafts=new Map();
   const modes=['guidata','allenamento','autonoma'],modeNames=['Guidata','Allenamento','Prova autonoma'];
   const family={compose:'componi',lookup:'cerca',walker:'walker'};
-  const sessionDone=new Set();
-  function finished(){
-    try{const data=JSON.parse(localStorage.getItem(storeKey)||'[]');return new Set([...sessionDone,...(Array.isArray(data)?data:[])]);}
-    catch{return new Set(sessionDone);}
-  }
-  function mark(k){sessionDone.add(k);try{const q=finished();q.add(k);localStorage.setItem(storeKey,JSON.stringify([...q]));}catch{/* Lo svolgimento resta disponibile durante la sessione. */}}
+  const registro=SL.registroProgressi('sistemilab.esercizi.v1',SL.esercizi.flatMap((_,j)=>
+    [0,1].map(v=>SL.chiaveTraccia('6.3',j+1,v))));
+  const finished=registro.completate,mark=registro.segna;
   function good(f,text){
     if(!String(text||'').trim())return false;
     const answers=[f.answer,...f.accept||[]];
@@ -26,8 +23,8 @@
     const variant=p.get('v')==='1'?1:0;
     const x=variant?{...base,...base.variants[0]}:base;
     const mode=modes.includes(p.get('m'))?p.get('m'):'guidata';
-    const key=x.id+'/'+variant,group=Math.floor((n-1)/4);
-    if(!drafts.has(key))drafts.set(key,{answers:x.fields.map(()=>''),source:'',examSubmitted:false,codeOK:false,unlocked:0});
+    const key=SL.chiaveTraccia('6.3',n,variant),group=Math.floor((n-1)/4);
+    if(!drafts.has(key))drafts.set(key,{answers:x.fields.map(()=>''),source:x.starter||'',examSubmitted:false,codeOK:false,unlocked:0});
     const d=drafts.get(key);const done=finished();
     const solved={...x,consegna:x.prompt,campi:x.fields,svolgimento:x.steps,codice:x.code};
     let film;
@@ -107,11 +104,11 @@
       SL.heading(E(x.title))+
       '<div class="layout">'+SL.sidebar(5)+'<div class="body"><details class="panel altri-esercizi"><summary>Altri esercizi sulla traduzione degli indirizzi</summary><div class="grouplist">'+SL.famNames.map((t,i)=>'<a class="'+(group===i?'on':'')+'" href="#esercitazioni/6.3/'+(i*4+1)+params(0)+'">'+E(t)+'<small>6.3.'+(i*4+1)+' – 6.3.'+(i*4+4)+'</small></a>').join('')+'</div>'+
       '<div class="toolrow spaced">'+SL.linksFamily(group,n,params(0))+'<small class="small" id="progresso">'+done.size+' / 40 tracce completate su questo dispositivo</small></div></details>'+
-      '<section class="panel"><div class="toolrow"><span class="label">Esercizio '+x.id+' · Traccia '+(variant+1)+'</span><a class="textlink" href="#esercitazioni/6.3/'+x.id.split('.').pop()+params(1-variant)+'">'+('Passa alla traccia '+(2-variant))+' ⇄</a></div>'+SL.principioProva(x.principio)+
+      '<section class="panel"><div class="toolrow"><span class="label obiettivo-traccia">Esercizio '+x.id+' · '+E(SL.titoloTraccia('6.3',n,variant))+'</span><a class="textlink" href="#esercitazioni/6.3/'+x.id.split('.').pop()+params(1-variant)+'">'+E(SL.titoloTraccia('6.3',n,1-variant))+' ⇄</a></div>'+SL.principioProva(x.principio)+
       '<div class="tabs" aria-label="Modalità">'+modes.map((v,i)=>'<a class="tab '+(mode===v?'active':'')+'" href="#esercitazioni/6.3/'+x.id.split('.').pop()+params(variant,v)+'">'+modeNames[i]+'</a>').join('')+'</div>'+
       '<p class="quiet-note">'+({guidata:'Verifica un passaggio per volta per aprire il successivo.',allenamento:'Completa i campi in qualsiasi ordine. La correzione individua il primo passaggio da rivedere.',autonoma:(x.code?'Consegna le risposte e il frammento assembly.':'Consegna le risposte.')+' Dopo il tentativo puoi consultare lo svolgimento.'}[mode])+'</p>'+
       '<div class="status"><p class="prompt">'+E(x.prompt)+'</p></div><p class="quiet-note">Usa il prefisso 0x nei campi esadecimali. Nei campi decimali scrivi le cifre senza separatori.</p><div class="fieldlist">'+x.fields.map(input).join('')+'</div>'+
-      (x.code?'<section class="box"><h3>Frammento assembly</h3><label for="editor">Sintassi Intel · x86-64</label><textarea class="editor" id="editor" spellcheck="false" autocomplete="off" placeholder="Scrivi qui le istruzioni">'+E(d.source)+'</textarea><div class="actions"><button class="btn" id="trace-code">Esegui la traccia</button><button class="btn" id="test-code">Prova i casi limite</button></div><div id="risultato-codice" aria-live="polite"></div><details class="unitentry"><summary>Istruzioni e registri disponibili</summary><p>Registri: RAX, RCX, RDI, RSI e le rispettive parti a 32 bit. Istruzioni: MOV, LEA, SHL, SHR, AND, OR, XOR, ADD, SUB, TEST, CMP, JMP, JE/JZ, JNE/JNZ, JB, JAE, NOP, RET. Le letture usano MOV a 64 bit su voci da otto byte. Gli shift accettano conteggi immediati. RET chiude il frammento e restituisce RAX al banco di prova. I test eseguono il modello didattico locale.</p></details></section>':'')+
+      (x.code?'<section class="box"><h3>'+(x.starter?'Listato di partenza':'Frammento assembly')+'</h3><label for="editor">Sintassi Intel · x86-64</label><textarea class="editor" id="editor" spellcheck="false" autocomplete="off" placeholder="Scrivi qui le istruzioni">'+E(d.source)+'</textarea><div class="actions"><button class="btn" id="trace-code">Esegui la traccia</button><button class="btn" id="test-code">Prova i casi limite</button></div><div id="risultato-codice" aria-live="polite"></div><details class="unitentry"><summary>Istruzioni e registri disponibili</summary><p>Registri: RAX, RCX, RDI, RSI e le rispettive parti a 32 bit. Istruzioni: MOV, LEA, SHL, SHR, AND, OR, XOR, ADD, SUB, TEST, CMP, JMP, JE/JZ, JNE/JNZ, JB, JAE, NOP, RET. Le letture usano MOV a 64 bit su voci da otto byte. Gli shift accettano conteggi immediati. RET chiude il frammento e restituisce RAX al banco di prova. I test eseguono il modello didattico locale.</p></details></section>':'')+
       '<div class="actions"><button class="btn warm" id="verifica">'+(mode==='guidata'?'Verifica passaggio':'Verifica risposte')+'</button>'+
       (mode!=='autonoma'?'<button class="btn quiet" id="indizio">Indizio</button>':'')+'<button class="btn quiet" id="apri-soluzione" aria-controls="solcorrente" aria-expanded="false" '+(mode==='autonoma'&&!d.examSubmitted?'disabled':'')+'>Mostra svolgimento</button><button class="chip" id="azzera">Ricomincia</button></div><div id="verdetto" aria-live="polite"></div>'+
       '<section id="film-esercizio" hidden><h3 class="spaced">Ricostruzione animata</h3>'+SL.replayMarkup()+'</section><div id="solcorrente" class="spaced" hidden><h3 class="soltitle">Svolgimento completo</h3>'+explain(x)+'</div></section>'+

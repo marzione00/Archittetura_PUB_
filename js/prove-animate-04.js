@@ -54,16 +54,29 @@
   }
 
   state('4.1/1',(v,k,b)=>{
-    const base=b?0x8000:0x4000,size=b?8:16,ix=b?33:14;
-    const d=tape(26,85,575,['['+(ix-1)+']','['+ix+']','['+(ix+1)+']'],k?1:-1)
-      +t(121,151,'passo '+size+' B','small','middle')+t(313,180,k>=2?'offset '+hx(A(v,0)):'base '+hx(base),'label','middle')
+    if(b){
+      const table=tape(32,85,568,['0x8108','0x8110','0x8118'],k>=2?1:-1);
+      const bytes=k>=2?tape(107,154,420,['0','1','2','3','4','5','6','7'],k===3?4:-1):'';
+      return graphic('Dalla lettura alla porta','IDT a 0x8000 · voci di 8 B · byte letto a 0x8114',table+bytes,
+        ['Gli indirizzi sulla striscia segnano l’inizio di tre porte.','Il byte letto dista 276 B dalla base.','276 = 34 × 8 + 4. La porta inizia a 0x8110.','Nel vettore '+A(v,0)+' è stato letto il byte di posizione '+A(v,1)+'.'][k]);
+    }
+    const d=tape(26,85,575,['[13]','[14]','[15]'],k?1:-1)
+      +t(121,151,'passo 16 B','small','middle')+t(313,180,k>=2?'offset '+hx(A(v,0)):'base 0x4000','label','middle')
       +(k===3?motion(315,160,315,130):'');
-    return graphic('Una porta nella IDT','Base '+hx(base)+' · vettore '+ix+' · descrittore da '+size+' B',d,['La tabella è indicizzata per vettore.','Passare da una voce alla successiva aggiunge '+size+' B.','Offset = '+ix+' × '+size+' = '+A(v,0)+' B.','Indirizzo della voce = '+hx(A(v,1))+'.'][k]);
+    return graphic('Una porta nella IDT','Base 0x4000 · vettore 14 · descrittore da 16 B',d,
+      ['La tabella è indicizzata per vettore.','La distanza fra due voci consecutive è di 16 B.','Offset = 14 × 16 = '+A(v,0)+' B.','Indirizzo della voce = '+hx(A(v,1))+'.'][k]);
   });
   state('4.1/2',(v,k,b)=>{
-    const pc=b?0x4020:0x4010,length=b?1:4,ret=Number(A(v,1)),d=c(30,65,191,64,'Istruzione',hx(pc))+c(421,65,191,64,'Seguente',show(k,3,hx(pc+length)))+c(214,150,201,56,'Evento',k>=1?(b?'#BP':'#PF'):'·',k===1);
-    return graphic('Punto di ripresa',b?'INT3 lungo 1 B':'Caricamento lungo 4 B · pagina assente',d+(k>=1?motion(130,132,216,167,k===1):'')+(k===3?motion(319,147,b?510:127,132):''),
-      ['Prima dell’ingresso nel gestore.',b?'Il breakpoint è completato.':'Il caricamento si arresta durante la traduzione.','Classe: '+A(v,0)+'.','RIP salvato: '+hx(ret)+'.'][k]);
+    if(b){
+      const b0=c(29,85,173,63,'0x4020',k>=2?'byte originale':'INT3',k===2),b1=c(407,85,173,63,'0x4021','RIP salvato',k===0);
+      const tip=t(32,186,k===3?'Primo fetch dopo il debugger a 0x4020':'Memoria del programma','label');
+      return graphic('Riprendere l’istruzione originale','Il frame contiene RIP = 0x4021.',b0+b1+tip+(k>=1?motion(401,118,208,118,k===1):''),
+        ['L’indirizzo salvato segue INT3.','0x4021 − 1 = 0x4020.','Il debugger riscrive il byte originale.','La ripresa è riferita al byte appena ripristinato.'][k]);
+    }
+    const pc=0x4010,length=4,ret=Number(A(v,1));
+    const d=c(30,65,191,64,'Istruzione',hx(pc))+c(421,65,191,64,'Seguente',show(k,3,hx(pc+length)))+c(214,150,201,56,'Evento',show(k,1,'#PF'),k===1);
+    return graphic('Punto di ripresa','Caricamento lungo 4 B · pagina assente',d+(k?motion(130,132,216,167,k===1):'')+(k===3?motion(319,147,127,132):''),
+      ['Prima dell’ingresso nel gestore.','Il caricamento si arresta durante la traduzione.','Classe: '+A(v,0)+'.','RIP salvato: '+hx(ret)+'.'][k]);
   });
   state('4.1/3',(v,k,b)=>{
     const names=b?(k>=2?['SS','RSP','RFLAGS','CS','RIP','errore #PF']:[]):(k===1?['SS','ESP']:k>=2?['SS','ESP','EFLAGS','CS','EIP']:[]);
@@ -85,9 +98,17 @@
     return graphic('Tre indirizzi con tre funzioni','Voce IDT a 0x4720 · destinazione 0x8040 · RIP nel frame 0x2048',
       circuit([['Voce IDT','0x4720',1],['Fetch gestore',hx(A(v,0)),2],['IRETQ',hx(A(v,1)),3]],k),['La porta e il frame si trovano in strutture diverse.','Si legge il descrittore.','Il primo fetch usa il contenuto della porta.','IRETQ recupera RIP dal frame.'][k]);
   });
-  state('4.2/1',(v,k,b)=>graphic('Banco dei registri Linux x86-64',b?'read(4, 0x4080, 32)':'write(7, 0x4080, 96)',
-    bank([['RAX',show(k,1,A(v,0)),k===1],['RDI',show(k,2,A(v,1)),k===2],['RSI',show(k,2,'0x4080'),k===2],['RDX',show(k,3,A(v,2)),k===3]]),
-    ['Prima di SYSCALL.', 'RAX seleziona il servizio '+(b?'read.':'write.'),'RDI e RSI contengono i primi due argomenti.','RDX limita i byte richiesti.'][k]));
+  state('4.2/1',(v,k,b)=>{
+    if(b){
+      const swapped=k>=2;
+      return graphic('Correggere gli argomenti di read','Il programma vuole leggere 32 B nel buffer a 0x4080.',
+        bank([['RAX','0',k===1],['RDI','4',k===1],['RSI',swapped?'0x4080':'32',k===2],['RDX',swapped?'32':'0x4080',k===3]]),
+        ['Fotografia prima di SYSCALL.','Servizio e descrittore sono corretti.','Lo scambio assegna a RSI l’indirizzo del buffer.','RDX limita la richiesta a '+A(v,1)+' B.'][k]);
+    }
+    return graphic('Banco dei registri Linux x86-64','write(7, 0x4080, 96)',
+      bank([['RAX',show(k,1,A(v,0)),k===1],['RDI',show(k,2,A(v,1)),k===2],['RSI',show(k,2,'0x4080'),k===2],['RDX',show(k,3,A(v,2)),k===3]]),
+      ['Prima di SYSCALL.','RAX seleziona write.','RDI e RSI contengono i primi due argomenti.','RDX limita i byte richiesti.'][k]);
+  });
   state('4.2/2',(v,k,b)=>b?graphic('Passaggio di pila','RSP utente prima di SYSCALL: 0x7000',
     bank([['RCX / R11',show(k,1,'PC / flag'),k===1],['RSP',show(k,2,hx(A(v,0))),k===2],['Pila kernel',show(k,3,'prologo'),k===3]]),
     ['Solo gli effetti hardware nella prima fase.','La CPU salva PC successivo e flag.','RSP contiene ancora il valore utente.','Lo stub seleziona la pila appropriata.'][k]):
@@ -119,10 +140,15 @@
       circuit([['COMMAND','START',1],['STATUS','READY = 1',2],['DATA','leggi byte',3]],k),
       ['Il driver acquisisce un campione.','Primo accesso a '+hx(A(v,0))+'.','Rileggi STATUS fino a READY = 1.','Ultimo accesso a '+hx(A(v,1))+'.'][k]));
   state('4.3/2',(v,k,b)=>{
-    const T=b?720:1000,p=b?24:50,cpu=b?5:8,count=Number(A(v,0));
-    let g=P.line(30,137,607,137,'wire');for(let i=1;i<=(k>=2?count:k);i++){const x=30+570*i/count;g+=P.dot(x,137,i===1?5:3,'pin');}
-    return graphic('Polling periodico','Periodo '+p+' µs · durata '+T+' µs · costo '+cpu+' cicli per controllo',g+t(30,165,'0')+t(600,165,T+' µs','small','end'),
-      ['Il primo controllo cade a un multiplo positivo.', 'Primo istante: '+p+' µs.','Controlli fino all’estremo incluso: '+count+'.','CPU: '+count+' × '+cpu+' = '+A(v,1)+' cicli.'][k]);
+    if(b){
+      const righe=bank([['Periodo 4 µs',show(k,2,'192 cicli'),false],['Periodo 8 µs',show(k,2,'96 cicli'),k===3],['Periodo 16 µs',show(k,1,'troppo lento'),k===1]]);
+      return graphic('Vincoli di latenza e di costo','Finestra di 96 µs · limite 10 µs · budget 100 cicli',righe,
+        ['Verifica sia il ritardo sia il costo.','A 16 µs un evento può attendere oltre la scadenza.','Fra i periodi rapidi, 4 µs supera il budget.','Con '+A(v,0)+' µs restano '+A(v,1)+' cicli.'][k]);
+    }
+    const count=Number(A(v,0));let g=P.line(30,137,607,137,'wire');
+    for(let i=1;i<=(k>=2?count:k);i++){const x=30+570*i/count;g+=P.dot(x,137,i===1?5:3,'pin');}
+    return graphic('Polling periodico','Periodo 50 µs · durata 1000 µs · costo di 8 cicli per controllo',
+      g+t(30,165,'0')+t(600,165,'1000 µs','small','end'),['Il primo controllo cade a un multiplo positivo.','Primo istante a 50 µs.','Controlli fino all’estremo incluso: '+count+'.','CPU: '+count+' × 8 = '+A(v,1)+' cicli.'][k]);
   });
   state('4.3/3',(v,k,b)=>b?graphic('Linea IRQ attiva a livello alto','EOI ricevuto mentre la sorgente mantiene la linea alta',
     circuit([['Sorgente','attiva',0],['Linea','alta',1],['EOI','riaccoda?',2],['Driver','libera causa',3]],k),
@@ -145,10 +171,15 @@
       circuit([['Tastiera','READY = 1',1],['Core','vettore '+A(v,0),2],['Driver',hx(A(v,1)),3]],k),
       ['Il codice resta nel registro dati.','L’arrivo attiva READY.','32 + 1 = 33.','Il byte ricevuto è un codice di scansione.'][k]));
   state('4.4/1',(v,k,b)=>{
-    const size=b?1200:800,rate=b?200:100,control=b?4:2,transfer=size/rate;
-    return graphic('Durata del collegamento','Carico '+size+' B · '+rate+' B/µs · controllo '+control+' µs',
-      lineTime(30,95,579,[['dati',k?transfer:0],['controllo',k>=2?control:0]],transfer+control)+t(31,164,k===3?'Banda utile = carico / durata totale':'Intervalli di occupazione del link'),
-      ['Risorsa a disposizione di una sola transazione.','La serializzazione dura '+transfer+' µs.','Durata totale: '+A(v,0)+' µs.','Banda utile: '+A(v,1)+' MB/s.'][k]);
+    if(b){
+      const bars=t(27,89,'Limite singolo')+lineTime(152,67,445,[['dati',k?6:0],['controllo',k>=1?2:0]],18)
+        +t(27,150,'2 insieme')+lineTime(152,128,445,[['dati',k>=2?12:0],['controllo',k>=2?3:0]],18);
+      return graphic('Quanto controllo ammette il requisito?','1200 B per pacchetto · 200 B/µs sul filo · almeno 150 B/µs utili',bars,
+        ['Confronta le occupazioni sulla stessa scala temporale.','Un pacchetto ha un limite di 8 µs, dei quali 6 per i dati.','Due pacchetti insieme occupano 15 µs.','Con controllo condiviso i dati utili raggiungono 160 MB/s.'][k]);
+    }
+    return graphic('Durata del collegamento','Carico 800 B · 100 B/µs · controllo 2 µs',
+      lineTime(30,95,579,[['dati',k?8:0],['controllo',k>=2?2:0]],10)+t(31,164,k===3?'Banda utile = carico / durata totale':'Intervalli di occupazione del link'),
+      ['Risorsa a disposizione di una sola transazione.','La serializzazione dura 8 µs.','Durata totale: '+A(v,0)+' µs.','Banda utile: '+A(v,1)+' MB/s.'][k]);
   });
   state('4.4/2',(v,k,b)=>{
     if(b)return graphic('Collocare due battute nel ciclo','Canale DDR da 32 bit · clock a 125 MHz',
@@ -160,11 +191,16 @@
       ['Ogni casella corrisponde a una corsia di byte.','Una battuta trasporta otto byte.','La settima battuta completa il carico.','Ultima battuta: '+A(v,1)+' B utili.'][k]);
   });
   state('4.4/3',(v,k,b)=>{
-    const name=b?['A','B','C']:['C','A','B'],dur=b?[5,2,4]:[3,3,3],limit=b?k:k>=3?3:k>=2?2:0;
-    return graphic('Concessioni a partire dal ciclo zero',b?'Priorità fissa A > B > C · durate 5, 2, 4 cicli':'Round-robin A, B, C · ultimo B · tre cicli per turno',
-      lineTime(28,95,577,name.slice(0,limit).map((n,i)=>[n,dur[i]]),dur.reduce((a,b)=>a+b,0))
-      +t(28,165,k?(b?'Ordine fisso: A, poi B, poi C.':'Ordine calcolato: C → A → B.'):'Richieste pendenti: A, B e C.'),
-      b?['Attesa comune dal ciclo 0.','A finisce a 5.','B finisce a 7.','C inizia a '+A(v,0)+' e finisce a '+A(v,1)+'.'][k]:
+    if(b){
+      const actual=lineTime(125,78,460,[['A',3],['B',k>=2?3:0],['C',k===3?3:0]],9);
+      const candidate=lineTime(125,142,460,[['A',3],['ancora A',k>=1?3:0]],9);
+      return graphic('Quale arbitro spiega la concessione?','B e C restano in attesa. A torna in coda prima del ciclo 3.',
+        t(27,103,'Osservata')+actual+t(27,168,'Fissa')+candidate,
+        ['A occupa il primo turno.','La priorità fissa sceglierebbe ancora A.','Il turno osservato di B è compatibile con la rotazione.','C può cominciare al ciclo '+A(v,1)+'.'][k]);
+    }
+    const ordine=['C','A','B'],fino=k>=3?3:k>=2?2:0;
+    return graphic('Concessioni a partire dal ciclo zero','Round-robin A, B, C · ultimo B · tre cicli per turno',
+      lineTime(28,95,577,ordine.slice(0,fino).map(n=>[n,3]),9)+t(28,165,k?'Ordine calcolato: C → A → B.':'Richieste pendenti: A, B e C.'),
       ['Ogni richiedente effettua una sola richiesta.','C segue l’ultimo servito B.','I primi due turni occupano sei cicli.','B attende '+A(v,1)+' cicli.'][k]);
   });
   state('4.4/4',(v,k,b)=>{
@@ -190,38 +226,55 @@
       ['I due versi possono cominciare insieme.','Una direzione impiega 12 µs.','Le due durate si sovrappongono.','2400 B trasferiti in '+A(v,0)+' µs: '+A(v,1)+' MB/s.'][k]);
   });
   state('4.5/1',(v,k,b)=>{
-    const surfaces=b?2:4,tracks=b?128:200,sectors=b?16:32,bytes=b?1024:512;
-    let d='';for(let i=surfaces-1;i>=0;i--){
+    if(b){
+      const g=c(29,83,176,62,'Una superficie',show(k,1,'2 MiB'),k===1)+c(231,83,176,62,'Volume','4 MiB',k===2)+c(432,83,176,62,'Superfici',show(k,2,A(v,0)),k===2);
+      return graphic('Verificare la geometria dichiarata','128 cilindri · 16 settori per traccia · 1024 B per settore',g+t(30,181,k===3?'Numerazione dei settori: 0 … 4095':'Si contano le tracce di una superficie.'),
+        ['Capacità misurata del volume: 4 MiB.','128 × 16 settori contengono 2 MiB.','Il disco dispone di due superfici attive.','Con 4096 settori, l’ultimo LBA è '+A(v,1)+'.'][k]);
+    }
+    let d='';for(let i=3;i>=0;i--){
       d+='<ellipse cx="167" cy="'+(92+i*22)+'" rx="111" ry="30" class="'+(k>=2?'cell active reveal':'cell')+'"/>';
       d+='<ellipse cx="167" cy="'+(92+i*22)+'" rx="70" ry="17" class="wire"/>';
     }
-    d+=t(312,101,'Una traccia: '+(k?sectors*bytes+' B':'?'))+t(312,140,'Un cilindro: '+show(k,2,A(v,0)+' B'));
-    return graphic('Superfici, tracce, cilindri',surfaces+' superfici · '+tracks+' cilindri · '+sectors+' settori/traccia · '+bytes+' B/settore',d,
+    d+=t(312,101,'Una traccia: '+show(k,1,'16384 B'))+t(312,140,'Un cilindro: '+show(k,2,A(v,0)+' B'));
+    return graphic('Superfici, tracce, cilindri','4 superfici · 200 cilindri · 32 settori/traccia · 512 B/settore',d,
       ['Le ellissi indicano le superfici alla stessa traccia radiale.','Capacità di una traccia = settori × byte per settore.','Si sommano le tracce sulle superfici attive.','Capacità totale: '+A(v,1)+' B.'][k]);
   });
   state('4.5/2',(v,k,b)=>{
-    const rpm=b?10000:6000,seek=b?5:4,transfer=b?2:1,rot=Number(A(v,0));let d='';
-    [70,49,28].forEach(r=>d+=P.dot(130,127,r,'cell'));d+=P.line(130,127,199,127,'wire live');
+    if(b){
+      const avg=t(25,97,'Media')+lineTime(134,75,450,[['seek',5],['rot.',k?3:0],['dati',2]],13);
+      const one=t(25,161,'Singola')+lineTime(134,139,450,k===3?[['seek',5],['rot.',5],['dati',2]]:[],13);
+      return graphic('Dalla durata media ai giri al minuto','Servizio medio 10 ms · seek 5 ms · copia 2 ms',avg+one,
+        ['Gli intervalli si misurano in millisecondi.','Dalla media si ricavano 3 ms di rotazione.','Un giro dura 6 ms, pari a 10 000 giri/min.','La lettura da 12 ms attende 5 ms, meno di un giro.'][k]);
+    }
+    let d='';[70,49,28].forEach(r=>d+=P.dot(130,127,r,'cell'));d+=P.line(130,127,199,127,'wire live');
     if(k>=2)d+=P.path('M199 127 A69 69 0 0 1 61 127','wire live')+P.travel('M199 127 A69 69 0 0 1 61 127');
-    d+=t(250,95,'Giro: '+show(k,1,60000/rpm+' ms'))+t(250,131,'Attesa media: '+show(k,2,rot+' ms'))
-      +(k===3?lineTime(250,158,349,[['seek',seek],['rot.',rot],['dati',transfer]],Number(A(v,1))):'');
-    return graphic('Latenza media del disco',rpm+' giri/min · seek '+seek+' ms · trasferimento '+transfer+' ms',d,
+    d+=t(250,95,'Giro: '+show(k,1,'10 ms'))+t(250,131,'Attesa media: '+show(k,2,A(v,0)+' ms'))
+      +(k===3?lineTime(250,158,349,[['seek',4],['rot.',5],['dati',1]],10):'');
+    return graphic('Latenza media del disco','6000 giri/min · seek 4 ms · trasferimento 1 ms',d,
       ['Fase uniforme dopo il seek.','Periodo del giro = 60 000 / RPM.','Mezzo giro è l’attesa media.','Servizio medio: '+A(v,1)+' ms.'][k]);
   });
   state('4.5/3',(v,k,b)=>{
-    if(b)return graphic('Allocazione intera dei blocchi','File di 10 000 B · blocchi da 4096 B',
-      lineTime(28,85,577,[['blocco 0',k?4096:0],['blocco 1',k?4096:0],['dati',k>=2?1808:0],['liberi',k===3?2288:0]],12288),
-      ['La scala è espressa in byte.','Dopo due blocchi restano 1808 B.','Il file richiede il terzo blocco.','Frammentazione interna: '+A(v,1)+' B.'][k]);
+    if(b){
+      const blocchi=tape(27,85,576,['blocco 0','blocco 1',k===3?'blocco 2 richiesto':'oltre il file'],k===3?2:k>=1?1:-1);
+      return graphic('Fino a dove può crescere il file?','8128 B presenti · 2 blocchi da 4096 B già assegnati',blocchi+t(29,171,k>=2?'Spazio per l’append: offset 8128 … 8191':'L’offset iniziale del file è zero.'),
+        ['Il limite di allocazione riguarda interi blocchi.','Il limite dello spazio assegnato è 8192 B.','Si possono aggiungere '+A(v,0)+' byte.','Il byte a offset 8192 richiede il blocco '+A(v,1)+'.'][k]);
+    }
     return graphic('Divisione in LBA e resto','Offset 2600 · blocchi da 512 B · LBA iniziale 0',
       tape(27,87,578,Array.from({length:6},(_,i)=>i),k>=2?5:-1,k?4:-1)+t(28,158,k?'I primi cinque blocchi occupano 2560 B.':'Quale blocco contiene il byte?'),
       ['La posizione iniziale del file ha offset zero.','5 × 512 = 2560.','Il sesto blocco ha indice '+A(v,0)+'.','Scostamento interno: '+A(v,1)+' B.'][k]);
   });
   state('4.5/4',(v,k,b)=>{
-    const q=b?7:3,seek=b?2:5,trans=Number(A(v,0)),total=Number(A(v,1));
-    return graphic('Risposta vista dal richiedente',(b?'0,9 MB a 75 MB/s':'1,2 MB a 150 MB/s')+' · coda '+q+' ms · accesso '+seek+' ms',
-      lineTime(27,87,578,[[k===3?'coda':null,q],[k===3?'accesso':null,seek],['dati',k>=2?trans:0]],total)
-      +t(29,162,k?('Trasferimento: '+(k===1?fm(trans/1000)+' s':trans+' ms')):'Tempo = dati / velocità.'),
-      ['Le unità della divisione sono secondi.','Rapporto fra MB e MB/s.','L’intervallo espresso in millisecondi misura il trasferimento.','Tempo di risposta = '+A(v,1)+' ms.'][k]);
+    if(b){
+      const clear=t(26,96,'Senza coda')+lineTime(155,74,430,k?[['accesso',2],['dati',12]]:[],21);
+      const fast=t(26,162,'Banda doppia')+lineTime(155,140,430,k>=2?[['coda',7],['accesso',2],['dati',6]]:[],21);
+      const x=155+430*14/21;
+      return graphic('Una scadenza, due interventi','Scadenza a 14 ms · stessa scala per entrambe le alternative',clear+fast+P.line(x,63,x,183,'wire live')+t(x,204,'14 ms','small','middle'),
+        ['Ogni intervento modifica una sola fase.','Senza coda la richiesta termina a 14 ms.','Raddoppiando la banda la sola copia dura 6 ms.','Con la coda invariata la richiesta termina a '+A(v,1)+' ms.'][k]);
+    }
+    const trans=Number(A(v,0)),total=Number(A(v,1));
+    return graphic('Risposta vista dal richiedente','1,2 MB a 150 MB/s · coda 3 ms · accesso 5 ms',
+      lineTime(27,87,578,[[k===3?'coda':null,3],[k===3?'accesso':null,5],['dati',k>=2?trans:0]],total)+t(29,162,k?'Trasferimento: '+(k===1?fm(trans/1000)+' s':trans+' ms'):'Tempo = dati / velocità.'),
+      ['Le unità della divisione sono secondi.','Rapporto fra MB e MB/s.','L’intervallo in millisecondi misura il trasferimento.','Tempo di risposta = '+A(v,1)+' ms.'][k]);
   });
   state('4.5/5',(v,k,b)=>{
     const path=b?[45,60,75,15]:[45,75,15,60],limit=k===0?1:k===1?2:4,x=n=>44+n*6.6,y=i=>70+i*32;
@@ -242,14 +295,25 @@
       ['Usa la durata di un ciclo completo.','990 + 10 = 1000 h.','Tempo disponibile: '+A(v,0)+'%.','Tempo indisponibile: '+A(v,1)+'%.'][k]);
   });
   state('4.6/2',(v,k,b)=>{
-    const drives=b?4:3,chunk=b?2:4,lba=b?26:19,idx=Math.floor(lba/chunk),row=Math.floor(idx/drives),unit=Number(A(v,0));
-    const dx=565/drives;
-    let d='';for(let i=0;i<drives;i++){
-      const x=28+i*dx;d+=t(x+dx/2,76,'Disco '+i,'small','middle');
-      for(let j=0;j<=row;j++){const highlight=k>=2&&i===unit&&j===row;d+=P.rect(x,85+j*25,dx-4,23,highlight?'cell hot reveal':'cell',2)+t(x+dx/2,103+j*25,k>=2||i+j===0?'chunk '+(j*drives+i):'·','small','middle');}
+    if(b){
+      const dx=140;
+      let d='';for(let i=0;i<4;i++){
+        const x=36+dx*i;d+=t(x+dx/2,80,'Disco '+i,'small','middle');
+        for(let j=0;j<4;j++){
+          const active=i===1&&j===3,first=2*(4*j+i);
+          d+=P.rect(x,90+j*24,dx-4,22,active?'cell hot':'cell',2)+t(x+dx/2,107+j*24,k>=2?first+'–'+(first+1):active?'locali 6–7':'·','small','middle');
+        }
+      }
+      return graphic('Ricostruire gli indirizzi del volume','Quattro membri · chunk di due blocchi · LBA iniziale 0',d,
+        ['Sono marcati i blocchi fisici segnalati dal controllo.','I blocchi locali 6 e 7 si trovano nella riga 3.','La riga inizia a LBA 24. Il disco 1 riceve 26 e 27.','Controllo diretto: chunk 13, disco 1, offset 0 e 1.'][k]);
     }
-    return graphic('RAID 0 · mappa dei chunk','LBA '+lba+' · '+drives+' dischi · '+chunk+' blocchi per chunk',d,
-      ['Si parte dal disco 0.','Chunk '+idx+' · offset interno '+(lba%chunk)+'.','Il chunk arriva sul disco '+A(v,0)+'.','Indice del blocco sul disco: '+A(v,1)+'.'][k]);
+    const dx=565/3;let d='';
+    for(let i=0;i<3;i++){
+      const x=28+i*dx;d+=t(x+dx/2,76,'Disco '+i,'small','middle');
+      for(let j=0;j<=1;j++){const hot=k>=2&&i===1&&j===1;d+=P.rect(x,85+j*25,dx-4,23,hot?'cell hot reveal':'cell',2)+t(x+dx/2,103+j*25,k>=2||i+j===0?'chunk '+(j*3+i):'·','small','middle');}
+    }
+    return graphic('RAID 0 · mappa dei chunk','LBA 19 · 3 dischi · 4 blocchi per chunk',d,
+      ['Si parte dal disco 0.','Chunk 4, offset interno 3.','Il chunk arriva sul disco '+A(v,0)+'.','Indice del blocco sul disco: '+A(v,1)+'.'][k]);
   });
   state('4.6/3',(v,k,b)=>{
     const d=c(28,82,193,74,b?'Superstite':'Disco 0',b?'900 GB':'4 TB')+c(407,82,193,74,b?'Sostituto':'Disco 1',b?show(k,3,'copia completa'):(k===3?'guasto':'4 TB'),k===3);
@@ -303,10 +367,12 @@
       ['Distingui le due viste del buffer.','Il pacchetto arriva dalla rete.','Il descrittore riceve l’indirizzo DMA.','La scheda emette scritture sulla RAM.'][k]);
   });
   state('4.7/4',(v,k,b)=>{
-    if(b)return graphic('Cicli CPU per 128 parole','PIO: 5 cicli per parola · DMA: 72 cicli iniziali e 24 finali',
-      t(28,92,'PIO')+lineTime(141,70,464,[['trasferimenti',k?640:0]],640)
-      +t(28,159,'DMA')+lineTime(141,137,464,k>=2?[['avvio',72],['fine',24]]:[],640),
-      ['Confronta le due lunghezze sulla stessa scala.','PIO costa 128 × 5 = 640 cicli.','Il risparmio assoluto è '+A(v,0)+' cicli.','Risparmio rispetto a PIO: '+A(v,1)+'%.'][k]);
+    if(b){
+      const cpu=t(28,94,'Core')+lineTime(115,72,480,[['avvio',8],['calcolo',k?40:0],['driver',k===3?4:0]],52);
+      const dev=t(28,158,'DMA')+lineTime(115,136,480,[[null,8],['dati',k>=2?32:0],['attesa',k>=2?8:0]],52);
+      return graphic('Lavoro del core durante il DMA','Tempi dalla preparazione iniziale · attesa della notifica in basso',cpu+dev,
+        ['CPU e dispositivo hanno righe separate.','La CPU calcola da 8 a 48 µs.','Ultimo byte a 40 µs, poi '+A(v,0)+' µs di notifica pendente.','Il servizio del driver termina a '+A(v,1)+' µs.'][k]);
+    }
     return graphic('DMA e occupazione della CPU','6400 B a 200 B/µs · avvio 3 µs · fine 2 µs · fasi seriali',
       t(27,89,'Servizio')+lineTime(146,67,455,k ? [[k===3?'':null,3],['DMA',32], [k===3?'':null,2]] : [],37)
       +t(27,153,'Lavoro CPU')+lineTime(146,131,455,k>=2?[['',3],[null,32],['',2]]:[],37),
@@ -316,7 +382,7 @@
     if(b)return graphic('Dall’ultimo byte alla ripresa','Ultimo byte a 18 µs · IRQ a 21 µs · driver 4 µs · scheduler 6 µs',
       lineTime(29,91,569,[['notifica',k?3:0],['driver',k>=2?4:0],['attesa CPU',k===3?6:0]],13)
       +t(28,153,'18 µs','small')+t(595,153,k===3?'31 µs':'','small','end'),
-      ['L’origine della striscia è l’arrivo dell’ultimo byte.','Consegna dell’interrupt dopo 3 µs.','Il thread è pronto a '+A(v,0)+' µs.','Dall’ultimo byte alla ripresa: '+A(v,1)+' µs.'][k]);
+      ['L’origine della striscia è l’arrivo dell’ultimo byte.','Consegna dell’interrupt dopo 3 µs.','Il thread è pronto a '+A(v,1)+' µs.','Dall’ultimo byte alla ripresa: '+A(v,2)+' µs.'][k]);
     let d=P.line(65,189,540,189,'wire')+P.line(65,189,65,67,'wire')+t(552,193,'parole','small')+t(67,62,'cicli CPU','small');
     if(k){d+=P.path('M65 189L435 77','wire live')+P.line(65,109,493,109,'wire live')+t(444,79,'PIO','small')+t(501,114,'DMA','small');}
     if(k>=2)d+=P.dot(329,109,5,'pin')+t(329,208,'5','small','middle');

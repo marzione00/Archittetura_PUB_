@@ -1,8 +1,8 @@
 'use strict';
 
 (() => {
-  const colors = {line:'#4e6d5a', dim:'#b0c7b8', text:'#e6f2e9', ink:'#102419',
-    on:'#a9edb6', live:'#f4c782', paint:'#23452f', amber:'#41351e'};
+  const colors = {line:'#6d634e', dim:'#c7c0b0', text:'#f2eee6', ink:'#241e10',
+    on:'#8cd4da', live:'#f4c782', paint:'#193031', amber:'#41351e'};
   const esc = SL.pen.e;
   const hex = n => '0x'+n.toString(16).toUpperCase().padStart(2,'0');
   const binary = (v,n) => Number(v).toString(2).padStart(n,'0');
@@ -11,8 +11,7 @@
   const unknown = '·';
   const text = (x,y,msg,size=14,anchor='start',color=colors.text) =>
     '<text x="'+x+'" y="'+y+'" font-family="ui-monospace,monospace" font-size="'+size+'" fill="'+color+'" text-anchor="'+anchor+'">'+esc(msg)+'</text>';
-  const rect = (x,y,w,h,mode='',radius=4) =>
-    '<rect'+(mode==='hot'?' class="reveal"':'')+' x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+radius+'" fill="'+(mode==='hot'?colors.amber:mode==='on'?colors.paint:colors.ink)+'" stroke="'+(mode==='hot'?colors.live:mode==='on'?colors.on:colors.line)+'" stroke-width="'+(mode==='hot'?2:1.2)+'"/>';
+  const rect = (x,y,w,h,mode='',radius=4) => SL.symbols.panel(x,y,w,h,mode==='hot'?colors.amber:mode==='on'?colors.paint:colors.ink,mode==='hot'?colors.live:mode==='on'?colors.on:colors.line,mode==='hot'?'reveal':'');
   function stroke(d,active=false){
     return '<path d="'+d+'" fill="none" stroke="'+(active?colors.on:colors.line)+'" stroke-width="'+(active?2.5:1.3)+'" stroke-linejoin="round"/>';
   }
@@ -22,6 +21,7 @@
   const pulse=SL.pen.travel;
   function title(t){return text(22,24,t,14,'start',colors.on);}
   function card(x,y,w,h,label,value,mode=''){
+    if(SL.symbols.kind(label))return SL.symbols.node(x,y,w,h,label,value,mode);
     const size = Math.max(10,Math.min(17,Math.floor((w-12)/(0.62*Math.max(1,String(value).length)))));
     return rect(x,y,w,h,mode)+text(x+w/2,y+18,label,12,'middle',colors.dim)+text(x+w/2,y+h-10,value,size,'middle');
   }
@@ -156,7 +156,7 @@
     g+=card(16,84,131,60,'bus di scrittura',p.v,k===1?'hot':'')+wire('M147 115H182V'+(60+42*p.w)+'H223',k===1&&!!p.en);
     const outputs=k===2?vals(s,2):vals(s,0);
     return g+card(453,47,149,52,'A seleziona R'+p.a,outputs['Porta A'],'on')+
-      card(453,133,149,52,'B seleziona R'+p.b,outputs['Porta B'],'on')+footer('Sul fronte viene aggiornata la parola abilitata dal decodificatore.');
+      card(453,133,149,52,'B seleziona R'+p.b,outputs['Porta B'],'on')+footer('Il fronte aggiorna la parola selezionata soltanto con scrittura abilitata.');
   }
   function clockMargins(p,s,k){
     const latest=30+p.max, earliest=12+p.min, scale=Math.max(250,p.t,latest+15),x=t=>104+470*t/scale;
@@ -348,7 +348,7 @@
       if(i<4)g+=wire('M'+(x+47)+' 103 l119 46',k===1);
       g+=tile(x,151,95,37,k===2?vals(s,2)[pipeStages[i]]:i&&k===1?vals(s,1)['Ingresso '+pipeStages[i]]:unknown,k===2?'hot':'');
     }
-    return g+footer(k===1?'Riga inferiore: ingressi preparati, prima del fronte.':'La riga alta mostra il ciclo '+p.c+'; quella bassa lo stato da acquisire.');
+    return g+footer(k===1?'Riga inferiore: ingressi preparati, prima del fronte.':k===2?'Dopo il fronte, la riga inferiore mostra lo stato acquisito nel ciclo '+(p.c+1)+'.':'La riga alta mostra il ciclo '+p.c+'; quella bassa lo stato da acquisire.');
   }
   function selectCandidate(header,items,winner,k,label,answer,caption){
     let g=title(header);const n=items.length,gap=n===4?40:49;
@@ -406,7 +406,7 @@
       const j=pipeStages.findIndex((tag,i)=>i>0&&/^U/.test(now[tag])&&now[tag]===old[pipeStages[i-1]]);
       if(j>0)g+=wire('M'+(125+(at-first-1)*63)+' '+(86+(j-1)*28)+'l63 4',true);
     }
-    return g+footer(k===s.length-1?'Bilancio: '+(last+1)+' cicli e '+vals(s,k)['Attese load/use']+' attese load/use.':
+    return g+footer(k===s.length-1?'Bilancio: '+(last+1)+' cicli e '+(Number(vals(s,k)['Attese load/use'])===1?'un’attesa load/use':vals(s,k)['Attese load/use']+' attese load/use')+'.':
       'L = carico · U = uso · I = copia · ○ = bolla inserita in E · — = stadio vuoto.');
   }
   function reordered(p,s,k){
@@ -489,8 +489,6 @@
     titolo:'Dal riporto al consumatore in pipeline',
     teoria:SL.lezioni['modulo-3'].join(' '),
     domanda:'In quale ciclo il consumatore U scrive il risultato?',
-    istruzione:'Confronta «Forwarding E → D» e «Solo banco dei registri» con le stesse parole A e B. Osserva le quattro colonne del sommatore al ciclo 3, poi segui U da D fino alla scrittura in W.',
-    osservazione:'L’inoltro permette a U di usare il risultato di P prima che W lo scriva nel banco. Le due esecuzioni producono lo stesso valore finale. Il numero di cicli cambia perché, con la sola lettura dal banco, U deve attendere la scrittura di P.',
     controlli:[
       {id:'a',label:'Parola A · intero senza segno',min:0,max:15,step:1,iniziale:7},
       {id:'b',label:'Parola B · intero senza segno',min:0,max:15,step:1,iniziale:1},

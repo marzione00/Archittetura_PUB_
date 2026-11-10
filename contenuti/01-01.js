@@ -5,68 +5,43 @@ SL.catalogo.push({
   "units": [
     {
       "id": "1.1.1",
-      "title": "Un programma, diversi livelli di interpretazione",
-      "experiment": "Seleziona «Aè» come argomento di puts. Segui i byte fino al descrittore 1, poi cambia la destinazione da terminale a file.",
-      "skill": "Collegare i livelli del sistema",
-      "check": "La sequenza UTF-8 termina con LF in entrambi i casi. Cambia l’oggetto al quale il kernel consegna i byte."
+      "title": "Un programma, diversi livelli di interpretazione"
     },
     {
       "id": "1.1.2",
-      "title": "La macchina fisica sotto le astrazioni",
-      "experiment": "Parti dallo spostamento 0 e ripeti la lettura con spostamento 1. Per ciascun accesso individua la cella sulla striscia di memoria.",
-      "skill": "Distinguere processore, memoria e periferiche",
-      "check": "Un incremento dello spostamento seleziona l’indirizzo successivo. Il registro riceve il byte di quella cella, espresso anche in decimale."
+      "title": "La macchina fisica sotto le astrazioni"
     },
     {
       "id": "1.1.3",
-      "title": "Dai byte del sorgente al file eseguibile",
-      "experiment": "Scegli prima gcc -S hello.c, poi gcc -c hello.c. Confronta l’ultima fase raggiunta e il nome del file conservato.",
-      "skill": "Ricostruire la compilazione",
-      "check": "Il primo comando conserva il testo assembly. Il secondo prosegue fino all’oggetto rilocabile. Il collegamento serve per ottenere l’eseguibile."
+      "title": "Dai byte del sorgente al file eseguibile"
     },
     {
       "id": "1.1.4",
-      "title": "Nomi, file e shell",
-      "experiment": "Scegli ../dati/./riga e cambia la directory corrente. Segui il cursore attraverso ogni componente. Ripeti con /tmp/../var/log.",
-      "skill": "Risolvere percorsi relativi",
-      "check": "Un percorso relativo parte dalla directory scelta. Un percorso che inizia con / parte dalla radice. Il componente .. risale al genitore e il punto conserva la posizione."
+      "title": "Nomi, file e shell"
     },
     {
       "id": "1.1.5",
-      "title": "Dal file eseguibile al processo",
-      "experiment": "Imposta il PID del figlio e un codice di uscita. Avanza da fork a execve e infine a waitpid, poi cambia soltanto il codice.",
-      "skill": "Seguire l’avvio di un processo",
-      "check": "Il nuovo programma conserva il PID del figlio. Alla terminazione normale la shell può ottenere dallo stato raccolto il codice di uscita scelto."
+      "title": "Dal file eseguibile al processo"
     },
     {
       "id": "1.1.6",
-      "title": "Seguire hello attraverso il sistema",
-      "experiment": "Confronta ./hello, ./hello > esito e ./hello >> esito. Controlla dove punta il descrittore 1 e leggi il file finale in esadecimale.",
-      "skill": "Attribuire gli eventi a shell, kernel e processo",
-      "check": "Nel primo caso i byte raggiungono il terminale. Con > il file viene troncato prima della scrittura. Con >> i due byte iniziali precedono la nuova sequenza."
+      "title": "Seguire hello attraverso il sistema"
     },
     {
       "id": "1.1.7",
       "title": "Problemi svolti",
-      "experiment": "Segui il byte A dal primo comando al terzo. Per ogni passaggio individua il processo che scrive e quello che legge.",
-      "skill": "Leggere una pipeline della shell",
-      "check": "Ogni pipe collega l’uscita di un processo all’ingresso del successivo. Il processo intermedio legge dalla prima pipe e scrive nella seconda.",
       "kind": "esercizi"
     },
     {
       "id": "1.1.8",
+      "provaIniziale": 4,
       "title": "Esercizi",
-      "experiment": "Scegli «Prevedere il contenuto di un file». Annota i byte iniziali e la sequenza emessa da printf. Calcola lunghezza e contenuto dopo la redirezione.",
-      "skill": "Localizzare un guasto",
-      "check": "Le risposte devono descrivere lo stesso file: contando gli ottetti della sequenza finale si deve ottenere la lunghezza indicata, compreso il carattere di fine riga.",
       "kind": "esercizi"
     },
     {
       "id": "1.1.9",
+      "provaIniziale": 5,
       "title": "Soluzioni",
-      "experiment": "Apri «Localizzare una fase di costruzione» e confronta le due tracce. Identifica il file disponibile e la fase che avrebbe bisogno del simbolo esterno.",
-      "skill": "Verificare l’ordine degli eventi",
-      "check": "La dichiarazione rende possibile compilare la chiamata. Per collegare l’eseguibile occorre anche una definizione. Il comando GCC scelto stabilisce quale fase si raggiunge.",
       "kind": "soluzioni"
     }
   ],

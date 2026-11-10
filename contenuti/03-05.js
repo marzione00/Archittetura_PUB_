@@ -5,55 +5,36 @@ SL.catalogo.push({
   "units": [
     {
       "id": "3.5.1",
-      "title": "Sovrapposizione, capacità di completamento e latenza",
-      "experiment": "Conserva numero di stadi e periodo. Misura una sola istruzione, poi aggiungine tre e confronta il primo completamento con la durata totale.",
-      "skill": "Distinguere latenza e intervallo di completamento",
-      "check": "La prima istruzione attraversa tutti gli stadi. Dopo il riempimento, ogni istruzione indipendente aggiunta richiede un solo periodo in più."
+      "title": "Sovrapposizione, capacità di completamento e latenza"
     },
     {
       "id": "3.5.2",
-      "title": "Leggere i diagrammi temporali della pipeline",
-      "experiment": "Scegli cinque istruzioni e porta il ciclo osservato da 4 a 5. Segui I1 nelle tre righe che circondano ogni ciclo scelto.",
-      "skill": "Leggere l’occupazione degli stadi",
-      "check": "Lo stadio di una stessa istruzione avanza di una posizione per ciclo. I trattini si concentrano all’inizio e alla fine del tratto, durante riempimento e svuotamento."
+      "title": "Leggere i diagrammi temporali della pipeline"
     },
     {
       "id": "3.5.3",
-      "title": "Conflitti dovuti alla sovrapposizione",
-      "experiment": "Scegli un carico seguito da un uso e cambia la dipendenza del consumatore. Ripeti il confronto per la porta di memoria e per il salto scegliendo le due condizioni.",
-      "skill": "Riconoscere conflitti di dati, risorse e controllo",
-      "check": "Il carico dipendente fa attendere D, una richiesta simultanea contende la porta e una previsione di salto errata elimina i prelievi sul cammino sbagliato."
+      "title": "Conflitti dovuti alla sovrapposizione"
     },
     {
       "id": "3.5.4",
-      "title": "Dalla portata ideale al CPI misurato",
-      "experiment": "Tieni fissi i cicli persi per dati e salti. Aumenta le istruzioni completate e confronta il CPI con il contributo del riempimento.",
-      "skill": "Calcolare il CPI",
-      "check": "In una pipeline a cinque stadi il riempimento aggiunge quattro cicli al totale ideale. Distribuiti su più istruzioni, incidono meno su ogni completamento."
+      "title": "Dalla portata ideale al CPI misurato"
     },
     {
       "id": "3.5.5",
       "title": "Problemi svolti",
-      "experiment": "Fissa il primo prelievo al ciclo 1. Individua il completamento della prima istruzione, poi conta gli intervalli fino alla ventesima.",
-      "skill": "Calcolare i cicli di una sequenza",
-      "check": "La distanza fra il primo e l’ultimo completamento dipende dal numero di istruzioni successive alla prima. La latenza iniziale entra nel totale una sola volta.",
       "kind": "esercizi"
     },
     {
       "id": "3.5.6",
       "title": "Esercizi",
-      "experiment": "Apri «Contare i cicli di fermo sovrapposti». Allinea le due maschere sul ciclo del bit zero e calcola quanti cicli contengono entrambe le cause e quanti almeno una.",
-      "skill": "Contare cicli di fermo sovrapposti",
-      "check": "L’intersezione individua i cicli richiesti da entrambe le cause. L’unione conta una volta ogni ciclo effettivamente perso.",
-      "kind": "esercizi"
+      "kind": "esercizi",
+      "provaIniziale": 4
     },
     {
       "id": "3.5.7",
       "title": "Soluzioni",
-      "experiment": "Seleziona «Calcolare gli stalli dalla distanza fra istruzioni». Segui produttore e consumatore fino alla lettura del banco e confronta le due distanze proposte.",
-      "skill": "Calcolare l’attesa del consumatore",
-      "check": "Confrontando il primo ciclo D del consumatore con il ciclo W del produttore si risale alla durata dell’attesa. I semicicli stabiliscono se la lettura è già possibile.",
-      "kind": "soluzioni"
+      "kind": "soluzioni",
+      "provaIniziale": 5
     }
   ],
   "pwn": [

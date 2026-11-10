@@ -2,11 +2,12 @@
 (() => {
   const e=SL.esc;
   const text=(x,y,value,cls='label',anchor='start')=>'<text x="'+x+'" y="'+y+'" class="'+e(cls)+'" text-anchor="'+e(anchor)+'">'+e(value)+'</text>';
-  const rect=(x,y,w,h,cls='cell',r=5)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" class="'+e(cls)+'"/>';
+  const rect=(x,y,w,h,cls='cell',r=5)=>SL.symbols.panel(x,y,w,h,'#211d14','#71644a',cls);
   const line=(x1,y1,x2,y2,cls='wire')=>'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" class="'+e(cls)+'"/>';
   const path=(d,cls='wire')=>'<path d="'+e(d)+'" class="'+e(cls)+'"/>';
   const dot=(x,y,r=5,cls='pin')=>'<circle cx="'+x+'" cy="'+y+'" r="'+r+'" class="'+e(cls)+'"/>';
   function box(x,y,w,h,label,value,cls='cell'){
+    if(SL.symbols.kind(label))return SL.symbols.node(x,y,w,h,label,value,cls);
     return rect(x,y,w,h,cls)+text(x+w/2,y+17,label,'small','middle')+text(x+w/2,y+h-10,value,'value','middle');
   }
   function arrow(x1,y1,x2,y2,active=false){
@@ -21,7 +22,7 @@
   SL.sceneLab=Object.create(null);SL.moduliAnimati=Object.create(null);
   let zoom=false;
   function drawing(graphic,label){
-    return '<div class="scene-frame"><button type="button" class="chip scene-zoom" aria-pressed="'+zoom+'">'+(zoom?'Inquadra tutta la figura':'Ingrandisci figura')+'</button><div class="scene-viewport'+(zoom?' zoom':'')+'" tabindex="0" aria-label="Disegno della simulazione"><svg class="scene-svg" viewBox="0 0 640 250" role="img" aria-label="'+e(label)+'">'+graphic+'</svg></div></div>';
+    return '<div class="scene-frame"><button type="button" class="chip scene-zoom" aria-pressed="'+zoom+'">'+(zoom?'Inquadra tutta la figura':'Ingrandisci figura')+'</button><div class="scene-viewport'+(zoom?' zoom':'')+'" tabindex="0" aria-label="Disegno della simulazione"><svg class="scene-svg" viewBox="0 0 640 250" role="img" aria-label="'+e(label)+'">'+graphic+'</svg></div>'+SL.symbols.legend(graphic)+'</div>';
   }
   function move(host,forward){
     if(!forward||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -56,10 +57,10 @@
     return {stop,sync(){play.disabled=last()<=0;if(timer!==null&&index()>=last())stop();}};
   }
   function bar(){
-    return '<div class="film-tools"><button type="button" class="btn quiet" data-film-play aria-pressed="false">Riproduci</button><label>Intervallo <select data-film-speed><option value="1250">1,25 s</option><option value="2600" selected>2,6 s</option><option value="4500">4,5 s</option></select></label></div>';
+    return '<div class="film-tools"><button type="button" class="btn quiet" data-film-play aria-pressed="false">Riproduci</button><label>Attesa fra i passi <select data-film-speed><option value="1250">1,25 s</option><option value="2600" selected>2,6 s</option><option value="4500">4,5 s</option></select></label><p class="film-help">I secondi scelti regolano la pausa fra due fotogrammi sullo schermo. Le durate fisiche e i cicli del modello si leggono nei dati della traccia.</p></div>';
   }
   function predictForm(){
-    return '<div class="scene-prediction"><label><span data-guess-label></span><input data-guess autocomplete="off" maxlength="180" placeholder="Scrivi la tua previsione"></label><span data-guess-result role="status"></span></div>';
+    return '<div class="scene-prediction"><label><span data-guess-label></span><input data-guess aria-describedby="guida-previsione" autocomplete="off" maxlength="180" placeholder="Scrivi la tua previsione"></label><span data-guess-result role="status"></span></div><p class="prediction-help" id="guida-previsione">Scrivi il risultato che ti aspetti prima di avanzare. All’ultimo passo compare il confronto con l’esito calcolato; lasciando il campo vuoto puoi comunque leggere il risultato.</p>';
   }
   // Confronto numerico esatto attraverso il medesimo correttore degli esercizi;
   // per risposte descrittive si offre un confronto esplicito, senza giudizio semantico.

@@ -304,5 +304,19 @@
     g+=text(24,190,'Istanze libere: '+(k<2||!free?free:k===2?free+hb:free+hb+ha+hc),'value');
     return g+progress(k,['Un tipo di risorsa e tre processi.', 'Bisogno = massimo dichiarato − istanze possedute.',free?'B può terminare e restituire le sue '+hb+' istanze.':'Nessun bisogno rientra nel disponibile.',free?'Sequenza sicura B → A → C.':'Stato insicuro rispetto ai massimi.']);
   };
-  Object.assign(SL.sceneProve,scenes);
+  function disegnaTempi(tempi,k){
+    const fotogramma=tempi.fotogrammi[k];
+    let g=title(fotogramma.titolo);
+    if(fotogramma.righe.length){
+      for(const [i,[nome,segmenti]] of fotogramma.righe.entries()){
+        g+=lane(58+82*i,nome,segmenti,tempi.limite);
+      }
+    }else{
+      g+=block(23,67,175,'Burst di A','8 ms')+block(229,67,175,'Burst di B','2 ms')+block(435,67,175,'Burst di C','5 ms');
+    }
+    return g+foot(fotogramma.nota);
+  }
+  for(const [id,scena] of Object.entries(scenes)){
+    SL.sceneProve[id]=(v,k)=>v.tempi?disegnaTempi(v.tempi,k):scena(v,k);
+  }
 })();

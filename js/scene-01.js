@@ -2,7 +2,7 @@
    passo del modello. Gli indirizzi e i pesi restano fermi durante il movimento. */
 (() => {
   'use strict';
-  const col = {ink:'#e4f3e8', muted:'#adceba', line:'#567a65', live:'#a4efb2', gold:'#f2c784', dark:'#10241a', active:'#234331', amber:'#40341f', stop:'#ffaaa1'};
+  const col = {ink:'#f3eee4', muted:'#cec4ad', line:'#7a6f56', live:'#8cd4da', gold:'#f2c784', dark:'#241e10', active:'#193031', amber:'#40341f', stop:'#ffaaa1'};
   const E = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
   const at = (stages,k) => Object.fromEntries(stages[k].valori);
   const bin = (n,w=8) => n.toString(2).padStart(w,'0');
@@ -13,7 +13,7 @@
     return '<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" font-family="ui-monospace, monospace" font-size="'+size+'" fill="'+color+'">'+E(value)+'</text>';
   }
   function rect(x,y,w,h,fill=col.dark,stroke=col.line,r=4) {
-    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"/>';
+    return SL.symbols.panel(x,y,w,h,fill,stroke);
   }
   function line(d,colour=col.line,width=2,dash='') {
     return '<path d="'+d+'" stroke="'+colour+'" stroke-width="'+width+'" fill="none" stroke-linecap="round" stroke-linejoin="round"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>';
@@ -26,6 +26,7 @@
     return SL.pen.travel(d);
   }
   function box(x,y,w,h,top,value,active=false) {
+    if(SL.symbols.kind(top))return SL.symbols.node(x,y,w,h,top,value,active);
     return rect(x,y,w,h,active?col.active:col.dark,active?col.live:col.line)+
       txt(x+w/2,y+17,top,12,'middle',col.muted)+txt(x+w/2,y+h-10,value,Math.min(18,(w-10)/Math.max(1,String(value).length)*1.6),'middle',active?col.live:col.ink);
   }
@@ -482,8 +483,6 @@
     titolo:'Leggere un record di telemetria',
     teoria:SL.lezioni['modulo-1'].join(' '),
     domanda:'Il lettore consegna la misura all’applicazione? In caso di rifiuto, quale controllo lo determina?',
-    istruzione:'Scegli un nome e la copia integra. Segui il record dal sensore al lettore. Lascia invariato il nome e ripeti con una sola alterazione, per esempio il byte finale mancante oppure la tensione negativa.',
-    osservazione:'La prima regola violata individua il campo che blocca la lettura. Un difetto di lunghezza interrompe la traccia prima delle misure, mentre una tensione negativa viene rilevata dopo la conversione binary32.',
     previsione:{label:'Esito del lettore',valore:(_p,s)=>at(s,s.length-1).Esito},
     controlli:SL.unita['1.7.7'].controlli,
     calcola:moduloCalcola,disegna:moduloDisegna

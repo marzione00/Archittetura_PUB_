@@ -1,7 +1,7 @@
 'use strict';
 (() => {
   const esc = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  const color = {ink:'#e0f1e5', muted:'#a6c6b2', wire:'#608b70', active:'#a9efba', hot:'#f0c381', dark:'#0d1d15', soft:'#193424'};
+  const color = {ink:'#f1ece0', muted:'#c6bca6', wire:'#8b7e60', active:'#8cd4da', hot:'#f0c381', dark:'#1d180d', soft:'#193031'};
   const tint = mode => ({hot:color.hot, on:color.active, dim:color.wire})[mode] || color.muted;
   const values = (frames,k) => Object.fromEntries(frames[k].valori);
   const sum = numbers => numbers.reduce((a,b)=>a+b,0);
@@ -11,9 +11,10 @@
   const heading = title => text(20,24,title,{size:16,fill:color.active});
   const note = (label,y=229) => text(20,y,label,{size:14,fill:color.muted});
   function rect(x,y,w,h,mode='dim',radius=6){
-    return '<rect'+(mode==='hot'?' class="reveal"':'')+' x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+radius+'" fill="'+(mode==='hot'?'#382c1a':mode==='on'?color.soft:color.dark)+'" stroke="'+tint(mode)+'" stroke-width="'+(mode==='hot'?2:1.2)+'"/>';
+    return SL.symbols.panel(x,y,w,h,mode==='hot'?'#382c1a':mode==='on'?color.soft:color.dark,tint(mode),mode==='hot'?'reveal':'');
   }
   function box(x,y,w,h,title,value,mode='dim'){
+    if(SL.symbols.kind(title))return SL.symbols.node(x,y,w,h,title,value,mode);
     return rect(x,y,w,h,mode)+text(x+10,y+18,title,{size:13,fill:tint(mode)})+
       text(x+w/2,y+h-12,value,{size:Math.min(21,Math.max(12,Math.floor((w-14)/Math.max(1,[...String(value)].length)*1.48))),align:'middle',mono:true});
   }
@@ -524,8 +525,6 @@
   SL.moduliAnimati[5]={
     titolo:'Chi può usare il core?',
     teoria:SL.lezioni['modulo-5'].join(' '),
-    istruzione:'Scegli il quanto e il costo di cambio. Prevedi il primo ingresso di B, poi avanza fino alla sua assegnazione. Ripeti con una lettura più lunga e segui A dal disco alla coda dei pronti.',
-    osservazione:'Prima che B inizi, il core serve A e paga l’eventuale cambio. Quando il disco termina la lettura, A torna pronto. La sua ripresa dipende dalla posizione in coda e dal termine del turno in corso.',
     domanda:'A quale istante B ottiene per la prima volta il core?',
     controlli:[
       {id:'quanto',label:'Quanto della CPU (ms)',min:1,max:4,step:1,iniziale:2},

@@ -1,9 +1,9 @@
 /* Disegni del modulo II. Le celle e i segnali mostrano lo stato del passo selezionato. */
 (() => {
   'use strict';
-  const ink = '#e7f4e9', dim = '#abc9b3', mint = '#a1e7b0', gold = '#f3c487';
+  const ink = '#f4f0e7', dim = '#c9c0ab', accent = '#e6d1a2', gold = '#f3c487';
   const colors = {
-    quiet: ['#102219', '#3d5a46'], active: ['#1e412c', '#80c693'],
+    quiet: ['#221c10', '#5a513d'], active: ['#193031', '#8cd4da'],
     focus: ['#403521', '#e7b979'], danger: ['#452a25', '#f3a592']
   };
   const {e:escape, values, travel} = SL.pen;
@@ -15,24 +15,25 @@
   }
   function tile(x,y,w,h,style='quiet') {
     const [fill,stroke]=colors[style];
-    return '<rect'+(style==='focus'||style==='danger'?' class="reveal"':'')+' x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="4" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"/>';
+    return SL.symbols.panel(x,y,w,h,fill,stroke,style==='focus'||style==='danger'?'reveal':'');
   }
   function cell(x,y,w,h,caption,value,state='quiet') {
+    if(SL.symbols.kind(caption))return SL.symbols.node(x,y,w,h,caption,value,state);
     return tile(x,y,w,h,state) + text(x+w/2,y+16,caption,12,dim,'middle',w-10)
       + text(x+w/2,y+h-11,value,17,state==='focus'?gold:ink,'middle',w-10);
   }
   function wire(d,active=false) {
-    const line='<path d="'+d+'" fill="none" stroke="'+(active?gold:'#526c5a')+'" stroke-width="'+(active?2:1.3)+'"/>';
+    const line='<path d="'+d+'" fill="none" stroke="'+(active?gold:'#6c6452')+'" stroke-width="'+(active?2:1.3)+'"/>';
     if(!active)return line;
     return line+travel(d);
   }
   function arrow(x,y,x2,y2,on=true) {
     const a=Math.atan2(y2-y,x2-x),h=6;
     const l=[x2-h*Math.cos(a-.48),y2-h*Math.sin(a-.48)],r=[x2-h*Math.cos(a+.48),y2-h*Math.sin(a+.48)];
-    return wire('M'+x+' '+y+' L'+x2+' '+y2,on)+'<path d="M'+l.join(' ')+' L'+x2+' '+y2+' L'+r.join(' ')+'" fill="none" stroke="'+(on?gold:'#526c5a')+'" stroke-width="2"/>';
+    return wire('M'+x+' '+y+' L'+x2+' '+y2,on)+'<path d="M'+l.join(' ')+' L'+x2+' '+y2+' L'+r.join(' ')+'" fill="none" stroke="'+(on?gold:'#6c6452')+'" stroke-width="2"/>';
   }
   const caption=(str,x=22,y=24)=>text(x,y,str,13,dim);
-  const note=str=>text(23,231,str,14,mint,'start',594);
+  const note=str=>text(23,231,str,14,accent,'start',594);
   function strip(y,items,styleAt,opts={}) {
     const x=opts.x??22,w=opts.w??596,h=opts.h??36;
     const pitch=w/items.length;
@@ -174,7 +175,7 @@
     let g=caption('Indirizzi · scala con passi di 8 byte')+wire('M73 130 H575');
     for(let d=min;d<=max;d+=8)g+=wire('M'+pos(d)+' 126 v9');
     g+=text(origin,158,hex(b),13,dim,'middle')+text(origin,179,'base',12,dim,'middle');
-    if(k>=1)g+=arrow(origin,87,scaled,87,true)+text((origin+scaled)/2,70,'indice × scala = '+offset,13,mint,'middle');
+    if(k>=1)g+=arrow(origin,87,scaled,87,true)+text((origin+scaled)/2,70,'indice × scala = '+offset,13,accent,'middle');
     if(k===2)g+=arrow(scaled,108,end,108,true)+wire('M'+end+' 110 v17',true)+text(350,198,'spiazzamento '+p.d+' B → '+values(s,k).Indirizzo,15,gold,'middle');
     return g+note('RDI = '+hex(b)+' · RSI = '+p.i+' · scala = '+p.s+' · spiazzamento = '+p.d+' B');
   });
@@ -203,7 +204,7 @@
     let g=caption('Array int[4] · il puntatore di fine segue l’ultima cella');
     for(let i=0;i<5;i++){const val=i===4?'limite':k>=1&&p.q===i?99:10*(i+1);
       g+=cell(x(i),91,101,58,hex(0x5000+4*i),val,k===2&&p.p===i?'focus':k===1&&p.q===i?(i===4?'danger':'active'):'quiet');}
-    g+=text(x(p.p)+50,50,'p',17,mint,'middle')+arrow(x(p.p)+50,56,x(p.p)+50,88,k===2)
+    g+=text(x(p.p)+50,50,'p',17,accent,'middle')+arrow(x(p.p)+50,56,x(p.p)+50,88,k===2)
       +text(x(p.q)+50,205,'q',17,gold,'middle')+arrow(x(p.q)+50,188,x(p.q)+50,151,k===1);
     return g+note(k===2?'*p = '+values(s,2)['Valore letto']:k===1?'Scrittura attraverso q: '+values(s,1)['Scrittura eseguita']+'.':'Gli indici p e q individuano indirizzi distanti quattro byte per elemento.');
   });
@@ -212,7 +213,7 @@
     const fields=[...v['ss (binario)'],...v.index,...v.base];
     return caption('Byte SIB · scala (2 bit), indice (3 bit), base (3 bit)')
       +strip(56,fields,i=>i<2?'focus':i<5?'active':'quiet',{h:44})
-      +text(96,132,'ss',14,gold,'middle')+text(279,132,'RCX',14,mint,'middle')+text(510,132,'RBX',14,dim,'middle')
+      +text(96,132,'ss',14,gold,'middle')+text(279,132,'RCX',14,accent,'middle')+text(510,132,'RBX',14,dim,'middle')
       +cell(22,166,243,56,'opcode · ModR/M · SIB',k?values(s,1)['Byte istruzione']:'8B 04 ··',k===1?'focus':'quiet')
       +arrow(269,191,359,191,k===2)+cell(361,166,242,56,'indirizzo della lettura',r.Indirizzo??'?',k===2?'focus':'quiet');
   });
@@ -243,7 +244,7 @@
     const high=values(s,0).Alto,low=values(s,0).Basso;
     let g=caption('Sorgenti · le quattro posizioni basse attraversano la maschera')
       +bits(51,p.h,8,j=>j<4,{x:20,w:275,h:34})+bits(51,p.l,8,j=>j<4,{x:341,w:275,h:34})
-      +text(155,105,'alto = '+high,13,mint,'middle')+text(478,105,'basso = '+low,13,mint,'middle');
+      +text(155,105,'alto = '+high,13,accent,'middle')+text(478,105,'basso = '+low,13,accent,'middle');
     if(k>=1)g+=arrow(155,113,203,152,true)+arrow(478,113,417,152,true);
     const composed=k>=1?[...binary(high,4),...binary(low,4)]:Array(8).fill('·');
     g+=strip(158,composed,j=>k?(j<4?'active':'focus'):'quiet',{x:96,w:448,h:43});
@@ -287,7 +288,7 @@
     return caption('ABI di funzione System V · argomenti da 1 a 6')
       +strip(44,funregs,j=>j===i?'focus':'quiet',{h:41})
       +arrow(cx,90,cx,147,k>=1)
-      +text(i>3?22:370,126,k===0?'posizione '+p.arg:values(s,1)['Preparazione della posizione'],13,mint)
+      +text(i>3?22:370,126,k===0?'posizione '+p.arg:values(s,1)['Preparazione della posizione'],13,accent)
       +strip(152,sysregs,j=>k&&j===i?'focus':'quiet',{h:41})
       +note(k===2?'Ingresso nel kernel: '+p.v+' in '+sysregs[i]+'.':'ABI delle syscall Linux x86-64 · argomenti da 1 a 6');
   });
@@ -298,14 +299,14 @@
     return caption('Buffer da 0x7000 · gli indici crescono verso destra')
       +strip(64,blocks,i=>i<written?'focus':i<read?'active':'quiet',{h:52})
       +text(23,144,'Richiesti '+n+' · disponibili '+p.cap+' · capacità prima write '+p.out,14,dim)
-      +(k>=1?text(23,175,'Verde: byte letti ancora da emettere ('+(read-written)+')',14,mint):'')
+      +(k>=1?text(23,175,'Verde: byte letti ancora da emettere ('+(read-written)+')',14,accent):'')
       +(k===2?text(23,198,'Ambra: byte già emessi ('+written+')',14,gold):'')
       +note(k===2?'Prossimo indirizzo = '+values(s,2)['Puntatore successivo']:k===1?'read ha restituito '+read+' byte.':'Il descrittore di ingresso è fd 3.');
   });
   draw('5.4',(p,s,k)=>{
     const ok=p.file==='ok',v=values(s,k),image=k===2?v.Immagine:'A';
     let g=caption('execve · una stessa identità di processo')
-      +tile(28,41,291,148,'active')+text(46,66,'PID '+p.pid,16,mint)
+      +tile(28,41,291,148,'active')+text(46,66,'PID '+p.pid,16,accent)
       +cell(47,84,120,65,'immagine',image,k===2?'focus':'quiet')
       +cell(174,84,126,65,'vecchia pagina',k===2&&ok?'rilasciata':'presente',k===2&&ok?'active':'quiet')
       +cell(386,42,204,60,'ricerca eseguibile',k?(ok?'presente':'ENOENT'):'?',k===1?(ok?'focus':'danger'):'quiet');
@@ -413,7 +414,7 @@
       +cell(111,141,292,53,k===2?hex(base-bytes)+' .. 0x8FEF':'area locale',k===2?bytes+' byte':'·',k===2?'focus':'quiet');
     const y=[61,113,168][k];
     g+=arrow(472,y,409,y,true)+text(484,y+5,'RSP',15,gold);
-    if(k>=1)g+=text(88,115,'RBP →',13,mint,'end');
+    if(k>=1)g+=text(88,115,'RBP →',13,accent,'end');
     return g+note('RSP = '+hex(sp)+(k>=1?' · RBP = 0x8FF0':'')+'.');
   });
   draw('7.2',(p,s,k)=>{
@@ -470,7 +471,7 @@
       +text(114,top+122,hex(sp-128),12,dim,'end')
       +text(237,top+106,'128 byte sotto RSP iniziale',12,dim,'middle');
     if(k===1){g+=tile(121,top+1,239,Math.max(6,scale*n),'active')
-      +text(380,tempY+16,n+' byte di temporaneo',12,mint);}
+      +text(380,tempY+16,n+' byte di temporaneo',12,accent);}
     const pointer=k===1&&!leaf?tempY:top;
     g+=arrow(431,pointer,366,pointer,k===1)+text(442,pointer+5,'RSP',15,gold);
     return g+note(k===0?'RSP iniziale = '+hex(sp)+'.':k===1?'Temporaneo a '+values(s,1)['Inizio temporaneo']+' · riserva esplicita '+values(s,1)['Byte sottratti a RSP']+' B.':'Fine dell’uso: RSP = '+state.RSP+'.');
@@ -494,7 +495,7 @@
         g+=tile(x,95,pitch-1.2,46,write?(i===p.n?'focus':'active'):'quiet')
           +text(x+pitch/2,123,write?(i===p.n?'0':'d'):'·',13,ink,'middle');
       }else{
-        g+='<rect x="'+x+'" y="95" width="'+(pitch-1.2)+'" height="46" fill="none" stroke="'+(i===p.n&&k>=1?'#f3a592':'#45604f')+'" stroke-dasharray="2 3"/>';
+        g+='<rect x="'+x+'" y="95" width="'+(pitch-1.2)+'" height="46" fill="none" stroke="'+(i===p.n&&k>=1?'#f3a592':'#605845')+'" stroke-dasharray="2 3"/>';
       }
     }
     const dest=28+(p.n+.5)*pitch;
@@ -512,8 +513,6 @@
     titolo:'Dalla cella di matrice al valore in EAX',
     teoria:SL.lezioni['modulo-2'].join(' '),
     domanda:'Quale valore contiene EAX dopo il caricamento della cella e l’addizione?',
-    istruzione:'Scegli una cella e segui RDX fino al caricamento. Mantieni poi la stessa riga e colonna, cambia solo la variazione e confronta EAX dopo ADD.',
-    osservazione:'Riga e colonna determinano l’indirizzo e i quattro byte letti. A parità di cella, MOV carica sempre lo stesso valore in EAX. Con due addendi diversi i valori di EAX divergono quando ADD scrive il risultato.',
     controlli:[demoParam('r','Riga (da 0)',0,3,2),demoParam('c','Colonna (da 0)',0,4,3),demoParam('delta','Variazione dopo il caricamento',-32,32,4)],
     previsione:{label:'EAX finale in esadecimale',valore:(p,s)=>values(s,s.length-1).EAX},
     calcola(p){

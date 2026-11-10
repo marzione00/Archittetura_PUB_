@@ -5,47 +5,31 @@ SL.catalogo.push({
   "units": [
     {
       "id": "6.3.1",
-      "title": "Rappresentare una mappatura in un programma",
-      "experiment": "Con pagine da 1 KiB, segui la traduzione di 0xC33. Nella vista dei campi individua la VPN, poi confronta l’indirizzo della voce letta con l’indirizzo finale del dato.",
-      "skill": "Individuare indice e posizione nella pagina",
-      "check": "La VPN sceglie la riga, il suo contenuto fornisce il frame e l’offset individua il byte al suo interno. L’indirizzo della voce e quello del dato si calcolano su basi diverse."
+      "title": "Rappresentare una mappatura in un programma"
     },
     {
       "id": "6.3.2",
-      "title": "Formato e validità delle voci",
-      "experiment": "Scegli la voce grezza 1 con il caso «Frame zero». Confronta i formati «PFN e bit valido» e «PFN diretto» a parità di indirizzo virtuale.",
-      "skill": "Separare validità e numero di frame",
-      "check": "Nel formato codificato il bit zero segnala validità e gli altri bit indicano il frame. Nel formato diretto il numero di frame occupa l’intera voce."
+      "title": "Formato e validità delle voci"
     },
     {
       "id": "6.3.3",
-      "title": "Implementare il calcolo dell’indirizzo",
-      "experiment": "Parti dal caso iniziale. Avanza di un’istruzione alla volta e individua il caricamento da memoria, il test di validità e la composizione del risultato. Ripeti con «Voce invalida».",
-      "skill": "Ricomporre base fisica e offset",
-      "check": "Il test del bit zero sceglie il ramo. Nella traduzione riuscita RAX contiene base del frame più offset. Nel ramo di errore contiene la sentinella a 64 bit."
+      "title": "Implementare il calcolo dell’indirizzo"
     },
     {
       "id": "6.3.4",
-      "title": "Valori di errore, limiti e funzioni eseguibili",
-      "experiment": "Seleziona «Lettura su due pagine» e segui i due tratti di memoria. Poi prova «Indice fuori tabella» e individua dove si arresta la routine.",
-      "skill": "Controllare l’indice prima del caricamento",
-      "check": "Una lettura a cavallo del confine richiede una traduzione per ciascuna pagina. Se la VPN è fuori intervallo, il controllo ferma la routine prima di leggere la voce."
+      "title": "Valori di errore, limiti e funzioni eseguibili"
     },
     {
       "id": "6.3.5",
       "title": "Esercizi",
-      "experiment": "Scegli «Una mappatura valida nel frame zero». Calcola i campi della traccia, inserisci il frammento e usa «Esegui la traccia» per verificare i registri. Confronta i risultati dei diversi rami.",
-      "skill": "Risolvere una traduzione completa",
-      "check": "La verifica distingue un frame valido di numero zero da una voce invalida. Il codice deve inoltre conservare i due registri d’ingresso.",
-      "kind": "esercizi"
+      "kind": "esercizi",
+      "provaIniziale": 18
     },
     {
       "id": "6.3.6",
       "title": "Soluzioni",
-      "experiment": "Apri «La larghezza della sentinella». Segui il ramo di errore fino alla scrittura in RAX, poi confronta il risultato con quello della scrittura ipotetica in EAX.",
-      "skill": "Verificare i passaggi di un walker",
-      "check": "La scelta tra EAX e RAX cambia i 32 bit superiori del risultato. Il confronto a 64 bit rende visibile la differenza.",
-      "kind": "soluzioni"
+      "kind": "soluzioni",
+      "provaIniziale": 20
     }
   ],
   "pwn": [

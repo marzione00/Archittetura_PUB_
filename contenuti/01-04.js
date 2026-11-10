@@ -5,54 +5,35 @@ SL.catalogo.push({
   "units": [
     {
       "id": "1.4.1",
-      "title": "Il complemento a due a larghezza fissata",
-      "experiment": "Fissa i sette bit inferiori e porta il bit 7 da zero a uno. Confronta le letture con e senza segno delle due parole.",
-      "skill": "Interpretare il bit di segno",
-      "check": "L’aggiunta del bit alto aumenta di 128 il valore senza segno e diminuisce di 128 il valore in complemento a due. Il contributo degli altri bit resta identico."
+      "title": "Il complemento a due a larghezza fissata"
     },
     {
       "id": "1.4.2",
-      "title": "Somma, sottrazione e overflow",
-      "experiment": "Somma 1 prima a 127 e poi a 255. Confronta CF, OF e il byte scritto. Ripeti con la sottrazione per individuare un prestito.",
-      "skill": "Distinguere riporto e overflow",
-      "check": "CF segue il calcolo senza segno. OF segue quello con segno. Il registro conserva in entrambi i casi gli otto bit bassi."
+      "title": "Somma, sottrazione e overflow"
     },
     {
       "id": "1.4.3",
-      "title": "Il linguaggio C: rappresentazione, operazioni e conversioni",
-      "experiment": "Confronta −1 con 1u. Mantieni 1u e sostituisci −1 con 0. Leggi il primo operando prima e dopo la conversione.",
-      "skill": "Applicare le conversioni aritmetiche del C",
-      "check": "Il confronto C si svolge fra due valori senza segno. Un primo operando negativo diventa il suo residuo modulo 2³² e può invertire l’esito rispetto al confronto matematico."
+      "title": "Il linguaggio C: rappresentazione, operazioni e conversioni"
     },
     {
       "id": "1.4.4",
-      "title": "Controllare l’aritmetica prima dell’operazione",
-      "experiment": "Mantieni B = 16 e confronta A = 15 con A = 16. Prevedi l’esito del controllo usando la divisione intera, poi osserva prodotto e residuo.",
-      "skill": "Verificare la moltiplicazione",
-      "check": "Il passaggio da un fattore al successivo può portare il prodotto oltre 255. Il residuo a otto bit può allora essere piccolo anche se il prodotto esatto eccede la capacità."
+      "title": "Controllare l’aritmetica prima dell’operazione"
     },
     {
       "id": "1.4.5",
       "title": "Problemi svolti",
-      "experiment": "Interpreta 0xF8 come intero con segno a otto bit. Estendilo a sedici bit copiando il bit di segno, poi rileggi il valore.",
-      "skill": "Estendere il segno",
-      "check": "Il nuovo byte alto contiene otto copie del bit di segno. La parola si allunga e il valore con segno si conserva.",
       "kind": "esercizi"
     },
     {
       "id": "1.4.6",
+      "provaIniziale": 1,
       "title": "Esercizi",
-      "experiment": "Apri «Codificare un numero negativo su otto bit». Determina il residuo fra 0 e 255 e traduci quel residuo in una parola di otto bit.",
-      "skill": "Codificare un intero negativo",
-      "check": "Una volta scritto il byte, puoi controllarlo attribuendo al bit 7 peso −128. La somma dei pesi deve restituire l’intero della consegna.",
       "kind": "esercizi"
     },
     {
       "id": "1.4.7",
+      "provaIniziale": 4,
       "title": "Soluzioni",
-      "experiment": "Nello svolgimento «Calcolare risultato e flag su un byte» ricostruisci prima il calcolo senza segno, poi rileggi i due operandi con segno.",
-      "skill": "Spiegare due interpretazioni della stessa somma",
-      "check": "Il byte finale è il residuo modulo 256. Il controllo per CF riguarda riporto o prestito, quello per OF riguarda il superamento dell’intervallo con segno.",
       "kind": "soluzioni"
     }
   ],

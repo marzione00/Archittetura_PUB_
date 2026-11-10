@@ -5,47 +5,31 @@ SL.catalogo.push({
   "units": [
     {
       "id": "6.5.1",
-      "title": "File, metadati e nomi nelle directory",
-      "experiment": "Scegli il nome da usare per la scrittura e cambia il primo byte. Dopo la rimozione del nome scelto, leggi il conteggio dei link e il byte raggiunto dal nome rimasto.",
-      "skill": "Distinguere nome e identità del file",
-      "check": "La scrittura modifica lo stesso file attraverso entrambi i nomi. La rimozione di una voce cambia il conteggio dei collegamenti, mentre l’altra voce continua a designare l’inode."
+      "title": "File, metadati e nomi nelle directory"
     },
     {
       "id": "6.5.2",
-      "title": "Risolvere un percorso",
-      "experiment": "Risolvi ./testo partendo prima da /corso e poi da /casa. Ripeti con /casa/testo e confronta gli inode raggiunti a ogni componente.",
-      "skill": "Risolvere un nome passo per passo",
-      "check": "Il percorso relativo parte dall’inode della directory corrente. Un percorso assoluto parte dalla radice, anche quando cambia la directory corrente."
+      "title": "Risolvere un percorso"
     },
     {
       "id": "6.5.3",
-      "title": "Allocare i blocchi",
-      "experiment": "Confronta file di 4096 e 4097 byte. Per il secondo file prova i tre metodi di allocazione e osserva posizione logica, blocco fisico e byte inutilizzati.",
-      "skill": "Calcolare blocchi dati e frammentazione interna",
-      "check": "Un solo byte oltre il confine richiede un altro blocco intero. A parità di dimensione del file, il metodo può cambiare il blocco fisico raggiunto."
+      "title": "Allocare i blocchi"
     },
     {
       "id": "6.5.4",
-      "title": "Spazio libero e contabilità dell’allocazione",
-      "experiment": "Seleziona il file A e prova le posizioni 1023 e 1024. Segui la catena e confronta i blocchi assegnati ai due file con quelli liberi nel volume. Per leggere la catena di B, seleziona il file B.",
-      "skill": "Seguire una catena di blocchi",
-      "check": "Il confine logico richiede un passaggio in più nella FAT. La mappa distingue i blocchi liberi da quelli già assegnati, indipendentemente dal byte letto."
+      "title": "Spazio libero e contabilità dell’allocazione"
     },
     {
       "id": "6.5.5",
       "title": "Esercizi",
-      "experiment": "Scegli «Dimensionare la bitmap di un volume». Calcola i byte minimi della mappa e individua eventuali bit inutilizzati nell’ultimo byte. Confronta le due tracce.",
-      "skill": "Collegare directory, file e blocchi",
-      "check": "La bitmap assegna un bit a ciascun blocco. La capacità cresce di un byte appena il numero di blocchi supera un multiplo di otto.",
-      "kind": "esercizi"
+      "kind": "esercizi",
+      "provaIniziale": 4
     },
     {
       "id": "6.5.6",
       "title": "Soluzioni",
-      "experiment": "Apri «Vita del file dopo unlink». Confronta la traccia con un descrittore aperto e quella con tutti i descrittori chiusi. Segui la rimozione dei due nomi.",
-      "skill": "Verificare la contabilità dello spazio",
-      "check": "Il conteggio dei nomi e i riferimenti aperti cambiano in momenti diversi. La loro combinazione determina quando lo spazio può tornare disponibile.",
-      "kind": "soluzioni"
+      "kind": "soluzioni",
+      "provaIniziale": 3
     }
   ],
   "pwn": [

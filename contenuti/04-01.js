@@ -5,75 +5,48 @@ SL.catalogo.push({
   "units": [
     {
       "id": "4.1.1",
-      "title": "Interruzione del flusso sequenziale",
-      "experiment": "Fissa il RIP iniziale. Esegui una traccia con il timer e una con la pagina assente. Confronta gli indirizzi di ripresa.",
-      "skill": "Ricostruire il trasferimento di controllo",
-      "check": "Il timer interrompe il flusso fra istruzioni. Dopo il recupero della pagina, il caricamento riparte dal proprio indirizzo."
+      "title": "Interruzione del flusso sequenziale"
     },
     {
       "id": "4.1.2",
-      "title": "Interrupt, fault, trap e abort",
-      "experiment": "Mantieni lo stesso RIP e cambia la causa fra INT3, pagina assente e guasto grave. In ogni traccia confronta il punto di ripresa con l’indirizzo iniziale.",
-      "skill": "Classificare l’evento",
-      "check": "Per INT3 il RIP salvato supera di un byte l’indirizzo iniziale. Il fault conserva l’indirizzo del caricamento. L’abort lascia indeterminata la ripresa."
+      "title": "Interrupt, fault, trap e abort"
     },
     {
       "id": "4.1.3",
-      "title": "Vettori, privilegi e ingresso protetto",
-      "experiment": "Scegli il vettore 48 e una porta con DPL 0. Confronta INT da CPL 3 con una richiesta hardware, poi prova il vettore 14 per il dispositivo.",
-      "skill": "Indirizzare un descrittore",
-      "check": "Con il vettore 48 entrambe le origini individuano la stessa porta. Il DPL regola l’invocazione software. Il vettore 14 viene escluso dalla mappa dei dispositivi prima dell’accesso alla IDT."
+      "title": "Vettori, privilegi e ingresso protetto"
     },
     {
       "id": "4.1.4",
-      "title": "Ingresso preciso in una macchina con pipeline",
-      "experiment": "Mantieni il registro iniziale a 12 e sposta il fault dal quarto al secondo ADD. Conta le istruzioni ritirate e leggi il registro nel gestore.",
-      "skill": "Ricostruire uno stato preciso",
-      "check": "Ogni ADD ritirato ha già incrementato il registro. Il RIP salvato identifica il primo ADD da ripetere."
+      "title": "Ingresso preciso in una macchina con pipeline"
     },
     {
       "id": "4.1.5",
-      "title": "Codice di ingresso Linux e contesto salvato",
-      "experiment": "Con RSP a 0x2008 e otto registri da salvare, confronta il page fault con l’errore di divisione. Annota RSP dopo l’ingresso hardware e dopo lo stub.",
-      "skill": "Leggere una traccia di ingresso",
-      "check": "Il codice di errore del page fault e lo slot sintetico dell’altro percorso occupano entrambi otto byte. Cambia la ripartizione fra hardware e software. A parità di registri salvati il RSP finale coincide."
+      "title": "Codice di ingresso Linux e contesto salvato"
     },
     {
       "id": "4.1.6",
-      "title": "Stato da preservare all’ingresso",
-      "experiment": "Scegli il valore iniziale di RAX. Ripeti l’interrupt con e senza il salvataggio di RAX e confronta le due letture dopo IRETQ.",
-      "skill": "Verificare il ripristino",
-      "check": "Entrambe le tracce riprendono allo stesso RIP. RAX contiene il valore del programma solo nel percorso che ne ripristina la copia salvata."
+      "title": "Stato da preservare all’ingresso"
     },
     {
       "id": "4.1.7",
-      "title": "Ripresa, annidamento e priorità",
-      "experiment": "Riabilita IF dopo il prologo. Confronta una richiesta di priorità 4 con una di priorità 5, poi mantieni IF a zero e ripeti la seconda prova.",
-      "skill": "Tracciare eventi annidati",
-      "check": "Con priorità attiva 4, la richiesta più urgente entra nel gestore esterno solo se IF è attivo. La profondità e il primo contesto ripristinato distinguono l’annidamento dall’attesa."
+      "title": "Ripresa, annidamento e priorità"
     },
     {
       "id": "4.1.8",
       "title": "Problemi svolti",
-      "experiment": "Parti da IF = 1. Prevedi il valore che leggerà il gestore e segui i due tipi di porta a partire dallo stesso stato.",
-      "skill": "Confrontare gli effetti delle porte sul flag IF",
-      "check": "Confronta il flag salvato con il flag attivo. La differenza fra le due porte compare nei flag del gestore.",
       "kind": "esercizi"
     },
     {
       "id": "4.1.9",
       "title": "Esercizi",
-      "experiment": "Apri «Indirizzare una porta della IDT». Per ogni traccia ricava dalla modalità la dimensione della voce, quindi calcola offset e indirizzo.",
-      "skill": "Calcolare l’indirizzo della voce",
-      "check": "L’indice conta voci. Il confronto con la seconda traccia mostra perché la stessa formula deve usare la dimensione della porta indicata nella consegna.",
+      "provaIniziale": 1,
       "kind": "esercizi"
     },
     {
       "id": "4.1.10",
       "title": "Soluzioni",
-      "experiment": "Scegli «Misurare il frame di ingresso» e ripercorri la seconda traccia. Tieni separati allineamento, campi di ritorno e codice di errore.",
-      "skill": "Distinguere frame hardware e allineamento della pila",
-      "check": "La differenza tra il puntatore iniziale e quello finale comprende anche i byte persi per l’allineamento. La sola dimensione del frame conta i campi effettivamente impilati.",
+      "provaIniziale": 3,
+      "tracciaIniziale": 2,
       "kind": "soluzioni"
     }
   ],

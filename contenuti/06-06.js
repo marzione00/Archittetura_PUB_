@@ -5,47 +5,31 @@ SL.catalogo.push({
   "units": [
     {
       "id": "6.6.1",
-      "title": "Perché la persistenza richiede un modello di consistenza",
-      "experiment": "Scegli un ordine di persistenza e ferma l’aggiornamento dopo una o due scritture. Leggi il bit di allocazione, il puntatore nell’inode e il contenuto del blocco 9 dopo il riavvio.",
-      "skill": "Leggere uno stato durevole parziale",
-      "check": "Il prefisso durevole determina separatamente quali byte sopravvivono, se l’allocatore considera il blocco occupato e se il file può raggiungerlo."
+      "title": "Perché la persistenza richiede un modello di consistenza"
     },
     {
       "id": "6.6.2",
-      "title": "Ricostruzione e riparazione",
-      "experiment": "Lascia presente il riferimento al blocco e imposta la bitmap su «Libero». Poi scambia le due condizioni e confronta la modifica apportata al bit nei due casi.",
-      "skill": "Diagnosticare un’incoerenza con fsck",
-      "check": "Con inode integri la mappa riparata segue la raggiungibilità del blocco. Segnarlo libero mentre è ancora usato crea un rischio di doppia assegnazione."
+      "title": "Ricostruzione e riparazione"
     },
     {
       "id": "6.6.3",
-      "title": "Journal redo e soglia del commit durevole",
-      "experiment": "Confronta il recupero con ultimo passo durevole 1, 2 e 3. Annota per A e B i valori prima e dopo il riavvio.",
-      "skill": "Decidere quando eseguire il replay",
-      "check": "Il commit separa i record da ignorare dalle immagini da installare. Un blocco già aggiornato conserva lo stesso valore se il redo lo riscrive."
+      "title": "Journal redo e soglia del commit durevole"
     },
     {
       "id": "6.6.4",
-      "title": "Journaling di dati e metadati: garanzie e costi",
-      "experiment": "Mantieni gli stessi blocchi dati e metadati. Cambia tra modalità completa e ordinata e confronta i conteggi prima del commit e dopo il checkpoint.",
-      "skill": "Distinguere costo e copertura del journal",
-      "check": "In entrambe le modalità il commit richiede dati e record di metadati durevoli. La modalità completa deve anche copiare i dati dal journal alla sede definitiva."
+      "title": "Journaling di dati e metadati: garanzie e costi"
     },
     {
       "id": "6.6.5",
       "title": "Esercizi",
-      "experiment": "Scegli «Diagnosticare uno stato persistente parziale». Per ogni traccia confronta il bit della bitmap con i puntatori degli inode, quindi associa il rischio alla discrepanza osservata.",
-      "skill": "Classificare le transazioni al riavvio",
-      "check": "Un blocco riservato e irraggiungibile sottrae spazio al volume. Un blocco raggiungibile che risulta libero può essere assegnato una seconda volta.",
-      "kind": "esercizi"
+      "kind": "esercizi",
+      "provaIniziale": 1
     },
     {
       "id": "6.6.6",
       "title": "Soluzioni",
-      "experiment": "Apri «Recuperare due transazioni indipendenti». Individua il commit di ciascuna transazione e confronta i valori dopo il primo e il secondo recupero.",
-      "skill": "Dimostrare l’idempotenza del record",
-      "check": "La decisione relativa a un blocco dipende dal commit della transazione che lo aggiorna. Ripetere l’installazione della stessa immagine ne conserva il contenuto.",
-      "kind": "soluzioni"
+      "kind": "soluzioni",
+      "provaIniziale": 5
     }
   ],
   "pwn": [

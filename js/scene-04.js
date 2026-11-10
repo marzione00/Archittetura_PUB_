@@ -1,17 +1,18 @@
 'use strict';
 (() => {
-  const C = {bg:'#10241b', line:'#52705e', ink:'#e3f6e7', dim:'#a6beac', green:'#b2f5bf', fill:'#244e32', gold:'#ffce82', warm:'#473820', red:'#f5a799'};
+  const C = {bg:'#241e10', line:'#706752', ink:'#f6f0e3', dim:'#beb7a6', green:'#8cd4da', fill:'#193031', gold:'#ffce82', warm:'#473820', red:'#f5a799'};
   const hx = n => '0x'+Number(n).toString(16).toUpperCase();
   const num = n => String(n).replace('.',',');
   const v = (steps,i) => Object.fromEntries(steps[i].valori);
   const txt = (x,y,value,size=14,anchor='start',color=C.ink) =>
     '<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" font-family="ui-monospace,monospace" style="fill:'+color+'" font-size="'+size+'">'+SL.pen.e(value)+'</text>';
-  const box = (x,y,w,h,fill=C.bg,stroke=C.line,r=4) => '<rect'+(fill===C.warm||fill===C.fill?' class="reveal"':'')+' x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="'+fill+'" stroke="'+stroke+'"/>';
+  const box = (x,y,w,h,fill=C.bg,stroke=C.line,r=4) => SL.symbols.panel(x,y,w,h,fill,stroke,fill===C.warm||fill===C.fill?'reveal':'');
   const wire = (d,color=C.line,width=2) => '<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="'+width+'" stroke-linejoin="round"/>';
   const disk = (x,y,r,fill=C.bg,stroke=C.line) => '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" stroke="'+stroke+'" fill="'+fill+'"/>';
   const title = x => txt(24,25,x,14,'start',C.green);
   const foot = x => txt(24,235,x,13,'start',C.dim);
   function card(x,y,w,h,caption,value,active=false) {
+    if(SL.symbols.kind(caption))return SL.symbols.node(x,y,w,h,caption,value,active);
     return box(x,y,w,h,active?C.warm:C.bg,active?C.gold:C.line)
       +txt(x+w/2,y+20,caption,13,'middle',C.dim)+txt(x+w/2,y+h-12,value,16,'middle',active?C.gold:C.ink);
   }
@@ -436,8 +437,6 @@
   SL.moduliAnimati[4]={
     titolo:'Dal bus alla ripresa del thread',
     teoria:SL.lezioni['modulo-4'].join(' '),
-    istruzione:'Tieni fisse la lunghezza della richiesta B e l’attesa dello scheduler. Aggiungi una richiesta davanti a B e confronta i due tempi finali. Poi ripristina la coda e varia soltanto l’attesa del thread pronto.',
-    osservazione:'Una richiesta davanti a B ritarda di cinque cicli sia l’ultimo byte sia la ripresa. L’attesa del thread pronto sposta soltanto la ripresa e aumenta l’intervallo che la separa dall’ultimo byte.',
     domanda:'In quale istante si riceve l’ultimo byte e quanto tempo passa prima che il thread torni sul core?',
     previsione:{label:'Intervallo dall’ultimo byte alla ripresa del thread (µs)',valore:(p,stages)=>String(v(stages,4)['Ultimo byte → ripresa (µs)'])},
     controlli:[knob('coda','Richieste davanti a B (4 parole ciascuna)',0,3,1),knob('parole','Parole DMA della richiesta B',1,8,4),knob('attesa','Attesa da pronto a in esecuzione (µs)',0,12,4)],

@@ -25,7 +25,7 @@
   function waves(rows,marks=['prima','primo','secondo']){
     let g='';const x=142,dx=426/marks.length;
     rows.forEach(([name,levels],j)=>{
-      const center=71+j*42;g+=text(26,center+4,name,'label')+path('M'+x+' '+(center+10)+'h426','wire dim');
+      const center=rows.length>3?61+j*34:71+j*42;g+=text(26,center+4,name,'label')+path('M'+x+' '+(center+10)+'h426','wire dim');
       let d='';
       for(let i=0;i<levels.length;i++){
         if(levels[i]===null)continue;
@@ -38,7 +38,9 @@
     marks.forEach((m,i)=>{g+=text(x+dx*(i+.5),199,m,'small','middle');});return g;
   }
   function pipeGrid(rows,cycles){
-    const x=98,w=Math.min(70,Math.floor(512/cycles));
+    const labels=Math.max(...rows.map(([label])=>label.length));
+    const x=Math.max(98,Math.min(166,31+8*labels));
+    const w=Math.min(70,Math.floor((612-x)/cycles));
     let g='';Array.from({length:cycles},(_,i)=>{g+=text(x+(i+.5)*w,55,i+1,'small','middle');});
     rows.forEach(([name,data],j)=>{const y=65+j*39;g+=text(24,y+21,name,'label')+tape(x,y,
       Array.from({length:cycles},(_,i)=>{const v=data[i];return [v??blank,v==='D*'||v==='W'?'hot':v?'active':''];}),w);});
@@ -313,6 +315,24 @@
     return g+caption('Le tre scritture avvengono insieme. I passi isolano una destinazione alla volta.');
   }
 
+  function verificaGrafica(figura,k){
+    let g=title(figura.titolo);
+    if(figura.tipo==='bit'){
+      figura.righe.forEach((parola,i)=>{
+        const visibile=k>=figura.mostra[i];
+        g+=wordRow(42+i*43,figura.etichette[i],visibile?parola:blank.repeat(parola.length),parola.length);
+      });
+    }else{
+      const onde=figura.tipo==='onde';
+      const righe=figura.righe.map((valori,riga)=>[
+        figura.etichette[riga],
+        valori.map((valore,i)=>k>=figura.mostra[riga][i]?valore:(onde?null:''))
+      ]);
+      g+=onde?waves(righe,figura.tempi):pipeGrid(righe,figura.righe[0].length);
+    }
+    return g+caption(figura.note[k]);
+  }
+
   const diagrams=[
     [majority,nibbles,carryBorrow,flags,srSequence],
     [srCharacteristic,transparent,edge,countOrLoad,simultaneous],
@@ -322,6 +342,6 @@
     [occupancy,pipeControl,fetch,loadUse,transfer]
   ];
   diagrams.forEach((row,c)=>row.forEach((render,i)=>{
-    SL.sceneProve['3.'+(c+1)+'/'+(i+1)]=(variant,k)=>render(variant.ingressiGrafico,k);
+    SL.sceneProve['3.'+(c+1)+'/'+(i+1)]=(variant,k)=>variant.figuraIII?verificaGrafica(variant.figuraIII,k):render(variant.ingressiGrafico,k);
   }));
 })();

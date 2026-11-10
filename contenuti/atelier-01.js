@@ -375,7 +375,7 @@
       const a=file==='valido'?firma:file==='errato'?[0x58,...firma.slice(1)]:[];
       return [passo('Redirezione','La shell tenta l’apertura in lettura prima di execve.', ['File',file],['Apertura',file==='manca'?'ENOENT':'riuscita']),
         passo('Descrittore',file==='manca'?'L’apertura fallita arresta l’avvio.':'La shell collega il file a fd 0 e avvia il lettore.', ['Programma avviato',si(file!=='manca')],['FD 0 del lettore',file==='manca'?'nessun processo':'file di ingresso']),
-        passo('Lettura della firma',file==='manca'?'La shell segnala l’errore al chiamante.':a.length?'Il lettore acquisisce quattro byte e li confronta con TLM1.':'La lettura restituisce zero byte alla fine del file.', ['Primo byte',a.length?'0x'+hex(a[0]):'assente'],['Esito',file==='valido'?'firma accettata':file==='errato'?'firma diversa':file==='vuoto'?'prefisso troncato':'errore di apertura'])];
+        passo(file==='manca'?'Diagnosi prima dell’avvio':'Lettura della firma',file==='manca'?'La shell segnala l’errore al chiamante.':a.length?'Il lettore acquisisce quattro byte e li confronta con TLM1.':'La lettura restituisce zero byte alla fine del file.', ['Primo byte',a.length?'0x'+hex(a[0]):'assente'],['Esito',file==='valido'?'firma accettata':file==='errato'?'firma diversa':file==='vuoto'?'prefisso troncato':'errore di apertura'])];
     });
 
   unita('1.7.7',
@@ -432,8 +432,9 @@
     (SL.prove[capitolo] ||= []).push({titolo,unita,attivita,principio,varianti});
   }
 
+  // Capitolo 1.1
   prova('1.1.1','lez01_01_layers_order','Dalla richiesta al dispositivo',
-    "La libreria C gestisce i flussi associati alle funzioni di I/O. Il kernel verifica i descrittori aperti e trasferisce i byte verso l’oggetto indicato dal descrittore.",
+    "La libreria standard C offre funzioni di ingresso e uscita, abbreviate I/O, fra cui fread per leggere da un flusso e puts per scrivere testo seguito da un fine riga. Un flusso è la risorsa di lettura o scrittura gestita dalla libreria; il suo buffer è una zona di memoria che raccoglie temporaneamente i byte. Il kernel, parte del sistema operativo che controlla le risorse, verifica il descrittore, cioè il numero con cui il processo identifica una risorsa aperta. Può trasferire dati già presenti nella propria cache, la memoria che conserva copie di dati letti in precedenza. Il flusso di uscita standard stdout usa qui il descrittore 1; LF indica il byte di fine riga, di valore esadecimale 0A.",
     variante('Un lettore C usa fread per riempire un buffer vuoto da un file locale. I dati sono già nella cache del kernel. Chi offre fread e chi controlla il descrittore?',
       [opzione('Chi offre fread?',['libreria C','kernel','controller del disco'],'libreria C','Una funzione della libreria standard può a sua volta richiedere al kernel una lettura.'),
         opzione('Chi controlla il descrittore?',['libreria C','kernel','compilatore'],'kernel','Il descrittore appartiene alle risorse aperte del processo.')],
@@ -442,153 +443,588 @@
       [opzione('Chi aggiunge LF?',['libreria C','driver della tastiera','CPU durante la compilazione'],'libreria C','Considera il contratto di puts.'),numero('Numero del descrittore',1,'I descrittori standard sono ordinati come ingresso, uscita, errore.')],
       ['puts riceve i due caratteri di OK e aggiunge il carattere di fine riga LF.','La libreria consegna 4F 4B 0A al sistema attraverso stdout.','Nel processo considerato, il flusso stdout usa il descrittore 1, collegato al terminale.']));
 
-  prova('1.1.2','lez01_02_hardware_roles','Seguire una lettura dalla memoria',
-    "In una memoria indirizzabile a byte, lo spostamento dalla base conta le celle a partire da zero. L’indirizzo seleziona la cella. I bit conservati in quella cella costituiscono il dato.",
-    ...[[0x1200,2,[8,14,97,42]],[0x2000,3,[41,52,63,74]]].map(([base,k,mem])=>
-      variante('La CPU legge un byte alla base 0x'+hex(base,4)+' più '+k+'. Le celle a indirizzi crescenti contengono '+bytes(mem)+' in esadecimale. Determina indirizzo e dato.',
-        [numero('Indirizzo finale',base+k,'Lo spostamento è in byte.'),numero('Valore del dato in decimale',mem[k],'Conta le celle dalla posizione zero e converti le due cifre esadecimali.')],
-        ['L’unità di indirizzamento somma 0x'+hex(base,4)+' e '+k+' e produce 0x'+hex(base+k,4)+'.','La memoria seleziona la cella con indice '+k+' nella sequenza e restituisce 0x'+hex(mem[k])+'.','L’espansione posizionale dà '+(mem[k]>>4)+' × 16 + '+(mem[k]&15)+' = '+mem[k]+'. Il registro riceve questo valore.'])));
+  prova("1.1.2", "lez01_02_hardware_roles", "Seguire una lettura dalla memoria",
+    "Un indirizzo individua una cella contando i byte dalla base. Celle diverse possono contenere lo stesso dato. Per ricavare l’origine di una lettura dal valore restituito occorre quindi controllare tutte le corrispondenze e gli eventuali vincoli sullo spostamento.",
+    variante(
+      "La CPU legge un byte alla base 0x1200 più 2. Le celle a indirizzi crescenti contengono 08 0E 61 2A in esadecimale. Determina indirizzo e dato.",
+      [
+        numero("Indirizzo finale", "4610", "Lo spostamento è in byte."),
+        numero("Valore del dato in decimale", "97", "Conta le celle dalla posizione zero e converti le due cifre esadecimali.")
+      ],
+      [
+        "L’unità di indirizzamento somma 0x1200 e 2 e produce 0x1202.",
+        "La memoria seleziona la cella con indice 2 nella sequenza e restituisce 0x61.",
+        "L’espansione posizionale dà 6 × 16 + 1 = 97. Il registro riceve questo valore."
+      ]
+    ),
+    {
+      consegna: "La memoria contiene 2A 55 2A 61 alle posizioni da 0x1200 a 0x1203. Una lettura dalla base 0x1200 restituisce 0x2A. Prima ricostruisci tutte le celle compatibili. Dopo aver appreso che lo spostamento era positivo, identifica quello usato dalla CPU.",
+      campi: [
+        numero("Celle compatibili con il solo dato", "2", "Cerca tutte le occorrenze del byte restituito."),
+        numero("Spostamento positivo in byte", "2", "Sottrai la base dall’indirizzo compatibile che rimane.")
+      ],
+      svolgimento: [
+        "Il byte 2A occupa le posizioni 0 e 2 nella sequenza che comincia alla base. Sono quindi compatibili 0x1200 e 0x1202.",
+        "Gli spostamenti corrispondenti sono 0x1200 − 0x1200 = 0 e 0x1202 − 0x1200 = 2. Il valore letto, considerato da solo, ammette due origini.",
+        "La condizione sullo spostamento esclude la posizione zero. Resta la cella 0x1202, che si raggiunge aggiungendo due byte alla base."
+      ],
+      quadro: [
+        {"titolo": "Traccia della lettura", "celle": [["base", "0x1200"], ["byte ricevuto", "0x2A"]], "nota": "Agli indirizzi crescenti si leggono 2A 55 2A 61."},
+        {"titolo": "Celle che contengono 2A", "celle": [["prima", "0x1200"], ["seconda", "0x1202"]], "nota": "Un dato può comparire in più celle."},
+        {"titolo": "Distanze dalla base", "celle": [["0x1200", "0 byte"], ["0x1202", "2 byte"]], "nota": "Si sottrae la base da ciascun indirizzo.", "tipo": "confronto"},
+        {"titolo": "Vincolo dello spostamento", "celle": [["ammesso", "2 byte"], ["origine", "0x1202"]], "nota": "Lo spostamento deve essere positivo."}
+      ]
+    }
+  );
 
-  prova('1.1.4','lez01_03_special_paths','Ricostruire un percorso',
+  prova("1.1.4", "lez01_03_special_paths", "Ricostruire un percorso",
     "La risoluzione di un percorso relativo parte dalla directory corrente. Un nome ordinario aggiunge un livello, «.» mantiene il livello corrente e «..» raggiunge il genitore.",
-    ...[['/home/lea/src','../dati/./a','/home/lea/dati/a','/home/lea/dati','a'],['/srv/archivio/prove','../../log/./ieri','/srv/log/ieri','/srv/log','ieri']].map(([dir,rel,out,gen,figlio])=>
-      variante('La directory corrente è '+dir+'. Considera '+rel+' in un albero con directory esistenti e senza link simbolici. Scegli il percorso finale.',
-        [opzione('Percorso assoluto',[out,dir+'/'+figlio,'/'+figlio],out,'Ogni componente .. elimina un livello dalla directory raggiunta.')],
-        ['Il percorso è relativo e la ricerca parte da '+dir+'.','Attraversando le componenti prima del nome finale si arriva a '+gen+'. Il punto conserva la directory corrente.','Si cerca '+figlio+' dentro '+gen+' e si ottiene '+out+'.'])));
+    variante(
+      "La directory corrente è /home/lea/src. Considera ../dati/./a in un albero con directory esistenti e senza link simbolici. Scegli il percorso finale.",
+      [
+        opzione("Percorso assoluto", ["/home/lea/dati/a", "/home/lea/src/a", "/a"], "/home/lea/dati/a", "Ogni componente .. elimina un livello dalla directory raggiunta.")
+      ],
+      [
+        "Il percorso è relativo e la ricerca parte da /home/lea/src.",
+        "Attraversando le componenti prima del nome finale si arriva a /home/lea/dati. Il punto conserva la directory corrente.",
+        "Si cerca a dentro /home/lea/dati e si ottiene /home/lea/dati/a."
+      ]
+    ),
+    {
+      consegna: "Un programma parte da /srv/corso/prove e deve aprire /srv/corso/dati/a con un percorso relativo. L’albero contiene queste directory e i suoi nomi ordinari, senza link simbolici. Scegli il percorso che raggiunge il file e conta le risalite che compie.",
+      campi: [
+        opzione("Percorso relativo", ["dati/a", "../dati/a", "../../dati/a"], "../dati/a", "Trova la directory comune più vicina alle due posizioni."),
+        numero("Risalite con ..", "1", "Segui la strada da prove al genitore comune.")
+      ],
+      svolgimento: [
+        "La directory comune più vicina è /srv/corso. Partendo da prove, il componente .. riporta esattamente a quel genitore.",
+        "I componenti dati e a scendono poi nella directory richiesta e individuano il file. Da prove il percorso relativo è ../dati/a.",
+        "dati/a comincerebbe cercando dati sotto prove. Con ../../dati/a si risalirebbe fino a /srv. La soluzione scelta compie invece una sola risalita."
+      ],
+      quadro: [
+        {"titolo": "Due posizioni", "celle": [["partenza", "prove"], ["arrivo", "dati/a"]], "nota": "Entrambe le posizioni si trovano sotto /srv/corso.", "tipo": "confronto"},
+        {"titolo": "Antenato comune", "celle": [["da", "prove"], ["con ..", "corso"]], "nota": "Una risalita conduce al genitore."},
+        {"titolo": "Discesa verso il file", "celle": [["directory", "dati"], ["nome", "a"]], "nota": "Il percorso completo è ../dati/a.", "tipo": "sequenza"},
+        {"titolo": "Controllo delle alternative", "celle": [["senza ..", "troppo in basso"], ["due ..", "troppo in alto"]], "nota": "La directory comune si raggiunge con una risalita."}
+      ]
+    }
+  );
 
-  prova('1.1.6','lez01_04_filesystem_ops','Prevedere il contenuto di un file',
+  prova("1.1.6", "lez01_04_filesystem_ops", "Interpretare gli effetti di una redirezione",
     "La shell stabilisce la destinazione di una redirezione prima di eseguire il comando. > tronca il file, mentre >> colloca i nuovi byte alla fine del contenuto esistente.",
-    ...[['>>',4,'41 0A 42 0A','in coda'],['>',2,'42 0A','dopo il troncamento']].map(([op,n,contenuto,modo])=>
-      variante('Il file dati contiene A e LF. Esegui printf \'B\\n\' '+op+' dati in una shell POSIX. Quanti byte restano e quale sequenza contengono?',
-        [numero('Byte nel file',n,'Il carattere di fine riga occupa un byte.'),opzione('Sequenza esadecimale',['41 0A','42 0A','41 0A 42 0A'],contenuto,'Verifica se l’apertura conserva il contenuto precedente.')],
-        ['Prima del comando i byte sono 41 0A.','La redirezione '+op+' colloca la scrittura '+modo+'. printf produce 42 0A.','I byte finali sono '+contenuto+', quindi la lunghezza è '+n+'.'])));
+    variante(
+      "Il file dati contiene A e LF. Esegui printf 'B\\n' >> dati in una shell POSIX. Quanti byte restano e quale sequenza contengono?",
+      [
+        numero("Byte nel file", "4", "Il carattere di fine riga occupa un byte."),
+        opzione("Sequenza esadecimale", ["41 0A", "42 0A", "41 0A 42 0A"], "41 0A 42 0A", "Verifica se l’apertura conserva il contenuto precedente.")
+      ],
+      [
+        "Prima del comando i byte sono 41 0A.",
+        "La redirezione >> colloca la scrittura in coda. printf produce 42 0A.",
+        "I byte finali sono 41 0A 42 0A, quindi la lunghezza è 4."
+      ]
+    ),
+    {
+      consegna: "Prima del comando un file contiene i byte 41 0A. Un verbale riporta che printf ha emesso soltanto B seguito da un fine riga e che il file finale contiene 42 0A. Tra le due redirezioni > e >>, quale spiega l’osservazione? Quanti byte iniziali sono stati eliminati all’apertura?",
+      campi: [
+        opzione("Redirezione compatibile", [">", ">>"], ">", "Confronta il primo byte iniziale con il primo byte finale."),
+        numero("Byte eliminati all’apertura", "2", "Conta gli ottetti presenti prima della scrittura.")
+      ],
+      svolgimento: [
+        "La nuova uscita occupa due byte, 42 per B e 0A per il fine riga. L’osservazione finale coincide con la sola nuova uscita.",
+        "Con >> i due byte originari sarebbero rimasti davanti ai nuovi, formando 41 0A 42 0A. Questa sequenza sarebbe lunga quattro byte.",
+        "La redirezione > apre il file con troncamento. I due byte originari vengono eliminati all’apertura, poi printf scrive i due byte osservati."
+      ],
+      quadro: [
+        {"titolo": "Reperto", "celle": [["prima", "41 0A"], ["dopo", "42 0A"]], "nota": "Il comando ha emesso B seguito da LF."},
+        {"titolo": "Uscita emessa", "celle": [["B", "42"], ["LF", "0A"]], "nota": "Due ottetti formano l’intera nuova uscita."},
+        {"titolo": "Ipotesi append", "celle": [["precedenti", "41 0A"], ["aggiunti", "42 0A"]], "nota": "In coda si otterrebbero quattro byte."},
+        {"titolo": "Ipotesi verificata", "celle": [["operatore", ">"], ["rimossi", "2 byte"]], "nota": "La scrittura riparte dal file troncato."}
+      ]
+    }
+  );
 
-  prova('1.1.3','lez01_05_build_pipeline','Localizzare una fase di costruzione',
-    "Il compilatore può tradurre una chiamata conoscendo la dichiarazione della funzione. La definizione può trovarsi in un altro file oggetto, che il collegatore deve trovare per costruire l’eseguibile.",
-    variante('hello.c chiama una funzione dichiarata in un header. gcc -c hello.c riesce e produce hello.o. Durante la creazione dell’eseguibile compare «undefined reference» per quella funzione.',
-      [opzione('Fase che segnala il problema',['preelaborazione','assemblaggio','collegamento'],'collegamento','L’oggetto contiene ancora riferimenti a simboli esterni.'),opzione('Azione pertinente',['aggiungere l’oggetto che definisce la funzione','cambiare il PID','rinominare il file .o in .c'],'aggiungere l’oggetto che definisce la funzione','La dichiarazione specifica il tipo della funzione. La definizione ne fornisce il corpo.')],
-      ['Il compilatore conosce la firma dalla dichiarazione e può produrre codice per la chiamata.','L’assemblatore crea un oggetto che conserva il riferimento esterno.','Il collegatore cerca una definizione. Fornire l’oggetto o la libreria corretti risolve il simbolo.']),
-    variante('Esegui gcc -S hello.c. Quale file ottieni per impostazione predefinita e quale fase lo traduce in un oggetto?',
-      [opzione('File prodotto',['hello.i','hello.s','hello.o'],'hello.s','L’opzione -S arresta la catena alla forma assembly.'),opzione('Fase successiva',['preelaborazione','assemblaggio','collegamento'],'assemblaggio','Un oggetto contiene istruzioni già codificate.')],
-      ['Il preprocessore espande le direttive di hello.c.','La compilazione traduce il sorgente in istruzioni assembly e conserva hello.s.','L’assemblatore può leggere hello.s e codificare le istruzioni in hello.o.']));
+  prova("1.1.3", "lez01_05_build_pipeline", "Localizzare una fase di costruzione",
+    "Il sorgente è il testo del programma C. Una dichiarazione descrive il nome della funzione, gli argomenti e il risultato che restituisce; la definizione ne contiene anche il corpo da eseguire. Un header raccoglie dichiarazioni e altre informazioni che il preprocessore può includere nel sorgente. Il compilatore può tradurre una chiamata conoscendo la dichiarazione, producendo istruzioni assembly; l’assemblatore le codifica in un file oggetto. Il collegatore unisce gli oggetti e cerca le definizioni necessarie per costruire l’eseguibile. Con GCC l’opzione -S arresta la costruzione al testo assembly, mentre -c produce l’oggetto.",
+    variante(
+      "hello.c chiama una funzione dichiarata in un header. gcc -c hello.c riesce e produce hello.o. Durante la creazione dell’eseguibile compare «undefined reference» per quella funzione.",
+      [
+        opzione("Fase che segnala il problema", ["preelaborazione", "assemblaggio", "collegamento"], "collegamento", "L’oggetto contiene ancora riferimenti a simboli esterni."),
+        opzione("Azione pertinente", ["aggiungere l’oggetto che definisce la funzione", "cambiare il PID", "rinominare il file .o in .c"], "aggiungere l’oggetto che definisce la funzione", "La dichiarazione specifica il tipo della funzione. La definizione ne fornisce il corpo.")
+      ],
+      [
+        "Il compilatore conosce la firma dalla dichiarazione e può produrre codice per la chiamata.",
+        "L’assemblatore crea un oggetto che conserva il riferimento esterno.",
+        "Il collegatore cerca una definizione. Fornire l’oggetto o la libreria corretti risolve il simbolo."
+      ]
+    ),
+    variante(
+      "Esegui gcc -S hello.c. Individua il file prodotto e la fase che potrebbe usarlo per costruire un oggetto. Ordina poi le tre fasi necessarie per passare dal sorgente C al file oggetto, includendo anche quella che il comando ha lasciato da eseguire.",
+      [
+        opzione("File prodotto", ["hello.i", "hello.s", "hello.o"], "hello.s", "L’opzione -S arresta la catena alla forma assembly."),
+        opzione("Fase successiva", ["preelaborazione", "assemblaggio", "collegamento"], "assemblaggio", "Un oggetto contiene istruzioni già codificate."),
+        {"label": "Dal sorgente C al file oggetto", "ordine": ["preelaborazione", "compilazione", "assemblaggio"], "answer": "preelaborazione → compilazione → assemblaggio", "numeric": false, "hint": "Le direttive vengono espanse prima di tradurre il testo in assembly. L’assemblatore usa il prodotto di tale traduzione."}
+      ],
+      [
+        "Il preprocessore espande le direttive di hello.c.",
+        "La compilazione traduce il sorgente in istruzioni assembly e conserva hello.s.",
+        "L’assemblatore può leggere hello.s e codificare le istruzioni in hello.o."
+      ]
+    )
+  );
 
-  prova('1.2.1','lez02_01_voltage_to_bits','Da segnali fisici a capacità binaria',
+  // Capitolo 1.2
+  prova("1.2.1", "lez02_01_voltage_to_bits", "Da segnali fisici a capacità binaria",
     "Una misura garantisce un bit quando rientra nella fascia bassa o in quella alta del ricevitore. Con n bit indipendenti si formano 2ⁿ configurazioni. Il valore di una configurazione dipende dall’ordine dei suoi bit.",
-    ...[[[400,2250,700],2],[[2400,2100,300,650],12]].map(([misure,valore])=>{
-      const b=misure.map(x=>Number(x>=2000)).join('');
-      return variante('Il livello basso è garantito fino a 800 mV e quello alto da 2000 mV. Dal bit più significativo al meno significativo misuri '+misure.join(', ')+' mV. Ricava valore e capacità della parola.',
-        [numero('Valore senza segno',valore,'Tratta ogni tensione come un bit e somma i pesi attivi.'),numero('Configurazioni possibili',2**misure.length,'Ogni linea indipendente raddoppia il numero di configurazioni.')],
-        ['I confronti con le soglie danno, nell’ordine, '+b+'.','I pesi da sinistra sono '+misure.map((_,i)=>2**(misure.length-i-1)).join(', ')+'. Le posizioni a uno sommano a '+valore+'.','Con '+misure.length+' linee hai 2^'+misure.length+' = '+2**misure.length+' configurazioni, incluso lo zero.']);
-    }));
+    variante(
+      "Il livello basso è garantito fino a 800 mV e quello alto da 2000 mV. Dal bit più significativo al meno significativo misuri 400, 2250, 700 mV. Ricava valore e capacità della parola.",
+      [
+        numero("Valore senza segno", "2", "Tratta ogni tensione come un bit e somma i pesi attivi."),
+        numero("Configurazioni possibili", "8", "Ogni linea indipendente raddoppia il numero di configurazioni.")
+      ],
+      [
+        "I confronti con le soglie danno, nell’ordine, 010.",
+        "I pesi da sinistra sono 4, 2, 1. Le posizioni a uno sommano a 2.",
+        "Con 3 linee hai 2^3 = 8 configurazioni, incluso lo zero."
+      ]
+    ),
+    {
+      consegna: "Il ricevitore garantisce 0 fino a 800 mV e 1 da 2000 mV. Su tre linee, dalla più significativa, misuri 2100, 1300 e 500 mV. Senza attribuire una soglia aggiuntiva al circuito, quanti valori interi sono compatibili e quali sono?",
+      campi: [
+        numero("Numero di valori compatibili", "2", "Ogni linea indeterminata lascia due possibilità."),
+        opzione("Valori compatibili", ["2 e 3", "4 e 6", "4 e 5"], "4 e 6", "Identifica il peso della linea compresa fra le soglie.")
+      ],
+      svolgimento: [
+        "La prima linea è alta e l’ultima è bassa. La tensione centrale cade fra 800 e 2000 mV, dove il ricevitore lascia indeterminato il livello logico.",
+        "Il codice ha perciò forma 1?0. La linea dubbia ha peso due, mentre quella alta ha peso quattro.",
+        "Le due parole compatibili sono 100 e 110, che valgono rispettivamente 4 e 6. La capacità nominale del gruppo di linee è otto parole. Questa osservazione ne lascia possibili soltanto due."
+      ],
+      quadro: [
+        {"titolo": "Tre misure", "celle": [["bit 2", "2100 mV"], ["bit 1", "1300 mV"], ["bit 0", "500 mV"]], "nota": "Le fasce garantite terminano a 800 e iniziano a 2000 mV."},
+        {"titolo": "Confronto con le soglie", "celle": [["bit 2", "1"], ["bit 1", "?"], ["bit 0", "0"]], "nota": "La misura centrale è nella fascia intermedia.", "tipo": "sequenza"},
+        {"titolo": "Peso del segnale dubbio", "celle": [["peso alto", "4"], ["peso centrale", "2"]], "nota": "La parola può valere 4 oppure 4 + 2."},
+        {"titolo": "Possibilità residue", "celle": [["100", "4"], ["110", "6"]], "nota": "Due valori sono compatibili con la stessa misura.", "tipo": "confronto"}
+      ]
+    }
+  );
 
-  prova('1.2.2','lez02_02_dec_to_bin','Scomporre un intero in potenze di due',
+  prova("1.2.2", "lez02_02_dec_to_bin", "Scomporre un intero in potenze di due",
     "Un intero positivo è la somma dei pesi delle sue posizioni binarie a uno. La potenza di due più grande compresa nel numero identifica il bit più significativo.",
-    ...[45,86].map(x=>{
-      const pesi=[64,32,16,8,4,2,1].filter(b=>b&x);
-      return variante('Converti '+x+' in binario senza zeri iniziali. Indica indice del bit più alto, numero di bit attivi e parola.',
-        [numero('Indice del bit più alto',Math.floor(Math.log2(x)),'Cerca la massima potenza di due minore o uguale al numero.'),numero('Bit a uno',pesi.length,'Conta gli addendi della scomposizione.'),opzione('Parola',[x.toString(2),(x+1).toString(2),(x+2).toString(2)],x.toString(2),'Confronta ciascun peso con il resto.')],
-        ['Il primo peso utile è '+pesi[0]+', cioè 2^'+Math.floor(Math.log2(x))+'.','Le sottrazioni successive individuano '+pesi.join(' + ')+' = '+x+'.','Scrivendo uno in quelle posizioni si legge '+x.toString(2)+'. Conta '+pesi.length+' cifre uno.']);
-    }));
+    variante(
+      "Converti 45 in binario senza zeri iniziali. Indica indice del bit più alto, numero di bit attivi e parola.",
+      [
+        numero("Indice del bit più alto", "5", "Cerca la massima potenza di due minore o uguale al numero."),
+        numero("Bit a uno", "4", "Conta gli addendi della scomposizione."),
+        opzione("Parola", ["101101", "101110", "101111"], "101101", "Confronta ciascun peso con il resto.")
+      ],
+      [
+        "Il primo peso utile è 32, cioè 2^5.",
+        "Le sottrazioni successive individuano 32 + 8 + 4 + 1 = 45.",
+        "Scrivendo uno in quelle posizioni si legge 101101. Conta 4 cifre uno."
+      ]
+    ),
+    {
+      consegna: "Il valore richiesto per un registro era 73. Nella lettura di controllo compare 01001101, cioè 77. Si sa che un solo bit è stato trascritto male. Individua il suo indice contando da destra a partire da zero e indica la correzione richiesta.",
+      campi: [
+        numero("Indice del bit da correggere", "2", "La differenza tra i due numeri è il peso del bit in eccesso."),
+        opzione("Correzione", ["da 1 a 0", "da 0 a 1"], "da 1 a 0", "Il numero osservato è maggiore di quello atteso.")
+      ],
+      svolgimento: [
+        "La differenza 77 − 73 vale 4. Poiché è cambiata una sola cifra binaria, il suo peso deve essere 4 = 2².",
+        "Il bit di indice 2 vale uno in 01001101. Per diminuire di quattro il valore del registro occorre portarlo a zero.",
+        "Il codice corretto è 01001001. I bit rimasti a uno pesano 64, 8 e 1, la cui somma restituisce 73."
+      ],
+      quadro: [
+        {"titolo": "Controllo del registro", "celle": [["atteso", "73"], ["osservato", "01001101"]], "nota": "L’errore riguarda un solo bit."},
+        {"titolo": "Differenza numerica", "celle": [["osservato", "77"], ["eccesso", "4"]], "nota": "La differenza individua il peso alterato."},
+        {"titolo": "Posizione", "celle": [["peso", "2²"], ["indice", "2"]], "nota": "Il bit in eccesso va da uno a zero."},
+        {"titolo": "Lettura dopo la correzione", "celle": [["parola", "01001001"], ["somma", "64 + 8 + 1"]], "nota": "Il registro torna a valere 73.", "tipo": "confronto"}
+      ]
+    }
+  );
 
-  prova('1.2.2','lez02_03_bin_to_hex','Raggruppare i bit in cifre esadecimali',
+  prova("1.2.2", "lez02_03_bin_to_hex", "Raggruppare i bit in cifre esadecimali",
     "Ogni cifra esadecimale codifica quattro bit. Per conservare i pesi si formano i gruppi partendo dal lato meno significativo e si completa con zeri soltanto il gruppo più a sinistra.",
-    ...[0xB6,0x2ED].map(x=>{
-      const s=x.toString(2),g=s.padStart(4*Math.ceil(s.length/4),'0').match(/.{4}/g),h=x.toString(16).toUpperCase();
-      return variante('Converti la parola binaria '+s+' in esadecimale. Ogni gruppo completo ha quattro bit.',
-        [numero('Gruppi necessari',g.length,'Parti dal lato meno significativo.'),opzione('Scrittura esadecimale',[h,(x+0x10).toString(16).toUpperCase(),(x^3).toString(16).toUpperCase()],h,'Una cifra esadecimale rappresenta un valore da zero a quindici.')],
-        ['Aggiungi eventuali zeri sul lato sinistro e separa '+g.join(' | ')+'.','I gruppi valgono '+g.map(n=>parseInt(n,2)).join(', ')+' in decimale.','Le cifre corrispondenti formano 0x'+h+'. La conversione ha richiesto '+g.length+' gruppi.']);
-    }));
+    variante(
+      "Converti la parola binaria 10110110 in esadecimale. Ogni gruppo completo ha quattro bit.",
+      [
+        numero("Gruppi necessari", "2", "Parti dal lato meno significativo."),
+        opzione("Scrittura esadecimale", ["B6", "C6", "B5"], "B6", "Una cifra esadecimale rappresenta un valore da zero a quindici.")
+      ],
+      [
+        "Aggiungi eventuali zeri sul lato sinistro e separa 1011 | 0110.",
+        "I gruppi valgono 11, 6 in decimale.",
+        "Le cifre corrispondenti formano 0xB6. La conversione ha richiesto 2 gruppi."
+      ]
+    ),
+    {
+      consegna: "Uno studente converte 101101 in esadecimale raggruppando 1011 e 01 e aggiungendo due zeri a destra. Ottiene B4. Individua il lato da completare per conservare il valore e scegli la conversione corretta.",
+      campi: [
+        opzione("Lato del riempimento", ["sinistro", "destro"], "sinistro", "Il bit più a destra deve conservare il peso uno."),
+        opzione("Esadecimale corretto", ["2D", "B4", "D2"], "2D", "Forma i gruppi di quattro a partire dalle unità.")
+      ],
+      svolgimento: [
+        "Aggiungendo due zeri a destra si forma 10110100. Ogni bit iniziale sale di due posizioni e il valore viene moltiplicato per quattro.",
+        "Il gruppo incompleto è a sinistra quando si separano i gruppi partendo dal bit di peso uno. Il riempimento corretto dà 0010 1101.",
+        "0010 vale 2 e 1101 vale 13, scritto D. La parola è 2D, il cui valore decimale è 2 × 16 + 13 = 45, pari a 32 + 8 + 4 + 1."
+      ],
+      quadro: [
+        {"titolo": "Conversione da controllare", "celle": [["ingresso", "101101"], ["proposta", "B4"]], "nota": "Il valore della parola deve restare invariato."},
+        {"titolo": "Riempimento a destra", "celle": [["ottenuto", "10110100"], ["effetto", "valore × 4"]], "nota": "Due zeri a destra spostano i pesi."},
+        {"titolo": "Riempimento a sinistra", "celle": [["alto", "0010"], ["basso", "1101"]], "nota": "Si separano quattro bit partendo dalle unità."},
+        {"titolo": "Verifica del valore", "celle": [["binario", "45"], ["0x2D", "45"]], "nota": "La conversione corretta conserva i pesi."}
+      ]
+    }
+  );
 
-  prova('1.2.3','lez02_04_hex_to_dec','Calcolare una distanza fra indirizzi',
-    "In esadecimale ogni posizione pesa una potenza di sedici. Sottrarre la base dall’indirizzo della cella dà lo spostamento in byte nei sistemi con indirizzamento a byte.",
-    ...[[0x180,0x1A6],[0x2F0,0x315]].map(([base,x])=>
-      variante('Un buffer parte da 0x'+hex(base)+' e una cella si trova a 0x'+hex(x)+'. Calcola l’indirizzo finale in decimale e lo spostamento in byte.',
-        [numero('Indirizzo finale in decimale',x,'Sviluppa le cifre secondo i pesi 256, 16 e 1.'),numero('Spostamento',x-base,'Sottrai l’indirizzo iniziale da quello finale.')],
-        ['La base 0x'+hex(base)+' equivale a '+base+' in decimale.','Il secondo indirizzo vale '+(x>>8)+' × 256 + '+((x>>4)&15)+' × 16 + '+(x&15)+' = '+x+'.','Lo spostamento è '+x+' − '+base+' = '+(x-base)+' byte. Sommato alla base riconduce alla cella richiesta.'])));
+  prova("1.2.3", "lez02_04_hex_to_dec", "Calcolare una distanza fra indirizzi",
+    "Un indirizzo si può scrivere in esadecimale o in decimale. Sottraendo la base si trova la distanza in byte. Per una regione che contiene n byte gli spostamenti validi vanno da zero a n − 1.",
+    variante(
+      "Un buffer parte da 0x180 e una cella si trova a 0x1A6. Calcola l’indirizzo finale in decimale e lo spostamento in byte.",
+      [
+        numero("Indirizzo finale in decimale", "422", "Sviluppa le cifre secondo i pesi 256, 16 e 1."),
+        numero("Spostamento", "38", "Sottrai l’indirizzo iniziale da quello finale.")
+      ],
+      [
+        "La base 0x180 equivale a 384 in decimale.",
+        "Il secondo indirizzo vale 1 × 256 + 10 × 16 + 6 = 422.",
+        "Lo spostamento è 422 − 384 = 38 byte. Sommato alla base riconduce alla cella richiesta."
+      ]
+    ),
+    {
+      consegna: "Un buffer di 16 byte parte da 0x2F0. Una routine considera valido anche l’indirizzo 0x300 perché lo scarto dalla base è 16. Decidi se la lettura di un byte è ammessa e calcola l’ultimo indirizzo effettivamente leggibile.",
+      campi: [
+        opzione("Lettura a 0x300", ["nel buffer", "fuori dal buffer"], "fuori dal buffer", "Una regione di 16 byte ha come primo indice zero."),
+        numero("Ultimo indirizzo leggibile", "767", "Somma alla base il massimo indice valido.")
+      ],
+      svolgimento: [
+        "Sedici byte contano sedici posizioni consecutive, da zero a quindici. L’indirizzo iniziale è già quello del primo byte.",
+        "0x300 − 0x2F0 = 0x10, cioè 16. L’indirizzo identifica il confine immediatamente successivo ai dati.",
+        "Per raggiungere l’ultimo byte si aggiunge invece 15 alla base. Si ottiene 0x2FF, cioè 767 in decimale. La lettura a 0x300 oltrepassa il buffer."
+      ],
+      quadro: [
+        {"titolo": "Controllo dei limiti", "celle": [["base", "0x2F0"], ["capacità", "16 byte"], ["richiesta", "0x300"]], "nota": "La richiesta riguarda un singolo byte.", "tipo": "confronto"},
+        {"titolo": "Indici occupati", "celle": [["primo", "0"], ["ultimo", "15"]], "nota": "La base identifica già il primo byte."},
+        {"titolo": "Distanza della richiesta", "celle": [["0x300 − 0x2F0", "16"]], "nota": "Lo scarto coincide con la capacità."},
+        {"titolo": "Confine della regione", "celle": [["ultimo", "0x2FF"], ["successivo", "0x300"]], "nota": "Il byte in posizione 16 è esterno."}
+      ]
+    }
+  );
 
-  prova('1.2.4','lez02_05_utf8_bytes_and_ascii','Dimensionare un buffer per il testo',
+  prova("1.2.4", "lez02_05_utf8_bytes_and_ascii", "Dimensionare un buffer per il testo",
     "In UTF-8 le lettere ASCII occupano un solo byte, mentre altri caratteri ne richiedono più di uno. La capacità di una stringa C deve comprendere anche il terminatore zero.",
-    ...['Aè','Z€'].map(s=>{
-      const a=encoder.encode(s),k=Array.from(s).length;
-      return variante('Memorizza «'+s+'» come stringa C in UTF-8. Conta i byte del testo e la capacità minima del buffer, terminatore compreso.',
-        [numero('Byte del testo',a.length,'La lettera ASCII occupa un byte. Controlla la lunghezza del carattere successivo.'),numero('Capacità minima',a.length+1,'Una stringa C richiede un byte finale pari a zero.')],
-        ['Il testo contiene '+k+' punti di codice. Il primo rientra in ASCII.','La sequenza UTF-8 è '+bytes(a)+' e occupa '+a.length+' byte.','Si accoda 00 come terminatore. Il buffer richiede almeno '+(a.length+1)+' byte.']);
-    }));
+    variante(
+      "Memorizza «Aè» come stringa C in UTF-8. Conta i byte del testo e la capacità minima del buffer, terminatore compreso.",
+      [
+        numero("Byte del testo", "3", "La lettera ASCII occupa un byte. Controlla la lunghezza del carattere successivo."),
+        numero("Capacità minima", "4", "Una stringa C richiede un byte finale pari a zero.")
+      ],
+      [
+        "Il testo contiene 2 punti di codice. Il primo rientra in ASCII.",
+        "La sequenza UTF-8 è 41 C3 A8 e occupa 3 byte.",
+        "Si accoda 00 come terminatore. Il buffer richiede almeno 4 byte."
+      ]
+    ),
+    {
+      consegna: "Il testo «A€B» deve entrare, a partire dal primo carattere, in un buffer C di cinque byte. In UTF-8 le lettere A e B occupano un byte ciascuna ed € ne occupa tre. Qual è il prefisso più lungo che entra interamente, lasciando posto a NUL? Calcola la capacità minima per conservare tutto il testo.",
+      campi: [
+        opzione("Prefisso conservabile", ["A", "A€", "A€B"], "A€", "Riserva un byte al terminatore prima di contare il testo."),
+        numero("Capacità per l’intero testo, in byte", "6", "Alla somma delle larghezze dei tre caratteri va aggiunto NUL.")
+      ],
+      svolgimento: [
+        "Dei cinque posti disponibili, uno serve al byte zero finale. Il testo può quindi occuparne al massimo quattro.",
+        "La codifica di A occupa un byte e quella di € ne occupa tre. A€ raggiunge esattamente quattro byte. Aggiungere B richiederebbe un quinto byte di testo oltre al terminatore.",
+        "Il testo completo ha larghezza 1 + 3 + 1 = 5 byte. Per farne una stringa C servono 5 + 1 = 6 byte."
+      ],
+      quadro: [
+        {"titolo": "Capacità del buffer", "celle": [["posti", "5"], ["testo", "A€B"]], "nota": "Ogni carattere deve entrare con tutti i suoi byte."},
+        {"titolo": "Riserva per NUL", "celle": [["buffer", "5"], ["per il testo", "4"]], "nota": "L’ultimo posto va conservato per il terminatore."},
+        {"titolo": "Prefisso completo", "celle": [["A", "1 byte"], ["€", "3 byte"]], "nota": "A€ occupa tutti i quattro posti disponibili per il testo."},
+        {"titolo": "Capacità integrale", "celle": [["testo", "5 byte"], ["con NUL", "6 byte"]], "nota": "Il carattere B richiede un ulteriore posto."}
+      ]
+    }
+  );
 
-  prova('1.3.1','lez03_01_same_bits_two_meanings','Distinguere codice, cifra e bit attivi',
-    "Il byte che memorizza una cifra ASCII può essere letto come intero oppure interpretato secondo la tabella dei caratteri. I quattro bit di ciascuna cifra esadecimale permettono anche di contare le posizioni a uno.",
-    ...[3,7].map(n=>{
-      const a=n+48,k=bin(a).split('1').length-1;
-      return variante('Per il byte 0x'+hex(a)+' indica il valore come intero senza segno, la cifra rappresentata in ASCII e quanti bit del byte sono attivi.',
-        [numero('Intero senza segno',a,'Moltiplica la cifra esadecimale alta per 16.'),numero('Cifra rappresentata',n,'Le cifre ASCII cominciano da 0x30.'),numero('Bit a uno',k,'Leggi i due gruppi di quattro bit.')],
-        ['0x'+hex(a)+' = 3 × 16 + '+n+' = '+a+'.','La distanza da 0x30 è '+n+', perciò il carattere è la cifra '+n+'.','La configurazione '+bin(a)+' contiene '+k+' bit a uno.']);
-    }));
+  // Capitolo 1.3
+  prova("1.3.1", "lez03_01_same_bits_two_meanings", "Distinguere il codice ASCII dal valore della cifra",
+    "La cifra scritta e il byte che la codifica rispondono a convenzioni diverse. In ASCII i codici delle dieci cifre sono consecutivi a partire da 0x30. Per interpretare il byte come intero si sommano i pesi delle posizioni a uno, mentre per ottenere il valore della cifra si sottrae il codice di «0».",
+    variante(
+      "Per il byte 0x33 indica il valore come intero senza segno, la cifra rappresentata in ASCII e quanti bit del byte sono attivi.",
+      [
+        numero("Intero senza segno", "51", "Moltiplica la cifra esadecimale alta per 16."),
+        numero("Cifra rappresentata", "3", "Le cifre ASCII cominciano da 0x30."),
+        numero("Bit a uno", "4", "Leggi i due gruppi di quattro bit.")
+      ],
+      [
+        "0x33 = 3 × 16 + 3 = 51.",
+        "La distanza da 0x30 è 3, perciò il carattere è la cifra 3.",
+        "La configurazione 00110011 contiene 4 bit a uno."
+      ]
+    ),
+    {
+      consegna: "Un lettore riceve i byte ASCII 36 e 32 in esadecimale, che rappresentano le cifre 6 e 2. Una routine somma direttamente i due byte. Trova il risultato che produce e quello che si ottiene trasformando prima i caratteri in cifre numeriche.",
+      campi: [
+        numero("Somma dei codici, in decimale", "104", "Converti ciascun codice esadecimale in un intero."),
+        numero("Somma delle cifre", "8", "Il codice di ciascuna cifra dista dal codice di zero quanto vale la cifra.")
+      ],
+      svolgimento: [
+        "0x36 vale 3 × 16 + 6 = 54, mentre 0x32 vale 3 × 16 + 2 = 50. Il programma che somma i codici ottiene 104.",
+        "I codici ASCII delle cifre sono consecutivi a partire da 0x30, cioè 48. Le distanze da 48 sono 54 − 48 = 6 e 50 − 48 = 2.",
+        "Sommando le due distanze si ottiene 8. La differenza rispetto a 104 deriva dalle due copie del valore di base 48 che la prima routine aveva incluso."
+      ],
+      quadro: [
+        {"titolo": "Somma da esaminare", "celle": [["primo byte", "0x36"], ["secondo byte", "0x32"]], "nota": "I byte sono i codici di due cifre."},
+        {"titolo": "Lettura numerica grezza", "celle": [["0x36", "54"], ["0x32", "50"]], "nota": "54 + 50 = 104.", "tipo": "sequenza"},
+        {"titolo": "Distanze dallo zero ASCII", "celle": [["54 − 48", "6"], ["50 − 48", "2"]], "nota": "Ogni distanza fornisce il valore di una cifra.", "tipo": "sequenza"},
+        {"titolo": "Confronto", "celle": [["somma codici", "104"], ["somma cifre", "8"]], "nota": "Lo scarto è due volte 48.", "tipo": "confronto"}
+      ]
+    }
+  );
 
-  prova('1.3.1','lez03_02_ascii_hex_string','Leggere una stringa terminata da NUL',
+  prova("1.3.1", "lez03_02_ascii_hex_string", "Leggere una stringa terminata da NUL",
     "Una stringa C termina al primo byte 00 a partire dall’indirizzo iniziale. I byte che seguono quel terminatore possono appartenere all’array senza far parte della stringa.",
-    ...[['RED','Z'],['OK','AB']].map(([s,coda])=>{
-      const a=encoder.encode(s+'\0'+coda);
-      return variante('Un array contiene '+bytes(a)+' (esadecimale). Determina la lunghezza della stringa C all’inizio dell’array e il suo ultimo carattere stampabile.',
-        [numero('Lunghezza della stringa',s.length,'Cerca il primo byte 00.'),opzione('Ultimo carattere della stringa',[s.at(-1),s[0],coda.at(-1)],s.at(-1),'Le celle successive al terminatore appartengono al resto dell’array.')],
-        ['Il primo 00 è all’indice '+s.length+' contando da zero.','I byte dal primo alla posizione precedente formano il testo ASCII '+s+'.','La lunghezza è '+s.length+' e l’ultimo carattere è '+s.at(-1)+'. Il resto dell’array contiene '+coda+'.']);
-    }));
+    variante(
+      "Un array contiene 52 45 44 00 5A (esadecimale). Determina la lunghezza della stringa C all’inizio dell’array e il suo ultimo carattere stampabile.",
+      [
+        numero("Lunghezza della stringa", "3", "Cerca il primo byte 00."),
+        opzione("Ultimo carattere della stringa", ["D", "R", "Z"], "D", "Le celle successive al terminatore appartengono al resto dell’array.")
+      ],
+      [
+        "Il primo 00 è all’indice 3 contando da zero.",
+        "I byte dal primo alla posizione precedente formano il testo ASCII RED.",
+        "La lunghezza è 3 e l’ultimo carattere è D. Il resto dell’array contiene Z."
+      ]
+    ),
+    {
+      consegna: "Un array contiene 43 41 53 41 00 58 in esadecimale, ossia CASA, NUL e X. Un programma deve ottenere la stringa «CAS» scrivendo un solo byte e lasciando intatte le altre celle. Indica l’indice da modificare, contando da zero, e il valore da scrivere.",
+      campi: [
+        numero("Indice della cella", "3", "Il nuovo primo terminatore deve seguire subito S."),
+        numero("Valore del byte", "0", "Una stringa C termina con il primo ottetto NUL.")
+      ],
+      svolgimento: [
+        "I primi tre byte codificano C, A e S agli indici 0, 1 e 2. Una stringa lunga tre byte termina subito dopo l’indice 2.",
+        "Si scrive 00 all’indice 3, al posto della seconda A, ottenendo 43 41 53 00 00 58. Il primo NUL termina la lettura.",
+        "Il vecchio terminatore e la X esistono ancora nell’array agli indici 4 e 5. Una lettura come stringa C a partire dall’indice 0 si arresta prima di raggiungerli."
+      ],
+      quadro: [
+        {"titolo": "Array ricevuto", "celle": [["indici 0–2", "C A S"], ["indici 3–5", "A NUL X"]], "nota": "Si può riscrivere un solo byte."},
+        {"titolo": "Prefisso da mantenere", "celle": [["ultimo carattere", "S"], ["indice di S", "2"]], "nota": "I primi tre byte sono già corretti."},
+        {"titolo": "Nuovo terminatore", "celle": [["indice", "3"], ["byte", "00"]], "nota": "L’ultimo carattere del prefisso precede NUL."},
+        {"titolo": "Due viste della memoria", "celle": [["stringa", "CAS"], ["coda", "NUL X"]], "nota": "Le celle dopo il primo NUL rimangono nell’array.", "tipo": "confronto"}
+      ]
+    }
+  );
 
-  prova('1.3.2','lez03_03_utf8_decode','Decodificare i gruppi utili in UTF-8',
-    "Nel primo byte UTF-8 il prefisso determina la lunghezza della sequenza. Ogni byte di continuazione comincia con 10 e contribuisce con i sei bit restanti al punto di codice.",
-    ...['è','€'].map(s=>{
-      const a=encoder.encode(s),g=Array.from(a,(x,i)=>x&(i?63:a.length===2?31:15)),v=s.codePointAt(0);
-      return variante('La sequenza valida '+bytes(a)+' rappresenta un solo carattere UTF-8. Ricava il numero di continuazioni e il punto di codice in decimale.',
-        [numero('Byte di continuazione',a.length-1,'Leggi gli uno iniziali del primo ottetto.'),numero('Punto di codice',v,'Togli i prefissi, poi accoda ogni gruppo di sei bit.')],
-        ['Il primo ottetto '+bin(a[0])+' annuncia '+a.length+' byte in totale, dei quali '+(a.length-1)+' sono continuazioni.','I gruppi utili, espressi in decimale, sono '+g.join(', ')+'. Per ogni gruppo successivo, moltiplica il valore accumulato per 64 e aggiungi i sei bit utili del nuovo byte.','Il calcolo '+g.map((z,i)=>z+' × '+64**(g.length-i-1)).join(' + ')+' dà '+v+', cioè U+'+hex(v,4)+' ('+s+').']);
-    }));
+  prova("1.3.2", "lez03_03_utf8_decode", "Verificare e decodificare una sequenza UTF-8",
+    "UTF-8 trasforma il numero assegnato da Unicode a un carattere, chiamato punto di codice, in una sequenza di byte. Il primo byte annuncia la lunghezza: il prefisso 0 indica un byte totale, 110 due, 1110 tre e 11110 quattro. Ogni byte successivo, detto continuazione, comincia con 10 e contribuisce con i sei bit restanti. Per aggiungere un gruppo di sei bit al valore già ricostruito si moltiplica quest’ultimo per 2⁶ = 64 e si somma il nuovo gruppo. La lettura richiede prima di verificare i prefissi: una continuazione con inizio diverso da 10 interrompe la decodifica della sequenza.",
+    variante(
+      "La sequenza valida C3 A8 rappresenta un solo carattere UTF-8. Ricava il numero di continuazioni e il punto di codice in decimale.",
+      [
+        numero("Byte di continuazione", "1", "Leggi gli uno iniziali del primo ottetto."),
+        numero("Punto di codice", "232", "Togli i prefissi, poi accoda ogni gruppo di sei bit.")
+      ],
+      [
+        "Il primo ottetto 11000011 annuncia due byte in totale: al byte iniziale segue un byte di continuazione.",
+        "I gruppi utili, espressi in decimale, sono 3, 40. Per ogni gruppo successivo, moltiplica il valore accumulato per 64 e aggiungi i sei bit utili del nuovo byte.",
+        "Il calcolo 3 × 64 + 40 × 1 dà 232, cioè U+00E8 (è)."
+      ]
+    ),
+    {
+      consegna: "Un lettore UTF-8 riceve E2 28 A1. Il primo byte ha prefisso 1110. Identifica l’indice del primo byte che impedisce la decodifica, contando da zero, e il prefisso binario che era richiesto in quella posizione.",
+      campi: [
+        numero("Indice del primo errore", "1", "Dopo il primo byte verifica ogni continuazione nell’ordine."),
+        opzione("Prefisso richiesto", ["10", "11", "01"], "10", "Un byte di continuazione conserva sei bit di dati.")
+      ],
+      svolgimento: [
+        "E2 è 11100010. Il prefisso 1110 annuncia una sequenza di tre byte, quindi devono seguire due continuazioni.",
+        "Il byte 28 vale 00101000 in binario e comincia con 00. All’indice 1 serviva invece 10 seguito da sei bit utili.",
+        "Il prefisso corretto di A1 riguarda soltanto il terzo byte. L’errore nel secondo ha già compromesso la sequenza. Il lettore deve interrompere la decodifica della sequenza all’indice 1."
+      ],
+      quadro: [
+        {"titolo": "Sequenza ricevuta", "celle": [["indice 0", "E2"], ["indice 1", "28"], ["indice 2", "A1"]], "nota": "Verifica l’ordine dei prefissi prima di unire i gruppi."},
+        {"titolo": "Lunghezza annunciata", "celle": [["prefisso E2", "1110"], ["continuazioni", "2"]], "nota": "Dopo E2 servono due byte della forma 10xxxxxx."},
+        {"titolo": "Primo confronto", "celle": [["0x28", "00101000"], ["prefisso", "00"]], "nota": "La violazione si trova all’indice 1."},
+        {"titolo": "Esito", "celle": [["primo errore", "indice 1"], ["prefisso atteso", "10"]], "nota": "Il gruppo successivo appartiene a una sequenza già interrotta."}
+      ]
+    }
+  );
 
-  prova('1.3.3','lez03_04_rgb_image_size','Localizzare un canale in un’immagine RGB',
-    "Un pixel RGB24 occupa tre byte consecutivi, uno per ciascun canale. Per raggiungere un canale si sommano tre spostamenti misurati in byte: quello della riga, quello del pixel nella riga e quello del canale nel pixel.",
-    ...[[8,4,3,2,1],[5,6,4,3,2]].map(([w,h,x,y,c])=> {
-      const canale=['R','G','B'][c],indice=w*y+x;
-      return variante('Un’immagine RGB24 misura '+w+' × '+h+' pixel, righe contigue senza riempimento. L’origine delle coordinate coincide con il primo pixel in memoria. x cresce lungo le righe, y nell’ordine in cui sono memorizzate. I canali si susseguono come R, G, B. Localizza il byte '+canale+' del pixel ('+x+', '+y+').',
-        [numero('Dimensione totale in byte',w*h*3,'Moltiplica i pixel per i tre byte di ciascun pixel.'),numero('Offset del canale',indice*3+c,'Conta prima le righe complete e poi i pixel nella riga corrente.')],
-        ['Ogni riga occupa '+w+' × 3 = '+(w*3)+' byte. L’intera immagine occupa '+(w*h*3)+' byte.','L’indice lineare del pixel è '+y+' × '+w+' + '+x+' = '+indice+'.','Il pixel comincia al byte '+(3*indice)+'. Il canale '+canale+' dista '+c+' byte dal suo inizio e si trova all’offset '+(3*indice+c)+'.']);
-    }));
+  prova("1.3.3", "lez03_04_rgb_image_size", "Localizzare un canale in un’immagine RGB",
+    "In RGB24 ogni pixel occupa tre byte nell’ordine rosso, verde, blu. La larghezza in byte di una riga consente sia di raggiungere una riga dalle sue coordinate sia di ricavarla dividendo lo spostamento totale. Il resto della divisione colloca il byte dentro la riga.",
+    variante(
+      "Un’immagine RGB24 misura 8 × 4 pixel, righe contigue senza riempimento. L’origine delle coordinate coincide con il primo pixel in memoria. x cresce lungo le righe, y nell’ordine in cui sono memorizzate. I canali si susseguono come R, G, B. Localizza il byte G del pixel (3, 2).",
+      [
+        numero("Dimensione totale in byte", "96", "Moltiplica i pixel per i tre byte di ciascun pixel."),
+        numero("Offset del canale", "58", "Conta prima le righe complete e poi i pixel nella riga corrente.")
+      ],
+      [
+        "Ogni riga occupa 8 × 3 = 24 byte. L’intera immagine occupa 96 byte.",
+        "L’indice lineare del pixel è 2 × 8 + 3 = 19.",
+        "Il pixel comincia al byte 57. Il canale G dista 1 byte dal suo inizio e si trova all’offset 58."
+      ]
+    ),
+    {
+      consegna: "In un’immagine RGB24 larga cinque pixel e alta quattro, le righe sono contigue e ogni pixel contiene R, G e B in quest’ordine. Un byte alterato si trova allo spostamento 52 dall’inizio. Identifica riga, colonna e canale, numerando righe e colonne da zero.",
+      campi: [
+        numero("Riga y", "3", "Dividi lo spostamento per la larghezza di una riga in byte."),
+        numero("Colonna x", "2", "Dividi il resto nella riga per i tre byte di un pixel."),
+        opzione("Canale", ["R", "G", "B"], "G", "Il resto entro il pixel vale zero per R, uno per G e due per B.")
+      ],
+      svolgimento: [
+        "Ogni riga occupa 5 × 3 = 15 byte. La divisione 52 = 3 × 15 + 7 individua la riga 3 e uno spostamento di 7 byte al suo interno.",
+        "Poiché ogni pixel occupa tre byte, 7 = 2 × 3 + 1 indica la colonna 2 e la componente di indice 1.",
+        "La componente di indice 1 è G. Sostituendo riga e colonna nella formula diretta si ritrova 3 × 15 + 2 × 3 + 1 = 52."
+      ],
+      quadro: [
+        {"titolo": "Segnalazione del guasto", "celle": [["larghezza", "5 pixel"], ["offset", "52 byte"]], "nota": "I canali di ciascun pixel sono R, G e B."},
+        {"titolo": "Divisione per la riga", "celle": [["quoziente", "3"], ["resto", "7 byte"]], "nota": "Una riga contiene quindici byte."},
+        {"titolo": "Divisione per il pixel", "celle": [["colonna", "2"], ["resto", "1 byte"]], "nota": "Un pixel contiene tre byte."},
+        {"titolo": "Byte identificato", "celle": [["y", "3"], ["x", "2"], ["canale", "G"]], "nota": "45 + 6 + 1 ricostruisce lo spostamento 52."}
+      ]
+    }
+  );
 
-  prova('1.3.5','lez03_05_multi_interpretation','Due ottetti, tre letture',
+  prova("1.3.5", "lez03_05_multi_interpretation", "Due ottetti, tre letture",
     "Gli indirizzi determinano la successione dei byte. Il testo ASCII si legge un byte per volta. In un intero a sedici bit, invece, l’ordine dei byte stabilisce quale valore moltiplicare per 256.",
-    ...[[0x41,0x42],[0x4F,0x4B]].map(([a,b])=>{
-      const s=String.fromCharCode(a,b);
-      return variante('Leggi '+bytes([a,b])+' come coppia ASCII e come intero senza segno di 16 bit nei due ordini di byte.',
-        [opzione('Testo',[s,s[1]+s[0],'00'],s,'Decodifica in ordine di indirizzo.'),numero('Intero big-endian',a*256+b,'Il primo byte pesa 256.'),numero('Intero little-endian',b*256+a,'Il secondo byte pesa 256.')],
-        ['Le due celle individuano i caratteri '+s[0]+' e '+s[1]+'. Il testo è '+s+'.','In big-endian si calcola '+a+' × 256 + '+b+' = '+(a*256+b)+'.','In little-endian si calcola '+b+' × 256 + '+a+' = '+(b*256+a)+'. La sequenza in memoria resta quella fornita.']);
-    }));
+    variante(
+      "Leggi 41 42 come coppia ASCII e come intero senza segno di 16 bit nei due ordini di byte.",
+      [
+        opzione("Testo", ["AB", "BA", "00"], "AB", "Decodifica in ordine di indirizzo."),
+        numero("Intero big-endian", "16706", "Il primo byte pesa 256."),
+        numero("Intero little-endian", "16961", "Il secondo byte pesa 256.")
+      ],
+      [
+        "Le due celle individuano i caratteri A e B. Il testo è AB.",
+        "In big-endian si calcola 65 × 256 + 66 = 16706.",
+        "In little-endian si calcola 66 × 256 + 65 = 16961. La sequenza in memoria resta quella fornita."
+      ]
+    ),
+    {
+      consegna: "Un manuale indica che il valore intero memorizzato è 0x4F4B. Nell’ordine crescente degli indirizzi leggi 4B 4F. Determina la convenzione usata e il testo che comparirebbe se gli stessi byte fossero inviati, in ordine di indirizzo, a un terminale ASCII.",
+      campi: [
+        opzione("Ordine del campo intero", ["little-endian", "big-endian"], "little-endian", "Confronta il primo byte in memoria con la coppia di cifre di peso minore del numero."),
+        opzione("Testo ASCII", ["OK", "KO"], "KO", "In ASCII 4B è K e 4F è O. La lettura dei caratteri segue gli indirizzi.")
+      ],
+      svolgimento: [
+        "Nella scrittura 0x4F4B la coppia 4F vale 256 volte il suo valore di byte. La coppia 4B ha peso uno.",
+        "La memoria presenta per primo 4B, il byte di peso minore. Questa disposizione è little-endian.",
+        "Se ciascun byte è interpretato come un carattere, l’indirizzo più basso fornisce K e quello seguente O. Il terminale riceve KO."
+      ],
+      quadro: [
+        {"titolo": "Due osservazioni", "celle": [["numero noto", "0x4F4B"], ["memoria", "4B 4F"]], "nota": "La memoria è letta per indirizzi crescenti.", "tipo": "confronto"},
+        {"titolo": "Pesi del numero", "celle": [["peso 256", "4F"], ["peso 1", "4B"]], "nota": "Le cifre in scrittura numerica sono ordinate per peso.", "tipo": "confronto"},
+        {"titolo": "Convenzione", "celle": [["primo", "4B"], ["ordine", "little-endian"]], "nota": "Il byte meno significativo viene per primo."},
+        {"titolo": "Lettura di testo", "celle": [["4B", "K"], ["4F", "O"]], "nota": "Il terminale vede KO."}
+      ]
+    }
+  );
 
-  prova('1.4.1','lez04_01_encode_negative_twos','Codificare un numero negativo su otto bit',
-    "Per codificare un intero negativo su otto bit si può invertire ogni bit del suo valore assoluto e aggiungere uno. Il risultato coincide con il residuo dell’intero modulo 256.",
-    ...[37,84].map(n=>{
-      const u=256-n;
-      return variante('Rappresenta −'+n+' in complemento a due su otto bit. Trova la parola dopo l’inversione dei bit del modulo e la parola finale, in decimale senza segno.',
-        [numero('Dopo l’inversione',255-n,'Il complemento bit a bit di un byte x vale 255 − x.'),numero('Byte finale',u,'Al complemento bit a bit aggiungi un’unità.')],
-        ['Il valore assoluto '+n+' si scrive '+bin(n)+'.','Inverti ogni bit: '+bin(255-n)+', pari a '+(255-n)+'.','Aggiungi uno e ottieni '+bin(u)+', cioè '+u+'. Verifica: '+u+' − 256 = −'+n+'.']);
-    }));
+  // Capitolo 1.4
+  prova("1.4.1", "lez04_01_encode_negative_twos", "Codificare un numero negativo su otto bit",
+    "Il valore assoluto di un numero è la sua distanza da zero: per −37 vale 37. Per codificare un intero negativo rappresentabile su otto bit si può invertire ogni bit del suo valore assoluto, scambiando zero e uno, e aggiungere uno. Il risultato coincide con il numero senza segno ottenuto aggiungendo 256 all’intero negativo; i suoi otto bit costituiscono il residuo modulo 256. Per verificare il codice con bit alto uguale a uno si sottrae 256 dalla lettura senza segno e si ritrova il valore negativo.",
+    variante(
+      "Rappresenta −37 in complemento a due su otto bit. Trova la parola dopo l’inversione dei bit del valore assoluto e la parola finale, in decimale senza segno.",
+      [
+        numero("Dopo l’inversione", "218", "Il complemento bit a bit di un byte x vale 255 − x."),
+        numero("Byte finale", "219", "Al complemento bit a bit aggiungi un’unità.")
+      ],
+      [
+        "Il valore assoluto 37 si scrive 00100101.",
+        "Inverti ogni bit: 11011010, pari a 218.",
+        "Aggiungi uno e ottieni 11011011, cioè 219. Verifica: 219 − 256 = −37."
+      ]
+    ),
+    {
+      consegna: "Per codificare −52 su otto bit uno studente parte da 00110100, inverte le cifre e consegna 11001011. Identifica il valore con segno della parola consegnata e scegli la parola che codifica −52.",
+      campi: [
+        numero("Valore con segno della parola consegnata", "-53", "Sottrai 256 dal valore senza segno della parola con il bit alto a uno."),
+        opzione("Codice corretto di −52", ["11001011", "11001100", "00110101"], "11001100", "Cerca il byte che, sommato a 52, lascia zero nelle otto posizioni.")
+      ],
+      svolgimento: [
+        "11001011 vale 203 senza segno. Letto in complemento a due vale 203 − 256 = −53.",
+        "Invertire i bit di 52 dà 255 − 52 = 203. Per ottenere il residuo di −52 serve invece 256 − 52 = 204, cioè un’unità in più.",
+        "La parola di 204 è 11001100. La somma 52 + 204 dà 256 e lascia zero negli otto bit inferiori."
+      ],
+      quadro: [
+        {"titolo": "Proposta da verificare", "celle": [["valore richiesto", "−52"], ["parola", "11001011"]], "nota": "La parola è il risultato della sola inversione."},
+        {"titolo": "Interpretazione", "celle": [["senza segno", "203"], ["con segno", "−53"]], "nota": "Il bit alto è attivo."},
+        {"titolo": "Residuo corretto", "celle": [["256 − 52", "204"], ["correzione", "+1"]], "nota": "Il complemento a due aggiunge uno all’inversione."},
+        {"titolo": "Verifica", "celle": [["parola", "11001100"], ["52 + 204", "256"]], "nota": "Gli otto bit bassi della somma sono zero."}
+      ]
+    }
+  );
 
-  prova('1.4.1','lez04_02_decode_twos','Leggere una parola con e senza segno',
+  prova("1.4.1", "lez04_02_decode_twos", "Leggere una parola con e senza segno",
     "Una parola di n bit ammette una lettura senza segno e una in complemento a due. Se il bit più significativo vale uno, la lettura con segno si ricava sottraendo 2ⁿ alla lettura senza segno.",
-    ...[[8,0xD2],[16,0xFF45]].map(([n,u])=>{
-      const m=2**n,s=u-m;
-      return variante('La parola di '+n+' bit 0x'+hex(u,n/4)+' viene letta sia senza segno sia in complemento a due. Determina i due risultati.',
-        [numero('Senza segno',u,'Sviluppa le cifre esadecimali con i pesi posizionali.'),numero('Con segno',s,'Osserva il bit di peso massimo e applica il modulo della larghezza scelta.')],
-        ['Convertendo 0x'+hex(u,n/4)+' come intero senza segno si ottiene '+u+'.','Il bit '+(n-1)+' vale uno. In complemento a due il valore con segno si trova sottraendo 2^'+n+' = '+m+'.','La differenza '+u+' − '+m+' = '+s+'. Aggiungendo il modulo al valore negativo ritrovi il codice di partenza.']);
-    }));
+    variante(
+      "La parola di 8 bit 0xD2 viene letta sia senza segno sia in complemento a due. Determina i due risultati.",
+      [
+        numero("Senza segno", "210", "Sviluppa le cifre esadecimali con i pesi posizionali."),
+        numero("Con segno", "-46", "Osserva il bit di peso massimo e applica il modulo della larghezza scelta.")
+      ],
+      [
+        "Convertendo 0xD2 come intero senza segno si ottiene 210.",
+        "Il bit 7 vale uno. In complemento a due il valore con segno si trova sottraendo 2^8 = 256.",
+        "La differenza 210 − 256 = -46. Aggiungendo il modulo al valore negativo ritrovi il codice di partenza."
+      ]
+    ),
+    {
+      consegna: "Un sensore a otto bit ha restituito 0x80. Dopo una copia su sedici bit si legge 0xFF80. Individua l’estensione usata e determina quale valore va attribuito al risultato se rappresenta la stessa misura con segno.",
+      campi: [
+        opzione("Estensione osservata", ["estensione con zeri", "estensione del segno"], "estensione del segno", "Confronta l’ottetto alto del risultato con il bit alto dell’originale."),
+        numero("Misura con segno", "-128", "Sottrai 256 al valore senza segno del byte iniziale quando il bit 7 vale uno.")
+      ],
+      svolgimento: [
+        "Nel byte 0x80 il bit 7 vale uno e gli altri sette valgono zero. In complemento a due il suo valore è −128.",
+        "Durante la copia sono comparsi otto uno sopra il byte iniziale, formando FF80. È stata replicata la cifra di segno.",
+        "Su sedici bit FF80 vale 65408 senza segno e 65408 − 65536 = −128 con segno. L’estensione con zeri avrebbe dato 0080 e il valore positivo 128."
+      ],
+      quadro: [
+        {"titolo": "Copia osservata", "celle": [["origine", "0x80"], ["destinazione", "0xFF80"]], "nota": "L’origine ha otto bit e il risultato sedici."},
+        {"titolo": "Cifra di segno", "celle": [["bit 7", "1"], ["valore", "−128"]], "nota": "Il peso della sola posizione attiva è −128."},
+        {"titolo": "Bit aggiunti", "celle": [["byte alto", "FF"], ["origine", "bit 7"]], "nota": "Il bit alto della parola iniziale è stato replicato."},
+        {"titolo": "Controllo del valore", "celle": [["0xFF80", "−128"], ["0x0080", "+128"]], "nota": "La replica conserva il valore con segno.", "tipo": "confronto"}
+      ]
+    }
+  );
 
-  prova('1.4.1','lez04_03_signed_range','Determinare gli estremi rappresentabili',
+  prova("1.4.1", "lez04_03_signed_range", "Determinare gli estremi rappresentabili",
     "In complemento a due il bit più significativo pesa −2ⁿ⁻¹ per una parola di n bit. Gli altri bit hanno pesi positivi: le loro combinazioni determinano il minimo, il massimo e il numero di valori distinti.",
-    ...[7,12].map(n=>{
-      const p=2**(n-1);
-      return variante('In un formato in complemento a due di '+n+' bit calcola minimo, massimo e numero di valori.',
-        [numero('Minimo',-p,'Il bit di segno ha peso negativo.'),numero('Massimo',p-1,'Attiva tutti i bit tranne quello di segno.'),numero('Numero di valori',2*p,'Conta tutte le configurazioni delle posizioni.')],
-        ['Il bit più alto pesa −2^'+(n-1)+' = −'+p+'. Con le altre posizioni a zero ottieni il minimo.','Con il bit alto a zero e gli altri a uno la somma dei pesi è '+p+' − 1 = '+(p-1)+'.','L’intervallo [−'+p+', '+(p-1)+'] comprende '+(2*p)+' valori, quanti i codici formati da '+n+' bit.']);
-    }));
+    variante(
+      "In un formato in complemento a due di 7 bit calcola minimo, massimo e numero di valori.",
+      [
+        numero("Minimo", "-64", "Il bit di segno ha peso negativo."),
+        numero("Massimo", "63", "Attiva tutti i bit tranne quello di segno."),
+        numero("Numero di valori", "128", "Conta tutte le configurazioni delle posizioni.")
+      ],
+      [
+        "Il bit più alto pesa −2^6 = −64. Con le altre posizioni a zero ottieni il minimo.",
+        "Con il bit alto a zero e gli altri a uno la somma dei pesi è 64 − 1 = 63.",
+        "L’intervallo [−64, 63] comprende 128 valori, quanti i codici formati da 7 bit."
+      ]
+    ),
+    {
+      consegna: "Un misuratore deve registrare tutti gli interi da −70 a +69 in complemento a due. Si vuole scegliere la larghezza minima. Quanti bit servono? Qual è il minimo valore con segno della larghezza immediatamente inferiore?",
+      campi: [
+        numero("Larghezza minima in bit", "8", "Confronta entrambi gli estremi richiesti con gli intervalli da sette e otto bit."),
+        numero("Minimo con un bit in meno", "-64", "A sette bit la cifra più alta pesa −2⁶.")
+      ],
+      svolgimento: [
+        "Con sette bit l’intervallo va da −2⁶ = −64 a 2⁶ − 1 = 63. Entrambi gli estremi richiesti cadono all’esterno.",
+        "Con otto bit il minimo è −128 e il massimo 127. L’intero intervallo da −70 a 69 è compreso fra questi due limiti.",
+        "Ogni bit aggiunto allarga l’intervallo rappresentabile. Il fallimento a sette bit e la riuscita a otto provano la minimalità della scelta."
+      ],
+      quadro: [
+        {"titolo": "Specifiche", "celle": [["minimo richiesto", "−70"], ["massimo richiesto", "69"]], "nota": "Occorre rappresentare anche i valori estremi."},
+        {"titolo": "Tentativo con 7 bit", "celle": [["minimo", "−64"], ["massimo", "63"]], "nota": "La misura supera entrambi i limiti.", "tipo": "confronto"},
+        {"titolo": "Tentativo con 8 bit", "celle": [["minimo", "−128"], ["massimo", "127"]], "nota": "Tutte le misure richieste sono comprese.", "tipo": "confronto"},
+        {"titolo": "Decisione", "celle": [["larghezza", "8 bit"], ["minimo a 7 bit", "−64"]], "nota": "La larghezza immediatamente inferiore è insufficiente."}
+      ]
+    }
+  );
 
   prova('1.4.2','lez04_04_fixed_width_add_sub','Calcolare risultato e flag su un byte',
-    "Un’operazione su otto bit conserva il residuo modulo 256. La convenzione x86 usa CF per il riporto o il prestito della lettura senza segno e OF per il risultato fuori intervallo della lettura con segno.",
+    "L’ALU è la parte di calcolo aritmetico e logico del processore. Su otto bit conserva il residuo modulo 256, cioè il valore fra 0 e 255 ottenuto aggiungendo o sottraendo multipli di 256 al risultato matematico. I flag sono bit che descrivono l’operazione: nella convenzione x86, CF segnala il riporto oltre il byte in addizione oppure il prestito in sottrazione, considerando gli operandi senza segno. OF segnala invece che il risultato matematico dei valori con segno esce dall’intervallo −128…127. Per leggere un byte in complemento a due, se il bit alto è uno si sottrae 256 dal valore senza segno.",
     ...[[0xF4,0x18,true],[0x7F,0xFF,false]].map(([a,b,add])=>{
       const raw=add?a+b:a-b,s=add?segno8(a)+segno8(b):segno8(a)-segno8(b),r=raw&255;
       const cf=Number(add?raw>255:raw<0),of=Number(s< -128||s>127),op=add?' + ':' − ';
@@ -597,135 +1033,500 @@
         ['Leggendo gli operandi senza segno, il calcolo matematico dà '+a+op+b+' = '+raw+'. Il residuo modulo 256 è '+r+' (0x'+hex(r)+').','Il risultato matematico '+(cf?'esce da':'rientra in')+' [0, 255]. CF vale '+cf+'.','Con segno calcoli ('+segno8(a)+')'+op+'('+segno8(b)+') = '+s+'. Il controllo dell’intervallo dà OF = '+of+'.']);
     }));
 
-  prova('1.4.4','lez04_05_overflow_detector','Verificare il margine prima della somma',
+  prova("1.4.4", "lez04_05_overflow_detector", "Verificare il margine prima della somma",
     "Per due operandi positivi si può verificare la somma prima di eseguirla. Sottrarre il primo operando dal massimo rappresentabile indica quanto spazio rimane per il secondo.",
-    ...[[119,9],[93,21]].map(([a,b])=>{
-      const limite=127-a,ok=b<=limite;
-      return variante('Vuoi sommare gli interi positivi '+a+' e '+b+' e memorizzare la somma in complemento a due su otto bit. Determina margine residuo e decisione prima di scrivere.',
-        [numero('Massimo addendo ammesso',limite,'Sottrai il primo operando dal massimo con segno.'),opzione('Decisione',['ammettere','rifiutare'],ok?'ammettere':'rifiutare','Confronta il secondo operando col margine calcolato.')],
-        ['Su otto bit il massimo con segno è 127.','Il margine è 127 − '+a+' = '+limite+'. Il secondo addendo '+b+' è '+(ok?'entro':'oltre')+' questo limite.','La somma matematica è '+(a+b)+'. La scrittura va '+(ok?'ammessa':'rifiutata')+' perché '+(ok?'il risultato è rappresentabile.':'il risultato eccede 127.')]);
-    }));
+    variante(
+      "Vuoi sommare gli interi positivi 119 e 9 e memorizzare la somma in complemento a due su otto bit. Determina margine residuo e decisione prima di scrivere.",
+      [
+        numero("Massimo addendo ammesso", "8", "Sottrai il primo operando dal massimo con segno."),
+        opzione("Decisione", ["ammettere", "rifiutare"], "rifiutare", "Confronta il secondo operando col margine calcolato.")
+      ],
+      [
+        "Su otto bit il massimo con segno è 127.",
+        "Il margine è 127 − 119 = 8. Il secondo addendo 9 è oltre questo limite.",
+        "La somma matematica è 128. La scrittura va rifiutata perché il risultato eccede 127."
+      ]
+    ),
+    {
+      consegna: "Un contatore con segno di otto bit parte da 93. Ogni evento aggiunge 7 e la scrittura è ammessa soltanto se il risultato rientra nell’intervallo. Quanti eventi consecutivi si possono registrare? Quale somma matematica produrrebbe il primo evento da respingere?",
+      campi: [
+        numero("Eventi ammessi", "4", "Dividi il margine fino a 127 per l’incremento e conserva la parte intera."),
+        numero("Prima somma da respingere", "128", "Aggiungi un altro incremento all’ultimo valore ammesso.")
+      ],
+      svolgimento: [
+        "Il massimo rappresentabile è 127, quindi il contatore dispone di 127 − 93 = 34 unità di margine.",
+        "Quattro incrementi consumano 28 unità e portano il valore a 121. Un quinto ne consumerebbe 35 dal punto iniziale.",
+        "L’ultimo tentativo produrrebbe 121 + 7 = 128. Restano disponibili soltanto sei unità e il controllo deve respingere la quinta scrittura."
+      ],
+      quadro: [
+        {"titolo": "Contatore", "celle": [["iniziale", "93"], ["incremento", "7"], ["max", "127"]], "nota": "Ogni evento deve essere registrato per intero."},
+        {"titolo": "Margine", "celle": [["127 − 93", "34"]], "nota": "Il margine è la dotazione complessiva disponibile."},
+        {"titolo": "Eventi interi", "celle": [["34 ÷ 7", "4 resto 6"], ["ultimo valore", "121"]], "nota": "Quattro eventi consumano 28 unità."},
+        {"titolo": "Tentativo seguente", "celle": [["121 + 7", "128"], ["esito", "respinto"]], "nota": "Il valore matematico supera il massimo."}
+      ]
+    }
+  );
 
-  prova('1.5.1','lez05_01_single_gate','Seguire due porte in cascata',
+  // Capitolo 1.5
+  prova("1.5.1", "lez05_01_single_gate", "Seguire due porte in cascata",
     "Una NAND restituisce il complemento dell’AND. In una cascata l’uscita di questa prima porta diventa un ingresso della successiva. La XOR vale uno quando i suoi due ingressi differiscono.",
-    ...[[1,0,1],[1,1,1]].map(([a,b,c])=>{
-      const p=1-(a&b),r=p^c;
-      return variante('Una NAND riceve A='+a+' e B='+b+'. L’uscita alimenta una XOR il cui secondo ingresso C vale '+c+'. Calcola le due uscite.',
-        [numero('Uscita NAND',p,'Nega il risultato dell’AND dei primi ingressi.'),numero('Uscita XOR',r,'La XOR vale uno se gli ingressi sono diversi.')],
-        ['A AND B = '+(a&b)+'.','La NAND inverte questo bit e produce '+p+'.','La XOR confronta '+p+' e '+c+', producendo '+r+'.']);
-    }));
+    variante(
+      "Una NAND riceve A=1 e B=0. L’uscita alimenta una XOR il cui secondo ingresso C vale 1. Calcola le due uscite.",
+      [
+        numero("Uscita NAND", "1", "Nega il risultato dell’AND dei primi ingressi."),
+        numero("Uscita XOR", "0", "La XOR vale uno se gli ingressi sono diversi.")
+      ],
+      [
+        "A AND B = 0.",
+        "La NAND inverte questo bit e produce 1.",
+        "La XOR confronta 1 e 1, producendo 0."
+      ]
+    ),
+    {
+      consegna: "Un circuito collega la NAND di A e B a una XOR con C. Dall’oscilloscopio sai che C vale 1 e che l’uscita finale vale 1 a segnali assestati. Risali all’uscita della NAND e alla coppia di ingressi compatibile.",
+      campi: [
+        numero("Uscita della NAND", "0", "La XOR vale uno quando i suoi due ingressi differiscono."),
+        opzione("Coppia AB", ["00", "01", "10", "11"], "11", "In quale riga la NAND vale zero?")
+      ],
+      svolgimento: [
+        "L’uscita della XOR vale uno e uno dei suoi ingressi è C = 1. Per avere due segnali diversi, l’altro ingresso deve valere zero.",
+        "Questo zero proviene dalla NAND. Poiché NAND inverte AND, l’AND di A e B prima dell’inversione deve valere uno.",
+        "Entrambi gli ingressi valgono dunque uno. La prova in avanti dà NAND(1,1) = 0 e XOR(0,1) = 1, come sulla misura."
+      ],
+      quadro: [
+        {"titolo": "Segnali misurati", "celle": [["C", "1"], ["uscita XOR", "1"]], "nota": "Si cerca la causa risalendo dall’uscita."},
+        {"titolo": "Ingresso ignoto della XOR", "celle": [["C", "1"], ["altro ingresso", "0"]], "nota": "Per dare uno, i due ingressi devono differire."},
+        {"titolo": "Inversione nella NAND", "celle": [["NAND", "0"], ["AND", "1"]], "nota": "Invertendo zero si ritrova l’AND della prima coppia."},
+        {"titolo": "Verifica in avanti", "celle": [["A", "1"], ["B", "1"], ["uscita", "1"]], "nota": "La sola coppia compatibile è 11."}
+      ]
+    }
+  );
 
-  prova('1.5.6','lez05_02_bitwise_on_bytes','Isolare e contare i bit selezionati',
+  prova("1.5.6", "lez05_02_bitwise_on_bytes", "Isolare e contare i bit selezionati",
     "Nell’AND bit a bit ogni posizione si calcola indipendentemente. Un bit del risultato vale uno soltanto se in quella posizione sia il dato sia la maschera contengono uno.",
-    ...[[0xB6,0x3C],[0xCA,0x55]].map(([x,m])=>{
-      const v=x&m,n=bin(v).split('1').length-1;
-      return variante('Esegui 0x'+hex(x)+' AND 0x'+hex(m)+' su otto bit. Determina risultato senza segno e numero di posizioni a uno nell’intersezione.',
-        [numero('Risultato',v,'Allinea gli ottetti e conserva solo le coppie 1 e 1.'),numero('Posizioni a uno',n,'Conta i pesi che sopravvivono alla maschera.')],
-        ['Gli operandi sono '+bin(x)+' e '+bin(m)+'.','L’AND per colonna produce '+bin(v)+', cioè 0x'+hex(v)+' = '+v+'.','Le posizioni attive dopo la selezione sono '+Array.from({length:8},(_,i)=>i).filter(i=>v&(1<<i)).join(', ')+'. In totale sono '+n+'.']);
-    }));
+    variante(
+      "Esegui 0xB6 AND 0x3C su otto bit. Determina risultato senza segno e numero di posizioni a uno nell’intersezione.",
+      [
+        numero("Risultato", "52", "Allinea gli ottetti e conserva solo le coppie 1 e 1."),
+        numero("Posizioni a uno", "3", "Conta i pesi che sopravvivono alla maschera.")
+      ],
+      [
+        "Gli operandi sono 10110110 e 00111100.",
+        "L’AND per colonna produce 00110100, cioè 0x34 = 52.",
+        "Le posizioni attive dopo la selezione sono 2, 4, 5. In totale sono 3."
+      ]
+    ),
+    {
+      consegna: "Una maschera ignota M di otto bit viene sottoposta a due prove. Si osservano 0xF0 AND M = 0xA0 e 0x0F AND M = 0x06. Ricostruisci M come intero senza segno e indica quante sue posizioni sono attive.",
+      campi: [
+        numero("Maschera ricostruita", "166", "La prima prova isola i quattro bit alti e la seconda quelli bassi."),
+        numero("Bit attivi nella maschera", "4", "Conta gli uno separatamente nei due gruppi.")
+      ],
+      svolgimento: [
+        "La maschera di prova F0 conserva le quattro posizioni alte di M. In A0 il gruppo alto è A, cioè 1010.",
+        "La maschera 0F conserva le posizioni basse. La risposta 06 mostra il gruppo 0110. Le due prove coprono l’intero byte in gruppi disgiunti.",
+        "La parola 10100110 vale 128 + 32 + 4 + 2 = 166, ossia 0xA6. Ogni gruppo di quattro contiene due uno, per un totale di quattro."
+      ],
+      quadro: [
+        {"titolo": "Due osservazioni", "celle": [["con F0", "A0"], ["con 0F", "06"]], "nota": "Si cerca il byte comune alle due operazioni.", "tipo": "confronto"},
+        {"titolo": "Parte alta", "celle": [["prova F0", "1010 xxxx"]], "nota": "F0 lascia passare soltanto il gruppo alto."},
+        {"titolo": "Parte bassa", "celle": [["prova 0F", "xxxx 0110"]], "nota": "0F rende visibili tutte e quattro le posizioni basse."},
+        {"titolo": "Unione dei gruppi", "celle": [["maschera", "A6"], ["decimale", "166"], ["bit attivi", "4"]], "nota": "Nessuna posizione resta indeterminata."}
+      ]
+    }
+  );
 
-  prova('1.5.2','lez05_03_identify_gate','Ricostruire una porta dalla colonna di uscita',
-    "Una colonna di uscite identifica una funzione booleana soltanto insieme all’ordine delle righe. Associando ciascuna uscita alla coppia di ingressi si ricostruisce la tabella della porta.",
-    ...[['0 1 1 0','XOR','le due righe con ingressi diversi'],['1 1 1 0','NAND','tutte le righe tranne 11']].map(([col,porta,righe])=>
-      variante('Una porta a due ingressi produce '+col+' sulle righe 00, 01, 10, 11. Identifica la porta e conta le righe con uscita uno.',
-        [opzione('Porta',['AND','XOR','NAND','NOR'],porta,'Confronta prima le righe 00 e 11 e poi le due righe miste.'),numero('Righe vere',col.split('1').length-1,'Conta gli uno della colonna indicata.')],
-        ['Associare ogni uscita ai suoi due ingressi consente di eliminare le porte incompatibili.','Restano attive '+righe+'. Questa è la definizione della porta '+porta+'.','Il conteggio della colonna dà '+(col.split('1').length-1)+' righe vere. Riproducendo la tabella di '+porta+' si ritrova '+col+'.'])));
+  prova("1.5.2", "lez05_03_identify_gate", "Ricostruire una porta dalla colonna di uscita",
+    "A ogni coppia di ingressi una porta associa un’uscita. Si può riconoscere la porta da tutte le righe della tabella oppure scegliere una sola riga sulla quale due ipotesi prevedono uscite diverse.",
+    variante(
+      "Una porta a due ingressi produce 0 1 1 0 sulle righe 00, 01, 10, 11. Identifica la porta e conta le righe con uscita uno.",
+      [
+        opzione("Porta", ["AND", "XOR", "NAND", "NOR"], "XOR", "Confronta prima le righe 00 e 11 e poi le due righe miste."),
+        numero("Righe vere", "2", "Conta gli uno della colonna indicata.")
+      ],
+      [
+        "Associare ogni uscita ai suoi due ingressi consente di eliminare le porte incompatibili.",
+        "Restano attive le due righe con ingressi diversi. Questa è la definizione della porta XOR.",
+        "Il conteggio della colonna dà 2 righe vere. Riproducendo la tabella di XOR si ritrova 0 1 1 0."
+      ]
+    ),
+    {
+      consegna: "Una porta sigillata è una AND oppure una OR. Il banco ha già provato 00 e 11, ottenendo rispettivamente 0 e 1. Per progettare una terza prova che distingua le due porte, scegli una riga utile fra quelle offerte e prevedi le due uscite su quella riga.",
+      campi: [
+        opzione("Nuova riga utile", ["00", "01", "11"], "01", "Cerca due ingressi con valori diversi."),
+        numero("Uscita se la porta è AND", "0", "AND richiede entrambi gli ingressi a uno."),
+        numero("Uscita se la porta è OR", "1", "OR si attiva appena uno dei due ingressi vale uno.")
+      ],
+      svolgimento: [
+        "AND e OR coincidono quando gli ingressi sono entrambi zero e quando sono entrambi uno. I due risultati già raccolti sono compatibili con entrambe.",
+        "Sulla riga 01 il primo ingresso è zero e il secondo è uno. Fra le righe offerte è l’unica con segnali diversi.",
+        "AND(0,1) vale 0, OR(0,1) vale 1. Il solo valore misurato su questa terza riga è sufficiente a identificare la porta. Anche la riga 10, fuori dalle alternative offerte, avrebbe la stessa proprietà."
+      ],
+      quadro: [
+        {"titolo": "Prove eseguite", "celle": [["riga 00", "0"], ["riga 11", "1"]], "nota": "Le porte candidate sono AND e OR.", "tipo": "confronto"},
+        {"titolo": "Valutazione dei reperti", "celle": [["ipotesi AND", "compatibile"], ["ipotesi OR", "compatibile"]], "nota": "Gli ingressi uguali producono la stessa uscita.", "tipo": "confronto"},
+        {"titolo": "Prova discriminante", "celle": [["riga scelta", "01"]], "nota": "Fra le opzioni offerte solo 01 presenta ingressi diversi."},
+        {"titolo": "Esiti alternativi", "celle": [["AND", "0"], ["OR", "1"]], "nota": "La misura sulla riga 01 identifica la porta.", "tipo": "confronto"}
+      ]
+    }
+  );
 
-  prova('1.5.6','lez05_04_c_bitwise_expression','Aggiornare un campo senza alterare i vicini',
-    "Per sostituire un campo occorre prima azzerare tutti i bit che gli appartengono. L’OR inserisce il nuovo valore già spostato alla posizione del campo e conserva i bit esterni.",
-    ...[[0xA5,2,1],[0xCA,4,3]].map(([a,k,v])=>{
-      const m=3<<k,pulito=a&(~m&255),r=pulito|(v<<k);
-      return variante('Nel byte 0x'+hex(a)+' assegna il valore '+v+' al campo di due bit che parte dalla posizione '+k+' (bit 0 a destra). Calcola maschera e byte aggiornato.',
-        [numero('Maschera del campo',m,'Due bit contigui valgono 3 prima dello spostamento.'),numero('Byte aggiornato',r,'Azzera il campo con il complemento della maschera, poi inserisci il nuovo valore.')],
-        ['La maschera è 3 << '+k+' = 0x'+hex(m)+'.','L’AND x & ~maschera lascia 0x'+hex(pulito)+' negli otto bit del byte.','Il valore spostato è 0x'+hex(v<<k)+'. L’OR produce 0x'+hex(r)+' = '+r+'. Rileggendo (risultato & maschera) >> '+k+' si ottiene '+v+'.'],
-        'unsigned int x = 0x'+hex(a)+'u;\nunsigned int mask = 3u << '+k+';\nx = (x & ~mask) | ('+v+'u << '+k+');');
-    }));
+  prova("1.5.6", "lez05_04_c_bitwise_expression", "Aggiornare un campo senza alterare i vicini",
+    "Un campo è un gruppo di posizioni del byte che conserva un’informazione. Per sostituirlo occorre prima azzerare tutti i bit che gli appartengono e poi inserire il nuovo valore già allineato a quelle posizioni. Nel codice C, & indica AND e conserva un bit a uno soltanto se entrambi gli operandi lo hanno; | indica OR e richiede almeno un uno; ~ inverte ciascun bit. La maschera ha uno nelle posizioni del campo, perciò x & ~mask le azzera. Lo spostamento << porta i bit verso i pesi maggiori, >> verso i pesi minori; il numero seguente indica di quante posizioni. unsigned int e il suffisso u indicano interi senza segno. Il segno = assegna alla variabile a sinistra il risultato a destra.",
+    variante(
+      "Nel byte 0xA5 assegna il valore 1 al campo di due bit che parte dalla posizione 2 (bit 0 a destra). Calcola maschera e byte aggiornato.",
+      [
+        numero("Maschera del campo", "12", "Due bit contigui valgono 3 prima dello spostamento."),
+        numero("Byte aggiornato", "165", "Azzera il campo con il complemento della maschera, poi inserisci il nuovo valore.")
+      ],
+      [
+        "La maschera è 3 << 2 = 0x0C.",
+        "L’AND x & ~maschera lascia 0xA1 negli otto bit del byte.",
+        "Il valore spostato è 0x04. L’OR produce 0xA5 = 165. Rileggendo (risultato & maschera) >> 2 si ottiene 1."
+      ],
+      "unsigned int x = 0xA5u;\nunsigned int mask = 3u << 2;\nx = (x & ~mask) | (1u << 2);"
+    ),
+    {
+      consegna: "Nel byte 0xA2 si vuole scrivere 3 nei bit di indice 3 e 2, preservando tutti i vicini. Dopo la scrittura si legge 0xBE. Determina il byte che si sarebbe dovuto ottenere e l’indice dell’unico bit estraneo modificato, contando da destra a partire da zero.",
+      campi: [
+        numero("Byte corretto, come intero senza segno", "174", "I due uno del campo desiderato formano 0x0C."),
+        numero("Indice del bit estraneo modificato", "4", "Confronta bit per bit il byte letto con quello corretto.")
+      ],
+      svolgimento: [
+        "La maschera del campo è 00001100. In 0xA2, cioè 10100010, il campo vale già 00. Impostandolo a 11 si ottiene 10101110, cioè 0xAE = 174.",
+        "Il risultato osservato è 10111110. Per individuare le posizioni discordanti si può applicare XOR fra AE e BE, ottenendo 00010000.",
+        "L’unico uno della differenza pesa 16 e ha indice 4. I due bit del campo hanno ricevuto 3, mentre il bit adiacente di indice 4 è cambiato indebitamente."
+      ],
+      quadro: [
+        {"titolo": "Scrittura segnalata", "celle": [["iniziale", "A2"], ["campo 3–2", "11"], ["osservato", "BE"]], "nota": "Si controllano anche i bit esterni al campo."},
+        {"titolo": "Byte atteso", "celle": [["campo", "0C"], ["esito", "AE"]], "nota": "10100010 con campo 11 diventa 10101110."},
+        {"titolo": "Confronto bit a bit", "celle": [["AE XOR BE", "10 esadecimale"]], "nota": "La differenza vale 00010000 in binario.", "tipo": "sequenza"},
+        {"titolo": "Diagnosi", "celle": [["atteso", "174"], ["bit estraneo", "4"]], "nota": "Il campo è corretto, il vicino di peso 16 è alterato."}
+      ]
+    }
+  );
 
-  prova('1.5.2','lez05_05_truth_table_rows','Numerare le righe di una tabella',
+  prova("1.5.2", "lez05_05_truth_table_rows", "Numerare le righe di una tabella",
     "Con n ingressi binari una tabella di verità ha 2ⁿ righe. Numerandole in ordine binario da zero, l’indice di una riga coincide con il valore senza segno della sequenza di ingressi.",
-    ...[[3,5],[4,9]].map(([n,i])=>{
-      const b=bin(i,n),tot=2**n;
-      return variante('Una tabella enumera '+n+' ingressi da sinistra a destra, il primo come bit più significativo. L’ordine delle righe è binario crescente a partire da zero. Per la tupla '+b+' determina indice e numero totale di righe.',
-        [numero('Indice',i,'Pesa i bit come una parola senza segno.'),numero('Numero totale di righe',tot,'Conta le combinazioni indipendenti di tutti gli ingressi.')],
-        ['I pesi da sinistra sono '+Array.from({length:n},(_,j)=>2**(n-j-1)).join(', ')+'.','Sommando i pesi con bit 1 in '+b+' ottieni l’indice '+i+'.','La tabella ha 2^'+n+' = '+tot+' righe. L’ultima ha indice '+(tot-1)+', coerente con l’indicizzazione da zero.']);
-    }));
+    variante(
+      "Una tabella enumera 3 ingressi da sinistra a destra, il primo come bit più significativo. L’ordine delle righe è binario crescente a partire da zero. Per la tupla 101 determina indice e numero totale di righe.",
+      [
+        numero("Indice", "5", "Pesa i bit come una parola senza segno."),
+        numero("Numero totale di righe", "8", "Conta le combinazioni indipendenti di tutti gli ingressi.")
+      ],
+      [
+        "I pesi da sinistra sono 4, 2, 1.",
+        "Sommando i pesi con bit 1 in 101 ottieni l’indice 5.",
+        "La tabella ha 2^3 = 8 righe. L’ultima ha indice 7, coerente con l’indicizzazione da zero."
+      ]
+    ),
+    {
+      consegna: "Un controllore deve assegnare un codice diverso a tredici stati, usando parole tutte della stessa larghezza. I codici vengono assegnati in ordine binario crescente iniziando da zero. Determina la larghezza minima e l’indice della prima riga ancora libera.",
+      campi: [
+        numero("Larghezza minima", "4", "Confronta tredici con le potenze di due vicine."),
+        numero("Indice della prima riga libera", "13", "Il primo stato usa l’indice zero.")
+      ],
+      svolgimento: [
+        "Tre bit offrono 2³ = 8 parole, che coprono soltanto otto stati. Con quattro bit le parole sono 2⁴ = 16.",
+        "I tredici codici assegnati occupano gli indici da 0 a 12 inclusi. L’ultima parola assegnata è 1100.",
+        "La prima riga libera è la successiva, con indice 13 e tupla 1101. Restano in tutto tre righe libere, quelle di indice 13, 14 e 15."
+      ],
+      quadro: [
+        {"titolo": "Specifica", "celle": [["stati", "13"], ["primo indice", "0"]], "nota": "Ogni stato richiede un codice distinto."},
+        {"titolo": "Capacità", "celle": [["3 bit", "8"], ["4 bit", "16"]], "nota": "La prima larghezza sufficiente è quattro.", "tipo": "confronto"},
+        {"titolo": "Intervallo assegnato", "celle": [["primo", "0"], ["ultimo", "12"]], "nota": "L’indice più alto vale uno meno del numero di stati."},
+        {"titolo": "Prime righe residue", "celle": [["prima libera", "13"], ["tupla", "1101"]], "nota": "Rimangono tre codici disponibili."}
+      ]
+    }
+  );
 
-  prova('1.6.1','lez06_01_fractional_binary','Pesare le cifre dopo la virgola',
+  // Capitolo 1.6
+  prova("1.6.1", "lez06_01_fractional_binary", "Pesare le cifre dopo la virgola",
     "La prima cifra dopo la virgola binaria pesa 1/2, la seconda 1/4 e così via. Con k posizioni si possono esprimere tutti i pesi come frazioni aventi denominatore 2ᵏ.",
-    ...['101','0111'].map(s=>{
-      const n=parseInt(s,2),d=2**s.length,add=s.split('').flatMap((x,i)=>x==='1'?['1/'+2**(i+1)]:[]);
-      return variante('La frazione in base due è 0,'+s+'. Scrivila come numeratore su '+d+' e indica il valore decimale esatto.',
-        [numero('Numeratore',n,'Il denominatore comune è il peso inverso dell’ultima posizione.'),numero('Valore decimale',n/d,'Somma i contributi delle sole cifre a uno.')],
-        ['Da sinistra i denominatori crescono per potenze di due. I contributi attivi sono '+add.join(' + ')+'.','Ridotti al denominatore '+d+' danno '+n+'/'+d+'.','La divisione dà il valore esatto '+dec(n/d)+'. La moltiplicazione per '+d+' ricostruisce il numeratore '+n+'.']);
-    }));
+    variante(
+      "La frazione in base due è 0,101. Scrivila come numeratore su 8 e indica il valore decimale esatto.",
+      [
+        numero("Numeratore", "5", "Il denominatore comune è il peso inverso dell’ultima posizione."),
+        numero("Valore decimale", "0.625", "Somma i contributi delle sole cifre a uno.")
+      ],
+      [
+        "Da sinistra i denominatori crescono per potenze di due. I contributi attivi sono 1/2 + 1/8.",
+        "Ridotti al denominatore 8 danno 5/8.",
+        "La divisione dà il valore esatto 0,625. La moltiplicazione per 8 ricostruisce il numeratore 5."
+      ]
+    ),
+    {
+      consegna: "Un formato conserva soltanto tre cifre dopo la virgola binaria. Occorre memorizzare esattamente 3/16. Decidi se il formato ci riesce e calcola il numero minimo di cifre necessarie dopo la virgola.",
+      campi: [
+        opzione("Tre cifre bastano?", ["sì", "no"], "no", "Con tre cifre ogni valore è un multiplo intero di un ottavo."),
+        numero("Cifre minime dopo la virgola", "4", "Cerca la prima potenza di due con cui la frazione si esprime mediante un numeratore intero.")
+      ],
+      svolgimento: [
+        "Con tre cifre sono possibili i multipli di 1/8. La frazione richiesta sta fra 1/8 = 2/16 e 2/8 = 4/16, quindi tre cifre sono insufficienti.",
+        "Con quattro cifre la posizione più a destra pesa 1/16. La somma 1/8 + 1/16 dà esattamente 3/16.",
+        "La scrittura minima è 0,0011 in base due. Cancellando l’ultima posizione si perde il termine da 1/16."
+      ],
+      quadro: [
+        {"titolo": "Vincolo del formato", "celle": [["obiettivo", "3/16"], ["cifre disponibili", "3"]], "nota": "La rappresentazione deve essere esatta."},
+        {"titolo": "Griglia a tre cifre", "celle": [["vicino inferiore", "2/16"], ["vicino superiore", "4/16"]], "nota": "Il valore richiesto cade fra due punti della griglia.", "tipo": "confronto"},
+        {"titolo": "Griglia a quattro cifre", "celle": [["pesi attivi", "1/8 + 1/16"]], "nota": "La nuova posizione consente di raggiungere 3/16."},
+        {"titolo": "Rappresentazione", "celle": [["in binario", "0,0011"], ["minimo", "4 cifre"]], "nota": "L’ultima cifra è necessaria."}
+      ]
+    }
+  );
 
-  prova('1.6.1','lez06_02_exact_or_approx','Stabilire se una frazione termina in base due',
-    "Una frazione ridotta ai minimi termini ha una scrittura binaria finita se il denominatore divide una potenza di due. La presenza di un altro fattore primo comporta una parte periodica.",
-    ...[[6,40,3,20],[10,40,1,4]].map(([a,b,n,d])=>{
-      const ok=(d&(d-1))===0;
-      return variante('Riduci '+a+'/'+b+' ai minimi termini e stabilisci se ammette una scrittura binaria finita. Indica il denominatore ridotto e classifica l’espansione.',
-        [numero('Denominatore ridotto',d,'Dividi numeratore e denominatore per il loro massimo comun divisore.'),opzione('Espansione binaria',['finita','infinita periodica'],ok?'finita':'infinita periodica','Un denominatore ridotto deve dividere qualche potenza di due per consentire una scrittura finita.')],
-        ['Il massimo comun divisore è '+(b/d)+'. La frazione ridotta è '+n+'/'+d+'.','Il denominatore '+d+(ok?' è 2².':' contiene il fattore primo 5.') ,ok?'La frazione vale 0,01 in base due e termina dopo due cifre.':'Nessuna potenza di due è divisibile per 5. La divisione binaria ha pertanto una parte periodica.']);
-    }));
+  prova("1.6.1", "lez06_02_exact_or_approx", "Stabilire se una frazione termina in base due",
+    "Ridurre una frazione ai minimi termini significa dividere numeratore e denominatore per tutti i fattori comuni. Un fattore primo è un divisore maggiore di uno che ammette soltanto uno e sé stesso come divisori positivi; per esempio 2 e 5 sono primi. La frazione ridotta ha una scrittura binaria finita quando il denominatore è una potenza di due, perché allora i pesi 1/2, 1/4, 1/8 e successivi bastano a ricostruirla con un numero finito di cifre. Se nel denominatore rimane un altro fattore primo, compare una parte periodica, ossia una sequenza di cifre che si ripete indefinitamente.",
+    variante(
+      "Riduci 6/40 ai minimi termini e stabilisci se ammette una scrittura binaria finita. Indica il denominatore ridotto e classifica l’espansione.",
+      [
+        numero("Denominatore ridotto", "20", "Dividi numeratore e denominatore per il loro massimo comun divisore."),
+        opzione("Espansione binaria", ["finita", "infinita periodica"], "infinita periodica", "Un denominatore ridotto deve dividere qualche potenza di due per consentire una scrittura finita.")
+      ],
+      [
+        "Il massimo comun divisore è 2. La frazione ridotta è 3/20.",
+        "Il denominatore 20 contiene il fattore primo 5.",
+        "Nessuna potenza di due è divisibile per 5. La divisione binaria ha pertanto una parte periodica."
+      ]
+    ),
+    {
+      consegna: "Un sensore registra una frazione n/40 con n intero da 1 a 39. Si cerca il più piccolo n per il quale l’espansione binaria sia finita. Determina n e la frazione ridotta, usando il denominatore nella seconda risposta.",
+      campi: [
+        numero("Minimo numeratore positivo", "5", "Scomponi 40 e cerca il fattore che deve scomparire nella riduzione."),
+        numero("Denominatore dopo la riduzione", "8", "Semplifica la frazione ottenuta con il minimo numeratore.")
+      ],
+      svolgimento: [
+        "40 si scompone in 2³ × 5. Affinché il denominatore ridotto sia una potenza di due occorre cancellare il fattore 5, quindi n deve essere multiplo di 5.",
+        "Il primo multiplo positivo di 5 è 5. Ciascuno dei quattro numeratori precedenti lascia il fattore 5 nel denominatore ridotto.",
+        "Riducendo 5/40 si ottiene 1/8. Poiché 8 = 2³, la frazione vale 0,001 in binario ed è finita."
+      ],
+      quadro: [
+        {"titolo": "Ricerca del numeratore", "celle": [["denominatore", "40"], ["numeratori", "1 … 39"]], "nota": "Si cerca la prima frazione binaria finita."},
+        {"titolo": "Fattori", "celle": [["40", "8 × 5"], ["da eliminare", "5"]], "nota": "Il denominatore ridotto deve contenere solo fattori due."},
+        {"titolo": "Primo candidato", "celle": [["numeratore", "5"], ["frazione", "5/40"]], "nota": "I numeratori precedenti lasciano il fattore cinque."},
+        {"titolo": "Verifica", "celle": [["ridotta", "1/8"], ["in binario", "0,001"]], "nota": "La rappresentazione richiede tre cifre frazionarie."}
+      ]
+    }
+  );
 
-  prova('1.6.2','lez06_03_normalize_binary','Trovare esponente reale e campo con bias',
+  prova("1.6.2", "lez06_03_normalize_binary", "Trovare esponente reale e campo con bias",
     "Normalizzare un numero binario significa esprimerlo come significanda compresa fra 1 incluso e 2 escluso, moltiplicata per una potenza di due. In un normale binary32 il campo esponente contiene l’esponente effettivo aumentato di 127.",
-    ...[['101,1','1,011',2],['0,00101','1,01',-3]].map(([x,m,e])=>
-      variante('Normalizza '+x+' in base due nella forma 1,f × 2^e. Indica l’esponente e il campo E di binary32 per questo numero normale.',
-        [numero('Esponente e',e,'Sposta la virgola finché rimane un solo uno alla sua sinistra.'),numero('Campo E',127+e,'Il bias dei numeri normali binary32 vale 127.')],
-        ['La significanda normalizzata è '+m+' in base due.','Per ricostruire '+x+' occorre moltiplicarla per 2^('+e+'). L’esponente effettivo è '+e+'.','Si memorizza E = e + 127 = '+(127+e)+'. Sottrarre nuovamente il bias consente di verificare il valore.'])));
+    variante(
+      "Normalizza 101,1 in base due nella forma 1,f × 2^e. Indica l’esponente e il campo E di binary32 per questo numero normale.",
+      [
+        numero("Esponente e", "2", "Sposta la virgola finché rimane un solo uno alla sua sinistra."),
+        numero("Campo E", "129", "Il bias dei numeri normali binary32 vale 127.")
+      ],
+      [
+        "La significanda normalizzata è 1,011 in base due.",
+        "Per ricostruire 101,1 occorre moltiplicarla per 2^(2). L’esponente effettivo è 2.",
+        "Si memorizza E = e + 127 = 129. Sottrarre nuovamente il bias consente di verificare il valore."
+      ]
+    ),
+    {
+      consegna: "Per 0,00101 in base due un appunto riporta la significanda 1,01 e il campo esponente binary32 E = 130. Controlla se la scala indicata ricostruisce il dato originale, poi determina l’esponente reale e il campo E corretti.",
+      campi: [
+        numero("Esponente reale corretto", "-3", "Il numero iniziale è inferiore a uno e la significanda normalizzata supera uno."),
+        numero("Campo E corretto", "124", "Per un numero normale il campo memorizzato vale 127 più l’esponente reale.")
+      ],
+      svolgimento: [
+        "Spostando la virgola di tre posti a destra si passa da 0,00101 a 1,01. La significanda ottenuta va moltiplicata per 2⁻³ per tornare al numero iniziale.",
+        "Il campo proposto E = 130 darebbe l’esponente reale 130 − 127 = 3 e aumenterebbe la significanda di un fattore otto. La scala andrebbe nella direzione sbagliata.",
+        "L’esponente reale è dunque −3 e il campo corretto è 127 − 3 = 124. Dividendo 1,01 in base due per otto si ritrova 0,00101."
+      ],
+      quadro: [
+        {"titolo": "Appunto da controllare", "celle": [["dato", "0,00101₂"], ["significanda", "1,01₂"], ["campo E", "130"]], "nota": "La verifica consiste nel ricostruire il dato."},
+        {"titolo": "Spostamento della virgola", "celle": [["normalizzazione", "3 posti"], ["scala richiesta", "2⁻³"]], "nota": "La significanda è più grande del valore iniziale."},
+        {"titolo": "Campo proposto", "celle": [["130 − 127", "+3"], ["fattore", "8"]], "nota": "Il campo indicato aumenterebbe il valore."},
+        {"titolo": "Correzione", "celle": [["esponente", "−3"], ["campo E", "124"]], "nota": "La divisione per otto ricostruisce il dato."}
+      ]
+    }
+  );
 
-  prova('1.6.2','lez06_04_ieee754_single_decode','Decodificare una parola normale binary32',
-    "Per un binary32 normale la frazione segue un uno iniziale implicito. Il bit di segno moltiplica il risultato per +1 oppure −1, mentre il campo esponente fissa la potenza di due.",
-    ...[[0x3FC00000,0,127,0.5,1.5],[0xC0200000,1,128,0.25,-2.5]].map(([w,s,e,f,v])=>
-      variante('La parola binary32 è 0x'+hex(w,8)+'. Trova esponente codificato e valore decimale esatto.',
-        [numero('Campo esponente E',e,'Preleva gli otto bit dopo il segno.'),numero('Valore',v,'Per un numero normale aggiungi l’uno implicito e sottrai 127 all’esponente.')],
-        ['Il segno è '+s+' e il campo esponente è '+bin(e)+' = '+e+'.','La frazione esplicita vale '+dec(f)+'. La significanda è 1 + '+dec(f)+' = '+dec(1+f)+'.','Il risultato è (−1)^'+s+' × '+dec(1+f)+' × 2^'+(e-127)+' = '+dec(v)+'.'])));
+  prova("1.6.2", "lez06_04_ieee754_single_decode", "Passare fra un numero normale e la parola binary32",
+    "Per un numero normale binary32 la significanda comprende un uno iniziale implicito. Il segno si applica al prodotto fra la significanda e la potenza di due. In lettura si ricava l’esponente reale sottraendo 127 al campo E. In scrittura si compie l’operazione inversa.",
+    variante(
+      "La parola binary32 è 0x3FC00000. Trova esponente codificato e valore decimale esatto.",
+      [
+        numero("Campo esponente E", "127", "Preleva gli otto bit dopo il segno."),
+        numero("Valore", "1.5", "Per un numero normale aggiungi l’uno implicito e sottrai 127 all’esponente.")
+      ],
+      [
+        "Il segno è 0 e il campo esponente è 01111111 = 127.",
+        "La frazione esplicita vale 0,5. La significanda è 1 + 0,5 = 1,5.",
+        "Il risultato è (−1)^0 × 1,5 × 2^0 = 1,5."
+      ]
+    ),
+    {
+      consegna: "Devi codificare −2,5 come numero normale binary32. Scegli il campo esponente e la parola completa. Le tre parole proposte differiscono per il segno o per la scala.",
+      campi: [
+        numero("Campo esponente E", "128", "Scrivi il valore assoluto come 1,f in base due moltiplicato per una potenza di due."),
+        opzione("Parola binary32", ["0x40200000", "0xC0200000", "0xBFA00000"], "0xC0200000", "Conserva insieme il bit di segno, il campo con bias 127 e la frazione che segue l’uno implicito.")
+      ],
+      svolgimento: [
+        "Il valore assoluto 2,5 vale 10,1 in binario. La forma normale è 1,01 × 2¹, quindi E = 127 + 1 = 128.",
+        "Il segno negativo richiede il bit 1. Il campo esponente di otto bit è 10000000 e il campo frazione inizia con 01, seguito da ventuno zeri.",
+        "Accostando i campi e raggruppando in quartetti si ottiene 0xC0200000. La parola 0x40200000 cambierebbe il segno e 0xBFA00000 avrebbe scala 2⁰."
+      ],
+      quadro: [
+        {"titolo": "Codifica richiesta", "celle": [["valore", "−2,5"], ["formato", "binary32"]], "nota": "Si costruiscono tre campi separati."},
+        {"titolo": "Normalizzazione", "celle": [["valore assoluto", "10,1₂"], ["forma", "1,01₂ × 2¹"]], "nota": "Il campo esponente vale 128.", "tipo": "sequenza"},
+        {"titolo": "Campi", "celle": [["segno", "1"], ["esponente", "10000000"], ["frazione", "01 … 0"]], "nota": "La cifra uno iniziale è implicita."},
+        {"titolo": "Parola completa", "celle": [["in esadecimale", "0xC0200000"]], "nota": "La ricostruzione dà −1,25 × 2 = −2,5.", "tipo": "sequenza"}
+      ]
+    }
+  );
 
-  prova('1.6.4','lez06_05_c_float_pitfalls','Perdita di un incremento in binary32',
+  prova("1.6.4", "lez06_05_c_float_pitfalls", "Perdita di un incremento in binary32",
     "L’esponente determina la distanza tra due valori binary32 consecutivi. Se la somma esatta cade nel loro punto medio, l’arrotondamento al più vicino sceglie il valore la cui significanda intera termina con zero in binario.",
-    ...[[2**24,1],[2**24,3]].map(([a,b])=>{
-      const exact=a+b,r=Math.fround(exact);
-      return variante('In C assumi float binary32, operazioni valutate a precisione binary32 e arrotondamento al più vicino con pareggio verso il pari. Calcola il valore memorizzato dopo aver sommato '+b+' a '+a+'.',
-        [numero('Somma matematica',exact,'Calcola prima tra interi esatti.'),numero('Valore memorizzato',r,'In questo intervallo i valori binary32 sono distanti due. In parità scegli la significanda con ultimo bit zero.')],
-        ['La base è 2²⁴ e la distanza tra valori consecutivi è 2^(24−23) = 2.','La somma esatta '+exact+' è a metà tra '+(exact-1)+' e '+(exact+1)+'.','Dividendo i due valori rappresentabili adiacenti per il passo 2 si ottengono due interi consecutivi. Quello pari è '+r/2+', quindi l’arrotondamento restituisce '+r+'.'],
-        'float x = 16777216.0f;\nx = x + '+b+'.0f;');
-    }));
+    variante(
+      "In C assumi float binary32, operazioni valutate a precisione binary32 e arrotondamento al più vicino con pareggio verso il pari. Calcola il valore memorizzato dopo aver sommato 1 a 16777216.",
+      [
+        numero("Somma matematica", "16777217", "Calcola prima tra interi esatti."),
+        numero("Valore memorizzato", "16777216", "In questo intervallo i valori binary32 sono distanti due. In parità scegli la significanda con ultimo bit zero.")
+      ],
+      [
+        "La base è 2²⁴ e la distanza tra valori consecutivi è 2^(24−23) = 2.",
+        "La somma esatta 16777217 è a metà tra 16777216 e 16777218.",
+        "Dividendo i due valori rappresentabili adiacenti per il passo 2 si ottengono due interi consecutivi. Quello pari è 8388608, quindi l’arrotondamento restituisce 16777216."
+      ],
+      "float x = 16777216.0f;\nx = x + 1.0f;"
+    ),
+    {
+      consegna: "In C considera float binary32, arrotondamento al più vicino con pareggio al pari e ciascuna addizione valutata in binary32. I due accumulatori del listato partono da 16777216. Determina i risultati dopo due incrementi separati o un’unica somma di due.",
+      campi: [
+        numero("Valore finale di x", "16777216", "Ogni assegnazione a x conserva il risultato arrotondato che verrà usato dalla somma successiva."),
+        numero("Valore finale di y", "16777218", "Il successore binary32 di 16777216 dista due.")
+      ],
+      svolgimento: [
+        "Nell’intervallo che comincia da 2²⁴ le parole binary32 adiacenti rappresentano numeri distanti due. 16777217 è a metà fra 16777216 e 16777218.",
+        "Il pareggio favorisce 16777216, che ha il bit finale della significanda a zero. Dopo la prima assegnazione x torna al valore iniziale e la seconda incontra lo stesso pareggio.",
+        "y riceve 16777216 + 2 = 16777218, già rappresentabile. Al termine x vale 16777216 e y vale 16777218. Il diverso numero di arrotondamenti distingue le due sequenze."
+      ],
+      quadro: [
+        {"titolo": "Due accumulatori", "celle": [["inizio di x", "16777216"], ["inizio di y", "16777216"]], "nota": "x riceve due incrementi, y una sola addizione.", "tipo": "confronto"},
+        {"titolo": "Griglia locale", "celle": [["primo", "16777216"], ["successore", "16777218"]], "nota": "Il risultato esatto di un incremento sta a metà."},
+        {"titolo": "Due assegnazioni a x", "celle": [["dopo +1", "16777216"], ["dopo +1 ancora", "16777216"]], "nota": "La seconda addizione riparte dal valore arrotondato.", "tipo": "sequenza"},
+        {"titolo": "Somma singola", "celle": [["x", "16777216"], ["y", "16777218"]], "nota": "L’incremento di due coincide con la distanza fra i candidati."}
+      ],
+      codice: "float x = 16777216.0f, y = x;\nx = x + 1.0f;\nx = x + 1.0f;\ny = y + 2.0f;"
+    }
+  );
 
-  // Casi conclusivi originali del capitolo integrativo.
-  prova('1.7.2','','Decodificare un record di telemetria',
+  // Capitolo 1.7
+  prova("1.7.2", "", "Decodificare un record di telemetria",
     "Nel record TLM1 la lunghezza del nome UTF-8 è misurata in byte. Il primo byte dopo il nome avvia una temperatura intera con segno in big-endian. Dopo la temperatura viene una tensione binary32 in little-endian.",
-    ...[['Z',1,100,1],['Aè',3,-123,10]].map(([nome,flags,t,v])=>{
-      const a=codificaTlm(nome,flags,t,v),n=a[5];
-      return variante('Il record TLM1 contiene '+bytes(a)+'. Dopo firma, flag e lunghezza, leggi il nome UTF-8, la temperatura int16 big-endian in centesimi di °C e la tensione binary32 little-endian.',
-        [numero('Byte del nome',n,'L’ottetto all’offset 5 contiene il conteggio.'),numero('Temperatura in °C',t/100,'Interpreta il campo a 16 bit con segno, poi applica la scala.'),numero('Tensione in V',v,'Riordina i quattro byte finali per leggere la word IEEE 754.')],
-        ['La firma è TLM1, i flag valgono '+flags+' e il nome occupa '+n+' byte: '+bytes(a.slice(6,6+n))+' corrisponde a '+nome+'.','La temperatura comincia all’offset '+(6+n)+'. I byte '+bytes(a.slice(6+n,8+n))+' danno '+t+' con segno, cioè '+dec(t/100)+' °C.','La tensione comincia all’offset '+(8+n)+'. I byte in little-endian danno la word 0x'+hex(floatWord(v),8)+' e il valore '+v+' V. La lunghezza complessiva torna: 12 + '+n+' = '+a.length+' byte.']);
-    }));
+    variante(
+      "Il record TLM1 contiene 54 4C 4D 31 01 01 5A 00 64 00 00 80 3F. Dopo firma, flag e lunghezza, leggi il nome UTF-8, la temperatura int16 big-endian in centesimi di °C e la tensione binary32 little-endian.",
+      [
+        numero("Byte del nome", "1", "L’ottetto all’offset 5 contiene il conteggio."),
+        numero("Temperatura in °C", "1", "Interpreta il campo a 16 bit con segno, poi applica la scala."),
+        numero("Tensione in V", "1", "Riordina i quattro byte finali per leggere la word IEEE 754.")
+      ],
+      [
+        "La firma è TLM1, i flag valgono 1 e il nome occupa 1 byte: 5A corrisponde a Z.",
+        "La temperatura comincia all’offset 7. I byte 00 64 danno 100 con segno, cioè 1 °C.",
+        "La tensione comincia all’offset 9. I byte in little-endian danno la word 0x3F800000 e il valore 1 V. La lunghezza complessiva torna: 12 + 1 = 13 byte."
+      ]
+    ),
+    {
+      consegna: "Un record TLM1 integro contiene 54 4C 4D 31 03 03 41 C3 A8 FF 85 00 00 20 41. Il nome inizia all’offset 6 e la sua lunghezza in byte è all’offset 5. Il software visualizza −312,33 °C. Calcola l’offset del primo byte della temperatura e scegli la correzione che ripristina la lettura int16 big-endian in centesimi di grado. Ordina infine le operazioni con cui il lettore ricava la temperatura.",
+      campi: [
+        numero("Offset iniziale della temperatura", "9", "Usa la lunghezza del nome in byte, compresa la lettera multibyte."),
+        opzione("Correzione della lettura", ["assegnare peso 256 a FF", "assegnare peso 256 a 85", "leggere la misura senza segno"], "assegnare peso 256 a FF", "Confronta le due word formate da FF e 85 con il valore mostrato."),
+        numero("Temperatura corretta in °C", "-1.23", "Sottrai 65536 al codice unsigned quando il bit di segno vale uno, poi dividi per cento."),
+        {"label": "Dalla lunghezza al valore fisico", "ordine": ["leggere la lunghezza del nome", "calcolare l’offset della temperatura", "leggere i due byte del campo", "convertire i centesimi in gradi"], "answer": "leggere la lunghezza del nome → calcolare l’offset della temperatura → leggere i due byte del campo → convertire i centesimi in gradi", "numeric": false, "hint": "Ciascuna operazione riceve dal passaggio precedente un valore necessario."}
+      ],
+      svolgimento: [
+        "Il byte all’offset 5 vale 03. I tre byte del nome sono 41 C3 A8 e occupano gli offset da 6 a 8. La temperatura comincia perciò all’offset 9, dove si trovano FF 85.",
+        "Se 85 riceve il peso 256, la parola è 0x85FF = 34303. In int16 vale 34303 − 65536 = −31233 centesimi, precisamente la misura visualizzata.",
+        "Il formato richiede peso 256 per il primo byte. FF85 vale 65413 senza segno, quindi 65413 − 65536 = −123 in int16. La temperatura corretta è −1,23 °C."
+      ],
+      quadro: [
+        {"titolo": "Resoconto del lettore", "celle": [["nome in byte", "03"], ["temperatura letta", "−312,33 °C"]], "nota": "Il campo temperatura usa due byte big-endian."},
+        {"titolo": "Confini", "celle": [["nome", "offset 6 … 8"], ["temperatura", "offset 9"]], "nota": "I primi byte del campo sono FF 85."},
+        {"titolo": "Lettura difettosa", "celle": [["parola", "85FF"], ["centesimi", "−31233"]], "nota": "Il risultato osservato denuncia l’inversione dei pesi.", "tipo": "sequenza"},
+        {"titolo": "Lettura corretta", "celle": [["parola", "FF85"], ["centesimi", "−123"], ["misura", "−1,23 °C"]], "nota": "All’offset minore si trova il byte di peso 256.", "tipo": "sequenza"}
+      ]
+    }
+  );
 
-  prova('1.7.3','','Controllare una dimensione prima dell’allocazione',
-    "Lo spazio richiesto da un’immagine dipende sia dal numero di pixel sia dai byte per pixel. Il prodotto va calcolato prima della conversione al tipo di destinazione e confrontato separatamente con il budget.",
-    ...[[65536,65536,64],[1024,768,4]].map(([w,h,budget])=>{
-      const n=w*h*4,lim=budget*1048576,ok=n<=lim&&n<=0xffffffff;
-      return variante('Un’immagine RGBA richiede quattro byte per pixel, senza spazi tra righe. Larghezza '+w+', altezza '+h+', budget '+budget+' MiB. Le dimensioni destinate all’allocatore devono entrare in uint32.',
-        [numero('Dimensione matematica in byte',n,'Calcola in un tipo più ampio e includi i quattro canali.'),opzione('Decisione',['allocare','rifiutare'],ok?'allocare':'rifiutare','Verifica separatamente il limite del tipo e il budget.')],
-        ['Il numero di pixel è '+w+' × '+h+' = '+(w*h)+'.','Il contenuto richiede '+(w*h)+' × 4 = '+n+' byte, da confrontare con 4294967295 come massimo del tipo.','Il budget è '+lim+' byte. '+(ok?'Il valore rientra in entrambi i vincoli: l’allocazione è ammessa.':'Il valore eccede entrambi i vincoli: la richiesta viene rifiutata prima della conversione.')]);
-    }));
+  prova("1.7.3", "", "Controllare una dimensione prima dell’allocazione",
+    "L’allocatore è il componente al quale il programma chiede di riservare memoria. Una riga dell’immagine occupa tanti byte quanti sono i pixel in larghezza moltiplicati per i byte per pixel. Il tipo uint32 rappresenta interi senza segno da 0 a 2³² − 1 = 4294967295; un MiB, mebibyte, contiene 2²⁰ = 1048576 byte. La capacità utilizzabile è il minore fra il budget di memoria e il massimo conteggio rappresentabile dall’allocatore. Si calcolano prima le dimensioni esatte e poi si applicano entrambi i limiti. Per ricavare quante righe intere entrino nel budget si divide la capacità per i byte di una riga, conservando il quoziente intero; il resto sono i byte ancora disponibili.",
+    variante(
+      "Un’immagine RGBA richiede quattro byte per pixel, senza spazi tra righe. Larghezza 65536, altezza 65536, budget 64 MiB. Le dimensioni destinate all’allocatore devono entrare in uint32.",
+      [
+        numero("Dimensione matematica in byte", "17179869184", "Calcola in un tipo più ampio e includi i quattro canali."),
+        opzione("Decisione", ["allocare", "rifiutare"], "rifiutare", "Verifica separatamente il limite del tipo e il budget.")
+      ],
+      [
+        "Il numero di pixel è 65536 × 65536 = 4294967296.",
+        "Il contenuto richiede 4294967296 × 4 = 17179869184 byte, da confrontare con 4294967295 come massimo del tipo.",
+        "Il budget è 67108864 byte. Il valore eccede entrambi i vincoli: la richiesta viene rifiutata prima della conversione."
+      ]
+    ),
+    {
+      consegna: "Una telecamera produce righe di 1536 pixel RGBA, quattro byte per pixel senza riempimento. Il budget è 4 MiB (4194304 byte) e il conteggio richiesto dall’allocatore deve essere rappresentabile in uint32. Trova l’altezza massima in righe intere e il numero di byte ancora disponibili a quell’altezza.",
+      campi: [
+        numero("Numero massimo di righe", "682", "Dividi il minore fra budget e massimo uint32 per i byte di una riga."),
+        numero("Byte residui", "4096", "Sottrai dal budget il prodotto fra altezza e byte per riga.")
+      ],
+      svolgimento: [
+        "Una riga richiede 1536 × 4 = 6144 byte. Il budget di 4194304 byte è inferiore al massimo uint32, pari a 4294967295, perciò qui limita il budget.",
+        "La divisione intera dà 4194304 = 682 × 6144 + 4096. Le 682 righe occupano 4190208 byte e lasciano 4096 byte liberi.",
+        "Una riga ulteriore richiederebbe 6144 byte. I 4096 rimasti sono insufficienti, quindi 682 è l’altezza massima ammessa da entrambi i vincoli."
+      ],
+      quadro: [
+        {"titolo": "Progetto dell’immagine", "celle": [["larghezza", "1536 pixel"], ["budget", "4 MiB"]], "nota": "La grandezza da scegliere è il numero delle righe."},
+        {"titolo": "Costo unitario", "celle": [["pixel per riga", "1536"], ["byte per riga", "6144"]], "nota": "Il budget è il limite più restrittivo."},
+        {"titolo": "Divisione del budget", "celle": [["righe intere", "682"], ["resto", "4096 byte"]], "nota": "Il quoziente esprime righe complete."},
+        {"titolo": "Prova di massimalità", "celle": [["una riga", "6144 byte"], ["ancora liberi", "4096 byte"]], "nota": "Lo spazio residuo è inferiore al costo di una riga.", "tipo": "confronto"}
+      ]
+    }
+  );
 
   prova('1.7.7','','Diagnosticare una copia alterata',
     "Nel formato TLM1 la lunghezza totale dipende dal numero di byte del nome. Dopo il controllo della dimensione, una maschera sul byte dei flag permette di riconoscere le posizioni riservate.",
     ...[['taglio','Record troncato'],['flag','Bit riservati attivi']].map(([guasto,esito])=>{
       let a=codificaTlm('Z',1,100,1);if(guasto==='taglio')a=a.slice(0,-2);else a[4]=0x81;
-      return variante('Il formato TLM1 contiene un solo record: lunghezza totale 12 + n, n all’offset 5, soli bit 0 e 1 ammessi nei flag. Analizza '+bytes(a)+'.',
+      return variante('Nel file si attende un solo record TLM1. La lunghezza è 12 + n, con n all’offset 5, e nei flag sono ammessi soltanto i bit 0 e 1. Analizza '+bytes(a)+'.',
         [numero('Lunghezza attesa',13,'Leggi la lunghezza del nome e aggiungi i campi fissi.'),opzione('Prima causa di rifiuto',['Record troncato','Bit riservati attivi','Firma errata'],esito,'Verifica prima il prefisso e la dimensione, poi la maschera 0xFC dei flag.')],
-        ['I primi quattro byte sono 54 4C 4D 31 e la firma è corretta.','Il byte di lunghezza del nome vale 1, quindi la lunghezza richiesta è 12 + 1 = 13. Sono presenti '+a.length+' byte.',guasto==='taglio'?'Mancano gli ultimi due byte del campo tensione. La diagnosi è troncamento e il valore in volt resta indeterminato.':'Il conteggio è corretto. Il campo flag vale 0x81; 0x81 & 0xFC = 0x80. Il bit 7 è riservato e la copia viene rifiutata.']);
+        ['I primi quattro byte sono 54 4C 4D 31 e la firma è corretta.','Il byte di lunghezza del nome vale 1, quindi la lunghezza richiesta è 12 + 1 = 13. Sono presenti '+a.length+' byte.',guasto==='taglio'?'Mancano gli ultimi due byte del campo tensione. La diagnosi è troncamento e il valore in volt resta indeterminato.':'Il conteggio è corretto. Applicando al campo flag 0x81 la maschera 0xFC si ottiene 0x80. Il bit 7 è riservato e la copia viene rifiutata.']);
     }));
 
-  prova('1.7.4','','Applicare la politica di modifica',
-    "La validità del byte viene controllata prima dei permessi. Per un byte valido la scrittura richiede sia il bit W sia almeno uno dei due ruoli ammessi. L’OR fra i ruoli è inclusivo.",
-    ...[[1,0,1],[0,1,1]].map(([w,o,a])=>
-      variante('Il byte di autorizzazione è valido: i bit riservati valgono zero. Il servizio accorda la modifica quando W AND (O OR A) vale uno. Per W='+w+', O='+o+', A='+a+', calcola la verifica del ruolo e la decisione finale.',
-        [numero('O OR A',o|a,'L’OR è inclusivo.'),numero('Decisione finale come bit',w&(o|a),'Il permesso di scrittura è un requisito distinto dal ruolo.')],
-        ['I ruoli presenti sono O='+o+' e A='+a+'.','La loro disgiunzione vale '+(o|a)+' perché almeno uno dei due è attivo.','Applicando AND con W='+w+' si ottiene '+(w&(o|a))+'. La modifica è '+(w?'concessa.':'negata.')])));
+  prova("1.7.4", "", "Applicare la politica di modifica",
+    "W indica l’abilitazione alla scrittura, O il ruolo di proprietario e A il ruolo di amministratore; ciascun indicatore vale zero se assente e uno se presente. La validità del byte viene controllata prima dei permessi: le posizioni riservate devono avere valore zero. Per un byte valido, AND richiede che entrambe le condizioni siano vere, mentre OR richiede almeno una condizione vera e accetta anche il caso in cui lo siano entrambe. La regola W AND (O OR A) richiede perciò W insieme ad almeno uno dei due ruoli. Per trovare una modifica minima si conta quanti indicatori inizialmente a zero debbano diventare uno per soddisfare entrambi i requisiti.",
+    variante(
+      "Il byte di autorizzazione è valido: i bit riservati valgono zero. Il servizio accorda la modifica quando W AND (O OR A) vale uno. Per W=1, O=0, A=1, calcola la verifica del ruolo e la decisione finale.",
+      [
+        numero("O OR A", "1", "L’OR è inclusivo."),
+        numero("Decisione finale come bit", "1", "Il permesso di scrittura è un requisito distinto dal ruolo.")
+      ],
+      [
+        "I ruoli presenti sono O=0 e A=1.",
+        "La loro disgiunzione vale 1 perché almeno uno dei due è attivo.",
+        "Applicando AND con W=1 si ottiene 1. La modifica è concessa."
+      ]
+    ),
+    {
+      consegna: "Un account deve poter modificare un file quando W AND (O OR A) vale uno. W abilita la scrittura, O segnala il proprietario e A l’amministratore. Il byte è valido e inizialmente W=0, O=0, A=0. Determina il numero minimo di bit da attivare e scegli una modifica minima che conceda l’accesso.",
+      campi: [
+        numero("Numero minimo di attivazioni", "2", "I due ingressi della AND finale devono essere entrambi veri."),
+        opzione("Modifica minima sufficiente", ["attivare O e A", "attivare soltanto W", "attivare W e O"], "attivare W e O", "Uno dei bit scelti deve abilitare la scrittura, l’altro deve rendere vera la condizione sul ruolo.")
+      ],
+      svolgimento: [
+        "Partendo da tre zeri bisogna rendere vero W e anche O OR A. Attivare soltanto W lascia falso il ruolo. Attivare soltanto O oppure A lascia falsa l’abilitazione.",
+        "Servono dunque almeno due modifiche. Attivare W e O dà 1 AND (1 OR 0) = 1 e dimostra che due modifiche bastano.",
+        "Anche W e A sarebbe una coppia minima valida. Fra le opzioni offerte, soltanto W e O soddisfa entrambi i requisiti. I bit riservati rimangono a zero."
+      ],
+      quadro: [
+        {"titolo": "Stato iniziale", "celle": [["W", "0"], ["O", "0"], ["A", "0"]], "nota": "Il formato del byte è valido."},
+        {"titolo": "Vincoli indipendenti", "celle": [["scrittura", "W"], ["ruolo", "O OR A"]], "nota": "Ciascun termine della AND finale deve valere uno.", "tipo": "confronto"},
+        {"titolo": "Una soluzione minima", "celle": [["W", "1"], ["O", "1"], ["A", "0"]], "nota": "Un’autorità sul ruolo si aggiunge al bit di scrittura."},
+        {"titolo": "Controllo", "celle": [["modifiche", "2"], ["decisione", "concessa"]], "nota": "Anche la coppia W e A soddisfa la politica."}
+      ]
+    }
+  );
 
   // Questi listati sono dati della consegna, consultabili prima della verifica.
   for (const v of SL.prove['1.6'][4].varianti) v.listato = v.codice;

@@ -240,7 +240,7 @@
       return g+note(k===3?'Blocco '+f(v,0)+' · offset '+f(v,1)+' B':k===2?idx+' successori dalla directory.':'Ogni blocco contiene '+cap+' byte.');
     },
     '6.6/1'(v,k){
-      const b=Number(bracket(v.consegna,/bitmap vale (\d)/)),r=Number(bracket(v.consegna,/trova (\d+) riferimenti/));
+      const b=Number(bracket(v.consegna,/bitmap vale (\d)/)),r=Number(bracket(v.consegna,/trova (\d+) riferiment[oi]/));
       return head('Arresto · confronto delle copie persistenti')+row(58,[['Bitmap[17]',b,k===1],['Riferimenti a 17',r,k===2]])+
         (k>=2&&r?flow(420,115,285,150,true):'')+capsule(166,149,300,k===0?'blocco 17':k===1?(b?'occupato':'libero'):k===2?(r?'raggiunto dagli inode':'irraggiungibile'):f(v,0),k===3?'cell danger':'cell')+note(k===3?f(v,1):'Confronta il bit con i puntatori degli inode sul blocco 17.');
     },
@@ -250,7 +250,7 @@
       ids.forEach((b,i)=>{const x=31+i*78,owner=owners.includes(b),bit=bits0.includes(b);
         g+=tiny(x+24,70,b,'middle')+capsule(x,81,51,owner?'1':'0',owner?'cell active':'cell')+capsule(x,123,51,(k>=1&&owner||k<2&&bit)?'1':'0',k&&owner!==bit?'cell hot':'cell');});
       g+=tiny(530,101,'inode')+tiny(530,143,'bitmap');
-      return g+note(k===0?'Le colonne identificano i numeri di blocco.':k===1?'Imposta i bit dei blocchi raggiungibili segnati liberi.':k===2?'Azzera gli eventuali bit privi di riferimento.':'Impostati '+f(v,0)+' bit, azzerati '+f(v,1)+'.');
+      return g+note(k===0?'Le colonne identificano i numeri di blocco.':k===1?'Imposta i bit dei blocchi raggiungibili segnati liberi.':k===2?'Azzera gli eventuali bit privi di riferimento.':'Aggiornamento: '+f(v,0)+' bit a 1, '+f(v,1)+' bit a 0.');
     },
     '6.6/3'(v,k){
       const committed=v.consegna.startsWith('Tutti');
@@ -306,9 +306,111 @@
       return g+tiny(25,219,k===3?'L’attribuzione riguarda l’account registrato.':k===2?'Righe mantenute '+f(v,0)+' · richieste concesse '+f(v,1)+'.':'Prima il tempo, poi l’account e l’oggetto.');
     }
   });
+  // Casi in cui la relazione spaziale o temporale è parte del ragionamento.
+  const figureCorrezione={
+    pareggio(d,k){
+      const ox=65, oy=190, sx=10, sy=24;
+      const costo=(i,p)=>d.ricerca[i]+p*d.miss[i]/100;
+      const y=(i,p)=>oy-costo(i,p)*sy;
+      const pari=(d.ricerca[1]-d.ricerca[0])*100/(d.miss[0]-d.miss[1]);
+      let g=head('Due progetti al variare della penalità')+
+        line(ox,oy,570,oy)+line(ox,oy,ox,46)+tiny(23,49,'ns')+tiny(578,207,'p (ns)','end');
+      [0,10,20,30,40,50].forEach(p=>g+=line(ox+p*sx,oy-3,ox+p*sx,oy+3)+tiny(ox+p*sx,209,p,'middle'));
+      if(k>0){
+        for(let i=0;i<2;i++){
+          g+=line(ox,y(i,0),ox+50*sx,y(i,50),i?'wire':'wire live')+tiny(580,y(i,50)+5,i?'B':'A');
+        }
+      }
+      if(k>=2){
+        g+=line(ox+pari*sx,oy,ox+pari*sx,y(0,pari),'wire live')+rect(ox+pari*sx-4,y(0,pari)-4,8,8,'cell hot')+
+          tiny(ox+pari*sx+7,y(0,pari)-8,'p = '+pari);
+      }
+      if(k===3){
+        for(let i=0;i<2;i++)g+=rect(ox+d.penalita*sx-4,y(i,d.penalita)-4,8,8,'cell hot');
+      }
+      return g+tiny(24,239,k===3?'A 40 ns si sceglie la retta più bassa.':'In orizzontale varia la penalità e in verticale si legge il costo medio.');
+    },
+    finestra(d,k){
+      const n=[1,2,3,4][k],inizio=d.pagine.length-n,uniche=new Set(d.pagine.slice(inizio));
+      let g=head('Quanto si può allargare la finestra finale?');
+      d.pagine.forEach((p,i)=>{
+        const x=36+i*113;
+        g+=tiny(x+48,93,'lettura '+(i+1),'middle')+capsule(x,109,96,p,i>=inizio?'cell hot':'cell');
+      });
+      const x=36+inizio*113,dx=(n-1)*113+96;
+      g+=path('M'+x+' 150v11h'+dx+'v-11','wire live');
+      g+=row(175,[['Riferimenti inclusi',n],['Pagine distinte',[...uniche].join(', ')],['Frame disponibili',d.frame]]);
+      return g;
+    },
+    permesso(d,k){
+      const limite=(Math.floor(d.primo/d.pagina)+1)*d.pagina,taglio=limite-d.primo;
+      let g=head('Lettura a cavallo di una pagina protetta');
+      for(let j=0;j<d.lunghezza;j++){
+        const x=32+j*72;
+        g+=capsule(x,90,68,hex(d.primo+j),k&&j<taglio?'cell active':k>=2?'cell danger':'cell');
+      }
+      const x=30+taglio*72;
+      g+=line(x,66,x,152,'wire live')+tiny(33,66,'pagina leggibile')+tiny(x+8,151,'seconda pagina');
+      if(k>=2)g+=tiny(x+10,66,'lettura vietata');
+      return g+tiny(30,196,k===3?'Controllo preventivo sull’intervallo completo: richiesta respinta.':k===2?'L’indirizzo al confine deve superare una propria verifica.':k===1?'La prima parte arriva fino all’ultimo byte della pagina 5.':'Gli otto riquadri rappresentano gli otto byte virtuali richiesti.');
+    },
+    sentinella(d,k){
+      let g=head('RAX dopo la scrittura della sentinella')+tiny(230,71,'bit 63…32','middle')+tiny(451,71,'bit 31…0','middle');
+      [['MOV EAX, −1','00000000'],['MOV RAX, −1','FFFFFFFF']].forEach(([ins,hi],i)=>{
+        const y=88+i*55;
+        g+=tiny(24,y+20,ins)+capsule(142,y,173,k>=2?hi:'?',k>=2?'cell hot':'cell')+
+          capsule(324,y,173,k>=1?'FFFFFFFF':'?',k===1?'cell active':'cell');
+      });
+      return g+tiny(25,219,k===3?'Nel ramo valido il PA 0x1A021 torna invece con la metà alta a zero.':
+        k===2?'Le metà superiori distinguono le due scritture.':k===1?'Il controllo limitato a EAX vede gli stessi otto simboli F.':'Il test proposto confronta soltanto la metà destra.');
+    },
+    spazio(d,k){
+      let g=head('La chiave della TLB e il cambio di processo')+
+        row(49,[['Spazio corrente','B'],['VPN richiesta',d.pagina],['Voce in TLB','A / '+d.pagina]]);
+      g+=box(34,147,218,56,'Vecchia traduzione','frame '+d.vecchio,k===1?'cell danger':'cell')+
+        box(377,147,218,56,'Tabella di B',k>=2?'frame '+d.nuovo:'?',k>=2?'cell active':'cell');
+      if(k===1)g+=flow(327,110,155,142,true);
+      if(k>=2)g+=flow(327,110,484,142,true);
+      return g+tiny(24,236,k===3?'ASID e VPN devono identificare insieme la traduzione utilizzata.':k===1?'Il falso hit consegna il frame dello spazio A.':'Segui la richiesta di B, che usa la propria tabella.');
+    },
+    catena(d,k){
+      let g=head('Quando una catena FAT torna su un blocco');
+      const xs=[29,178,327,476],y=95;
+      d.catena.forEach((v,i)=>g+=capsule(xs[i],y,100,v,i===3&&k<3?'cell off':k?'cell active':'cell'));
+      if(k)g+=flow(130,110,173,110,true)+flow(279,110,323,110,true);
+      if(k===2)g+=path('M375 130v30H228v-29','wire live')+travel('M375 130v30H228v-29')+tiny(286,185,'ciclo','middle');
+      if(k===3)g+=flow(428,110,471,110,true);
+      return g+tiny(29,222,k===3?'La sola voce modificata è FAT[2] e il blocco 9 chiude la catena.':k===2?'Il quarto passo raggiunge una seconda volta il blocco 10.':'I numeri nei riquadri identificano blocchi fisici.');
+    },
+    redoInverso(d,k){
+      let g=head('Risali dal disco ai commit delle due transazioni');
+      for(let i=0;i<2;i++){
+        const y=49+i*76,t=['T1 · A','T2 · B'][i],resta=d.iniziali[i]===d.finali[i];
+        g+=box(22,y,121,52,t+' prima',d.iniziali[i])+box(165,y,122,52,'Immagine redo',d.immagini[i])+
+          box(312,y,121,52,'Dopo',d.finali[i],k===i+1?'cell hot':'cell')+
+          box(465,y,138,52,'Commit',k>=i+1?(resta?'assente':'durevole'):'?',k>=i+1?'cell active':'cell');
+      }
+      return g+tiny(24,224,k===3?'Una nuova assegnazione di B = 21 conserva la coppia osservata.':'Confronta il valore finale con quello previsto da ciascun record.');
+    },
+    auditConfronto(d,k){
+      let g=head('Un’affermazione alla prova delle righe del registro');
+      ['Minuto','Account','Operazione','Esito'].forEach((t,i)=>g+=tiny([35,119,242,443][i],64,t));
+      d.righe.forEach((r,j)=>{
+        const y=80+39*j,focus=k===1&&j===0||k===2&&j>0||k===3&&j===0;
+        g+=rect(24,y,585,30,focus?'cell hot':'cell',2);
+        r.forEach((t,i)=>g+=tiny([35,119,242,443][i],y+19,t));
+      });
+      return g+tiny(25,227,k===3?'Per ada al minuto 2 risulta un tentativo respinto.':k===2?'Le altre righe descrivono un’operazione o un account differente.':'Verifica la frase «ada ha modificato tesi al minuto 2».');
+    }
+  };
+
   // Un nuovo fotogramma fa emergere il disegno anche quando il cambiamento
   // consiste in una classificazione, senza trasporto fra due componenti.
   Object.entries(scenes).forEach(([id,draw])=>{
-    SL.sceneProve[id]=(v,k)=>'<g'+(k?' class="reveal"':'')+'>'+draw(v,k)+'</g>';
+    SL.sceneProve[id]=(v,k)=>{
+      const d=v.figuraCorrezione;
+      const figura=d?figureCorrezione[d.tipo](d,k):draw(v,k);
+      return '<g'+(k?' class="reveal"':'')+'>'+figura+'</g>';
+    };
   });
 })();

@@ -83,15 +83,18 @@
     return p.map(([k,v])=>'<button type="button" class="chip" data-case="'+k+'">'+v+'</button>').join('');
   }
   function controls(s,unit){
-    const r=traduci(s);
-    return '<section class="panel"><h2 id="inizio-attivita" tabindex="-1">Parametri</h2><form id="setparams"><div class="fields">'+
-    '<label>Indirizzo virtuale<input id="addr" value="'+H(s.va)+'" autocomplete="off" spellcheck="false"></label>'+
-    '<label>Pagina<select id="pagebits">'+[10,11,12,13,14].map(b=>'<option value="'+b+'"'+(s.b===b?' selected':'')+'>'+2**(b-10)+' KiB · '+b+' bit</option>').join('')+'</select></label>'+
-    '<label>Numero di voci<input id="length" type="number" min="1" max="16" value="'+s.table.length+'"></label>'+
-    (unit===4?'<label>Byte da leggere<select id="width">'+[1,2,4,8].map(v=>'<option'+(v===s.width?' selected':'')+'>'+v+'</option>').join('')+'</select></label>':'')+
-    (unit===2?'<label>Formato<select id="format"><option value="bit">PFN e bit valido</option><option value="diretto"'+(s.format==='diretto'?' selected':'')+'>PFN diretto</option></select></label>':'')+
-    '<button class="btn" type="submit">Applica</button></div><div class="error-msg" id="paramerr" role="alert"></div></form>'+
-    '<div class="presets">'+presets(unit)+'</div><details class="unitentry spaced"><summary>Modifica una voce della tabella</summary><form id="setcell"><div class="fields spaced"><label>Indice<select id="cellidx">'+s.table.map((_,i)=>'<option value="'+i+'"'+(BigInt(i)===r.vpn?' selected':'')+'>'+i+'</option>').join('')+'</select></label><label>Valore grezzo<input id="cellvalue" value="'+String(s.table[r.bound?Number(r.vpn):0])+'"></label><button class="btn" type="submit">Scrivi nella tabella</button></div><div class="error-msg" id="cellerr" role="alert"></div></form></details></section>';
+    const r=traduci(s),g=SL.guide['6.3.'+unit];
+    function campo(id,label,html){return '<div class="control-field"><label for="'+id+'">'+E(label)+html+'</label><p class="control-help" id="'+id+'-help">'+E(g.controlli[id])+'</p></div>';}
+    return '<section class="panel"><h2 id="inizio-attivita" tabindex="-1">Parametri</h2>'+SL.introduzioneUnita('6.3.'+unit)+'<form id="setparams"><div class="fields">'+
+      campo('addr','Indirizzo virtuale','<input id="addr" aria-describedby="addr-help" value="'+H(s.va)+'" autocomplete="off" spellcheck="false">')+
+      campo('pagebits','Pagina','<select id="pagebits" aria-describedby="pagebits-help">'+[10,11,12,13,14].map(b=>'<option value="'+b+'"'+(s.b===b?' selected':'')+'>'+2**(b-10)+' KiB · '+b+' bit</option>').join('')+'</select>')+
+      campo('length','Numero di voci','<input id="length" aria-describedby="length-help" type="number" min="1" max="16" value="'+s.table.length+'">')+
+      (unit===4?campo('width','Byte da leggere','<select id="width" aria-describedby="width-help">'+[1,2,4,8].map(v=>'<option'+(v===s.width?' selected':'')+'>'+v+'</option>').join('')+'</select>'):'')+
+      (unit===2?campo('format','Formato','<select id="format" aria-describedby="format-help"><option value="bit">PFN e bit valido</option><option value="diretto"'+(s.format==='diretto'?' selected':'')+'>PFN diretto</option></select>'):'')+
+      '<button class="btn" type="submit">Applica</button></div><div class="error-msg" id="paramerr" role="alert"></div></form><div class="presets">'+presets(unit)+'</div><details class="unitentry spaced"><summary>Modifica una voce della tabella</summary><form id="setcell"><div class="fields spaced">'+
+      campo('cellidx','Indice','<select id="cellidx" aria-describedby="cellidx-help">'+s.table.map((_,i)=>'<option value="'+i+'"'+(BigInt(i)===r.vpn?' selected':'')+'>'+i+'</option>').join('')+'</select>')+
+      campo('cellvalue','Valore grezzo','<input id="cellvalue" aria-describedby="cellvalue-help" value="'+String(s.table[r.bound?Number(r.vpn):0])+'">')+
+      '<button class="btn" type="submit">Scrivi nella tabella</button></div><div class="error-msg" id="cellerr" role="alert"></div></form></details></section>';
   }
   function splitBody(s,step,unit){
     const r=traduci(s),ph=phases(s),i=Math.min(step,ph.length-1);
@@ -152,6 +155,8 @@
       max=state.max;step=Math.min(step,max);
       $('special-graphic').innerHTML=SL.disegno(state.graphic,state.stepTitle);
       SL.anima($('special-graphic'),forward);
+      const esito=document.querySelector('[data-guida-esito]');
+      if(esito)esito.hidden=SL.parametri(s)!==SL.parametri(defaultState);
       const r=traduci(s);
       const access=unit===4?SL.intervalli(s):null;
       const target=unit===4?(access.overflow?['Esito dell’intervallo a 32 bit','oltre il limite']:['Numero di pagine virtuali coperte dalla richiesta',access.segments.length]):
@@ -169,6 +174,13 @@
     function refresh(){
       player.stop();
       $('parampanel').innerHTML=controls(s,unit);
+      const segnalaModifica=()=>{
+        player.stop();
+        $('paramerr').textContent='Premi «Applica» per ricalcolare la traduzione con i dati inseriti.';
+      };
+      $('setparams').oninput=segnalaModifica;
+      $('setparams').onchange=segnalaModifica;
+      $('cellvalue').oninput=()=>{player.stop();$('cellerr').textContent='Conferma il valore con «Scrivi nella tabella».';};
       $('setparams').onsubmit=e=>{
         e.preventDefault();
         try{
@@ -179,7 +191,7 @@
           step=0;refresh();
         }catch(err){$('paramerr').textContent=err.message;}
       };
-      $('cellidx').onchange=()=>{$('cellvalue').value=String(s.table[Number($('cellidx').value)]);};
+      $('cellidx').onchange=()=>{$('cellvalue').value=String(s.table[Number($('cellidx').value)]);$('cellerr').textContent='';};
       $('setcell').onsubmit=e=>{
         e.preventDefault();
         try{const val=intero($('cellvalue').value);if(val>32767n)throw Error('Scegli una voce da 0 a 32767.');
@@ -192,7 +204,7 @@
     SL.after=()=>{player=SL.filmPlayer($('film-special'),()=>step,()=>max,(n,f)=>{step=n;redraw(f);});guess=SL.previsione($('guess-special'));refresh();$('reset').onclick=()=>{s=unit===4?SL.scenari('confine'):SL.iniziale();step=0;refresh();};$('share').onclick=e=>SL.share(e.currentTarget);};
     const targetEx=[1,13,17,19][unit-1],u=SL.real.units[unit-1];
     return '<div class="wrap">'+SL.bread('<a href="#mappa/6.3">6.3 · Traduzione degli indirizzi</a> / '+unit)+SL.heading(E(u.title))+
-      '<div class="layout">'+SL.sidebar(unit)+'<div class="body"><div class="toolrow"><span class="label">Esperimento 6.3.'+unit+'</span><div class="examples"><button id="reset" class="chip">Ripristina esempio</button> <button id="share" class="chip">Condividi stato</button></div></div>'+SL.guidaUnita(u.id,u.experiment,u.check)+'<div id="parampanel"></div><section class="panel"><div id="guess-special">'+SL.previsioneForm()+'</div><div id="special-graphic"></div><div id="film-special">'+SL.filmBar()+'</div><div id="simout"></div></section><a class="btn" href="#esercitazioni/6.3/'+targetEx+'">Passa alle esercitazioni →</a></div></div></div>';
+      '<div class="layout">'+SL.sidebar(unit)+'<div class="body"><div class="toolrow"><span class="label">Esperimento 6.3.'+unit+'</span><div class="examples"><button id="reset" class="chip">Ripristina esempio</button> <button id="share" class="chip">Condividi stato</button></div></div>'+SL.guidaUnita(u.id)+'<div id="parampanel"></div><section class="panel"><div id="guess-special">'+SL.previsioneForm()+'</div>'+SL.letturaUnita(u.id)+'<div id="special-graphic"></div><div id="film-special">'+SL.filmBar()+'</div><div id="simout"></div></section>'+SL.esitoUnita(u.id)+'<a class="btn" href="#esercitazioni/6.3/'+targetEx+'">Passa alle esercitazioni →</a></div></div></div>';
   }
   SL.laboratorio=laboratorio;
 })();

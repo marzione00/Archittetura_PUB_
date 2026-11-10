@@ -5,69 +5,44 @@ SL.catalogo.push({
   "units": [
     {
       "id": "2.3.1",
-      "title": "Indirizzi, valori e ampiezza degli accessi",
-      "experiment": "Lascia l’offset a 4. Scegli in successione 1, 2 e 4 byte e ricostruisci EAX leggendo le celle a indirizzi crescenti.",
-      "skill": "Distinguere indirizzo e contenuto",
-      "check": "Il primo byte conserva peso uno in tutte le letture. Allargando l’accesso si aggiungono i contributi dei byte successivi con pesi 256, 256² e 256³."
+      "title": "Indirizzi, valori e ampiezza degli accessi"
     },
     {
       "id": "2.3.2",
-      "title": "Formare un indirizzo efficace",
-      "experiment": "Mantieni la base e l’indice iniziali, cambia la scala da 4 a 8 e confronta l’offset netto. Ripeti modificando soltanto lo spiazzamento.",
-      "skill": "Valutare un indirizzo composto",
-      "check": "La scala moltiplica l’indice. Lo spiazzamento si somma in byte dopo il prodotto e sposta l’indirizzo finale della stessa quantità."
+      "title": "Formare un indirizzo efficace"
     },
     {
       "id": "2.3.3",
-      "title": "Array e matrici contigue",
-      "experiment": "Seleziona riga 2 e colonna 3. Spostati di una colonna e poi, tornando alla colonna 3, di una riga. Confronta gli indirizzi.",
-      "skill": "Calcolare l’offset in ordine per righe",
-      "check": "Passare alla colonna seguente aggiunge la dimensione di un intero. Passare alla riga seguente aggiunge la dimensione di cinque interi perché la matrice ha cinque colonne."
+      "title": "Array e matrici contigue"
     },
     {
       "id": "2.3.4",
-      "title": "Strutture, allineamento e riempimento",
-      "experiment": "Seleziona la struttura di indice 1. Scambia l’ordine di char e int e confronta il riempimento interno, quello in coda e il tipo del secondo membro.",
-      "skill": "Misurare il padding tra campi",
-      "check": "Con char davanti, il riempimento precede int. Con int davanti, il riempimento segue char. Nei due casi il passo dell’array rispetta lo stesso allineamento."
+      "title": "Strutture, allineamento e riempimento"
     },
     {
       "id": "2.3.5",
-      "title": "Validità degli oggetti e aliasing",
-      "experiment": "Mantieni p sull’elemento 2. Prova q sugli indici 2, 1 e 4, confrontando l’autorizzazione alla scrittura e il valore poi letto attraverso p.",
-      "skill": "Verificare le precondizioni di accesso",
-      "check": "La scrittura influenza la lettura da p quando i puntatori designano la stessa cella. Con q all’indice 4, il controllo riconosce il limite e salta la scrittura."
+      "title": "Validità degli oggetti e aliasing"
     },
     {
       "id": "2.3.6",
-      "title": "Codificare e riconoscere i calcoli di indirizzo",
-      "experiment": "Lascia RCX a 3 e cambia la scala. Confronta il campo scala del byte SIB e l’indirizzo. Poi varia RCX a scala fissa.",
-      "skill": "Decodificare l’indirizzamento scalato",
-      "check": "Cambiare scala modifica sia i bit dell’istruzione sia l’indirizzo efficace. Cambiare il contenuto di RCX modifica soltanto l’indirizzo calcolato all’esecuzione."
+      "title": "Codificare e riconoscere i calcoli di indirizzo"
     },
     {
       "id": "2.3.7",
       "title": "Problemi svolti",
-      "experiment": "Con base 0x2000 e interi di quattro byte, indica il primo byte dell’elemento di indice 7 e ricostruisci il calcolo sulla striscia di memoria.",
-      "skill": "Convertire un indice di array in un indirizzo",
-      "check": "L’indice conta gli elementi che precedono quello scelto. Moltiplicandolo per il passo si ottiene lo spostamento in byte da sommare alla base.",
       "kind": "esercizi"
     },
     {
       "id": "2.3.8",
       "title": "Esercizi",
-      "experiment": "Passa da «Scrivere usando un indirizzo calcolato» a «Due letture per seguire un puntatore». Annota per ogni accesso l’indirizzo, il numero di byte e il contenuto trasferito.",
-      "skill": "Separare indirizzo della voce, puntatore letto e dato finale",
-      "check": "L’indirizzo di una voce e il puntatore memorizzato nella voce compaiono in passi diversi. Quel puntatore può poi fornire la base per una seconda lettura.",
-      "kind": "esercizi"
+      "kind": "esercizi",
+      "provaIniziale": 2
     },
     {
       "id": "2.3.9",
       "title": "Soluzioni",
-      "experiment": "Nello svolgimento «Caricare e interpretare una word» ricomponi i due byte, poi confronta MOVZX e MOVSX per entrambe le tracce.",
-      "skill": "Verificare le estensioni di una word little-endian",
-      "check": "MOVZX riempie di zeri i bit aggiunti. MOVSX replica il bit 15. Le due estensioni coincidono quando quel bit è zero e divergono quando vale uno.",
-      "kind": "soluzioni"
+      "kind": "soluzioni",
+      "provaIniziale": 1
     }
   ],
   "pwn": [

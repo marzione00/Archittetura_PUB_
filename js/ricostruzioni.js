@@ -43,19 +43,43 @@
     return {unlock(a){locked=false;answers=a.slice();draw();},stop:player.stop};
   }
   function chapterReplayBox(c,sol){
-    return '<section class="panel chapter-film"><h2 id="inizio-attivita" tabindex="-1">'+(sol?'Ripercorri uno svolgimento':'Prova una previsione')+'</h2><div class="fields exp-controls"><label>Esercizio<select data-which-ex>'+SL.allExercises(c).map((x,i)=>'<option value="'+i+'">'+(i+1)+' · '+E(x.titolo)+'</option>').join('')+'</select></label><label>Traccia<select data-which-v><option value="0">Traccia 1</option><option value="1">Traccia 2</option></select></label></div><div data-task></div></section>';
+    const u=c.units.find(u=>sol?u.kind==='soluzioni':u.kind==='esercizi'&&!/svolt/i.test(u.title));
+    const iniziale=u.provaIniziale||1,variante=(u.tracciaIniziale||1)-1,items=SL.allExercises(c);
+    return '<section class="panel chapter-film"><h2 id="inizio-attivita" tabindex="-1">'+(sol?'Ripercorri uno svolgimento':'Prova una previsione')+'</h2>'+SL.introduzioneUnita(u.id)+'<p class="esempio-riferimento">La guida di questa unità sviluppa l’esercizio '+iniziale+' · '+E(items[iniziale-1].titolo)+', '+E(SL.titoloTraccia(c.id,iniziale,variante))+'. Puoi ripristinarlo con il pulsante sottostante oppure scegliere un’altra traccia per esercitarti.</p><div class="fields exp-controls"><label>Esercizio<select data-which-ex>'+items.map((x,i)=>'<option value="'+i+'">'+(i+1)+' · '+E(x.titolo)+'</option>').join('')+'</select></label><label>Traccia<select data-which-v><option value="0">Traccia 1</option><option value="1">Traccia 2</option></select></label></div><button type="button" class="chip" data-esempio-guida>Carica l’esempio guidato</button>'+SL.letturaUnita(u.id)+'<div data-task></div></section>';
   }
   function mountChapter(c,sol,params){
     const host=document.querySelector('.chapter-film'),items=SL.allExercises(c);
     const which=host.querySelector('[data-which-ex]'),vi=host.querySelector('[data-which-v]'),body=host.querySelector('[data-task]');
-    const first=Number(params?.get('es')||1)-1;
-    which.value=String(Number.isInteger(first)&&first>=0&&first<items.length?first:0);
-    vi.value=params?.get('v')==='1'?'1':'0';
+    const unita=c.units.find(u=>sol?u.kind==='soluzioni':u.kind==='esercizi'&&!/svolt/i.test(u.title));
+    const iniziale=unita.provaIniziale||1;
+    const varianteIniziale=(unita.tracciaIniziale||1)-1;
+    const richiesta=Number(params?.get('es')||iniziale);
+    which.value=String((Number.isInteger(richiesta)&&richiesta>=1&&richiesta<=items.length?richiesta:iniziale)-1);
+    vi.value=params?.has('es')||params?.has('v')?(params.get('v')==='1'?'1':'0'):String(varianteIniziale);
+    const guida=document.querySelector('.guida-unita');
+    const riferimento=document.createElement('details'),titoloRiferimento=document.createElement('summary');
+    riferimento.className='teoria-riferimento';riferimento.dataset.teoriaRiferimento='';
+    titoloRiferimento.textContent='Teoria dell’esempio guidato · '+items[iniziale-1].titolo;
+    guida.before(riferimento);riferimento.append(titoloRiferimento,guida);
     let film;
     function show(){
       film?.stop();const n=Number(which.value)+1,j=Number(vi.value),item=items[n-1],v=item.varianti[j],field=v.campi[0];
+      const esempio=n===iniziale&&j===varianteIniziale;
+      riferimento.open=esempio;titoloRiferimento.hidden=esempio;
+      guida.querySelector('.procedura-guida').hidden=!esempio;
+      host.querySelector('.lettura-figura').hidden=!esempio;
+      host.querySelector('[data-introduzione]').hidden=!esempio;
+      const esito=document.querySelector('[data-guida-esito]');if(esito)esito.hidden=!esempio;
+      for(const option of vi.options)option.textContent=SL.titoloTraccia(c.id,n,Number(option.value));
       const go='#esercitazioni/'+c.id+'/'+n+'?v='+j+'&m=guidata';
-      body.innerHTML='<p class="prompt spaced">'+E(v.consegna)+'</p>'+SL.listatoFornito(v)+(!sol?'<div class="scene-prediction"><label>'+E(field.label)+(field.choices?'<select data-short-answer><option value="">Scegli una risposta</option>'+field.choices.map(x=>'<option>'+E(x)+'</option>').join('')+'</select>':'<input data-short-answer autocomplete="off">')+'</label><button type="button" class="btn" data-check-short>Registra la previsione</button><small role="status" data-short-status></small></div>':'')+
+      const principio=n!==iniziale||j!==varianteIniziale?SL.principioProva(v.principio||item.principio):'';
+      let previsione='';
+      if(!sol){
+        const controllo=field.ordine?SL.campoOrdine(field,' data-short-answer'):'<label>'+E(field.label)+(field.choices?'<select data-short-answer><option value="">Scegli una risposta</option>'+field.choices.map(x=>'<option>'+E(x)+'</option>').join('')+'</select>':'<input data-short-answer autocomplete="off">')+'</label>';
+        previsione='<div class="scene-prediction">'+controllo+'<button type="button" class="btn" data-check-short>Registra la previsione</button><small role="status" data-short-status></small></div>';
+      }
+      const procedura=esempio?'':'<div class="procedura-attiva" data-procedura-attiva><h3>Procedura della traccia scelta</h3><ol><li>Leggi la consegna e applica il principio riportato sopra ai dati del caso.</li><li>'+E(sol?'Premi «Passo successivo» per seguire lo svolgimento.':'Formula la previsione richiesta nel campo «'+field.label+'», poi premi «Registra la previsione».')+'</li><li>Avanza un fotogramma alla volta: confronta i valori disegnati con la spiegazione del passaggio e ricostruisci il calcolo. Nelle fasi finali controlla i risultati dei campi richiesti.</li></ol><p data-lettura-attiva>La figura iniziale rappresenta i dati della consegna. Nei fotogrammi successivi, il titolo e la spiegazione sotto il disegno indicano il passaggio svolto e la variazione dei valori. Usa «Precedente» per confrontare due fasi consecutive.</p></div>';
+      body.innerHTML=principio+procedura+'<p class="prompt spaced">'+E(v.consegna)+'</p>'+SL.listatoFornito(v)+previsione+
         replayMarkup()+'<a class="textlink" href="'+go+'">Apri la prova completa →</a>';
       const grade=c.id==='6.3'?SL.good:SL.correct;
       film=replay(body.querySelector('[data-replay]'),v,SL.sceneProve[c.id+'/'+n],{datiVisibili:true,locked:!sol,reviewFields:true,answers:sol?attempts.get(attemptKey(c.id,n,j)):[],grade});
@@ -67,20 +91,21 @@
           film.unlock([answer]);
         };
       }
-      const hash='#'+(sol?'soluzioni/':'esercitazioni/')+c.id+(n===1&&!j?'':'?es='+n+'&v='+j);
+      const hash='#'+(sol?'soluzioni/':'esercitazioni/')+c.id+(n===iniziale&&j===varianteIniziale?'':'?es='+n+'&v='+j);
       if(location.hash!==hash)history.replaceState(null,'',hash);
     }
-    which.onchange=show;vi.onchange=show;show();
+    which.onchange=show;vi.onchange=show;host.querySelector('[data-esempio-guida]').onclick=()=>{which.value=String(iniziale-1);vi.value=String(varianteIniziale);show();};show();
   }
 
   function problemaSvolto(id){
+    if(!Object.hasOwn(SL.casiSvolti,id))return '';
     const ex=SL.casiSvolti[id],c=SL.unitChapter(id),u=c.units.find(u=>u.id===id);
     const v={consegna:ex.dati,svolgimento:ex.passi.map(x=>x.testo),campi:[]};
     SL.after=()=>{
       const host=$('esempio-animato');const guess=SL.previsione($('previsione-esempio'));guess.set([ex.domanda,ex.risposta,ex.formato],false);
       replay(host,v,(_,k)=>{guess.set([ex.domanda,ex.risposta,ex.formato],k===ex.passi.length);return SL.disegnaCaso(id,k);},{datiVisibili:true,titles:ex.passi.map(x=>x.titolo)});
     };
-    return '<div class="wrap">'+SL.bread('<a href="#mappa/'+c.id+'">Capitolo '+c.id+'</a> / '+id)+SL.heading(E(ex.titolo),'Problema svolto · '+id)+'<div class="layout">'+SL.chapterNav(c,id)+'<div class="body">'+SL.guidaUnita(id,u.experiment,u.check)+'<section class="panel"><h2 id="inizio-attivita" tabindex="-1">Dati iniziali</h2><p class="prompt">'+E(ex.dati)+'</p><div id="previsione-esempio">'+SL.previsioneForm()+'</div><div id="esempio-animato">'+replayMarkup()+'</div></section><a class="btn" href="#esercitazioni/'+c.id+'">Esercitazioni del capitolo →</a></div></div></div>';
+    return '<div class="wrap">'+SL.bread('<a href="#mappa/'+c.id+'">Capitolo '+c.id+'</a> / '+id)+SL.heading(E(ex.titolo),'Problema svolto · '+id)+'<div class="layout">'+SL.chapterNav(c,id)+'<div class="body">'+SL.guidaUnita(id)+'<section class="panel"><h2 id="inizio-attivita" tabindex="-1">Dati iniziali</h2>'+SL.introduzioneUnita(id)+'<p class="prompt">'+E(ex.dati)+'</p><div id="previsione-esempio">'+SL.previsioneForm()+'</div>'+SL.letturaUnita(id)+'<div id="esempio-animato">'+replayMarkup()+'</div></section>'+SL.esitoUnita(id)+'<a class="btn" href="#esercitazioni/'+c.id+'">Esercitazioni del capitolo →</a></div></div></div>';
 
   }
   Object.assign(SL,{replayMarkup,replay,chapterReplayBox,mountChapter,problemaSvolto,registraTentativo:record,dimenticaTentativo:forget});

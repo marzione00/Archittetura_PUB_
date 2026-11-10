@@ -5,54 +5,35 @@ SL.catalogo.push({
   "units": [
     {
       "id": "1.6.1",
-      "title": "Frazioni binarie, scala e precisione",
-      "experiment": "Scegli 5 come numeratore della frazione in ottavi. A ogni raddoppio annota il bit estratto e il resto, poi ripeti con un altro numeratore.",
-      "skill": "Convertire una frazione esatta",
-      "check": "Le tre cifre corrispondono ai pesi 1/2, 1/4 e 1/8. Sommando i pesi attivi si ricostruisce esattamente la frazione iniziale."
+      "title": "Frazioni binarie, scala e precisione"
     },
     {
       "id": "1.6.2",
-      "title": "Il formato IEEE 754",
-      "experiment": "Confronta le parole 7F800000 e 7FC00000. Leggi prima il campo esponente e poi la frazione. Ripeti con 00000001 per esaminare un subnormale.",
-      "skill": "Leggere i campi di binary32",
-      "check": "Due parole con esponente 255 possono avere classi diverse. Con esponente zero cambia anche la regola con cui si interpreta la significanda."
+      "title": "Il formato IEEE 754"
     },
     {
       "id": "1.6.3",
-      "title": "Arrotondamento, distanza tra valori e programmi",
-      "experiment": "Scegli e = 0 e poi e = 1. In ciascun caso confronta 2ᵉ con il suo successore binary32 e sottrai i due valori.",
-      "skill": "Calcolare la spaziatura locale",
-      "check": "Incrementare l’esponente di uno raddoppia la distanza dal successore della potenza di due, anche se le due codifiche del singolo esperimento differiscono ancora di una sola unità."
+      "title": "Arrotondamento, distanza tra valori e programmi"
     },
     {
       "id": "1.6.4",
-      "title": "Dal formato IEEE al percorso dei dati in virgola mobile",
-      "experiment": "Imposta la differenza fra gli esponenti a 23, 24 e 25. Confronta la somma esatta con il valore binary32 scritto dopo l’arrotondamento.",
-      "skill": "Tracciare le fasi di un’addizione floating point",
-      "check": "A un’intera unità dell’ultima posizione il termine aggiunto è rappresentabile. A metà unità interviene la regola del pareggio; al di sotto di metà si sceglie il valore più vicino."
+      "title": "Dal formato IEEE al percorso dei dati in virgola mobile"
     },
     {
       "id": "1.6.5",
       "title": "Problemi svolti",
-      "experiment": "Confronta le due parole con segno zero ed esponente 255. Muoviti dal campo esponente al campo frazione prima di assegnare la classe.",
-      "skill": "Distinguere infinito e NaN",
-      "check": "L’esponente colloca entrambe le parole fra i casi speciali. Il confronto fra frazione nulla e frazione diversa da zero determina le due classi.",
       "kind": "esercizi"
     },
     {
       "id": "1.6.6",
+      "provaIniziale": 5,
       "title": "Esercizi",
-      "experiment": "Apri «Perdita di un incremento in binary32». Calcola la somma intera del listato e scegli il valore rappresentabile che verrà scritto in x.",
-      "skill": "Codificare una potenza di due",
-      "check": "Se due valori binary32 sono equidistanti dalla somma esatta, il bit meno significativo della significanda decide il pareggio. Puoi verificarlo confrontando i due candidati.",
       "kind": "esercizi"
     },
     {
       "id": "1.6.7",
+      "provaIniziale": 4,
       "title": "Soluzioni",
-      "experiment": "Nella soluzione «Decodificare una parola normale binary32» separa segno, esponente e frazione nelle due varianti. Segui la ricostruzione del valore decimale.",
-      "skill": "Spiegare una perdita di precisione",
-      "check": "Al campo esponente va sottratto 127. Il fattore di segno si applica al prodotto fra significanda e potenza di due, anche nel caso della parola negativa.",
       "kind": "soluzioni"
     }
   ],

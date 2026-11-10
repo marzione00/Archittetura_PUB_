@@ -5,47 +5,31 @@ SL.catalogo.push({
   "units": [
     {
       "id": "6.7.1",
-      "title": "Autenticazione e autorizzazione sul fascicolo",
-      "experiment": "Richiedi la modifica del fascicolo prima come studente, poi come docente e infine senza credenziali. Osserva la verifica dell’identità e l’applicazione dei diritti.",
-      "skill": "Distinguere autenticazione e autorizzazione",
-      "check": "L’assenza di credenziali ferma la richiesta prima della regola di ruolo. Con un’identità autenticata, l’esito dipende anche dall’operazione richiesta."
+      "title": "Autenticazione e autorizzazione sul fascicolo"
     },
     {
       "id": "6.7.2",
-      "title": "Controlli sulle directory e sugli oggetti",
-      "experiment": "Concedi la lettura su esiti e confronta «Solo elenco» con «Solo attraversamento» per /corso. Poi nega la lettura sul file, lasciando invariata la directory.",
-      "skill": "Separare ricerca del nome e accesso al file",
-      "check": "Il bit x sulla directory consente di cercare il nome noto. Il diritto di lettura sul file entra in gioco dopo che la ricerca ne ha raggiunto l’inode."
+      "title": "Controlli sulle directory e sugli oggetti"
     },
     {
       "id": "6.7.3",
-      "title": "Cifratura e posizione dell’avversario",
-      "experiment": "Sposta l’osservatore dal disco rimosso all’interfaccia del volume sbloccato. Confronta una sessione autorizzata alla lettura con una a cui la lettura è negata.",
-      "skill": "Definire il perimetro della cifratura a riposo",
-      "check": "Il disco conserva blocchi cifrati. Nel volume sbloccato il sistema dispone della chiave, mentre i permessi determinano se l’account riceve i byte in chiaro."
+      "title": "Cifratura e posizione dell’avversario"
     },
     {
       "id": "6.7.4",
-      "title": "Evidenze di audit e loro interpretazione",
-      "experiment": "Filtra il registro per account e oggetto. Sposta il minuto finale a ridosso di uno degli eventi e confronta righe selezionate, richieste concesse e richieste negate.",
-      "skill": "Interpretare un registro di audit",
-      "check": "Un evento entra nei conteggi solo se soddisfa tutti e tre i criteri. Un rifiuto documenta una richiesta respinta e va distinto da una modifica effettiva."
+      "title": "Evidenze di audit e loro interpretazione"
     },
     {
       "id": "6.7.5",
       "title": "Esercizi",
-      "experiment": "Scegli «Comporre i diritti individuali e di gruppo». Annota le voci applicabili ad Ada nelle due tracce e verifica l’esito della richiesta di modifica.",
-      "skill": "Verificare una decisione di accesso",
-      "check": "Le stesse regole possono produrre esiti diversi a seconda dell’appartenenza al gruppo. La decisione deriva dai diritti effettivamente concessi sull’oggetto.",
-      "kind": "esercizi"
+      "kind": "esercizi",
+      "provaIniziale": 2
     },
     {
       "id": "6.7.6",
       "title": "Soluzioni",
-      "experiment": "Apri «Delimitare una conclusione di audit». Confronta i due filtri e verifica quali righe documentano un accesso concesso e a quale account è attribuito.",
-      "skill": "Motivare la classificazione di un incidente",
-      "check": "I record selezionati permettono di motivare i conteggi e l’attribuzione all’account. L’identità della persona che usava la sessione richiede un riscontro distinto.",
-      "kind": "soluzioni"
+      "kind": "soluzioni",
+      "provaIniziale": 5
     }
   ],
   "pwn": [

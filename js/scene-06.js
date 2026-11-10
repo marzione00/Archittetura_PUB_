@@ -76,7 +76,7 @@
   function pageFault(p,s,k){
     const ram=p.cond==='ram',file=p.cond==='file',valid=ram||file;
     let img=head('Lo stesso accesso può seguire tre percorsi')+token(20,93,106,46,'lettura')+
-      link(128,116,165,116,true)+box(166,82,130,68,'Pagina 2',ram?'P = 1':'P = 0','cell hot');
+      link(128,116,165,116,true)+box(166,82,130,68,'Pagina 2',ram||(file&&k===2)?'P = 1':'P = 0','cell hot');
     const route=ram?0:file?1:2;
     const captions=['frame in RAM','I/O dal file','regione assente'];
     captions.forEach((str,i)=>{
@@ -408,8 +408,6 @@
   SL.moduliAnimati[6]={
     titolo:'Dal byte virtuale all’accesso autorizzato',
     teoria:SL.lezioni['modulo-6'].join(' '),
-    istruzione:'Scegli la pagina di file assente e l’operazione di lettura. Segui il caricamento e il nuovo tentativo. Ripeti con una pagina residente di sola lettura, la sua voce precaricata in TLB e una scrittura.',
-    osservazione:'Il miss richiede due letture di voci. Un hit permette di saltare quelle letture. I permessi memorizzati nella voce possono comunque far respingere la scrittura.',
     domanda:'Quale indirizzo fisico raggiunge la richiesta autorizzata e quale esito dà la richiesta che viola i permessi?',
     previsione:{label:'Indirizzo fisico (0x…) oppure «accesso negato»',valore:(p,s)=>values(s,s.length-1).Esito},
     controlli:[

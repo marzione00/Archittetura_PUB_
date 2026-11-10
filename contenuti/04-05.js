@@ -5,47 +5,31 @@ SL.catalogo.push({
   "units": [
     {
       "id": "4.5.1",
-      "title": "Geometria e latenza meccanica",
-      "experiment": "Imposta 7200 giri/min e mantieni costante il seek. Confronta zero e quattro ottavi di giro residuo, leggendo la latenza al primo byte.",
-      "skill": "Convertire giri al minuto in tempi",
-      "check": "La quota di giro residua si misura dopo il posizionamento della testina. A settore già allineato rimane il solo seek. Con mezzo giro si aggiunge metà periodo."
+      "title": "Geometria e latenza meccanica"
     },
     {
       "id": "4.5.2",
-      "title": "Blocchi logici e prestazioni quantitative",
-      "experiment": "Mantieni LBA, dimensione del blocco, seek e rotazione. Raddoppia i blocchi consecutivi da 8 a 16 e confronta scostamento iniziale e tempo di servizio.",
-      "skill": "Ricavare scostamento e durata di una lettura",
-      "check": "Lo scostamento iniziale dipende dal primo LBA e dalla dimensione del blocco. Raddoppiano i byte e il tempo di trasferimento. Il costo iniziale di accesso si paga una volta."
+      "title": "Blocchi logici e prestazioni quantitative"
     },
     {
       "id": "4.5.3",
-      "title": "Code, scheduling e cache",
-      "experiment": "Parti dal cilindro 40 con cache vuota. Confronta FCFS e SSTF, poi rendi disponibile in cache il blocco sul cilindro 80. Segui le letture rimaste sul disco.",
-      "skill": "Confrontare politiche del disco",
-      "check": "FCFS segue la coda. SSTF ricalcola il cilindro più vicino dopo ogni movimento. Un blocco servito dalla cache scompare dal cammino della testina."
+      "title": "Code, scheduling e cache"
     },
     {
       "id": "4.5.4",
       "title": "Problemi svolti",
-      "experiment": "Ripartisci i 10 000 byte del file in blocchi da 4096 byte. Distingui i byte effettivamente occupati nell’ultimo blocco da quelli assegnati al file.",
-      "skill": "Arrotondare il numero di blocchi",
-      "check": "Sommando lo spazio inutilizzato alla dimensione del file ritrovi un multiplo intero della dimensione del blocco.",
       "kind": "esercizi"
     },
     {
       "id": "4.5.5",
       "title": "Esercizi",
-      "experiment": "Scegli «Calcolare tempo di trasferimento e risposta». Per entrambe le tracce ricava la durata della copia e componi coda, posizionamento e trasferimento.",
-      "skill": "Separare attesa, posizionamento e trasferimento",
-      "check": "La risposta si misura dall’arrivo della richiesta al completamento. Una volta espresso tutto in millisecondi, la somma include anche l’attesa prima del servizio.",
+      "provaIniziale": 4,
       "kind": "esercizi"
     },
     {
       "id": "4.5.6",
       "title": "Soluzioni",
-      "experiment": "Apri «Calcolare gli spostamenti della testina». Ripercorri FCFS e SSTF con la stessa posizione iniziale e somma le distanze tra i cilindri visitati.",
-      "skill": "Ricostruire il cammino della testina",
-      "check": "Nel caso SSTF la richiesta scelta dipende dalla posizione raggiunta al passo precedente. Il cammino totale è la somma dei singoli tratti in valore assoluto.",
+      "provaIniziale": 5,
       "kind": "soluzioni"
     }
   ],

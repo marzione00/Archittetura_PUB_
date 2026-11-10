@@ -1,5 +1,5 @@
 'use strict';
-window.SL = { catalogo: [], lezioni: Object.create(null), esercizi: [], unita: Object.create(null), prove: Object.create(null) };
+window.SL = { catalogo: [], guide: Object.create(null), lezioni: Object.create(null), esercizi: [], unita: Object.create(null), prove: Object.create(null) };
 (() => {
   const max64 = (1n << 64n) - 1n;
   function intero(s) {

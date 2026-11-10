@@ -211,7 +211,7 @@
   });
 
   add('5/1',(v,k)=>{
-    const [msg,fd,code]=group(v,/«([^»]+)» senza carattere di fine riga\. Scrivili su fd (\d+) .* codice (\d+)/);
+    const [msg,fd,code]=group(v,/«([^»]+)» senza carattere di fine riga\. Il programma li scrive su fd (\d+) .* codice (\d+)/);
     return title('Buffer msg · byte ASCII consecutivi')
       +row(53,[...msg],()=>k===2,{h:41})
       +reg(22,141,k===3?'EDI · exit':'RDI · write',k===3?code:k?fd:'?',k===1||k===3,172)
@@ -230,7 +230,7 @@
       +bottom(k===3?'Il suffisso evidenziato viene consegnato a fd 1.':k===1?'Le celle evidenziate contengono i byte restituiti da read.':'Gli offset sono relativi alla base buf.');
   });
   add('5/3',(v,k)=>{
-    const sp=hexes(v)[0],[cap,read,i]=nums(v,/Riserva (\d+) byte sulla pila, poi usa read per caricarvi (\d+) byte.*indice (\d+)/);
+    const sp=hexes(v)[0],[cap,read,i]=nums(v,/riserva (\d+) byte sulla pila, usa read per caricarvi (\d+) byte.*indice (\d+)/);
     return title('Buffer sullo stack · capacità '+cap+' byte, richiesta read '+read+' byte')
       +row(66,Array.from({length:cap},(_,j)=>j<10||j===i?j:'·'),j=>k===1?j<read:k===2&&j===i,{h:39})
       +reg(24,153,'RSP',hex(k===0||k===3?sp:sp-cap),k===1||k===3,164)
@@ -334,7 +334,7 @@
       +bottom(k===0?'EDI = '+a+' · g restituisce '+b+'.':k===1?'Il prologo conserva l’argomento nella locale prima della chiamata.':k===2?'La somma legge '+a+' dalla locale e '+b+' dal ritorno di g.':'Dopo LEAVE e RET, RSP = '+hex(+answer(v,1))+'.');
   });
   add('7/4',(v,k)=>{
-    const [a,b]=nums(v,/Inserisci (\d+) e poi (\d+)/),sp=hexes(v)[0];
+    const [a,b]=nums(v,/inserisce (\d+) e poi (\d+)/),sp=hexes(v)[0];
     return title('Duplicazione della cima · qword da otto byte')
       +stackRow(53,hex(sp-8),k?a:'·',k===3)
       +stackRow(100,hex(sp-16),k===1||k===2?b:'·',k===1)

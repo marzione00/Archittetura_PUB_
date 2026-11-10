@@ -5,69 +5,44 @@ SL.catalogo.push({
   "units": [
     {
       "id": "2.5.1",
-      "title": "Dalla richiesta dell’utente all’ingresso nel kernel",
-      "experiment": "Esegui write con otto byte, poi seleziona getpid. Confronta RAX prima della syscall e al rientro, quindi individua i registri aggiornati durante SYSCALL.",
-      "skill": "Distinguere libreria e kernel",
-      "check": "Prima dell’ingresso RAX seleziona il servizio. Al rientro contiene il numero di byte scritti oppure il PID. La lunghezza del messaggio riguarda solo write."
+      "title": "Dalla richiesta dell’utente all’ingresso nel kernel"
     },
     {
       "id": "2.5.2",
-      "title": "L’ABI delle syscall Linux x86-64",
-      "experiment": "Segui prima l’argomento 4 dal wrapper C all’ingresso nel kernel. Ripeti con l’argomento 3, lasciando invariato il valore intero.",
-      "skill": "Applicare la convenzione delle syscall",
-      "check": "Per l’argomento 4 il wrapper deve trasferire il valore in R10 perché SYSCALL occupa RCX. Per l’argomento 3 entrambe le convenzioni usano lo stesso registro."
+      "title": "L’ABI delle syscall Linux x86-64"
     },
     {
       "id": "2.5.3",
-      "title": "I/O tramite descrittori di file",
-      "experiment": "Richiedi otto byte da un file con cinque byte disponibili e limita la prima write a due byte. Segui RDX prima delle due chiamate e il puntatore dopo write.",
-      "skill": "Gestire letture brevi",
-      "check": "La quantità offerta a write dipende dai byte effettivamente letti. Il puntatore avanza poi dei soli byte accettati da write, lasciando il resto nel buffer."
+      "title": "I/O tramite descrittori di file"
     },
     {
       "id": "2.5.4",
-      "title": "Mappature e sostituzione dell’immagine di processo",
-      "experiment": "Mantieni lo stesso PID e alterna «Eseguibile valido» e «File assente». Segui l’immagine attiva, RIP e l’esito di execve.",
-      "skill": "Interpretare la sostituzione dello spazio di indirizzi",
-      "check": "Il PID identifica lo stesso processo in entrambi i casi. Il successo avvia la nuova immagine. Con ENOENT il programma originario riprende dopo la syscall."
+      "title": "Mappature e sostituzione dell’immagine di processo"
     },
     {
       "id": "2.5.5",
-      "title": "Identità dei descrittori e stato aperto condiviso",
-      "experiment": "Confronta fd 4 ottenuto con dup e fd 4 ottenuto da una seconda open dello stesso file. Mantieni uguali le lunghezze delle due letture.",
-      "skill": "Seguire l’offset condiviso",
-      "check": "Con dup, la prima lettura sposta anche il punto di partenza della seconda. Una seconda open crea un’altra descrizione aperta con un proprio offset."
+      "title": "Identità dei descrittori e stato aperto condiviso"
     },
     {
       "id": "2.5.6",
-      "title": "Dall’ingresso nel programma all’uscita del processo",
-      "experiment": "Confronta i codici richiesti 7 e 263 per la syscall exit. Segui RDI all’ingresso e WEXITSTATUS dopo la raccolta da parte del genitore.",
-      "skill": "Distinguere terminazione e ritorno da funzione",
-      "check": "I due codici differiscono di 256 e hanno gli stessi otto bit bassi. Il genitore osserva quindi lo stesso codice, pur partendo da due valori diversi in RDI."
+      "title": "Dall’ingresso nel programma all’uscita del processo"
     },
     {
       "id": "2.5.7",
       "title": "Problemi svolti",
-      "experiment": "Segui una write che accetta i primi due byte di ABCDE. Prima di avanzare indica da quale cella deve partire la scrittura successiva.",
-      "skill": "Riprendere una scrittura parziale senza duplicare il prefisso",
-      "check": "Il prefisso già emesso precede il nuovo puntatore. Puntatore avanzato e conteggio residuo delimitano esattamente il suffisso ancora da trasferire.",
       "kind": "esercizi"
     },
     {
       "id": "2.5.8",
       "title": "Esercizi",
-      "experiment": "In «Scrivere il suffisso appena letto» confronta capacità del buffer, byte letti e offset iniziale. Poi prova «Recuperare dopo una write breve» per determinare gli argomenti della seconda write.",
-      "skill": "Preparare un intervallo valido per una write",
-      "check": "RSI identifica il primo byte da emettere e RDX il conteggio residuo. In ogni passaggio l’intervallo così descritto resta entro la porzione valida del buffer.",
-      "kind": "esercizi"
+      "kind": "esercizi",
+      "provaIniziale": 2
     },
     {
       "id": "2.5.9",
       "title": "Soluzioni",
-      "experiment": "Nello svolgimento «Interpretare zero al ritorno di read» alterna le due tracce. Leggi il conteggio richiesto prima di interpretare RAX e l’offset finale.",
-      "skill": "Interpretare un ritorno zero insieme al conteggio richiesto",
-      "check": "Sul file ordinario della prova, zero dopo una richiesta positiva indica la fine del file. Con un conteggio richiesto pari a zero lo stesso ritorno è compatibile anche con dati ancora disponibili.",
-      "kind": "soluzioni"
+      "kind": "soluzioni",
+      "provaIniziale": 4
     }
   ],
   "pwn": [

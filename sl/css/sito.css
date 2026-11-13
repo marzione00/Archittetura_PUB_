@@ -244,7 +244,7 @@ main{display:block;outline:none}
 .el-zona.st-att{border-color:var(--ambra)}.el-zona.st-on{border-color:var(--ciano)}.el-zona.st-on .et{color:var(--ciano)}
 svg.linee{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 svg.linee line{stroke:var(--riga2);stroke-width:2;stroke-linecap:round;transition:stroke .35s,opacity .35s}
-svg.linee line.st-att{stroke:var(--ambra)}svg.linee line.st-on{stroke:var(--ciano)}svg.linee line.st-off{opacity:.35}
+svg.linee line.st-att{stroke:var(--ambra)}svg.linee line.st-on{stroke:var(--ciano)}svg.linee line.st-err{stroke:var(--rosso)}svg.linee line.st-off{opacity:.35}
 svg.linee line.tratto{stroke-dasharray:6 6}
 .calcolo{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;min-height:52px;padding:10px 16px;background:var(--pan);border:1px solid var(--riga);font-family:var(--mono)}
 .calcolo small{font-size:11px;letter-spacing:.16em;color:var(--muto)}
@@ -267,7 +267,8 @@ input[type=range]{width:100%;height:28px;accent-color:var(--ambra)}
 
 /* Esercizi */
 .esercizio{display:flex;flex-direction:column;gap:16px}
-.esercizio input[type=text]{width:240px;max-width:100%;height:48px;padding:0 14px;font:500 20px var(--mono);color:var(--chiaro);background:var(--pan);border:1px solid var(--riga2)}
+.esercizio input[type=text]::placeholder{font:400 15px var(--corpo);color:var(--muto);opacity:1}
+.esercizio input[type=text]{width:300px;max-width:100%;height:48px;padding:0 14px;font:500 20px var(--mono);color:var(--chiaro);background:var(--pan);border:1px solid var(--riga2)}
 .esercizio label.campo{display:flex;flex-direction:column;gap:6px;color:var(--testo2);font-size:14px}
 .spunta{display:flex;gap:12px;align-items:flex-start;min-height:44px;color:#e4dbc6}
 .spunta input{width:22px;height:22px;margin-top:2px;accent-color:var(--ciano);flex:none}

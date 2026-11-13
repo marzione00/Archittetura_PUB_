@@ -18,11 +18,11 @@ SL.registra('1.3.4', {
   },
   idea: {
     titolo: 'Il file dichiara, il lettore verifica',
-    termini: ['campo', 'larghezza', 'intestazione', 'validazione', 'cursore'],
+    termini: ['campo', 'larghezza', 'intestazione', 'firma', 'validazione', 'cursore'],
     testo: [
       'Nelle unità precedenti mancava sempre qualcosa: la larghezza dell’immagine, la frequenza del suono. Un formato completo mette queste informazioni dentro il file stesso. Stabilisce quali dati compaiono, in quale ordine e con quanti byte ciascuno. Ogni dato è un [[campo]], e il numero di byte che occupa è la sua [[larghezza]].',
       'Molti formati cominciano con un’[[intestazione]], cioè con un gruppo di campi che descrive quello che segue. L’intestazione di un’immagine dichiara larghezza e altezza in pixel; quella di un suono dichiara frequenza, profondità e canali.',
-      'Spesso i primi byte sono una firma che identifica il formato. Ogni immagine PNG comincia con i byte `89 50 4E 47`, e gli ultimi tre sono le lettere P, N, G in ASCII. Ogni documento PDF comincia con `25 50 44 46`, cioè con i caratteri «%PDF». Il nome del file e la sua estensione sono soltanto un’etichetta scritta all’esterno, mentre la firma fa parte del contenuto.',
+      'Spesso i primi byte sono una [[firma]] che identifica il formato. Ogni immagine PNG comincia con i byte `89 50 4E 47`, e gli ultimi tre sono le lettere P, N, G in ASCII. Ogni documento PDF comincia con `25 50 44 46`, cioè con i caratteri «%PDF». Il nome del file e la sua estensione sono soltanto un’etichetta scritta all’esterno, mentre la firma fa parte del contenuto.',
       'I dati di lunghezza variabile, come un testo, sono preceduti di solito da un campo che ne dichiara la lunghezza: «seguono 4 byte». Il lettore legge quel numero e sa dove finisce il dato e dove comincia il campo successivo.',
       { fig: 'celle', titolo: 'Un messaggio con tipo, lunghezza e contenuto', nota: 'Il primo campo dice che il contenuto è un testo, il secondo che è lungo quattro byte.', celle: [
         { so: 'tipo', v: '01', st: 'amb', gi: 'byte 0' }, { so: 'lunghezza', v: '04', st: 'amb', gi: 'byte 1' }, { so: 'contenuto', v: 'S', st: 'on', gi: 'byte 2' }, { so: '', v: 'A', st: 'on', gi: 'byte 3' }, { so: '', v: 'L', st: 'on', gi: 'byte 4' }, { so: '', v: 'U', st: 'on', gi: 'byte 5' }] },

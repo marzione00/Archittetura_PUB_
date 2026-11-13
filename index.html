@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="sl/css/sito.css">
 </head>
 <body>
-<a class="salta" href="#contenuto">Vai al contenuto</a>
+<a class="salta" href="#contenuto" onclick="event.preventDefault();document.getElementById('contenuto').focus()">Vai al contenuto</a>
 <header class="testa">
   <div class="in">
     <a class="marchio" href="#/" aria-label="SistemiLab, rete del corso"><svg class="sim" width="30" height="30" viewBox="0 0 64 64" aria-hidden="true" style="color:#f2b648"><use href="#sl-cpu"></use></svg><span>Sistemi<b>Lab</b></span></a>
@@ -29,9 +29,12 @@
 <script src="sl/js/simboli.js"></script>
 <script src="sl/dati/corso.js"></script>
 <script src="sl/dati/glossario.js"></script>
+<script src="sl/dati/telemetria.js"></script>
+<script src="sl/dati/macchina.js"></script>
 <script src="sl/js/scena.js"></script>
 <script src="sl/js/laboratorio.js"></script>
 <script src="sl/js/unita.js"></script>
+<script src="sl/js/prova.js"></script>
 <script src="sl/js/rete.js"></script>
 <script src="sl/js/avvio.js"></script>
 </body>

@@ -20,25 +20,26 @@
   const blocchi = (lista, dopo) => lista.map((b) => (typeof b === 'string' ? '<p>' + T(b) + '</p>' : b.fig ? figura(b, dopo) : b.sottotitolo ? '<h3>' + E(b.sottotitolo) + '</h3>' : '')).join('');
 
   // Domanda a scelta con risposta commentata.
-  function scelta(ospite, q) {
-    let presa = null;
+  function scelta(ospite, q, alEsito) {
+    let presa = null, scelte = 0;
     const disegna = () => {
       ospite.innerHTML = '<div class="titolo3">' + T(q.d) + '</div><div class="riga-bottoni">' +
         q.o.map((o, k) => '<button type="button" class="tessera' + (presa === k ? (o.ok ? ' giusta' : ' errata') : '') + '" data-k="' + k + '" aria-pressed="' + (presa === k) + '">' + E(o.t) + '</button>').join('') + '</div>' +
         (presa == null ? '' : '<div class="avviso ' + (q.o[presa].ok ? 'ok' : 'no') + '" role="status"><span class="eti">' + (q.o[presa].ok ? 'CORRETTO' : 'DA RIVEDERE') + '</span><span>' + T(q.o[presa].fb) + '</span></div>');
-      ospite.querySelectorAll('[data-k]').forEach((b) => b.addEventListener('click', () => { presa = Number(b.dataset.k); disegna(); }));
+      ospite.querySelectorAll('[data-k]').forEach((b) => b.addEventListener('click', () => { presa = Number(b.dataset.k); scelte++; disegna(); if (alEsito) alEsito(!!q.o[presa].ok, scelte, 0); }));
     };
     disegna();
   }
 
   // Esercizio a risposta scritta con correttore diagnostico e indizi graduati.
   const norma = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, '').replace(',', '.');
-  function esercizio(ospite, x, n, dopo) {
+  // «opz» serve alle prove di fine capitolo: un occhiello diverso e un avviso a ogni risposta.
+  function esercizio(ospite, x, n, dopo, opz) {
     let esito = null, indizi = 0, tentativi = 0, svolto = false;
     const fig = x.figura ? figura(x.figura, dopo) : '';
-    ospite.innerHTML = '<div class="occhiello">Mettiti alla prova · esercizio ' + n + '</div><h3 class="titolo2" style="font-size:24px">' + T(x.d) + '</h3>' + fig + '<div data-r="corpo" class="colonna" style="gap:14px"></div>';
+    ospite.innerHTML = '<div class="occhiello">' + E((opz && opz.occhiello) || 'Mettiti alla prova · esercizio ' + n) + '</div><h3 class="titolo2" style="font-size:24px">' + T(x.d) + '</h3>' + fig + '<div data-r="corpo" class="colonna" style="gap:14px"></div>';
     const corpo = ospite.querySelector('[data-r="corpo"]');
-    if (x.o) { scelta(corpo, { d: x.guida || 'Scegli la risposta.', o: x.o }); return; }
+    if (x.o) { scelta(corpo, { d: x.guida || 'Scegli la risposta.', o: x.o }, opz && opz.alEsito); return; }
     corpo.innerHTML = '<div class="riga-bottoni" style="align-items:flex-end"><label class="campo">' + E(x.eti || 'La tua risposta') + '<input type="text" autocomplete="off" spellcheck="false" placeholder="' + E(x.segnaposto || '') + '"></label>' +
       '<button type="button" class="bottone primo" data-b="verifica">Verifica</button><button type="button" class="bottone" data-b="indizio"></button><button type="button" class="bottone" data-b="svolgi" hidden>Mostra lo svolgimento</button></div><div data-r="esito"></div><div data-r="indizi" class="colonna" style="gap:8px"></div><div data-r="svolto"></div>';
     const campo = corpo.querySelector('input'), bInd = corpo.querySelector('[data-b="indizio"]'), bSv = corpo.querySelector('[data-b="svolgi"]');
@@ -58,6 +59,7 @@
       if (x.giuste.map(norma).includes(a)) esito = { ok: true, msg: x.ok };
       else { const d = (x.diagnosi || []).find((r) => r.se.map(norma).includes(a)); esito = { ok: false, msg: d ? d.msg : x.altro }; }
       aggiorna();
+      if (opz && opz.alEsito) opz.alEsito(esito.ok, tentativi, indizi);
     };
     corpo.querySelector('[data-b="verifica"]').addEventListener('click', verifica);
     campo.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') verifica(); });
@@ -65,6 +67,8 @@
     bSv.addEventListener('click', () => { svolto = !svolto; bSv.textContent = svolto ? 'Nascondi lo svolgimento' : 'Mostra lo svolgimento'; aggiorna(); });
     aggiorna();
   }
+
+  SL.esercizio = esercizio;
 
   SL.viste.u = (main, r) => {
     const info = SL.trovaUnita(r.a);

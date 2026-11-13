@@ -19,10 +19,12 @@ const TUTTO = process.argv.includes('--tutto');
 const SL = { viste: {}, unita: {}, registra: (id, def) => { SL.unita[id] = def; } };
 const ambiente = vm.createContext({ SL, console });
 const carica = (f) => vm.runInContext(leggi(f), ambiente, { filename: f });
-['sl/js/scena.js', 'sl/dati/corso.js', 'sl/dati/glossario.js'].forEach(carica);
+['sl/js/scena.js', 'sl/dati/corso.js', 'sl/dati/glossario.js', 'sl/dati/telemetria.js', 'sl/dati/macchina.js'].forEach(carica);
 const SIMBOLI = new Set((leggi('sl/js/simboli.js').match(/id=\\?"sl-[a-z0-9-]+/g) || []).map((s) => s.replace(/^.*sl-/, '')));
 const ORDINE = SL.unitaNuove.map((u) => u.id);
 fs.readdirSync(path.join(radice, 'sl/unita')).filter((f) => f.endsWith('.js')).sort().forEach((f) => carica('sl/unita/' + f));
+carica('sl/js/prova.js');
+if (fs.existsSync(path.join(radice, 'sl/prove'))) fs.readdirSync(path.join(radice, 'sl/prove')).filter((f) => f.endsWith('.js')).sort().forEach((f) => carica('sl/prove/' + f));
 
 const errori = [], avvisi = [], note = [];
 // Lo stesso difetto ripetuto su molti casi dello stesso esperimento viene riportato una volta sola, con il conteggio.
@@ -148,12 +150,56 @@ for (const id of ORDINE) {
       if (opz.length < 2) err(id, 'previsione ' + caso + ': meno di due opzioni');
       if (new Set(opz.map((o) => String(o[0]))).size !== opz.length) err(id, 'previsione ' + caso + ': opzioni ripetute');
       if (!opz.some((o) => o[0] === c.esito)) err(id, 'previsione ' + caso + ': l’esito ' + JSON.stringify(c.esito) + ' non è fra le opzioni');
-      if (lab.confronto) opz.forEach((o) => { const t = lab.confronto(o[0], c.esito, p); if (typeof t !== 'string' || /undefined|\[object /.test(t) || (/NaN/.test(t) && !(u.idea.termini || []).includes('nan'))) err(id, 'confronto ' + caso + ': testo non valido'); unaVolta('prosa', 'confronto', t); });
+      if (lab.confronto) opz.forEach((o) => { const t = lab.confronto(o[0], c.esito, p); if (typeof t !== 'string' || /undefined|\[object /.test(t) || (/NaN/.test(t) && !(u.idea.termini || []).includes('nan') && !JSON.stringify(u.idea.testo).includes('[[nan'))) err(id, 'confronto ' + caso + ': testo non valido'); unaVolta('prosa', 'confronto', t); });
     }
   }
   statistiche.push([id, casi.length, min, max, domande ? 'sì' : 'no']);
 }
 Object.keys(SL.unita).forEach((id) => { if (!ORDINE.includes(id)) err(id, 'unità presente fra i file ma assente da sl/dati/corso.js'); });
+
+/* ---------- prove di fine capitolo ---------- */
+// Ogni prova viene composta in tutte le 999 varianti: struttura delle domande, risposte, testi.
+const VARIANTI = 999, statProve = [];
+const capitoli = SL.corso.flatMap((m) => m.capitoli);
+Object.keys(SL.prove).forEach((cap) => { const c = capitoli.find((x) => x.id === cap); if (!c || !c.prova) err('prova ' + cap, 'la prova esiste ma il capitolo non la dichiara in sl/dati/corso.js'); });
+for (const c of capitoli.filter((x) => x.prova)) {
+  const id = 'prova ' + c.id, def = SL.prove[c.id];
+  if (!def) { err(id, 'manca il file sl/prove/' + c.id + '.js'); continue; }
+  const visti = new Set(), unaVolta = (genere, dove, s) => { if (typeof s === 'string' && !visti.has(s)) { visti.add(s); metti(id, genere, dove, s); } };
+  const unitaCap = (c.unita || []).map((u) => u.id), coperte = new Set(), distinte = def.domande.map(() => new Set());
+  const normaR = (x) => String(x == null ? '' : x).trim().toLowerCase().replace(/\s+/g, '').replace(',', '.');
+  for (let v = 1; v <= VARIANTI; v++) {
+    let domande;
+    try { domande = SL.componiProva(c.id, v); } catch (e) { err(id, 'variante ' + v + ': ' + e.message); continue; }
+    domande.forEach((q, k) => {
+      const dove = 'domanda ' + (k + 1);
+      distinte[k].add(q.d + '|' + (q.o ? q.o.map((o) => o.t).sort().join('/') : ''));
+      if (!unitaCap.includes(q.u)) err(id, dove + ': l’unità indicata (' + q.u + ') non appartiene al capitolo'); else coperte.add(q.u);
+      const tutti = [q.d, q.ok, q.altro, q.guida].concat(q.indizi || [], q.svolgimento || [], (q.diagnosi || []).map((g) => g.msg), (q.o || []).flatMap((o) => [o.t, o.fb]), q.giuste || []);
+      tutti.forEach((t) => { if (t != null && (typeof t !== 'string' || /undefined|\[object |\bnull\b|Infinity/.test(t) || (/NaN/.test(t) && !/^1\.(6\.2|7\.7)$/.test(q.u)))) err(id, dove + ', variante ' + v + ': testo non valido «' + String(t).slice(0, 60) + '»'); });
+      unaVolta('domanda', dove, q.d);
+      if (q.o) {
+        if (q.o.filter((o) => o.ok).length !== 1) err(id, dove + ', variante ' + v + ': serve una e una sola opzione corretta');
+        if (q.o.length < 3) err(id, dove + ': servono almeno tre opzioni');
+        if (new Set(q.o.map((o) => o.t)).size !== q.o.length) err(id, dove + ', variante ' + v + ': opzioni ripetute');
+        q.o.forEach((o) => { unaVolta('breve', dove + ' opzione', o.t); unaVolta('prosa', dove + ' riscontro', o.fb); if (typeof o.fb !== 'string' || !o.fb) err(id, dove + ': opzione senza commento'); });
+      } else {
+        if (!q.giuste || !q.giuste.length) err(id, dove + ', variante ' + v + ': mancano le risposte corrette');
+        if (!q.indizi || q.indizi.length !== 3) err(id, dove + ': gli indizi devono essere tre');
+        if (!q.svolgimento || !q.svolgimento.length) err(id, dove + ': manca lo svolgimento');
+        if (typeof q.ok !== 'string' || typeof q.altro !== 'string' || !q.segnaposto) err(id, dove + ': mancano commento, risposta generica o segnaposto');
+        const giuste = new Set(q.giuste.map(normaR));
+        (q.diagnosi || []).forEach((g) => g.se.forEach((x) => { if (giuste.has(normaR(x))) err(id, dove + ', variante ' + v + ': la diagnosi copre una risposta corretta (' + x + ')'); }));
+        unaVolta('prosa', dove, q.ok); unaVolta('prosa', dove, q.altro); unaVolta('breve', dove, q.segnaposto);
+        (q.diagnosi || []).forEach((g) => unaVolta('prosa', dove + ' diagnosi', g.msg));
+        q.indizi.forEach((t) => unaVolta('prosa', dove + ' indizio', t));
+        q.svolgimento.forEach((t) => unaVolta('prosa', dove + ' svolgimento', t));
+      }
+    });
+  }
+  unitaCap.forEach((u) => { if (!coperte.has(u)) err(id, 'nessuna domanda riguarda l’unità ' + u); });
+  statProve.push([c.id, def.domande.length, Math.min.apply(null, distinte.map((x) => x.size)), distinte.reduce((a, x) => a + x.size, 0)]);
+}
 
 // Testi della mappa del corso.
 SL.corso.forEach((m) => { metti('corso', 'breve', 'modulo ' + m.r, m.nome); simboliUsati('corso', 'modulo ' + m.r, m.sim); m.capitoli.forEach((c) => {
@@ -198,7 +244,17 @@ const ACCETTATI = {
   'terminale': 'prima dell’unità 1.1.6 è soltanto il nome di un simbolo',
   'canale': 'nel capitolo 1.1 indica il canale di uscita di un programma, spiegato sul posto; il canale di un dato arriva nell’unità 1.3.1',
   'larghezza': 'nell’unità 1.3.1 è la larghezza di un’immagine in pixel, nel senso comune; la larghezza di un campo arriva nell’unità 1.3.4',
-  'cursore': 'nell’unità 1.2.2 è il segnaposto che scorre sui pesi, descritto sul posto; il cursore di lettura arriva nell’unità 1.3.4'
+  'cursore': 'nell’unità 1.2.2 è il segnaposto che scorre sui pesi, descritto sul posto; il cursore di lettura arriva nell’unità 1.3.4',
+  'immediato': 'nell’unità 0.1 è l’aggettivo comune («così breve da sembrare immediato»); l’immediato di un’istruzione arriva nell’unità 2.1.1',
+  'operando': 'nelle unità 1.4.3 e 1.5.6 indica i valori su cui lavora un operatore del C, nel senso comune dell’aritmetica; l’operando di un’istruzione arriva nell’unità 2.1.2',
+  'indice': 'nel capitolo 2.2 è uno dei termini dell’espressione base + indice × scala + spiazzamento, presentata sul posto; l’indice di un elemento di un array arriva nell’unità 2.3.2',
+  'struttura': 'nelle unità 1.1.4 e 1.7.7 è la parola comune («struttura ad albero», «controlli di struttura»); la struttura del C arriva nell’unità 2.3.4',
+  'pila': 'nell’unità 2.5.4 è nominata fra le zone dell’immagine di un processo, come zona di lavoro; il suo funzionamento arriva nell’unità 2.6.1',
+  'rsp': 'nell’unità 2.1.2 compare soltanto nell’elenco dei nomi dei registri generali; il suo ruolo arriva nell’unità 2.6.1',
+  'ret': 'prima dell’unità 2.6.2 compare in fondo ai listati come l’istruzione con cui la funzione torna al chiamante; il suo meccanismo sulla pila arriva nell’unità 2.6.2',
+  'rbp': 'prima dell’unità 2.7.1 compare soltanto negli elenchi dei registri, nelle unità 2.1.2 e 2.6.2; il suo ruolo arriva nell’unità 2.7.1',
+  'pila ombra': 'l’unità 2.7.4 la annuncia fra le difese con un rinvio esplicito all’unità 2.7.6, che la spiega',
+  'percorso dati': 'nell’unità 1.1.4 le due parole sono accostate per caso: «il percorso dati/voti.txt» indica un file nella directory dati'
 };
 const piano = (s) => s.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2').replace(/\[\[([^\]]+)\]\]/g, '$1').replace(/`/g, '');
 const parola = (f) => new RegExp('(?<![\\p{L}\\p{N}])' + f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu');
@@ -215,6 +271,22 @@ for (const k of Object.keys(G)) {
     const forma = forme.find((f) => parola(f).test(s));
     if (forma) anticipi.push({ k, id, dove: t.dove, s: s.length > 150 ? s.slice(Math.max(0, s.search(parola(forma)) - 60), s.search(parola(forma)) + 80) : s });
   }));
+}
+
+// Le prove: una prova può usare i termini introdotti fino all'ultima unità del suo capitolo.
+for (const c of capitoli.filter((x) => x.prova && testi['prova ' + x.id])) {
+  const ultima = Math.max.apply(null, (c.unita || []).map((u) => ORDINE.indexOf(u.id)));
+  for (const k of Object.keys(G)) {
+    if (ORDINE.indexOf(G[k].u) <= ultima) continue;
+    const forme = [k].concat(G[k].f || []).sort((a, b) => b.length - a.length);
+    const piuLunghi = Object.keys(G).filter((x) => x !== k && x.includes(k)).flatMap((x) => [x].concat(G[x].f || []));
+    testi['prova ' + c.id].forEach((t) => {
+      let s = piano(t.s);
+      piuLunghi.forEach((x) => { s = s.replace(new RegExp(x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu'), '·'); });
+      const forma = forme.find((f) => parola(f).test(s));
+      if (forma) anticipi.push({ k, id: 'prova ' + c.id, dove: t.dove, s: s.length > 150 ? s.slice(Math.max(0, s.search(parola(forma)) - 60), s.search(parola(forma)) + 80) : s });
+    });
+  }
 }
 
 /* ---------- costrutti da evitare ---------- */
@@ -262,6 +334,10 @@ statistiche.forEach((r) => {
   const u = SL.unita[r[0]], idea = piano((u.idea.testo || []).filter((t) => typeof t === 'string').join(' '));
   console.log(riga(r) + String((idea.match(/[\p{L}\p{N}]+/gu) || []).length).padEnd(8) + gulpease(idea));
 });
+if (statProve.length) {
+  console.log('\n' + riga(['prova', 'domande', 'var-min', 'var-tot']) + '(varianti distinte su ' + VARIANTI + ': la domanda meno varia, e la somma)');
+  statProve.forEach((r) => console.log(riga(r)));
+}
 const fuori = anticipi.filter((a) => !ACCETTATI[a.k]);
 console.log('\nERRORI ' + errori.length); errori.forEach((x) => console.log('  ' + x.testo + (x.n > 1 ? '  [e altri ' + (x.n - 1) + ' casi uguali]' : '')));
 console.log('\nTERMINI USATI PRIMA DELLA LORO UNITÀ ' + fuori.length + (TUTTO ? '' : ' (più ' + (anticipi.length - fuori.length) + ' accettati, visibili con --tutto)'));

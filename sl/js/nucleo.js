@@ -71,7 +71,7 @@ window.SL = (() => {
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') chiudi(); });
   window.addEventListener('hashchange', chiudi);
 
-  // Percorsi: #/  #/m/<modulo>  #/c/<capitolo>  #/u/<unità>/<fase>  #/glossario
+  // Percorsi: #/  #/m/<modulo>  #/c/<capitolo>  #/u/<unità>/<fase>  #/p/<capitolo>/<variante>  #/glossario
   SL.percorso = () => {
     const p = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
     return { vista: p[0] || 'rete', a: p[1] || '', b: p[2] || '' };
@@ -83,7 +83,7 @@ window.SL = (() => {
     if (smonta) { try { smonta(); } catch (e) { /* la vista precedente è già stata rimossa */ } smonta = null; }
     const vista = SL.viste[r.vista] || SL.viste.rete;
     document.querySelectorAll('.testa nav a[data-vista]').forEach((a) => {
-      if (a.dataset.vista === (SL.viste[r.vista] ? r.vista : 'rete') || (a.dataset.vista === 'rete' && /^(m|c|u)$/.test(r.vista))) a.setAttribute('aria-current', 'page');
+      if (a.dataset.vista === (SL.viste[r.vista] ? r.vista : 'rete') || (a.dataset.vista === 'rete' && /^(m|c|u|p)$/.test(r.vista))) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
     smonta = vista(main, r) || null;

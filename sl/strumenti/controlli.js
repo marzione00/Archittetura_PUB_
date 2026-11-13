@@ -254,7 +254,9 @@ const ACCETTATI = {
   'ret': 'prima dell’unità 2.6.2 compare in fondo ai listati come l’istruzione con cui la funzione torna al chiamante; il suo meccanismo sulla pila arriva nell’unità 2.6.2',
   'rbp': 'prima dell’unità 2.7.1 compare soltanto negli elenchi dei registri, nelle unità 2.1.2 e 2.6.2; il suo ruolo arriva nell’unità 2.7.1',
   'pila ombra': 'l’unità 2.7.4 la annuncia fra le difese con un rinvio esplicito all’unità 2.7.6, che la spiega',
-  'percorso dati': 'nell’unità 1.1.4 le due parole sono accostate per caso: «il percorso dati/voti.txt» indica un file nella directory dati'
+  'percorso dati': 'nell’unità 1.1.4 le due parole sono accostate per caso: «il percorso dati/voti.txt» indica un file nella directory dati',
+  'pipeline': 'le unità 3.4.3 e 3.4.5 la annunciano come tema dei capitoli successivi, senza farne uso',
+  'codice di errore': 'nell’unità 2.5.2 l’espressione indica il numero conservato in errno, un oggetto diverso dal valore che il processore aggiunge al frame di interruzione'
 };
 const piano = (s) => s.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2').replace(/\[\[([^\]]+)\]\]/g, '$1').replace(/`/g, '');
 const parola = (f) => new RegExp('(?<![\\p{L}\\p{N}])' + f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu');

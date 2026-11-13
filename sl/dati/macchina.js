@@ -163,3 +163,87 @@ SL.x86 = (() => {
   };
   return { u64, esa, esa2, byteDi, larghezza, scrivi, leggi, registro, bit, fila, pila, listato, flag, bin8, conSegno, somma, differenza, num, labFlag, traccia };
 })();
+
+/* Strumenti comuni alle unità sul repertorio Y86-64: registri, lunghezze, codifica in byte e scrittura
+   delle istruzioni. Un'istruzione è { n: nome, a: registro rA, b: registro rB, c: costante }. */
+SL.y86 = (() => {
+  const REG = ['rax', 'rcx', 'rdx', 'rbx', 'rsp', 'rbp', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14'];
+  const OP = { addq: 0, subq: 1, andq: 2, xorq: 3 }, J = { jmp: 0, jle: 1, jl: 2, je: 3, jne: 4, jge: 5, jg: 6 };
+  const ICODE = { halt: 0, nop: 1, rrmovq: 2, irmovq: 3, rmmovq: 4, mrmovq: 5, opq: 6, jxx: 7, call: 8, ret: 9, pushq: 10, popq: 11 };
+  const classe = (n) => (n in OP ? 'opq' : n in J ? 'jxx' : n);
+  const conRegistri = (n) => ['rrmovq', 'irmovq', 'rmmovq', 'mrmovq', 'opq', 'pushq', 'popq'].includes(classe(n));
+  const conCostante = (n) => ['irmovq', 'rmmovq', 'mrmovq', 'jxx', 'call'].includes(classe(n));
+  const lung = (n) => 1 + (conRegistri(n) ? 1 : 0) + (conCostante(n) ? 8 : 0);
+  const esa2 = (v) => v.toString(16).toUpperCase().padStart(2, '0');
+  const esa = (v) => '0x' + v.toString(16).toUpperCase();
+  // Gli otto byte di una costante, dal meno significativo.
+  const le8 = (v) => { let x = BigInt.asUintN(64, BigInt(v)); const out = []; for (let k = 0; k < 8; k++) { out.push(Number(x & 255n)); x >>= 8n; } return out; };
+  const idReg = (r) => (r == null ? 15 : REG.indexOf(r));
+  const byteIst = (i) => {
+    const c = classe(i.n), b = [(ICODE[c] << 4) | (c === 'opq' ? OP[i.n] : c === 'jxx' ? J[i.n] : 0)];
+    if (conRegistri(i.n)) b.push((idReg(i.a) << 4) | idReg(i.b));
+    if (conCostante(i.n)) le8(i.c).forEach((x) => b.push(x));
+    return b;
+  };
+  const testo = (i) => {
+    const c = classe(i.n);
+    return c === 'rrmovq' || c === 'opq' ? i.n + ' %' + i.a + ', %' + i.b : c === 'irmovq' ? 'irmovq $' + i.c + ', %' + i.b : c === 'rmmovq' ? 'rmmovq %' + i.a + ', ' + i.c + '(%' + i.b + ')'
+      : c === 'mrmovq' ? 'mrmovq ' + i.c + '(%' + i.b + '), %' + i.a : c === 'jxx' || c === 'call' ? i.n + ' ' + esa(i.c) : c === 'pushq' || c === 'popq' ? i.n + ' %' + i.a : i.n;
+  };
+  return { REG, OP, J, ICODE, classe, conRegistri, conCostante, lung, esa2, esa, le8, idReg, byteIst, testo };
+})();
+
+/* Diagramma di una pipeline: una riga per istruzione, una colonna per ciclo.
+   righe: [{ n: 'I1', da: 1, s: ['F', 'D', 'E', 'M', 'W'], err: [cicli da segnare] }], dove s[j] è lo stadio occupato nel ciclo da + j.
+   o: { x, y, passo, py, h, cicli, fino: ultimo ciclo mostrato, evid: ciclo in evidenza }. */
+SL.pipe = (() => {
+  const stadioIn = (r, c) => { const j = c - r.da; return j >= 0 && j < r.s.length ? r.s[j] : null; };
+  const diagramma = (pre, righe, o) => {
+    const x = o.x == null ? 150 : o.x, passo = o.passo || 60, h = o.h || 28, py = o.py || 34, els = [];
+    for (let c = 1; c <= o.cicli; c++) els.push(SL.el.nota(pre + 'c' + c, x + (c - 1) * passo + passo / 2 - (c > 9 ? 12 : 7), o.y, String(c), 'mono minuta', c === o.evid ? 'att' : ''));
+    righe.forEach((r, k) => {
+      els.push(SL.el.nota(pre + 'n' + k, o.xn == null ? 20 : o.xn, o.y + 28 + k * py, r.n, 'mono minuta', r.st || ''));
+      for (let c = 1; c <= o.cicli; c++) {
+        const s = stadioIn(r, c), vista = o.fino == null || c <= o.fino;
+        if (s) els.push(SL.el.cella(pre + k + '_' + c, x + (c - 1) * passo, o.y + 24 + k * py, passo - 6, h, vista ? s : '·', !vista ? 'off' : s === '○' ? 'zero' : (r.err || []).includes(c) ? 'err' : c === o.evid ? 'att' : 'on', { piccola: true, cls: 'minuta' }));
+      }
+    });
+    return els;
+  };
+  // La fila dei cinque stadi con i loro occupanti. occ: cinque testi (vuoto se manca); o: { x, y, w, h, gap, st: [stati], et: [etichette] }
+  const NOMI = ['F', 'D', 'E', 'M', 'W'];
+  const stadi = (pre, occ, o) => {
+    const w = o.w || 158, gap = o.gap == null ? 8 : o.gap, h = o.h || 74;
+    return NOMI.map((s, j) => SL.el.box(pre + j, o.x + j * (w + gap), o.y, w, h, (o.et && o.et[j]) || 'stadio ' + s, occ[j] || 'vuoto', (o.st && o.st[j]) || (occ[j] ? 'on' : 'off'), { cls: 'stretta' }));
+  };
+  return { stadioIn, diagramma, stadi, NOMI };
+})();
+
+/* Strumenti del Modulo IV: eventi che deviano il flusso di controllo, e la scena comune alle unità 4.1.1 e 4.1.2. */
+SL.kern = (() => {
+  const H = (v) => '0x' + v.toString(16).toUpperCase();
+  // ripresa: 'seguente' = dall'istruzione successiva · 'stessa' = l'istruzione viene ripetuta · 'nessuna' = ripresa non garantita
+  const EVENTI = {
+    irq: { nome: 'interrupt del timer', classe: 'interrupt', ripresa: 'seguente', lung: 4, ist: 'add rax, 8' },
+    pf: { nome: 'pagina assente', classe: 'fault', ripresa: 'stessa', lung: 4, ist: 'mov rax, [rdi+8]' },
+    bp: { nome: 'breakpoint', classe: 'trap', ripresa: 'seguente', lung: 1, ist: 'int3' },
+    abort: { nome: 'guasto grave', classe: 'abort', ripresa: 'nessuna', lung: 4, ist: 'add rax, 8' }
+  };
+  const ripresa = (ev, pc) => { const e = EVENTI[ev]; return e.ripresa === 'nessuna' ? 0 : pc + (e.ripresa === 'seguente' ? e.lung : 0); };
+  /* Scena: tre istruzioni in fila, il gestore sotto, l'indirizzo salvato e la ripresa.
+     fase: 0 il programma avanza · 1 l'evento · 2 l'indirizzo salvato · 3 il gestore lavora · 4 la ripresa.
+     o: { x, y, w (larghezza di una istruzione), gap, h, classe: true per mostrare la classe dell'evento } */
+  const flusso = (pre, ev, pc, f, o) => {
+    const el = SL.el, e = EVENTI[ev], r = ripresa(ev, pc), w = o.w, gap = o.gap, h = o.h, x = o.x, y = o.y, y2 = y + h + 32, els = [];
+    const ind = [pc - 4, pc, pc + e.lung], testi = ['add rbx, 8', e.ist, 'add rax, 1'];
+    ind.forEach((a, k) => els.push(el.box(pre + 'i' + k, x + k * (w + gap), y, w, h, 'indirizzo ' + H(a), testi[k], k === 0 ? 'on' : k === 1 ? (f === 0 ? 'att' : f >= 1 && f <= 3 ? (e.ripresa === 'stessa' || e.ripresa === 'nessuna' ? 'err' : 'on') : r === a ? 'att' : e.ripresa === 'nessuna' ? 'err' : 'on') : f >= 4 && r === a ? 'att' : '', { cls: 'stretta' })));
+    els.push(el.box(pre + 'e', x, y2, w, h, 'evento', f >= 1 ? e.nome : '·', f === 1 ? 'att' : f > 1 ? 'on' : '', { cls: 'stretta' }));
+    els.push(el.box(pre + 'g', x + w + gap, y2, w, h, 'gestore del kernel', f === 3 ? 'al lavoro' : f > 3 ? 'ha finito' : 'in attesa', f === 3 ? 'att' : f > 3 ? 'on' : '', { cls: 'stretta' }));
+    els.push(el.box(pre + 's', x + 2 * (w + gap), y2, w, h, 'indirizzo salvato', f >= 2 ? (r ? H(r) : 'inaffidabile') : '·', f === 2 ? (r ? 'att' : 'err') : f > 2 ? (r ? 'on' : 'err') : '', { cls: 'stretta' }));
+    els.push(el.linea(pre + 'l1', x + w + gap + w / 2, y + h, x + w + gap + w / 2, y2, f === 3 ? 'att' : f > 3 ? 'on' : ''));
+    if (o.classe) els.push(el.box(pre + 'c', x, y2 + h + 20, w, h, 'classe dell’evento', f >= 1 ? e.classe : '·', f === 1 ? 'att' : f > 1 ? 'on' : '', { cls: 'stretta' }));
+    els.push(el.box(pre + 'r', x + (o.classe ? w + gap : 0), y2 + h + 20, o.classe ? 2 * w + gap : 3 * w + 2 * gap, h, 'alla ripresa', f >= 4 ? (r ? 'RIP = ' + H(r) + (e.ripresa === 'stessa' ? ' · l’istruzione viene ripetuta' : ' · si prosegue con la seguente') : 'ripresa non garantita') : '·', f >= 4 ? (r ? 'att' : 'err') : '', { cls: 'stretta' }));
+    return els;
+  };
+  return { H, EVENTI, ripresa, flusso };
+})();

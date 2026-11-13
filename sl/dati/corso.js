@@ -187,19 +187,118 @@
           { id: '3.2.5', titolo: 'Dallo stato memorizzato alle macchine a stati', sim: 'riproduci', scopo: 'Un distributore che ricorda soltanto il credito, seguito moneta dopo moneta.' }
         ],
         sfide: [['cslez3_2_01_random_assembly', 'Stati e ingressi di un latch SR'], ['cslez3_2_02_random_assembly', 'Trasparenza e abilitazione del latch D'], ['cslez3_2_03_random_assembly', 'Acquisizione sul fronte di clock'], ['cslez3_2_04_random_assembly', 'Caricamento e modifica di un registro a quattro bit'], ['cslez3_2_05_random_assembly', 'Aggiornamenti paralleli e priorità dei comandi']] },
-      classico('3.3', 'Repertorio Y86-64', 'Il repertorio Y86-64 e le fasi di esecuzione', 'file'),
-      classico('3.4', 'Processore sequenziale', 'Il processore sequenziale', 'cpu'),
-      classico('3.5', 'Pipeline e conflitti', 'Pipeline: sovrapposizione, capacità di completamento e conflitti', 'conflitto'),
-      classico('3.6', 'Pipeline a cinque stadi', 'Il processore in pipeline a cinque stadi', 'pipeline')
+      { id: '3.3', breve: 'Repertorio Y86-64', titolo: 'Il repertorio Y86-64 e le fasi di esecuzione', sim: 'file', stato: 'nuovo', prova: true,
+        guida: 'Una macchina ridotta, descritta per intero: lo stato, la codifica in byte delle istruzioni e le sei fasi in cui ciascuna viene eseguita.',
+        unita: [
+          { id: '3.3.1', titolo: 'Dalla logica al contratto dell’ISA', sim: 'cpu', scopo: 'Tre istruzioni sullo stesso stato: che cosa cambia e che cosa resta.' },
+          { id: '3.3.2', titolo: 'Codifica e confini delle istruzioni', sim: 'hex', scopo: 'Dieci byte in memoria, letti come li legge il processore per trovare dove finisce l’istruzione.' },
+          { id: '3.3.3', titolo: 'Semantica delle istruzioni e flusso dei dati', sim: 'strati', scopo: 'Una lettura dalla memoria seguita attraverso le sei fasi, un valore alla volta.' },
+          { id: '3.3.4', titolo: 'Classi di istruzioni, stato e controllo', sim: 'scudo', scopo: 'Quattro codici di stato, e il controllo che tiene un accesso dentro la memoria.' },
+          { id: '3.3.5', titolo: 'Tracce complete delle istruzioni', sim: 'tabella', scopo: 'Una call e il suo ret, dodici fasi in cui lo stesso indirizzo cambia nome tre volte.' },
+          { id: '3.3.6', titolo: 'Assemblaggio manuale come verifica', sim: 'file', scopo: 'Quattro righe di testo tradotte in byte, con un salto verso un’etichetta che viene dopo.' }
+        ],
+        sfide: [['cslez3_3_01_random_assembly', 'Decodificare icode e ifun'], ['cslez3_3_02_random_assembly', 'Lunghezza e campi di un’istruzione'], ['cslez3_3_03_random_assembly', 'Registri sorgente e destinazione'], ['cslez3_3_04_random_assembly', 'Operazioni Y86-64 e codici di condizione'], ['cslez3_3_05_random_assembly', 'Memoria, scrittura dei risultati e aggiornamento del PC']] },
+      { id: '3.4', breve: 'Processore sequenziale', titolo: 'Il processore sequenziale', sim: 'cpu', stato: 'nuovo', prova: true,
+        guida: 'Il primo processore completo: un’istruzione per ciclo, con i blocchi dei capitoli precedenti collegati fra loro e comandati da poche equazioni.',
+        unita: [
+          { id: '3.4.1', titolo: 'Dalle fasi dell’ISA a una macchina sincrona', sim: 'cpu', scopo: 'Una sottrazione seguita dentro un solo ciclo, fino al fronte che la rende definitiva.' },
+          { id: '3.4.2', titolo: 'Il percorso dati a ciclo singolo di SEQ', sim: 'alu', scopo: 'Una pushq sul percorso dati: due multiplexer, un’ALU e un risultato che prende due strade.' },
+          { id: '3.4.3', titolo: 'Temporizzazione e aggiornamento dello stato', sim: 'clock', scopo: 'Due percorsi sullo stesso asse dei tempi, e il periodo che il più lento impone a tutti.' },
+          { id: '3.4.4', titolo: 'Equazioni di controllo, traccia e verifica', sim: 'mux', scopo: 'pushq e popq dallo stesso stato: i segnali che distinguono un deposito da un prelievo.' },
+          { id: '3.4.5', titolo: 'Oltre SEQ a ciclo singolo', sim: 'bilancio', scopo: 'Lo stesso programma su due macchine: pochi cicli lunghi contro molti cicli brevi.' }
+        ],
+        sfide: [['cslez3_4_01_random_assembly', 'Ingressi dell’ALU e aggiornamento dello stack'], ['cslez3_4_02_random_assembly', 'Indirizzi di memoria e limiti degli accessi'], ['cslez3_4_03_random_assembly', 'Segnali di controllo di SEQ'], ['cslez3_4_04_random_assembly', 'Cammino critico e periodo di clock'], ['cslez3_4_05_random_assembly', 'Selezione del PC e stato successivo']] },
+      { id: '3.5', breve: 'Pipeline e conflitti', titolo: 'Pipeline: sovrapposizione, capacità di completamento e conflitti', sim: 'conflitto', stato: 'nuovo', prova: true,
+        guida: 'Che cosa si guadagna facendo avanzare più istruzioni insieme, come si legge il diagramma che lo descrive e quali ostacoli nascono dalla sovrapposizione.',
+        unita: [
+          { id: '3.5.1', titolo: 'Sovrapposizione, capacità di completamento e latenza', sim: 'pipeline', scopo: 'Un flusso di istruzioni in una pipeline vuota: quanto impiega ciascuna, e ogni quanto ne esce una.' },
+          { id: '3.5.2', titolo: 'Leggere i diagrammi temporali della pipeline', sim: 'tabella', scopo: 'Tre fotografie consecutive della pipeline, lette per righe e per colonne.' },
+          { id: '3.5.3', titolo: 'Conflitti dovuti alla sovrapposizione', sim: 'conflitto', scopo: 'Un dato in ritardo, una porta contesa, un salto previsto male: tre modi di perdere cicli.' },
+          { id: '3.5.4', titolo: 'Dalla portata ideale al CPI misurato', sim: 'bilancio', scopo: 'Il contatore dei cicli e quello delle istruzioni: riempimento, penalità e il loro peso sul CPI.' }
+        ],
+        sfide: [['cslez3_5_01_random_assembly', 'Riempimento, svuotamento e cicli di pipeline'], ['cslez3_5_02_random_assembly', 'Latenza, produttività e accelerazione'], ['cslez3_5_03_random_assembly', 'Dipendenze di lettura dopo scrittura'], ['cslez3_5_04_random_assembly', 'Conteggio e sovrapposizione degli stalli'], ['cslez3_5_05_random_assembly', 'Distanza tra istruzioni dipendenti']] },
+      { id: '3.6', breve: 'Pipeline a cinque stadi', titolo: 'Il processore in pipeline a cinque stadi', sim: 'pipeline', stato: 'nuovo', prova: true,
+        guida: 'Come è fatto il processore PIPE: i registri fra gli stadi, la scelta del prossimo prelievo, l’inoltro dei dati, le bolle e gli stalli, fino alla misura delle prestazioni.',
+        unita: [
+          { id: '3.6.1', titolo: 'Dalla sovrapposizione alla pipeline controllata', sim: 'register', scopo: 'Un fronte del clock visto da vicino: cinque registri che catturano insieme.' },
+          { id: '3.6.2', titolo: 'Stato della pipeline e controllo del prelievo', sim: 'puntatore', scopo: 'Tre indirizzi candidati e un selettore con priorità: da dove si preleva la prossima istruzione.' },
+          { id: '3.6.3', titolo: 'Dipendenze dei dati e inoltro', sim: 'bus', scopo: 'Un registro conteso da tre istruzioni: quale valore arriva allo stadio D, e da dove.' },
+          { id: '3.6.4', titolo: 'Conflitti di controllo, stalli e bolle', sim: 'conflitto', scopo: 'Un salto condizionato nello stadio E: due istruzioni da tenere oppure da trasformare in bolle.' },
+          { id: '3.6.5', titolo: 'Priorità dei conflitti e stato preciso', sim: 'stallo', scopo: 'Carico, ret ed errori nello stesso ciclo: quali registri si fermano, quali si svuotano.' },
+          { id: '3.6.6', titolo: 'Traccia e conteggio delle prestazioni', sim: 'tabella', scopo: 'Un carico, il suo uso e una istruzione indipendente: due ordini, due tracce a confronto.' },
+          { id: '3.6.7', titolo: 'Misurare e spiegare le prestazioni', sim: 'bilancio', scopo: 'Lo stesso programma prima e dopo il riordino: cicli, tempo, CPI e accelerazione.' }
+        ],
+        sfide: [['cslez3_6_01_random_assembly', 'Istruzioni presenti nei cinque stadi'], ['cslez3_6_02_random_assembly', 'Abilitazione e controllo dei registri di pipeline'], ['cslez3_6_03_random_assembly', 'Priorità nella selezione del PC'], ['cslez3_6_04_random_assembly', 'Cronologia degli stadi e completamento'], ['cslez3_6_05_random_assembly', 'Trasferimenti tra stadi e bolle']] }
     ] },
     { k: '4', r: 'IV', breve: 'I/O e dischi', nome: 'I/O e archiviazione', sim: 'storage', capitoli: [
-      classico('4.1', 'Eccezioni', 'Flusso di controllo eccezionale e ingresso protetto', 'interrupt'),
-      classico('4.2', 'Ingresso nel kernel', 'Chiamate di sistema e ingresso controllato nel kernel', 'gate'),
-      classico('4.3', 'Polling e interrupt', 'Controller dei dispositivi, polling e interrupt', 'dispositivo'),
-      classico('4.4', 'Bus e transazioni', 'Bus, transazioni e interconnessioni', 'bus'),
-      classico('4.5', 'Dischi magnetici', 'Memoria magnetica e analisi dei tempi di accesso', 'disco'),
-      classico('4.6', 'RAID e SSD', 'RAID e memoria a stato solido', 'raid'),
-      classico('4.7', 'Dispositivi e DMA', 'Classi di dispositivi e accesso diretto alla memoria', 'ssd')
+      { id: '4.1', breve: 'Eccezioni', titolo: 'Flusso di controllo eccezionale e ingresso protetto', sim: 'interrupt', stato: 'nuovo', prova: true,
+        guida: 'Che cosa accade quando un evento toglie il processore a un programma: le classi di eventi, la tabella che porta al gestore, lo stato da salvare e l’ordine dei ritorni.',
+        unita: [
+          { id: '4.1.1', titolo: 'Interruzione del flusso sequenziale', sim: 'interrupt', scopo: 'Un evento durante una istruzione: il gestore, l’indirizzo salvato e la ripresa.' },
+          { id: '4.1.2', titolo: 'Interrupt, fault, trap e abort', sim: 'conflitto', scopo: 'Quattro classi di eventi, distinte dal rapporto con l’istruzione in corso.' },
+          { id: '4.1.3', titolo: 'Vettori, privilegi e ingresso protetto', sim: 'tabella', scopo: 'Dal vettore alla voce della IDT, e il controllo che decide chi può entrare.' },
+          { id: '4.1.4', titolo: 'Ingresso preciso in una macchina con pipeline', sim: 'pipeline', scopo: 'Un fault in mezzo a sei istruzioni: che cosa resta, che cosa viene scartato.' },
+          { id: '4.1.5', titolo: 'Codice di ingresso Linux e contesto salvato', sim: 'pila', scopo: 'La cima della pila del kernel, casella per casella, dal frame ai registri salvati.' },
+          { id: '4.1.6', titolo: 'Stato da preservare all’ingresso', sim: 'register', scopo: 'Un registro usato dal gestore: salvato e ripristinato, oppure perduto.' },
+          { id: '4.1.7', titolo: 'Ripresa, annidamento e priorità', sim: 'interrupt', scopo: 'Una seconda richiesta durante un gestore: entra subito oppure attende.' }
+        ],
+        sfide: [['cslez4_1_01_exceptions_01', 'Vettori e voci della IDT'], ['cslez4_1_02_exceptions_02', 'Classificare fault, trap e interrupt'], ['cslez4_1_03_exceptions_03', 'Campi del frame di ingresso'], ['cslez4_1_04_exceptions_04', 'Mascheramento e privilegi'], ['cslez4_1_05_exceptions_05', 'Indirizzo del gestore, esecuzione e ritorno']] },
+      { id: '4.2', breve: 'Ingresso nel kernel', titolo: 'Chiamate di sistema e ingresso controllato nel kernel', sim: 'gate', stato: 'nuovo', prova: true,
+        guida: 'La chiamata di sistema vista dal kernel: la scelta del servizio, i controlli sugli argomenti, i valori restituiti, le attese e le regole che decidono chi può che cosa.',
+        unita: [
+          { id: '4.2.1', titolo: 'Dalla richiesta utente all’esecuzione nel kernel', sim: 'gate', scopo: 'Un numero in RAX sceglie il servizio, e il servizio dà senso agli altri registri.' },
+          { id: '4.2.2', titolo: 'Il percorso di write oltre il confine di privilegio', sim: 'scudo', scopo: 'Otto lettere, una pipe e un descrittore: il kernel controlla prima di copiare.' },
+          { id: '4.2.3', titolo: 'Convalida, valori di ritorno e avanzamento parziale', sim: 'puntatore', scopo: 'Dopo una write a metà: da dove ripartire, e quanto resta.' },
+          { id: '4.2.4', titolo: 'Quando una chiamata di sistema si blocca', sim: 'clock', scopo: 'Una read su una pipe vuota: aspettare dentro la chiamata, oppure tornare subito.' },
+          { id: '4.2.5', titolo: 'Meccanismo, politica e struttura del sistema operativo', sim: 'privilegi', scopo: 'La stessa open, due utenti, due risposte: i permessi del file decidono.' }
+        ],
+        sfide: [['cslez4_2_01_syscalls_01', 'Numeri, argomenti e registri delle syscall'], ['cslez4_2_02_syscalls_02', 'Passaggio dalla modalità utente al kernel'], ['cslez4_2_03_syscalls_03', 'Preparare read, write ed exit'], ['cslez4_2_04_syscalls_04', 'Trasferimenti parziali, EOF ed errori'], ['cslez4_2_05_syscalls_05', 'Selezione del servizio e funzione di libreria']] },
+      { id: '4.3', breve: 'Polling e interrupt', titolo: 'Controller dei dispositivi, polling e interrupt', sim: 'dispositivo', stato: 'nuovo', prova: true,
+        guida: 'Come il kernel parla con una periferica: i registri del controller, i due modi di accorgersi di un evento, la strada di un interrupt fino al gestore e i costi del servizio.',
+        unita: [
+          { id: '4.3.1', titolo: 'Interfaccia del controller e notifiche', sim: 'dispositivo', scopo: 'Una misura, dal comando al dato: tre registri e un bit che dice quando leggere.' },
+          { id: '4.3.2', titolo: 'Polling e interrupt', sim: 'clock', scopo: 'Lo stesso evento scoperto in due modi, con il conto del ritardo e del lavoro.' },
+          { id: '4.3.3', titolo: 'Instradamento, vettori e conferma dell’interrupt', sim: 'interrupt', scopo: 'Dalla linea al vettore, dal vettore al gestore, e le due conferme nel loro ordine.' },
+          { id: '4.3.4', titolo: 'Registri del dispositivo, costo e struttura del driver', sim: 'coda', scopo: 'Una coda servita a gruppi, e un registro di stato che si cancella scrivendo 1.' }
+        ],
+        sfide: [['cslez4_3_01_io_interrupts_01', 'Registri di comando, stato e dati'], ['cslez4_3_02_io_interrupts_02', 'Frequenza e costo del polling'], ['cslez4_3_03_io_interrupts_03', 'Consegna e riconoscimento di un interrupt'], ['cslez4_3_04_io_interrupts_04', 'Fronte, livello e priorità'], ['cslez4_3_05_io_interrupts_05', 'Percorso di un evento da tastiera']] },
+      { id: '4.4', breve: 'Bus e transazioni', titolo: 'Bus, transazioni e interconnessioni', sim: 'bus', stato: 'nuovo', prova: true,
+        guida: 'Processore, memoria e controller si parlano attraverso collegamenti condivisi. Il capitolo segue una transazione sul bus, ne misura la capacità e la durata, mostra come un arbitro mette in fila le richieste, e arriva alle reti di collegamenti punto a punto.',
+        unita: [
+          { id: '4.4.1', titolo: 'Regole di comunicazione di un’interconnessione', sim: 'bus', scopo: 'Chi ottiene il turno, e quale componente risponde a un indirizzo.' },
+          { id: '4.4.2', titolo: 'Larghezza, clock e topologia', sim: 'clock', scopo: 'Tre fattori che, moltiplicati, danno i byte al secondo.' },
+          { id: '4.4.3', titolo: 'Transazioni e semantica del protocollo', sim: 'coda', scopo: 'Le stesse parole in una raffica oppure in transazioni singole.' },
+          { id: '4.4.4', titolo: 'Banda, coordinamento e arbitraggio', sim: 'semaforo', scopo: 'Priorità fissa e round-robin, e l’attesa che ne deriva.' },
+          { id: '4.4.5', titolo: 'Gerarchie e reti punto a punto', sim: 'strati', scopo: 'Il viaggio di un pacchetto attraverso un ponte.' }
+        ],
+        sfide: [['cslez4_4_01_buses_01', 'Tempo di trasferimento e banda utile'], ['cslez4_4_02_buses_02', 'Larghezza del bus e cicli di trasferimento'], ['cslez4_4_03_buses_03', 'Arbitraggio e tempi di attesa'], ['cslez4_4_04_buses_04', 'Trasferimenti sincroni, asincroni e a raffica'], ['cslez4_4_05_buses_05', 'Collegamenti bidirezionali, code e latenza']] },
+      { id: '4.5', breve: 'Dischi magnetici', titolo: 'Memoria magnetica e analisi dei tempi di accesso', sim: 'disco', stato: 'nuovo', prova: true,
+        guida: 'Il disco magnetico è un dispositivo con parti in movimento, e i suoi tempi si contano in millisecondi. Il capitolo ne descrive la geometria, calcola il tempo di una lettura e mostra come l’ordine di servizio e la cache riducano gli spostamenti del braccio.',
+        unita: [
+          { id: '4.5.1', titolo: 'Geometria e latenza meccanica', sim: 'disco', scopo: 'Seek e ritardo di rotazione, prima di leggere un byte.' },
+          { id: '4.5.2', titolo: 'Blocchi logici e prestazioni quantitative', sim: 'byte', scopo: 'Dai numeri di blocco ai byte, e il tempo di una lettura sequenziale.' },
+          { id: '4.5.3', titolo: 'Code, scheduling e cache', sim: 'coda', scopo: 'FCFS e SSTF a confronto sul cammino della testina.' }
+        ],
+        sfide: [['cslez4_5_01_disks_01', 'Geometria e capacità di un disco'], ['cslez4_5_02_disks_02', 'Rotazione, posizionamento e tempo di accesso'], ['cslez4_5_03_disks_03', 'Indirizzamento a blocchi e frammentazione'], ['cslez4_5_04_disks_04', 'Velocità e tempo di trasferimento'], ['cslez4_5_05_disks_05', 'Ordine delle letture e località']] },
+      { id: '4.6', breve: 'RAID e SSD', titolo: 'RAID e memoria a stato solido', sim: 'raid', stato: 'nuovo', prova: true,
+        guida: 'Due risposte ai limiti del disco magnetico. Il RAID unisce più dischi per sopravvivere ai guasti, con copie oppure con la parità. L’unità a stato solido elimina la meccanica, e in cambio deve gestire una memoria che non si corregge sul posto.',
+        unita: [
+          { id: '4.6.1', titolo: 'Ridondanza, modelli di guasto e RAID', sim: 'raid', scopo: 'Capacità utile e guasti sopportati dai livelli RAID.' },
+          { id: '4.6.2', titolo: 'Scritture di parità, modalità degradata e ricostruzione', sim: 'gate', scopo: 'La parità calcolata, aggiornata e usata dopo un guasto.' },
+          { id: '4.6.3', titolo: 'Memoria flash e traduzione', sim: 'ssd', scopo: 'Ogni aggiornamento in una pagina nuova, con una mappa per ritrovarlo.' },
+          { id: '4.6.4', titolo: 'FTL, durata e latenza dipendente dallo stato', sim: 'clock', scopo: 'Il recupero dello spazio e il suo costo sulle scritture.' }
+        ],
+        sfide: [['cslez4_6_01_raid_ssd_01', 'Affidabilità e disponibilità'], ['cslez4_6_02_raid_ssd_02', 'Distribuzione dei dati in RAID 0'], ['cslez4_6_03_raid_ssd_03', 'Copie e ricostruzione in RAID 1'], ['cslez4_6_04_raid_ssd_04', 'Parità e capacità in RAID 5 e RAID 10'], ['cslez4_6_05_raid_ssd_05', 'Lettura, cancellazione e usura negli SSD']] },
+      { id: '4.7', breve: 'Dispositivi e DMA', titolo: 'Classi di dispositivi e accesso diretto alla memoria', sim: 'ssd', stato: 'nuovo', prova: true,
+        guida: 'Con l’accesso diretto alla memoria il dispositivo trasferisce i dati da solo. Il capitolo ne misura il vantaggio, descrive la richiesta che il driver gli affida, le regole di proprietà sui buffer condivisi, le condizioni su indirizzi e contenuto, e chiude il Modulo IV seguendo il completamento fino alla ripresa del processo.',
+        unita: [
+          { id: '4.7.1', titolo: 'I/O programmato e motivazione del DMA', sim: 'cpu', scopo: 'Un costo per parola contro un costo fisso.' },
+          { id: '4.7.2', titolo: 'Il DMA come transazione di memoria delegata', sim: 'bus', scopo: 'Dal descrittore alle transazioni del dispositivo.' },
+          { id: '4.7.3', titolo: 'Interfacce, descrittori e proprietà dei buffer', sim: 'coda', scopo: 'Un anello di slot, e chi può toccarli in ogni momento.' },
+          { id: '4.7.4', titolo: 'Coerenza, ordinamento e indirizzi visibili al dispositivo', sim: 'cache', scopo: 'L’indirizzo adatto al dispositivo, e la memoria aggiornata.' },
+          { id: '4.7.5', titolo: 'Completamento e ritorno allo scheduling', sim: 'process', scopo: 'Dall’ultimo byte alla ripresa del processo.' }
+        ],
+        sfide: [['cslez4_7_01_dma_01', 'Dispositivi a caratteri e a blocchi'], ['cslez4_7_02_dma_02', 'Driver e gestione delle richieste'], ['cslez4_7_03_dma_03', 'Configurazione e completamento del DMA'], ['cslez4_7_04_dma_04', 'Costo temporale e impegno della CPU'], ['cslez4_7_05_dma_05', 'Confrontare I/O programmato e DMA']] }
     ] },
     { k: '5', r: 'V', breve: 'Processi', nome: 'Processi e concorrenza', sim: 'process', capitoli: [
       classico('5.1', 'Processi e stati', 'Processi, stati e cambi di contesto', 'process'),

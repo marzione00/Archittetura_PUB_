@@ -25,12 +25,27 @@ Il sito è statico e non ha dipendenze esterne: caratteri, simboli e script sono
 | Capitolo 2.7, unità 2.7.1–2.7.7 | nuovo formato |
 | Capitolo 3.1, unità 3.1.1–3.1.6 | nuovo formato |
 | Capitolo 3.2, unità 3.2.1–3.2.5 | nuovo formato |
-| Prove di fine capitolo, capitoli 1.1–1.7, 2.1–2.7, 3.1 e 3.2 | nuovo formato |
-| Capitoli 3.3–3.6 e moduli IV–VI | versione precedente, aperta da `classico.html` |
+| Capitolo 3.3, unità 3.3.1–3.3.6 | nuovo formato |
+| Capitolo 3.4, unità 3.4.1–3.4.5 | nuovo formato |
+| Capitolo 3.5, unità 3.5.1–3.5.4 | nuovo formato |
+| Capitolo 3.6, unità 3.6.1–3.6.7 | nuovo formato |
+| Capitolo 4.1, unità 4.1.1–4.1.7 | nuovo formato |
+| Capitolo 4.2, unità 4.2.1–4.2.5 | nuovo formato |
+| Capitolo 4.3, unità 4.3.1–4.3.4 | nuovo formato |
+| Capitolo 4.4, unità 4.4.1–4.4.5 | nuovo formato |
+| Capitolo 4.5, unità 4.5.1–4.5.3 | nuovo formato |
+| Capitolo 4.6, unità 4.6.1–4.6.4 | nuovo formato |
+| Capitolo 4.7, unità 4.7.1–4.7.5 | nuovo formato |
+| Prove di fine capitolo, capitoli 1.1–1.7, 2.1–2.7, 3.1–3.6 e 4.1–4.7 | nuovo formato |
+| Moduli V e VI | versione precedente, aperta da `classico.html` |
 
-I Moduli I e II sono completi e il Modulo III è avviato. Per i capitoli non ancora riscritti la rete del corso rimanda alla versione precedente.
+I Moduli I, II, III e IV sono completi. Per i capitoli non ancora riscritti la rete del corso rimanda alla versione precedente.
 
 Il capitolo 2.7 tratta la sicurezza della memoria con modelli astratti: celle con un'etichetta, indirizzi di fantasia, blocchi di due istruzioni. Lo scopo è capire i meccanismi e le difese, e le unità non contengono procedure applicabili a programmi reali.
+
+Il Modulo III lavora sul modello Y86-64 e sui processori didattici SEQ e PIPE: sintassi AT&T, sei fasi, pipeline a cinque stadi F, D, E, M, W. I capitoli 3.5 e 3.6 adottano ovunque le stesse regole: ogni salto condizionato è previsto eseguito, una previsione sbagliata costa due cicli, un carico seguito subito dal suo uso costa un ciclo, una `ret` ne costa tre. Laboratori, esercizi e prove dipendono da queste regole, e vanno aggiornati insieme se il modello cambia.
+
+Il Modulo IV torna alla sintassi Intel del Modulo II e lavora su modelli semplificati, dichiarati nella nota di ogni laboratorio. I principali: istruzioni di 4 byte, con `int3` di 1 byte e `SYSCALL` di 2; tabella dei vettori a partire da 0x4000 con voci di 16 byte; frame di interruzione di cinque parole da 8 byte, più 8 byte quando c'è un codice di errore; errori delle chiamate di sistema restituiti come numeri negativi in RAX. Nei capitoli 4.4–4.7 i tempi sono numeri di modello e non misure di dispositivi reali: turni di bus da cinque cicli, trasferimento del disco a 128 byte per microsecondo, lettura, programmazione e cancellazione della flash da 50, 200 e 2000 microsecondi. Nell'unità 4.4.4 i cicli della griglia sono numerati da 0, come nella versione precedente del sito; nell'unità 4.4.3 le caselle della cronologia sono contate da 1.
 
 ## Struttura
 
@@ -49,7 +64,7 @@ sl/js/rete.js         rete del corso in tre dimensioni, pagina di capitolo, glos
 sl/dati/corso.js      mappa di moduli, capitoli e unità
 sl/dati/glossario.js  termini, definizioni e unità che li introduce
 sl/dati/telemetria.js il record «TLM1» usato dal capitolo 1.7: codifica, campi, disegno dei byte
-sl/dati/macchina.js   strumenti del Modulo II: registri x86-64, flag, tracce, listati, file di bit, pila
+sl/dati/macchina.js   strumenti dei Moduli II, III e IV: registri x86-64, flag, tracce, listati, file di bit, pila, codifica Y86-64, diagrammi di pipeline, flusso di un'eccezione
 sl/unita/<id>.js      un file per unità, caricato soltanto quando serve
 sl/prove/<cap>.js     un file per capitolo con i generatori delle domande
 sl/strumenti/         controlli sui contenuti

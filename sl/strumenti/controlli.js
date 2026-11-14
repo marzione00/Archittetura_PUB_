@@ -331,7 +331,7 @@ for (const id of Object.keys(testi)) {
 // Il sito adotta la forma impersonale in ogni testo: teoria, laboratori ed esercizi. Lo strumento segnala la seconda persona,
 // la prima plurale, il lessico colloquiale, i superlativi, le formule a effetto e le serie di frasi brevissime.
 // Le unità già riscritte sono elencate in REGISTRO_FATTO: per loro ogni segnalazione è riportata; per le altre si dà il conto.
-const REGISTRO_FATTO = ['0.', '1.', '2.', '3.'];
+const REGISTRO_FATTO = ['0.', '1.', '2.', '3.', '4.'];
 const IMPERATIVI = 'Prova|Guarda|Osserva|Scegli|Pensa|Immagina|Nota|Ricorda|Calcola|Scrivi|Leggi|Confronta|Aumenta|Riduci|Cambia|Ripeti|Conta|Cerca|Usa|Parti|Segui|Considera|Controlla|Verifica|Rispondi|Indica|Completa|Sposta|Premi|Apri|Torna|Dividi|Moltiplica|Somma|Sottrai|Aggiungi|Togli|Converti|Applica|Trova|Elenca|Tieni|Ragiona|Annota|Chiediti|Fermati|Lascia|Metti|Prendi|Porta|Ripassa|Rileggi|Riparti|Separa|Traduci|Individua|Stabilisci|Descrivi|Spiega|Fai|Vai|Scorri|Ricava|Ordina|Estrai|Isola|Esegui|Sostituisci|Riscrivi';
 const REGISTRO = [
   ['seconda persona', /(?<![\p{L}’])(saprai|vedrai|sceglierai|potrai|dovrai|troverai|userai|avrai|farai|seguirai|leggerai|scriverai|otterrai|noterai|imparerai|capirai|sarai|vorrai|dirai|conterai|calcolerai|confronterai|proverai|guarderai|osserverai|incontrerai|riconoscerai|hai|avevi|puoi|devi|vuoi|sai|stai|eri|tu|ti|te|tuo|tua|tuoi|tue|fall[oiae]|scrivil[oiae]|contal[oiae]|leggil[oiae]|sommal[oiae]|dividil[oiae]|spostal[oiae]|mettil[oiae]|prendil[oiae]|chiediti|fermati|ricordati|confrontal[oiae]|calcolal[oiae]|trovali|trovalo|cercal[oiae]|usal[oiae]|tienil[oiae]|lascial[oiae]|guardal[oiae]|osserval[oiae]|scorril[oiae])(?![\p{L}’])/iu],

@@ -2,7 +2,7 @@
 /* Pagina di un'unità: cinque fasi mostrate una alla volta. Nulla viene conservato fra una visita e l'altra. */
 (() => {
   const E = SL.E, T = SL.T;
-  const FASI = [['richiami', 'Richiami'], ['idea', 'L’idea'], ['esperimento', 'L’esperimento'], ['riproduci', 'Esecuzione guidata'], ['bilancio', 'Bilancio']];
+  const FASI = [['richiami', 'Richiami'], ['idea', 'Esposizione'], ['esperimento', 'Esperimento'], ['riproduci', 'Esecuzione guidata'], ['bilancio', 'Bilancio']];
   let corrente = { id: null, ctx: null };
 
   // Figure dichiarative dentro la prosa.
@@ -37,11 +37,11 @@
   function esercizio(ospite, x, n, dopo, opz) {
     let esito = null, indizi = 0, tentativi = 0, svolto = false;
     const fig = x.figura ? figura(x.figura, dopo) : '';
-    ospite.innerHTML = '<div class="occhiello">' + E((opz && opz.occhiello) || 'Mettiti alla prova · esercizio ' + n) + '</div><h3 class="titolo2" style="font-size:24px">' + T(x.d) + '</h3>' + fig + '<div data-r="corpo" class="colonna" style="gap:14px"></div>';
+    ospite.innerHTML = '<div class="occhiello">' + E((opz && opz.occhiello) || 'Esercizio ' + n) + '</div><h3 class="titolo2" style="font-size:24px">' + T(x.d) + '</h3>' + fig + '<div data-r="corpo" class="colonna" style="gap:14px"></div>';
     const corpo = ospite.querySelector('[data-r="corpo"]');
-    if (x.o) { scelta(corpo, { d: x.guida || 'Scegli la risposta.', o: x.o }, opz && opz.alEsito); return; }
-    corpo.innerHTML = '<div class="riga-bottoni" style="align-items:flex-end"><label class="campo">' + E(x.eti || 'La tua risposta') + '<input type="text" autocomplete="off" spellcheck="false" placeholder="' + E(x.segnaposto || '') + '"></label>' +
-      '<button type="button" class="bottone primo" data-b="verifica">Verifica</button><button type="button" class="bottone" data-b="indizio"></button><button type="button" class="bottone" data-b="svolgi" hidden>Mostra lo svolgimento</button></div><div data-r="esito"></div><div data-r="indizi" class="colonna" style="gap:8px"></div><div data-r="svolto"></div>';
+    if (x.o) { scelta(corpo, { d: x.guida || 'Si scelga la risposta.', o: x.o }, opz && opz.alEsito); return; }
+    corpo.innerHTML = '<div class="riga-bottoni" style="align-items:flex-end"><label class="campo">' + E(x.eti || 'Risposta') + '<input type="text" autocomplete="off" spellcheck="false" placeholder="' + E(x.segnaposto || '') + '"></label>' +
+      '<button type="button" class="bottone primo" data-b="verifica">Verifica</button><button type="button" class="bottone" data-b="indizio"></button><button type="button" class="bottone" data-b="svolgi" hidden>Svolgimento</button></div><div data-r="esito"></div><div data-r="indizi" class="colonna" style="gap:8px"></div><div data-r="svolto"></div>';
     const campo = corpo.querySelector('input'), bInd = corpo.querySelector('[data-b="indizio"]'), bSv = corpo.querySelector('[data-b="svolgi"]');
     const aggiorna = () => {
       campo.style.borderColor = esito == null ? '' : esito.ok ? 'var(--ciano)' : 'var(--rosso)';
@@ -54,7 +54,7 @@
     };
     const verifica = () => {
       const a = norma(campo.value);
-      if (!a) { esito = { ok: false, msg: 'Scrivi una risposta prima di verificare.' }; aggiorna(); return; }
+      if (!a) { esito = { ok: false, msg: 'Occorre inserire una risposta prima della verifica.' }; aggiorna(); return; }
       tentativi++;
       if (x.giuste.map(norma).includes(a)) esito = { ok: true, msg: x.ok };
       else { const d = (x.diagnosi || []).find((r) => r.se.map(norma).includes(a)); esito = { ok: false, msg: d ? d.msg : x.altro }; }
@@ -72,11 +72,11 @@
 
   SL.viste.u = (main, r) => {
     const info = SL.trovaUnita(r.a);
-    if (!info) { main.innerHTML = '<div class="pagina"><h1 class="titolone">Unità non trovata</h1><p class="guida">Questa unità non è ancora disponibile nel nuovo formato.</p><p><a class="bottone primo" href="#/">Torna alla rete del corso</a></p></div>'; return null; }
+    if (!info) { main.innerHTML = '<div class="pagina"><h1 class="titolone">Unità non trovata</h1><p class="guida">L’identificativo indicato non corrisponde ad alcuna unità del corso.</p><p><a class="bottone primo" href="#/">Rete del corso</a></p></div>'; return null; }
     const fase = Math.max(1, Math.min(5, Number(r.b) || 1));
     const stessa = corrente.id === info.id;
     let pulizie = [], vivo = true;
-    main.innerHTML = '<div class="pagina"><p class="guida">Carico l’unità ' + E(info.id) + '.</p></div>';
+    main.innerHTML = '<div class="pagina"><p class="guida">Caricamento dell’unità ' + E(info.id) + '.</p></div>';
     SL.carica(info.id).then((u) => {
       if (!vivo) return;
       if (!stessa) corrente = { id: info.id, ctx: { p: SL.parametriIniziali(u.lab), pred: null, esito: null, fatto: false } };
@@ -93,34 +93,34 @@
         '<nav class="fasi" id="fasi" aria-label="Fasi dell’unità">' + FASI.map((f, k) => '<a class="fase' + (k + 1 < fase ? ' fatta' : '') + '" href="' + base + (k + 1) + '"' + (k + 1 === fase ? ' aria-current="step"' : '') + '>' + SL.sim(f[0], 44) + '<span><small>' + '0' + (k + 1) + '</small>' + f[1] + '</span></a>').join('') + '</nav>';
 
       if (fase === 1) {
-        h += '<section class="colonna" style="gap:18px"><div class="colonna" style="gap:6px"><div class="occhiello c">Fase 1 · Richiami</div><h2 class="titolo2">Che cosa portiamo con noi</h2><p class="guida">' + T(u.richiami.guida || 'Questa unità si appoggia su poche idee già incontrate. Rileggile: tutto il resto verrà costruito qui, un termine alla volta.') + '</p></div>' +
+        h += '<section class="colonna" style="gap:18px"><div class="colonna" style="gap:6px"><div class="occhiello c">Fase 1 · Richiami</div><h2 class="titolo2">Nozioni richiamate</h2><p class="guida">' + T(u.richiami.guida || 'L’unità si fonda su poche nozioni già introdotte, qui richiamate. Ogni altro termine è introdotto nel corso dell’unità, uno alla volta.') + '</p></div>' +
           (u.richiami.carte.length ? '<div class="griglia">' + u.richiami.carte.map((c) => '<div class="richiamo">' + SL.sim(c.sim, 60) + '<div class="colonna" style="gap:4px"><div class="occhiello c" style="font-size:11px">' + E(c.da) + '</div><h3 class="titolo3">' + E(c.t) + '</h3><p>' + T(c.d) + '</p></div></div>').join('') + '</div>' : '') +
           (u.richiami.domanda ? '<div class="pannello colonna" style="background:var(--pan2)" data-r="dom"></div>' : '') + '</section>';
       } else if (fase === 2) {
-        h += '<section class="colonna" style="gap:22px"><div class="colonna" style="gap:6px"><div class="occhiello">Fase 2 · L’idea</div><h2 class="titolo2" style="font-size:32px">' + E(u.idea.titolo) + '</h2></div><div class="due"><div class="prosa">' + blocchi(u.idea.testo, dopo) + '</div>' +
-          '<aside class="accanto pannello tacca" aria-label="Termini nuovi"><div class="occhiello">Termini nuovi · ' + u.idea.termini.length + '</div>' + (u.idea.termini.length ? '' : '<div class="voce"><span>Questa unità mette in ordine termini già incontrati, senza aggiungerne di nuovi.</span></div>') + u.idea.termini.map((id) => { const v = SL.glossario[id] || { t: id, d: '' }; return '<div class="voce"><b>' + (v.s ? SL.sim(v.s, 34) : '') + E(v.t) + '</b><span>' + E(v.d) + '</span></div>'; }).join('') +
+        h += '<section class="colonna" style="gap:22px"><div class="colonna" style="gap:6px"><div class="occhiello">Fase 2 · Esposizione</div><h2 class="titolo2" style="font-size:32px">' + E(u.idea.titolo) + '</h2></div><div class="due"><div class="prosa">' + blocchi(u.idea.testo, dopo) + '</div>' +
+          '<aside class="accanto pannello tacca" aria-label="Termini nuovi"><div class="occhiello">Termini nuovi · ' + u.idea.termini.length + '</div>' + (u.idea.termini.length ? '' : '<div class="voce"><span>L’unità riordina termini già introdotti, senza aggiungerne di nuovi.</span></div>') + u.idea.termini.map((id) => { const v = SL.glossario[id] || { t: id, d: '' }; return '<div class="voce"><b>' + (v.s ? SL.sim(v.s, 34) : '') + E(v.t) + '</b><span>' + E(v.d) + '</span></div>'; }).join('') +
           '<div class="nota" style="border-top:1px solid var(--riga);padding-top:12px">I termini evidenziati nel testo si aprono con un clic e restano sempre nel <a href="#/glossario">glossario</a>.</div></aside></div></section>';
       } else if (fase === 3) {
         h += '<section class="colonna" style="gap:20px"><div class="colonna" style="gap:6px"><div class="occhiello">Fase 3 · L’esperimento</div><h2 class="titolo2">Prima di cominciare</h2></div><div class="griglia">' +
-          '<div class="pannello colonna"><h3 class="titolo3">Che cosa faremo</h3>' + u.esperimento.faremo.map((p) => '<p style="color:#d6ccb5">' + T(p) + '</p>').join('') + '</div>' +
-          '<div class="pannello colonna" style="gap:14px"><h3 class="titolo3">Che cosa vedrai sulla scena</h3>' + u.esperimento.vedrai.map((v) => '<div class="legenda-fig">' + SL.sim(v[0], 40) + '<div><b>' + E(v[1]) + '.</b> ' + T(v[2]) + '</div></div>').join('') + '</div>' +
+          '<div class="pannello colonna"><h3 class="titolo3">Svolgimento dell’esperimento</h3>' + u.esperimento.faremo.map((p) => '<p style="color:#d6ccb5">' + T(p) + '</p>').join('') + '</div>' +
+          '<div class="pannello colonna" style="gap:14px"><h3 class="titolo3">Elementi della scena</h3>' + u.esperimento.vedrai.map((v) => '<div class="legenda-fig">' + SL.sim(v[0], 40) + '<div><b>' + E(v[1]) + '.</b> ' + T(v[2]) + '</div></div>').join('') + '</div>' +
           '<div class="pannello tacca colonna" data-r="prev"></div></div></section>';
       } else if (fase === 4) {
         h += '<section class="colonna" style="gap:18px"><div class="colonna" style="gap:6px"><div class="occhiello">Fase 4 · Esecuzione guidata</div><h2 class="titolo2">' + E(u.lab.titolo) + '</h2></div><div data-r="lab" class="colonna" style="gap:18px"></div></section>';
       } else {
         const b = u.bilancio;
-        h += '<section class="colonna" style="gap:20px"><div class="colonna" style="gap:6px"><div class="occhiello">Fase 5 · Bilancio</div><h2 class="titolo2">Che cosa abbiamo visto</h2></div>' +
-          (ctx.fatto && ctx.pred != null ? '<div class="pannello esito colonna" style="gap:6px"><div class="occhiello c">Previsione ed esito</div><div style="font-size:18px;color:#e9fafc">' + T(u.lab.confronto ? u.lab.confronto(ctx.pred, ctx.esito, ctx.p) : 'Avevi previsto ' + ctx.pred + '. L’esito dell’esperimento è ' + ctx.esito + '.') + '</div></div>' : '') +
-          '<div class="griglia"><div class="pannello colonna"><div class="occhiello">La regola, a parole</div>' + b.regola.map((p) => '<p style="color:#e4dbc6">' + T(p) + '</p>').join('') + '</div>' +
+        h += '<section class="colonna" style="gap:20px"><div class="colonna" style="gap:6px"><div class="occhiello">Fase 5 · Bilancio</div><h2 class="titolo2">Sintesi</h2></div>' +
+          (ctx.fatto && ctx.pred != null ? '<div class="pannello esito colonna" style="gap:6px"><div class="occhiello c">Previsione ed esito</div><div style="font-size:18px;color:#e9fafc">' + T(u.lab.confronto ? u.lab.confronto(ctx.pred, ctx.esito, ctx.p) : 'La previsione indicava ' + ctx.pred + '. L’esito dell’esperimento è ' + ctx.esito + '.') + '</div></div>' : '') +
+          '<div class="griglia"><div class="pannello colonna"><div class="occhiello">Enunciato della regola</div>' + b.regola.map((p) => '<p style="color:#e4dbc6">' + T(p) + '</p>').join('') + '</div>' +
           '<div class="pannello colonna"><div class="occhiello r">Errori frequenti</div>' + b.errori.map((e) => '<div class="colonna" style="gap:2px"><b style="color:var(--chiaro)">' + T(e[0]) + '</b><span style="color:var(--testo2)">' + T(e[1]) + '</span></div>').join('') + '</div>' +
-          '<div class="pannello colonna"><div class="occhiello c">Ora so farlo da solo?</div>' + b.saFare.map((t) => '<label class="spunta"><input type="checkbox"><span>' + T(t) + '</span></label>').join('') + '<p class="nota">Le spunte servono a te e non vengono conservate.</p></div></div></section>' +
+          '<div class="pannello colonna"><div class="occhiello c">Competenze da verificare</div>' + b.saFare.map((t) => '<label class="spunta"><input type="checkbox"><span>' + T(t) + '</span></label>').join('') + '<p class="nota">Le spunte hanno valore di promemoria e non vengono conservate.</p></div></div></section>' +
           b.esercizi.map((x, k) => '<section class="banco esercizio" data-es="' + k + '"></section>').join('') +
-          (b.sfida ? '<section class="pannello sfida"><div class="colonna" style="flex:999 1 420px;min-width:0;gap:8px"><div class="occhiello">Dal sito alla sfida</div><h2 class="titolo3" style="font-size:21px">La sfida PWN collegata</h2><p style="color:#d6ccb5;max-width:680px">Le sfide sono esercizi del corso che si svolgono in un terminale: il sistema assegna a ciascuno studente una propria traccia e controlla la risposta. Conviene affrontarle dopo aver chiuso il capitolo. L’indirizzo della piattaforma viene comunicato a lezione.</p></div><div class="pannello colonna" style="flex:1 1 280px;min-width:0;background:var(--pan2);border-color:var(--riga2);gap:6px"><div class="occhiello m" style="font-size:11px">Sfida collegata</div><div class="id">' + E(b.sfida[0]) + '</div><div style="color:var(--testo2);font-size:15px">' + E(b.sfida[1]) + '</div></div></section>' : '');
+          (b.sfida ? '<section class="pannello sfida"><div class="colonna" style="flex:999 1 420px;min-width:0;gap:8px"><div class="occhiello">Dal laboratorio alla sfida</div><h2 class="titolo3" style="font-size:21px">La sfida PWN collegata</h2><p style="color:#d6ccb5;max-width:680px">Le sfide sono esercizi del corso da svolgere in un terminale: il sistema assegna a ciascuno studente una traccia individuale e ne verifica la risposta. È opportuno affrontarle al termine del capitolo. L’indirizzo della piattaforma viene comunicato a lezione.</p></div><div class="pannello colonna" style="flex:1 1 280px;min-width:0;background:var(--pan2);border-color:var(--riga2);gap:6px"><div class="occhiello m" style="font-size:11px">Sfida collegata</div><div class="id">' + E(b.sfida[0]) + '</div><div style="color:var(--testo2);font-size:15px">' + E(b.sfida[1]) + '</div></div></section>' : '');
       }
       const dopoUnita = info.dopo;
-      h += '<div class="passi-fase">' + (fase > 1 ? '<a class="bottone" href="' + base + (fase - 1) + '">Fase precedente</a>' : '<a class="bottone" href="' + capLink + '">' + (info.cap.diretta ? 'Torna alla rete' : 'Torna al capitolo') + '</a>') +
+      h += '<div class="passi-fase">' + (fase > 1 ? '<a class="bottone" href="' + base + (fase - 1) + '">Fase precedente</a>' : '<a class="bottone" href="' + capLink + '">' + (info.cap.diretta ? 'Rete del corso' : 'Pagina del capitolo') + '</a>') +
         (fase < 5 ? '<a class="bottone primo" href="' + base + (fase + 1) + '">Fase ' + (fase + 1) + ' · ' + FASI[fase][1] + '</a>' :
-          (dopoUnita ? '<a class="bottone primo" href="#/u/' + dopoUnita.id + '">Unità successiva · ' + E(dopoUnita.id) + ' ' + E(dopoUnita.titolo) + '</a>' : '<a class="bottone primo" href="#/">Torna alla rete del corso</a>')) + '</div></div>';
+          (dopoUnita ? '<a class="bottone primo" href="#/u/' + dopoUnita.id + '">Unità successiva · ' + E(dopoUnita.id) + ' ' + E(dopoUnita.titolo) + '</a>' : '<a class="bottone primo" href="#/">Rete del corso</a>')) + '</div></div>';
       main.innerHTML = h;
       const Q = (k) => main.querySelector('[data-r="' + k + '"]');
       if (fase === 1 && u.richiami.domanda) scelta(Q('dom'), u.richiami.domanda);
@@ -132,7 +132,7 @@
       if (stessa) { const a = document.getElementById('fasi'); if (a) a.scrollIntoView({ block: 'start' }); } else window.scrollTo(0, 0);
     }).catch((err) => {
       if (!vivo) return;
-      main.innerHTML = '<div class="pagina"><h1 class="titolone">Unità non disponibile</h1><p class="guida">' + E(err.message) + '.</p><p><a class="bottone primo" href="#/">Torna alla rete del corso</a></p></div>';
+      main.innerHTML = '<div class="pagina"><h1 class="titolone">Unità non disponibile</h1><p class="guida">' + E(err.message) + '.</p><p><a class="bottone primo" href="#/">Rete del corso</a></p></div>';
     });
     return () => { vivo = false; pulizie.forEach((f) => { try { f(); } catch (e) { /* già smontato */ } }); };
   };

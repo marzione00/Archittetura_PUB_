@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.2.3', {
   titolo: 'Registri, banchi di registri e memoria',
-  obiettivo: 'Alla fine saprai descrivere un banco di registri con due porte di lettura e una di scrittura, e saprai dire che cosa mostrano le letture prima e dopo un fronte del clock.',
+  obiettivo: 'Obiettivo: descrivere un banco di registri con due porte di lettura e una di scrittura, e saprai dire che cosa mostrano le letture prima e dopo un fronte del clock.',
   concetti: [['register', 'Molti registri, un indirizzo'], ['mux', 'Leggere significa scegliere'], ['clock', 'Scrivere al fronte']],
   filigrana: ['register', 'memory', 'mux'],
   richiami: {
@@ -61,7 +61,7 @@ SL.registra('3.2.3', {
       domanda: (p) => 'Il banco contiene R0 = 8, R1 = 5, R2 = 11 e R3 = 2. La porta A legge R' + p.a + ' e la porta B legge R' + p.b + '. La porta di scrittura offre 21 a R' + p.w + ', con l’abilitazione a ' + p.en + '. Dopo il fronte, che cosa mostrano le due porte?',
       opzioni: (p) => { const R = SL.unita323.INIZIO, f = SL.unita323.dopo(p); return Array.from(new Set([R[p.a] + ',' + R[p.b], f[p.a] + ',' + f[p.b], '21,' + R[p.b], R[p.a] + ',21', '21,21'])).map((k) => [k, 'A mostra ' + k.split(',')[0] + ', B mostra ' + k.split(',')[1]]); }
     },
-    confronto: (pred, esito, p) => { const T = (k) => 'A = ' + k.split(',')[0] + ' e B = ' + k.split(',')[1]; return 'Avevi previsto ' + T(pred) + '. Dopo il fronte: ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : !p.en ? 'Con l’abilitazione a 0 nessun registro carica, e le letture restano quelle di prima.' : 'Cambia soltanto R' + p.w + ', che riceve 21. Lo vedono le porte che leggono proprio quel registro' + (p.a !== p.w && p.b !== p.w ? ', e qui nessuna delle due lo legge.' : '.')); },
+    confronto: (pred, esito, p) => { const T = (k) => 'A = ' + k.split(',')[0] + ' e B = ' + k.split(',')[1]; return 'La previsione indicava ' + T(pred) + '. Dopo il fronte: ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : !p.en ? 'Con l’abilitazione a 0 nessun registro carica, e le letture restano quelle di prima.' : 'Cambia soltanto R' + p.w + ', che riceve 21. Lo vedono le porte che leggono proprio quel registro' + (p.a !== p.w && p.b !== p.w ? ', e qui nessuna delle due lo legge.' : '.')); },
     costruisci(p) {
       const el = SL.el, U = SL.unita323, passi = [], R = U.INIZIO.slice(), YR = [10, 78, 146, 214];
       const st = { la: false, lb: false, attesa: false, ck: 'basso' };
@@ -112,7 +112,7 @@ SL.registra('3.2.3', {
       ['Pensare che la scrittura tocchi le porte di lettura.', 'La scrittura cambia un registro. Una porta se ne accorge soltanto se sta leggendo proprio quello.'],
       ['Dimenticare l’abilitazione.', 'Con l’abilitazione a 0 l’indirizzo e il dato di scrittura vengono ignorati, e nessun registro cambia.']
     ],
-    saFare: ['Descrivo le porte di lettura e la porta di scrittura di un banco.', 'Dico quale registro cambia al fronte, dati indirizzo e abilitazione.', 'Prevedo ciò che una porta di lettura mostra prima e dopo una scrittura.'],
+    saFare: ['Descrivere le porte di lettura e la porta di scrittura di un banco.', 'Indicare quale registro cambia al fronte, dati indirizzo e abilitazione.', 'Prevedere ciò che una porta di lettura mostra prima e dopo una scrittura.'],
     esercizi: [
       { d: 'Un banco contiene R0 = 4, R1 = 9, R2 = 6 e R3 = 1. La porta A legge R3. La porta di scrittura offre 7 a R3 con l’abilitazione a 1. Che cosa mostra la porta A subito prima del fronte?', segnaposto: 'Un numero', giuste: ['1', 'uno'],
         ok: 'Prima del fronte R3 contiene ancora 1, e la lettura mostra il contenuto del momento.',
@@ -124,7 +124,7 @@ SL.registra('3.2.3', {
         altro: 'Il numero è diverso. Cerca il contenuto di R3 prima che la scrittura abbia effetto.',
         indizi: ['La porta A legge R3.', 'La scrittura ha effetto al fronte.', 'Prima del fronte R3 contiene 1.'],
         svolgimento: ['Indirizzo della porta A: 3.', 'Contenuto di R3 prima del fronte: 1.', 'La porta A mostra 1. Dopo il fronte mostrerà 7.'] },
-      { d: 'Al fronte di salita l’abilitazione di scrittura vale 0. Che cosa accade al registro indicato dall’indirizzo di scrittura?', guida: 'Scegli la risposta.', o: [
+      { d: 'Al fronte di salita l’abilitazione di scrittura vale 0. Che cosa accade al registro indicato dall’indirizzo di scrittura?', guida: 'Si scelga la risposta.', o: [
         { t: 'Riscrive il proprio contenuto', ok: true, fb: 'Il suo comando Carica vale 0, come quello di tutti gli altri registri.' },
         { t: 'Carica il dato offerto', fb: 'Il filo del decodificatore passa da una AND con l’abilitazione. Con l’abilitazione a 0 il comando Carica resta a 0.' },
         { t: 'Viene azzerato', fb: 'Nessun segnale chiede di azzerarlo. Con Carica a 0 il registro conserva la parola che ha.' }] }

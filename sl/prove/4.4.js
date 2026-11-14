@@ -20,13 +20,13 @@
             { se: [a.toString(16), '0x' + a.toString(16)], msg: 'Questo è l’indirizzo sul bus. Il numero del registro si conta dall’inizio dell’intervallo.' },
             { se: I(n + 1), msg: 'Il primo registro è il numero 0, all’indirizzo ' + H2(base) + '.' }
           ]),
-          altro: 'Il numero è diverso. Sottrai dall’indirizzo l’inizio dell’intervallo del controller.',
+          altro: 'Il numero è diverso. Si sottragga dall’indirizzo l’inizio dell’intervallo del controller.',
           indizi: ['L’intervallo del controller comincia a ' + H2(base) + '.', 'In base dieci: ' + a + ' − ' + base + '.', a + ' − ' + base + ' = ' + n + '.'],
           svolgimento: ['Indirizzo: ' + H2(a) + ' = ' + a + '.', 'Inizio dell’intervallo: ' + H2(base) + ' = ' + base + '.', 'Registro: ' + n + '.'] };
       }
       const cat = r.scegli(['ram', 'ctl', 'no']), a = cat === 'ram' ? r.int(0, 127) : cat === 'ctl' ? r.int(base, fine) : (base > 128 && r.int(0, 1) === 0 ? r.int(128, base - 1) : r.int(fine + 1, 255));
       const perche = cat === 'ram' ? H2(a) + ' è minore di 0x80, e appartiene alla RAM.' : cat === 'ctl' ? H2(a) + ' sta fra ' + H2(base) + ' e ' + H2(fine) + '.' : H2(a) + ' cade fuori dai due intervalli.';
-      return { u: '4.4.1', d: testa + 'Un iniziatore ottiene il turno e mette sul bus l’indirizzo ' + H2(a) + '. Quale componente risponde?', guida: 'Scegli la risposta.', o: r.mescola([
+      return { u: '4.4.1', d: testa + 'Un iniziatore ottiene il turno e mette sul bus l’indirizzo ' + H2(a) + '. Quale componente risponde?', guida: 'Si scelga la risposta.', o: r.mescola([
         { t: 'La RAM', ok: cat === 'ram', fb: perche },
         { t: 'Il controller', ok: cat === 'ctl', fb: perche },
         { t: 'Nessuno, e la transazione si chiude con un errore', ok: cat === 'no', fb: perche }]) };
@@ -55,7 +55,7 @@
           { se: CI(sing), msg: 'Questa è la durata delle transazioni singole. Va sottratta la durata della raffica.' },
           { se: CI(n * (1 + w)), msg: 'Anche la raffica paga una volta indirizzo e attesa: le ripetizioni risparmiate sono ' + (n - 1) + '.' }
         ]),
-        altro: 'Il numero è diverso. Calcola le due durate e sottrai.',
+        altro: 'Il numero è diverso. Si calcolino le due durate e si sottragga.',
         indizi: ['Singole: ' + n + ' × (1 + ' + w + ' + 1).', 'Raffica: 1 + ' + w + ' + ' + n + '.', sing + ' − ' + raff + ' = ' + v + '.'],
         svolgimento: ['Transazioni singole: ' + n + ' × ' + (2 + w) + ' = ' + sing + ' cicli.', 'Raffica: 1 + ' + w + ' + ' + n + ' = ' + raff + ' cicli.', 'Risparmio: ' + v + ' cicli.'] }; }
       const R = cosa === 0, v = R ? raff : sing, giuste = CI(v);
@@ -82,7 +82,7 @@
           rr ? { se: CI(daUltimo), msg: 'La rotazione riparte dal successivo di ' + last + ', che va in fondo.' } : null,
           { se: CI(fine ? T * pos : T * pos + T), msg: fine ? 'Questo è l’inizio del turno. Per il completamento vanno aggiunti i ' + T + ' cicli del turno.' : 'Questo è il completamento. L’attesa termina quando il turno comincia.' }
         ]),
-        altro: 'Il numero è diverso. Scrivi l’ordine dei tre turni e conta quelli che precedono ' + oss + '.',
+        altro: 'Il numero è diverso. Si scriva l’ordine dei tre turni e si conti quelli che precedono ' + oss + '.',
         indizi: [rr ? 'Dopo ' + last + ' la rotazione riparte da ' + o[0] + '.' : 'Con la priorità fissa l’ordine è sempre A, B, C.', 'Ordine: ' + o.join(', ') + '. Turni prima di ' + oss + ': ' + pos + '.', fine ? T + ' × ' + pos + ' + ' + T + ' = ' + v + '.' : T + ' × ' + pos + ' = ' + v + '.'],
         svolgimento: ['Ordine dei turni: ' + o.join(', ') + '.', 'Turni che precedono ' + oss + ': ' + pos + '.', 'Attesa: ' + T + ' × ' + pos + ' = ' + T * pos + ' cicli.'].concat(fine ? ['Completamento: ' + T * pos + ' + ' + T + ' = ' + v + ' cicli.'] : []) };
     },

@@ -36,7 +36,7 @@
           liv === '6' ? { se: I(1), msg: 'Un guasto è il limite di RAID 5. RAID 6 ha due parità.' } : null,
           liv === '1' ? { se: I(n), msg: 'Deve restare almeno un disco con la copia.' } : null
         ]),
-        altro: 'Il numero è diverso. Chiediti quante copie, o quante relazioni di parità, proteggono ogni blocco.',
+        altro: 'Il numero è diverso. Ci si chieda quante copie, o quante relazioni di parità, proteggono ogni blocco.',
         indizi: liv === '0' ? ['Ogni blocco sta su un solo disco.', 'Non ci sono copie né parità.', 'Nessun guasto è sopportato: 0.'] : liv === '1' ? ['Ogni disco contiene tutto il volume.', 'Basta un superstite.', n + ' − 1 = ' + sopporta + '.'] : liv === '10' ? ['Ogni blocco ha due copie, sui due dischi di una coppia.', 'Il caso peggiore sono due guasti nella stessa coppia.', 'Il numero garantito è 1.'] : ['Ogni striscia ha ' + (liv === '5' ? 'una parità' : 'due parità') + '.', 'Ogni parità ricava un blocco mancante.', 'Guasti sopportati: ' + sopporta + '.'],
         svolgimento: [liv === '0' ? 'Protezione: nessuna.' : liv === '1' ? 'Copie complete: ' + n + '.' : liv === '10' ? 'Copie di ogni blocco: 2, nella stessa coppia.' : 'Parità per striscia: ' + sopporta + '.', 'Guasti sopportati comunque scelti: ' + sopporta + '.'] };
     },
@@ -51,7 +51,7 @@
           { se: E2(a & b), msg: 'Questo è AND. XOR segnala le colonne in cui i bit sono diversi.' },
           { se: E2((a + b) & 255), msg: 'Questa è la somma. XOR lavora colonna per colonna, senza riporti.' }
         ]),
-        altro: 'Il valore è diverso. Scrivi i due byte in binario e confronta le colonne.',
+        altro: 'Il valore è diverso. Si scrivano i due byte in binario e si confrontino le colonne.',
         indizi: ['P = A XOR B.', H2(a) + ' è ' + B8(a) + ', ' + H2(b) + ' è ' + B8(b) + '.', 'Il risultato è ' + B8(pv) + '.'],
         svolgimento: ['A = ' + B8(a) + '.', 'B = ' + B8(b) + '.', 'P = ' + B8(pv) + ' = ' + H2(pv) + '.'] }; }
       if (cosa === 1) { const giuste = E2(pn); return { u: '4.6.2', d: 'Una striscia ha parità P = ' + H2(pv) + '. Il blocco A, che valeva ' + H2(a) + ', viene riscritto con ' + H2(n) + '. Quanto vale la nuova parità? Rispondi in esadecimale.', segnaposto: 'Un byte', giuste,
@@ -61,7 +61,7 @@
           { se: E2(a ^ n), msg: 'Questo è lo XOR fra vecchio e nuovo A. Va applicato alla vecchia parità, ' + H2(pv) + '.' },
           { se: E2(pv), msg: 'La parità deve cambiare ogni volta che cambia un dato della striscia.' }
         ]),
-        altro: 'Il valore è diverso. Applica alla vecchia parità due XOR: con il vecchio A e con il nuovo A.',
+        altro: 'Il valore è diverso. Si applichi alla vecchia parità due XOR: con il vecchio A e con il nuovo A.',
         indizi: ['P nuova = P vecchia XOR A vecchio XOR A nuovo.', H2(pv) + ' XOR ' + H2(a) + ' = ' + H2(b) + '.', H2(b) + ' XOR ' + H2(n) + ' = ' + H2(pn) + '.'],
         svolgimento: [H2(pv) + ' XOR ' + H2(a) + ' = ' + H2(b) + ': è il contributo degli altri dati.', H2(b) + ' XOR ' + H2(n) + ' = ' + H2(pn) + '.'] }; }
       const giuste = E2(a);
@@ -72,7 +72,7 @@
           { se: E2(b & pv), msg: 'Questo è AND. Per ricavare il blocco mancante serve XOR.' },
           { se: E2(pv), msg: 'La parità da sola contiene anche il contributo di B, che va tolto con uno XOR.' }
         ]),
-        altro: 'Il valore è diverso. Calcola B XOR P in binario.',
+        altro: 'Il valore è diverso. Si calcoli B XOR P in binario.',
         indizi: ['A = B XOR P.', H2(b) + ' è ' + B8(b) + ', ' + H2(pv) + ' è ' + B8(pv) + '.', 'Il risultato è ' + B8(a) + '.'],
         svolgimento: ['B = ' + B8(b) + '.', 'P = ' + B8(pv) + '.', 'A = ' + B8(a) + ' = ' + H2(a) + '.'] };
     },
@@ -98,7 +98,7 @@
           { se: I(k + 1), msg: 'L’ultima pagina scritta, P' + ultima + ', contiene la versione corrente.' },
           { se: I(1), msg: 'Ogni aggiornamento rende invalida la pagina precedente, e gli aggiornamenti sono ' + k + '.' }
         ]),
-        altro: 'Il numero è diverso. Elenca le pagine che hanno contenuto il dato ed escludi l’ultima.',
+        altro: 'Il numero è diverso. Si elenchino le pagine che hanno contenuto il dato ed escludi l’ultima.',
         indizi: ['Il dato è passato per P' + s + ' e per ' + k + ' pagine nuove.', 'In tutto sono ' + (k + 1) + ' pagine, e soltanto l’ultima è valida.', (k + 1) + ' − 1 = ' + k + '.'],
         svolgimento: ['Pagine che hanno contenuto il dato: ' + (k + 1) + '.', 'Valida: P' + ultima + '.', 'Invalide: ' + k + '.'] };
     },
@@ -112,7 +112,7 @@
           { se: US(v * (tr + tp) + te + tp), msg: 'Nessun blocco va recuperato: la pagina libera c’è già.' },
           { se: US(tp + te), msg: 'La cancellazione serve soltanto quando mancano pagine libere.' }
         ]),
-        altro: 'Il valore è diverso. Chiediti quali operazioni servono quando una pagina libera è già pronta.',
+        altro: 'Il valore è diverso. Ci si chieda quali operazioni servono quando una pagina libera è già pronta.',
         indizi: ['Non serve alcuna migrazione.', 'Non serve alcuna cancellazione.', 'Resta la programmazione: ' + tp + ' µs.'],
         svolgimento: ['Migrazioni: nessuna.', 'Cancellazione: nessuna.', 'Programmazione richiesta: ' + tp + ' µs.'] }; }
       const coda = 'Il computer chiede di scrivere una pagina, e il controller deve prima recuperare un blocco che contiene ' + (v === 1 ? '1 pagina valida' : v + ' pagine valide') + '. ';
@@ -122,7 +122,7 @@
           { se: I(v), msg: 'Alle copie va aggiunta la pagina che il computer aveva chiesto di scrivere.' },
           { se: I(1), msg: 'Varrebbe 1 se non servisse alcun recupero.' }
         ]),
-        altro: 'Il numero è diverso. Conta tutte le pagine programmate e dividi per quelle richieste, che sono una.',
+        altro: 'Il numero è diverso. Conta tutte le pagine programmate e si divida per quelle richieste, che sono una.',
         indizi: ['Le pagine copiate sono ' + v + '.', 'A queste si aggiunge la pagina richiesta.', (v + 1) + ' ÷ 1 = ' + (v + 1) + '.'],
         svolgimento: ['Programmazioni per le copie: ' + v + '.', 'Programmazione richiesta: 1.', 'Amplificazione: ' + (v + 1) + '.'] }; }
       const tot = v * (tr + tp) + te + tp, giuste = US(tot);

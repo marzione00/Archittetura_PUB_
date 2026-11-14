@@ -59,6 +59,7 @@
   const E = SL.E;
   const attese = Object.create(null);
   const carica = (cap) => {
+    if (!SL.idCapitolo(cap)) return Promise.reject(new Error('Identificativo di capitolo non valido'));
     if (SL.prove[cap]) return Promise.resolve();
     if (attese[cap]) return attese[cap];
     attese[cap] = new Promise((ok, no) => {
@@ -75,14 +76,14 @@
   SL.viste.p = (main, r) => {
     const t = SL.trovaCapitolo(r.a);
     if (!t || !t.cap.prova) {
-      main.innerHTML = '<div class="pagina"><h1 class="titolone">Prova non disponibile</h1><p class="guida">Questo capitolo non ha ancora una prova nel nuovo formato.</p><p><a class="bottone primo" href="#/">Torna alla rete del corso</a></p></div>';
+      main.innerHTML = '<div class="pagina"><h1 class="titolone">Prova non disponibile</h1><p class="guida">Per il capitolo indicato non è disponibile alcuna prova.</p><p><a class="bottone primo" href="#/">Rete del corso</a></p></div>';
       return null;
     }
     const cap = t.cap, mod = t.mod, variante = Number(r.b);
     if (!(Number.isInteger(variante) && variante >= 1 && variante <= 999)) { location.replace('#/p/' + cap.id + '/' + altraVariante(0)); return null; }
     let vivo = true;
     const pulizie = [];
-    main.innerHTML = '<div class="pagina"><h1 class="titolone">Prova del capitolo ' + E(cap.id) + '</h1><p class="guida">Carico le domande.</p></div>';
+    main.innerHTML = '<div class="pagina"><h1 class="titolone">Prova del capitolo ' + E(cap.id) + '</h1><p class="guida">Caricamento delle domande.</p></div>';
     carica(cap.id).then(() => {
       if (!vivo) return;
       const domande = SL.componiProva(cap.id, variante), n = domande.length, dopo = [];
@@ -94,11 +95,11 @@
         '<div class="podio">' + SL.sim('bilancio', 104) + '</div><div class="dx"><div class="occhiello">Capitolo ' + E(cap.id) + ' · Prova di fine capitolo</div><h1>Prova · ' + E(cap.breve) + '</h1>' +
         '<p style="color:var(--testo2);max-width:640px">' + n + ' domande sugli argomenti del capitolo. Ogni risposta riceve subito un commento, e per le domande a risposta scritta restano disponibili gli indizi e lo svolgimento.</p>' +
         '<div class="piste"><span class="pista">' + SL.sim('riproduci', 28) + 'Variante ' + variante + '</span><span class="pista">' + SL.sim('tabella', 28) + n + ' domande</span></div></div></header>' +
-        '<section class="pannello colonna" style="gap:8px"><div class="occhiello">Come funziona</div><p style="color:#d6ccb5">Questa è la variante ' + variante + '. Con lo stesso numero la prova si ripresenta identica, quindi puoi rifarla oppure proporla ad altri. Il pulsante «Un’altra variante» cambia i dati delle domande e lascia uguali gli argomenti.</p>' +
-        '<p style="color:#d6ccb5">Il riepilogo in fondo alla pagina si aggiorna mentre rispondi. Serve soltanto a te: quando lasci la pagina viene dimenticato.</p></section>' +
+        '<section class="pannello colonna" style="gap:8px"><div class="occhiello">Funzionamento della prova</div><p style="color:#d6ccb5">Questa è la variante ' + variante + '. Con lo stesso numero la prova si ripresenta identica, e può quindi essere ripetuta oppure assegnata ad altri. Il pulsante «Un’altra variante» cambia i dati delle domande e lascia uguali gli argomenti.</p>' +
+        '<p style="color:#d6ccb5">Il riepilogo in fondo alla pagina si aggiorna a ogni risposta. Ha valore soltanto per chi svolge la prova: alla chiusura della pagina viene eliminato.</p></section>' +
         domande.map((x, k) => '<section class="banco esercizio" data-q="' + k + '"></section>').join('') +
         '<section class="pannello esito colonna" data-r="riepilogo" role="status" aria-live="polite"></section>' +
-        '<div class="passi-fase"><a class="bottone" href="#/c/' + E(cap.id) + '">Torna al capitolo</a><button type="button" class="bottone primo" data-b="altra">Un’altra variante</button></div></div>';
+        '<div class="passi-fase"><a class="bottone" href="#/c/' + E(cap.id) + '">Pagina del capitolo</a><button type="button" class="bottone primo" data-b="altra">Un’altra variante</button></div></div>';
 
       const riepilogo = main.querySelector('[data-r="riepilogo"]');
       const disegnaRiepilogo = () => {
@@ -107,11 +108,11 @@
         const rivedere = [];
         domande.forEach((x, k) => { if ((stati[k] === 'aiutata' || stati[k] === 'tentata') && x.u && !rivedere.includes(x.u)) rivedere.push(x.u); });
         riepilogo.innerHTML = '<div class="occhiello c">Riepilogo della variante ' + variante + '</div>' +
-          '<div class="hud"><div class="c"><small>Giuste al primo tentativo</small><b>' + piene + '</b></div><div class="a"><small>Giuste con un aiuto</small><b>' + aiutate + '</b></div><div><small>Ancora aperte</small><b>' + aperte + '</b></div><div><small>Domande</small><b>' + n + '</b></div></div>' +
-          '<p style="color:#e9fafc">' + (piene + aiutate === 0 ? 'Rispondi alle domande nell’ordine che preferisci. Conta come «al primo tentativo» una risposta giusta data senza indizi e senza tentativi precedenti.'
-            : aperte > 0 ? (aperte === 1 ? 'Resta una domanda aperta' : 'Restano ' + aperte + ' domande aperte') + '. Puoi tornarci in qualunque momento.'
-            : piene === n ? 'Hai risolto tutte le domande al primo tentativo. Per una conferma puoi provare un’altra variante.'
-            : 'Hai risolto tutte le domande. Quelle che hanno richiesto un aiuto indicano gli argomenti su cui conviene tornare.') + '</p>' +
+          '<div class="hud"><div class="c"><small>Corrette al primo tentativo</small><b>' + piene + '</b></div><div class="a"><small>Corrette con un aiuto</small><b>' + aiutate + '</b></div><div><small>Ancora aperte</small><b>' + aperte + '</b></div><div><small>Domande</small><b>' + n + '</b></div></div>' +
+          '<p style="color:#e9fafc">' + (piene + aiutate === 0 ? 'L’ordine delle risposte è libero. È considerata «al primo tentativo» una risposta corretta data senza indizi e senza tentativi precedenti.'
+            : aperte > 0 ? (aperte === 1 ? 'Resta una domanda aperta' : 'Restano ' + aperte + ' domande aperte') + '. Vi si può tornare in qualunque momento.'
+            : piene === n ? 'Tutte le domande sono state risolte al primo tentativo. Un’altra variante consente una conferma.'
+            : 'Tutte le domande sono state risolte. Quelle che hanno richiesto un aiuto indicano gli argomenti da rivedere.') + '</p>' +
           (rivedere.length ? '<div class="colonna" style="gap:8px"><div class="occhiello m" style="font-size:11px">Unità da rivedere</div><div class="riga-bottoni">' + rivedere.map((id) => { const info = SL.trovaUnita(id); return '<a class="bottone" href="#/u/' + E(id) + '">' + E(id) + (info ? ' · ' + E(info.titolo) : '') + '</a>'; }).join('') + '</div></div>' : '');
       };
       main.querySelectorAll('[data-q]').forEach((nodo) => {
@@ -132,7 +133,7 @@
       window.scrollTo(0, 0);
     }).catch((err) => {
       if (!vivo) return;
-      main.innerHTML = '<div class="pagina"><h1 class="titolone">Prova non disponibile</h1><p class="guida">' + E(err.message) + '.</p><p><a class="bottone primo" href="#/c/' + E(cap.id) + '">Torna al capitolo</a></p></div>';
+      main.innerHTML = '<div class="pagina"><h1 class="titolone">Prova non disponibile</h1><p class="guida">' + E(err.message) + '.</p><p><a class="bottone primo" href="#/c/' + E(cap.id) + '">Pagina del capitolo</a></p></div>';
     });
     return () => { vivo = false; pulizie.forEach((f) => { try { f(); } catch (e) { /* già smontato */ } }); };
   };

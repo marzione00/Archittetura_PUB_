@@ -45,6 +45,7 @@ code{font-family:var(--mono);font-size:.94em;color:var(--chiaro);background:var(
 .testa nav a[aria-current]{color:var(--ambra);border-bottom-color:var(--ambra);font-weight:600}
 .testa .lato{font-size:14px;color:var(--muto);text-decoration:none;min-height:44px;display:flex;align-items:center}
 .piede{border-top:1px solid var(--riga);margin-top:48px}
+.piede .licenza{margin-left:auto}.piede .licenza a{color:var(--ambra)}
 .piede .in{max-width:1320px;margin:0 auto;padding:22px 24px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;color:var(--muto);font-size:14px}
 main{display:block;outline:none}
 .pagina{max-width:1160px;margin:0 auto;padding:36px 24px 56px;display:flex;flex-direction:column;gap:32px}
@@ -84,6 +85,7 @@ main{display:block;outline:none}
 
 /* Termini con definizione */
 .termine{font:inherit;color:var(--ambra);background:none;border:0;border-bottom:1px dotted var(--ambra);padding:0;cursor:help}
+.unito{white-space:nowrap}.unito .termine{white-space:normal}
 #fumetto{position:absolute;z-index:40;max-width:320px;background:var(--pan2);border:1px solid var(--ambra);padding:12px 14px;box-shadow:0 10px 40px rgba(0,0,0,.6);font-size:15px;line-height:1.45}
 #fumetto b{display:flex;align-items:center;gap:8px;color:var(--chiaro);margin-bottom:4px}
 #fumetto small{display:block;margin-top:6px;color:var(--muto);font:12px var(--mono)}
@@ -281,5 +283,33 @@ input[type=range]{width:100%;height:28px;accent-color:var(--ambra)}
 @keyframes sl-bagliore{0%,100%{box-shadow:0 0 6px rgba(242,182,72,.5)}50%{box-shadow:0 0 20px rgba(242,182,72,.95)}}
 @keyframes sl-entra{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
 .pagina>*{animation:sl-entra .35s both}
+/* Sequenza di avvio */
+#avvio{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 40%,#17130b 0,#0a0907 70%);opacity:1;transition:opacity .45s;outline:none}
+#avvio.esce{opacity:0;pointer-events:none}
+#avvio .quadro{width:min(760px,100%);display:flex;flex-direction:column;gap:18px;padding:28px 30px;border:1px solid var(--ambra-t);background:linear-gradient(135deg,var(--ambra) 10px,transparent 10px) 0 0/20px 20px no-repeat,var(--pan);box-shadow:0 0 0 1px #0a0907,0 0 60px rgba(242,182,72,.12);animation:sl-entra .35s both}
+#avvio .capo{display:flex;align-items:center;gap:18px}
+#avvio .capo .sim{color:var(--ambra);flex:none}
+#avvio .nome{font:700 34px/1.05 var(--tit);color:var(--chiaro)}
+#avvio .nome b{color:var(--ambra)}
+#avvio .sotto{color:var(--testo2);font-size:15px}
+#avvio .righe{display:flex;flex-direction:column;font:500 14.5px/1.95 var(--mono);color:var(--testo2);border-top:1px solid var(--riga);border-bottom:1px solid var(--riga);padding:10px 0}
+#avvio .righe span{display:flex;flex-wrap:wrap;gap:0 12px;opacity:0;animation:avvio-riga .12s linear forwards}
+#avvio .righe b{color:var(--ciano);font-weight:600;flex:none}
+#avvio .righe em{font-style:normal;color:var(--muto);flex:0 0 170px}
+#avvio .righe i{font-style:normal;color:var(--chiaro)}
+#avvio .righe .invito b,#avvio .righe .invito em{color:var(--ambra);flex:none}
+#avvio .righe .invito u{width:9px;height:17px;background:var(--ambra);align-self:center;text-decoration:none;animation:avvio-cursore .9s steps(2,start) infinite}
+#avvio .lettura{position:absolute;left:-9999px}
+#avvio .corsa{height:4px;background:var(--riga);position:relative;overflow:hidden}
+#avvio .corsa i{position:absolute;inset:0;background:var(--ambra);transform-origin:left center;animation:avvio-corsa var(--durata,4.2s) linear forwards}
+@keyframes avvio-riga{to{opacity:1}}
+@keyframes avvio-corsa{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes avvio-cursore{to{visibility:hidden}}
+@media (max-width:560px){#avvio .quadro{padding:20px 18px}#avvio .nome{font-size:27px}#avvio .righe em{flex-basis:100%}#avvio .righe{line-height:1.6}#avvio .righe span{margin-bottom:6px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media print{.testa nav,.riga-bottoni,.tacche,input[type=range]{display:none}body{background:#fff;color:#000}}
+
+/* Sfondo «alveare»: tela fissa dietro i contenuti e velo che attenua il disegno sotto la colonna di testo. Assente sotto i 900 px e in stampa. */
+#sfondo,#sfondo-velo{position:fixed;left:0;top:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+#sfondo-velo{background:linear-gradient(90deg,rgba(12,11,9,0) 0,rgba(12,11,9,.78) 22%,rgba(12,11,9,.78) 78%,rgba(12,11,9,0) 100%)}
+@media (max-width:899.98px),print{#sfondo,#sfondo-velo{display:none}}

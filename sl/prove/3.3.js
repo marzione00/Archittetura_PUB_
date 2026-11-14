@@ -25,7 +25,7 @@
       }
       const o2 = r.scegli(['addq', 'subq']), b = r.int(0, 3) === 0 ? (o2 === 'addq' ? -a : a) : b0, ris = o2 === 'addq' ? b + a : b - a, zf = ris === 0 ? 1 : 0, sf = ris < 0 ? 1 : 0, giusta = zf + ',' + sf;
       const perche = 'Il risultato è ' + N(b) + (o2 === 'addq' ? ' + ' : ' − ') + PA(a) + ' = ' + N(ris) + (zf ? ', cioè zero.' : sf ? ', un numero negativo.' : ', un numero positivo.');
-      return { u: '3.3.1', d: 'In una macchina Y86-64 il registro %' + s + ' vale ' + N(a) + ' e %' + d + ' vale ' + N(b) + '. Dopo `' + o2 + ' %' + s + ', %' + d + '`, quanto valgono i codici di condizione ZF e SF?', guida: 'Scegli la risposta.',
+      return { u: '3.3.1', d: 'In una macchina Y86-64 il registro %' + s + ' vale ' + N(a) + ' e %' + d + ' vale ' + N(b) + '. Dopo `' + o2 + ' %' + s + ', %' + d + '`, quanto valgono i codici di condizione ZF e SF?', guida: 'Si scelga la risposta.',
         o: ['0,0', '1,0', '0,1', '1,1'].map((k) => (k === giusta ? { t: 'ZF = ' + k[0] + ' e SF = ' + k[2], ok: true, fb: perche } : { t: 'ZF = ' + k[0] + ' e SF = ' + k[2], fb: k === '1,1' ? 'Un risultato nullo ha il bit di segno a 0, quindi ZF e SF non valgono mai 1 insieme. ' + perche : perche })) };
     },
     // 3.3.2 · valP a partire dal primo byte
@@ -35,7 +35,7 @@
       return { u: '3.3.2', d: 'Un’istruzione Y86-64 comincia all’indirizzo ' + H(pc) + ' con il byte ' + b0 + ', il codice di `' + i.n + '`. Quanto vale valP? Rispondi in esadecimale.', segnaposto: 'Per esempio ' + H(pc + 4), giuste,
         ok: '`' + i.n + '` occupa ' + n + ' byte: il codice' + (Y.conRegistri(i.n) ? ', il byte dei registri' : '') + (Y.conCostante(i.n) ? ', la costante di otto byte' : '') + '. valP = ' + H(pc) + ' + ' + n + ' = ' + H(pc + n) + '.',
         diagnosi: DIAG(giuste, [1, 2, 9, 10].filter((k) => k !== n).map((k) => ({ se: ESA(pc + k, 3), msg: 'Hai contato ' + k + ' byte. `' + i.n + '` ne occupa ' + n + ': un byte di codice' + (Y.conRegistri(i.n) ? ', uno per i registri' : ', nessuno per i registri') + (Y.conCostante(i.n) ? ', otto per la costante.' : ', nessuno per una costante.') })).concat([{ se: ESA(pc, 3), msg: 'Questo è il PC. valP è l’indirizzo dell’istruzione successiva: va sommata la lunghezza.' }])),
-        altro: 'Il valore è diverso. Stabilisci la lunghezza di `' + i.n + '` e sommala al PC, in esadecimale.',
+        altro: 'Il valore è diverso. Si stabilisca la lunghezza di `' + i.n + '` e sommala al PC, in esadecimale.',
         indizi: ['Il codice occupa sempre 1 byte.', (Y.conRegistri(i.n) ? 'Il byte dei registri è presente' : 'Il byte dei registri è assente') + (Y.conCostante(i.n) ? ', e la costante di otto byte è presente.' : ', e la costante è assente.'), H(pc) + ' + ' + n + '.'],
         svolgimento: ['Classe: icode ' + b0[0] + ', `' + i.n + '`.', 'Lunghezza: ' + n + ' byte.', 'valP = ' + H(pc) + ' + ' + n + ' = ' + H(pc + n) + '.'] };
     },
@@ -51,7 +51,7 @@
           dd ? { se: I(b - dd), msg: 'Lo spostamento va sommato con il suo segno: ' + b + ' + ' + PA(dd) + '.' } : null,
           dd ? { se: I(dd), msg: 'Questo è valC, lo spostamento. Va sommato alla base.' } : null
         ]),
-        altro: 'Il numero è diverso. Somma base e spostamento' + (cosa ? ', poi aggiungi 7 per arrivare all’ottava cella.' : '.'),
+        altro: 'Il numero è diverso. Somma base e spostamento' + (cosa ? ', poi si aggiunga 7 per arrivare all’ottava cella.' : '.'),
         indizi: ['valB è il contenuto di %' + rb + ': ' + b + '.', 'valC è lo spostamento: ' + N(dd) + '.', cosa ? 'valE = ' + valE + ', e l’ultima cella è valE + 7.' : b + ' + ' + PA(dd) + '.'],
         svolgimento: ['valB = ' + b + ', valC = ' + N(dd) + '.', 'valE = ' + b + ' + ' + PA(dd) + ' = ' + valE + '.', cosa ? 'Ultima cella: ' + valE + ' + 7 = ' + (valE + 7) + '.' : 'valE = ' + valE + '.'] };
     },
@@ -60,7 +60,7 @@
       const M = r.scegli([64, 128, 256]), tipo = r.scegli(['mem', 'mem', 'mem', 'halt', 'ris']), op = r.scegli(['mrmovq 0(%rbx), %rax', 'rmmovq %rax, 0(%rbx)']), a = M - r.int(5, 12) + r.int(0, 8), bris = r.scegli(['C0', 'D0', 'E0', 'F0']);
       const stat = tipo === 'ris' ? 'INS' : tipo === 'halt' ? 'HLT' : a + 7 > M - 1 ? 'ADR' : 'AOK';
       const FB = { AOK: tipo === 'mem' ? 'L’accesso userebbe le celle da ' + a + ' a ' + (a + 7) + ', e la memoria arriva alla cella ' + (M - 1) + '.' : 'AOK accompagna le istruzioni dopo le quali si prosegue.', HLT: tipo === 'halt' ? '`halt` è un’istruzione valida, che chiede l’arresto.' : 'HLT segnala l’esecuzione di `halt`, che qui non compare.', ADR: tipo === 'mem' ? 'L’accesso userebbe le celle da ' + a + ' a ' + (a + 7) + ', e la memoria arriva alla cella ' + (M - 1) + '.' : 'Questa istruzione non accede alla memoria dei dati, quindi nessun indirizzo può risultare invalido.', INS: tipo === 'ris' ? 'Le classi valide hanno icode da 0 a B, e l’icode ' + bris[0] + ' resta fuori.' : 'L’istruzione appartiene a una classe esistente, quindi è valida.' };
-      return { u: '3.3.4', d: 'La memoria dei dati ha ' + M + ' celle, numerate da 0 a ' + (M - 1) + '. ' + (tipo === 'mem' ? 'Si esegue `' + op + '` con %rbx = ' + a + '.' : tipo === 'halt' ? 'Si esegue `halt`.' : 'Il primo byte dell’istruzione vale ' + bris + '.') + ' Quale codice di stato ne risulta?', guida: 'Scegli la risposta.',
+      return { u: '3.3.4', d: 'La memoria dei dati ha ' + M + ' celle, numerate da 0 a ' + (M - 1) + '. ' + (tipo === 'mem' ? 'Si esegue `' + op + '` con %rbx = ' + a + '.' : tipo === 'halt' ? 'Si esegue `halt`.' : 'Il primo byte dell’istruzione vale ' + bris + '.') + ' Quale codice di stato ne risulta?', guida: 'Si scelga la risposta.',
         o: ['AOK', 'HLT', 'ADR', 'INS'].map((k) => (k === stat ? { t: k, ok: true, fb: FB[k] } : { t: k, fb: FB[k] })) };
     },
     // 3.3.5 · una call: valore salvato, cella, %rsp, PC dopo il ret
@@ -78,7 +78,7 @@
           { se: ESA(pc + 10, 4), msg: 'Una `call` occupa 9 byte: uno di codice e otto di destinazione.' },
           { se: ESA(sp + 8, 4), msg: 'La pila cresce verso gli indirizzi bassi: la `call` toglie 8 a %rsp.' }
         ]),
-        altro: 'Il valore è diverso. Calcola valP = PC + 9 e valE = %rsp − 8, poi stabilisci quale dei due risponde alla domanda.',
+        altro: 'Il valore è diverso. Si calcoli valP = PC + 9 e valE = %rsp − 8, poi si stabilisca quale dei due risponde alla domanda.',
         indizi: ['valP = ' + H(pc) + ' + 9.', 'valE = ' + H(sp) + ' − 8.', ['In memoria va valP.', 'La cella scritta è M8[valE].', '%rsp riceve valE.', 'Il `ret` mette nel PC il valore letto dalla pila, che è valP.'][cosa]],
         svolgimento: ['valP = ' + H(pc) + ' + 9 = ' + H(valP) + '.', 'valE = ' + H(sp) + ' − 8 = ' + H(giu) + '.', ['Valore scritto: ' + H(valP) + '.', 'Cella scritta: ' + H(giu) + '.', '%rsp = ' + H(giu) + '.', 'PC dopo il `ret`: ' + H(valP) + '.'][cosa]] };
     },
@@ -96,7 +96,7 @@
             { se: ESA(pc + parseInt(String(byte), 16), 3), msg: 'I byte prima dell’etichetta sono ' + byte + ' in decimale. Convertili in esadecimale prima di sommarli a ' + H(pc) + '.' },
             { se: ESA(fine - 9, 3), msg: 'Anche la `jmp` occupa spazio, 9 byte, e sta prima dell’etichetta.' }
           ]),
-          altro: 'L’indirizzo è diverso. Somma le lunghezze delle istruzioni che precedono l’etichetta, e aggiungi il totale a ' + H(pc) + ' in esadecimale.',
+          altro: 'L’indirizzo è diverso. Somma le lunghezze delle istruzioni che precedono l’etichetta, e si aggiunga il totale a ' + H(pc) + ' in esadecimale.',
           indizi: ['Lunghezze: `irmovq` 10, `rrmovq` e `addq` 2, `jmp` 9, `nop` 1.', 'Byte prima dell’etichetta: ' + byte + '.', byte + ' in esadecimale è ' + H(byte) + '.'],
           svolgimento: ['Byte prima di `fine`: ' + prima.map((x) => Y.lung(x)).concat(n ? [n] : []).join(' + ') + ' = ' + byte + '.', byte + ' = ' + H(byte) + '.', 'fine = ' + H(pc) + ' + ' + H(byte) + ' = ' + H(fine) + '.'] };
       }
@@ -108,7 +108,7 @@
           { se: [(b[0] + b[1] + '00').toLowerCase()], msg: 'Il secondo byte della costante è la parte alta di ' + H(dest) + ', cioè ' + b[2] + '.' },
           { se: [(b[1] + b[2] + b[0]).toLowerCase()], msg: 'Il primo byte dell’istruzione è il codice, ' + b[0] + '. La destinazione viene dopo.' }
         ]),
-        altro: 'I byte sono diversi. Scrivi il codice, poi la destinazione a partire dal byte meno significativo.',
+        altro: 'I byte sono diversi. Si scriva il codice, poi la destinazione a partire dal byte meno significativo.',
         indizi: ['Il primo byte è il codice, ' + b[0] + '.', H(dest) + ' si divide nei byte ' + b[2] + ' e ' + b[1] + ', dal più significativo.', 'In memoria la costante compare rovesciata: ' + b[1] + ', ' + b[2] + ', poi zeri.'],
         svolgimento: ['Codice: ' + b[0] + '.', 'Costante ' + H(dest) + ' in little-endian: ' + b[1] + ' ' + b[2] + ' 00 00 00 00 00 00.', 'Primi tre byte: ' + b.join(' ') + '.'] };
     }

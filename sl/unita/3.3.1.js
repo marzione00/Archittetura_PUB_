@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.3.1', {
   titolo: 'Dalla logica al contratto dell’ISA',
-  obiettivo: 'Alla fine saprai dire che cosa stabilisce una ISA, elencare lo stato visibile della macchina Y86-64 e prevedere l’effetto di `rrmovq`, `addq` e `subq` su registri, codici di condizione e contatore di programma.',
+  obiettivo: 'Obiettivo: dire che cosa stabilisce una ISA, elencare lo stato visibile della macchina Y86-64 e prevedere l’effetto di `rrmovq`, `addq` e `subq` su registri, codici di condizione e contatore di programma.',
   concetti: [['file', 'Un contratto fra programma e hardware'], ['register', 'Lo stato visibile'], ['flag', 'Che cosa cambia, che cosa resta']],
   filigrana: ['cpu', 'file', 'flag'],
   richiami: {
@@ -56,7 +56,7 @@ SL.registra('3.3.1', {
       domanda: (p) => 'Lo stato iniziale è %rax = ' + SL.x86.num(p.a) + ' e %rbx = ' + SL.x86.num(p.b) + '. La macchina esegue `' + p.op + ' %rax, %rbx`. Quanto vale %rbx alla fine?',
       opzioni: (p) => Array.from(new Set([p.a, p.b, p.a + p.b, p.b - p.a, p.a - p.b])).sort((x, y) => x - y).map((v) => [v, SL.x86.num(v)])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + SL.x86.num(pred) + '. Alla fine %rbx vale ' + SL.x86.num(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.op === 'rrmovq' ? '`rrmovq` copia la sorgente, %rax, nella destinazione, %rbx.' : p.op === 'addq' ? '`addq` somma la sorgente alla destinazione: ' + SL.x86.num(p.b) + ' + ' + (p.a < 0 ? '(' + SL.x86.num(p.a) + ')' : p.a) + '.' : '`subq %rax, %rbx` toglie la sorgente dalla destinazione: %rbx − %rax, cioè ' + SL.x86.num(p.b) + ' − ' + (p.a < 0 ? '(' + SL.x86.num(p.a) + ')' : p.a) + '.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + SL.x86.num(pred) + '. Alla fine %rbx vale ' + SL.x86.num(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.op === 'rrmovq' ? '`rrmovq` copia la sorgente, %rax, nella destinazione, %rbx.' : p.op === 'addq' ? '`addq` somma la sorgente alla destinazione: ' + SL.x86.num(p.b) + ' + ' + (p.a < 0 ? '(' + SL.x86.num(p.a) + ')' : p.a) + '.' : '`subq %rax, %rbx` toglie la sorgente dalla destinazione: %rbx − %rax, cioè ' + SL.x86.num(p.b) + ' − ' + (p.a < 0 ? '(' + SL.x86.num(p.a) + ')' : p.a) + '.'),
     costruisci(p) {
       const el = SL.el, X = SL.x86, Y = SL.y86, N = X.num, passi = [], ist = { n: p.op, a: 'rax', b: 'rbx' }, byte = Y.byteIst(ist).map(Y.esa2).join(' ');
       const r = p.op === 'rrmovq' ? p.a : p.op === 'addq' ? p.b + p.a : p.b - p.a, arit = p.op !== 'rrmovq', PA = (v) => (v < 0 ? '(' + N(v) + ')' : N(v));
@@ -101,7 +101,7 @@ SL.registra('3.3.1', {
       ['Aspettarsi che ogni istruzione tocchi i flag.', 'Le copie come `rrmovq` lasciano i codici di condizione com’erano.'],
       ['Dimenticare il PC.', 'Anche il PC fa parte dello stato, e ogni istruzione lo modifica: qui avanza di due byte.']
     ],
-    saFare: ['Elenco le parti dello stato visibile di Y86-64.', 'Leggo un’istruzione Y86-64 riconoscendo sorgente e destinazione.', 'Prevedo registri, codici di condizione e PC dopo `rrmovq`, `addq` e `subq`.'],
+    saFare: ['Elencare le parti dello stato visibile di Y86-64.', 'Leggere un’istruzione Y86-64 riconoscendo sorgente e destinazione.', 'Prevedere registri, codici di condizione e PC dopo `rrmovq`, `addq` e `subq`.'],
     esercizi: [
       { d: 'Il registro %rax vale 5 e %rbx vale 12. Dopo `subq %rax, %rbx`, quanto vale %rbx?', segnaposto: 'Un numero', giuste: ['7', 'sette'],
         ok: '`subq %rax, %rbx` calcola %rbx − %rax: 12 − 5 = 7.',
@@ -113,7 +113,7 @@ SL.registra('3.3.1', {
         altro: 'Il numero è diverso. La destinazione è l’operando di destra, e da essa si toglie la sorgente.',
         indizi: ['La sorgente è %rax, la destinazione è %rbx.', '`subq` calcola destinazione meno sorgente.', '12 − 5.'],
         svolgimento: ['Sorgente: %rax = 5. Destinazione: %rbx = 12.', '%rbx − %rax = 12 − 5 = 7.', '%rbx = 7, e ZF = 0, SF = 0.'] },
-      { d: 'Quale di queste istruzioni lascia invariati i codici di condizione?', guida: 'Scegli la risposta.', o: [
+      { d: 'Quale di queste istruzioni lascia invariati i codici di condizione?', guida: 'Si scelga la risposta.', o: [
         { t: 'rrmovq %rax, %rbx', ok: true, fb: 'È una copia fra registri, e le copie non toccano ZF, SF e OF.' },
         { t: 'addq %rax, %rbx', fb: 'Le istruzioni aritmetiche aggiornano i tre codici di condizione secondo il risultato.' },
         { t: 'subq %rax, %rbx', fb: 'Anche la differenza passa dall’ALU, che aggiorna i codici di condizione.' }] }

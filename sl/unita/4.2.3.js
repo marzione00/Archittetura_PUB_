@@ -19,7 +19,7 @@ SL.unita423 = (() => {
 })();
 SL.registra('4.2.3', {
   titolo: 'Convalida, valori di ritorno e avanzamento parziale',
-  obiettivo: 'Alla fine saprai preparare la chiamata successiva dopo una write che ha consegnato soltanto una parte dei byte, e dire che cosa cambia quando la chiamata restituisce un errore.',
+  obiettivo: 'Obiettivo: preparare la chiamata successiva dopo una write che ha consegnato soltanto una parte dei byte, e dire che cosa cambia quando la chiamata restituisce un errore.',
   concetti: [['puntatore', 'Da dove ripartire'], ['bilancio', 'Quanto resta'], ['scudo', 'Un errore lascia tutto com’è']],
   filigrana: ['puntatore', 'bilancio', 'scudo'],
   richiami: {
@@ -70,7 +70,7 @@ SL.registra('4.2.3', {
       domanda: (p) => 'Il programma chiama write con RSI = 0x5000 e RDX = ' + p.n + '. ' + (p.esito === 'ok' ? 'La destinazione accetta ' + p.cap + ' byte.' : 'Il kernel restituisce −9, l’errore EBADF.') + ' Con quali valori va fatta la chiamata successiva?',
       opzioni: (p) => { const H = SL.kern.H, k = Math.min(p.n, p.cap); return [[0x5000 + ':' + p.n, 'RSI = 0x5000 e RDX = ' + p.n], [(0x5000 + k) + ':' + (p.n - k), 'RSI = ' + H(0x5000 + k) + ' e RDX = ' + (p.n - k)], [(0x5000 + k) + ':' + p.n, 'RSI = ' + H(0x5000 + k) + ' e RDX = ' + p.n], [0x5000 + ':' + (p.n - k), 'RSI = 0x5000 e RDX = ' + (p.n - k)]]; }
     },
-    confronto: (pred, esito, p) => { const H = SL.kern.H, N = (v) => { const x = v.split(':'); return 'RSI = ' + H(Number(x[0])) + ' e RDX = ' + x[1]; }; return 'Avevi previsto ' + N(pred) + '. I valori giusti sono ' + N(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.esito === 'errore' ? 'Dopo un errore nessun byte è partito, e la richiesta resta quella di prima.' : 'Puntatore e lunghezza si aggiornano insieme, con il numero di byte confermati.'); },
+    confronto: (pred, esito, p) => { const H = SL.kern.H, N = (v) => { const x = v.split(':'); return 'RSI = ' + H(Number(x[0])) + ' e RDX = ' + x[1]; }; return 'La previsione indicava ' + N(pred) + '. I valori giusti sono ' + N(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.esito === 'errore' ? 'Dopo un errore nessun byte è partito, e la richiesta resta quella di prima.' : 'Puntatore e lunghezza si aggiornano insieme, con il numero di byte confermati.'); },
     costruisci(p) {
       const U = SL.unita423, H = U.H, passi = [], c = U.conti(p), R = c.ok ? String(c.k) : '−9';
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'BUFFER DEL PROGRAMMA', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w: 820, hc: 36, conti: true, h: 60, gap: 14 }));
@@ -97,7 +97,7 @@ SL.registra('4.2.3', {
       ['Aggiornare soltanto la lunghezza.', 'Con il puntatore fermo la chiamata successiva rimanderebbe i primi byte, e gli ultimi andrebbero perduti.'],
       ['Usare il valore negativo per avanzare.', 'Sottrarre 9 al puntatore o sommarlo alla lunghezza sarebbe privo di senso, perché dopo un errore nulla si è mosso.']
     ],
-    saFare: ['Calcolo il puntatore per la chiamata successiva.', 'Calcolo i byte residui.', 'Tratto un valore negativo come un errore, senza avanzare.'],
+    saFare: ['Calcolare il puntatore per la chiamata successiva.', 'Calcolare i byte residui.', 'Trattare un valore negativo come un errore, senza avanzare.'],
     esercizi: [
       { d: 'Un programma chiama write con RSI = 0x7000 e RDX = 30. Il kernel restituisce 11. Quale valore va in RSI per la chiamata successiva? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['700b', '0x700b', '700bh'],
         ok: 'Il puntatore avanza dei byte confermati: 0x7000 + 11 = 0x700B.',
@@ -115,10 +115,10 @@ SL.registra('4.2.3', {
           { se: ['30', 'trenta'], msg: 'Con la lunghezza invariata la chiamata chiederebbe 11 byte oltre la fine del buffer.' },
           { se: ['11', 'undici'], msg: 'Questi sono i byte già partiti. Servono quelli che restano.' }
         ],
-        altro: 'Il numero è diverso. Togli dai byte richiesti quelli confermati.',
+        altro: 'Il numero è diverso. Si tolga dai byte richiesti quelli confermati.',
         indizi: ['Erano richiesti 30 byte.', 'Ne sono partiti 11.', '30 − 11.'],
         svolgimento: ['Richiesti: 30.', 'Confermati: 11.', 'RDX = 19.'] },
-      { d: 'Una write con RSI = 0x7000 e RDX = 30 restituisce −9. Come va preparata la chiamata successiva?', guida: 'Scegli la risposta.', o: [
+      { d: 'Una write con RSI = 0x7000 e RDX = 30 restituisce −9. Come va preparata la chiamata successiva?', guida: 'Si scelga la risposta.', o: [
         { t: 'Con gli stessi valori, dopo avere rimosso la causa dell’errore', ok: true, fb: 'Nessun byte è partito, e la richiesta resta quella di prima.' },
         { t: 'Con RSI = 0x7009 e RDX = 21', fb: 'Il 9 è il codice dell’errore. Nessun byte è partito.' },
         { t: 'Con RSI = 0x6FF7 e RDX = 39', fb: 'Un valore negativo resta fuori dai conti, perché segnala soltanto che la chiamata è fallita.' }] }

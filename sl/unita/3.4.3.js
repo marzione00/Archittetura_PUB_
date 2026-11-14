@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.4.3', {
   titolo: 'Temporizzazione e aggiornamento dello stato',
-  obiettivo: 'Alla fine saprai calcolare il periodo minimo di SEQ a partire dai ritardi dei suoi blocchi, e dire quale istruzione lo impone.',
+  obiettivo: 'Obiettivo: calcolare il periodo minimo di SEQ a partire dai ritardi dei suoi blocchi, e dire quale istruzione lo impone.',
   concetti: [['clock', 'Un periodo per tutte le istruzioni'], ['lente', 'Il percorso più lento'], ['bilancio', 'Il tempo che va perduto']],
   filigrana: ['clock', 'lente', 'cpu'],
   richiami: {
@@ -55,7 +55,7 @@ SL.registra('3.4.3', {
       domanda: (p) => 'Il prelievo richiede ' + p.f + ' ps, la lettura dei registri 30 ps e l’ALU 45 ps. Poi un’operazione aritmetica attraversa un selettore da ' + p.s + ' ps, mentre un carico interroga la memoria dei dati, che richiede ' + p.m + ' ps. I registri chiedono un margine di 15 ps. Qual è il periodo minimo?',
       opzioni: (p) => { const c = p.f + 75, a = c + p.s, l = c + p.m; return Array.from(new Set([Math.max(a, l) + 15, Math.max(a, l), Math.min(a, l) + 15, c + p.s + p.m + 15])).sort((x, y) => x - y).map((v) => [v, v + ' ps']); }
     },
-    confronto: (pred, esito, p) => { const c = p.f + 75, a = c + p.s, l = c + p.m; return 'Avevi previsto ' + pred + ' ps. Il periodo minimo è ' + esito + ' ps. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il percorso aritmetico dura ' + a + ' ps e quello del carico ' + l + ' ps. Conta il più lungo, a cui si aggiungono i 15 ps di margine. I due percorsi sono alternative e i loro ritardi non si sommano fra loro.'); },
+    confronto: (pred, esito, p) => { const c = p.f + 75, a = c + p.s, l = c + p.m; return 'La previsione indicava ' + pred + ' ps. Il periodo minimo è ' + esito + ' ps. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il percorso aritmetico dura ' + a + ' ps e quello del carico ' + l + ' ps. Conta il più lungo, a cui si aggiungono i 15 ps di margine. I due percorsi sono alternative e i loro ritardi non si sommano fra loro.'); },
     costruisci(p) {
       const el = SL.el, passi = [], X0 = 180, K = 2.2, com = p.f + 75, A = com + p.s, L = com + p.m, lim = Math.max(A, L), T = lim + 15, NL = L >= A ? 'carico' : 'aritmetica';
       const st = { com: false, a: false, l: false, t: false };
@@ -110,7 +110,7 @@ SL.registra('3.4.3', {
       ['Sommare i percorsi di istruzioni diverse.', 'In ogni ciclo si esegue una sola istruzione. I percorsi sono alternative, e conta il più lungo.'],
       ['Dare per scontato che il limite sia il carico.', 'Dipende dai ritardi. Con una memoria rapida e un selettore lento, il limite passa all’operazione aritmetica.']
     ],
-    saFare: ['Sommo i ritardi dei blocchi attraversati da un’istruzione.', 'Individuo l’istruzione limitante.', 'Calcolo il periodo minimo e il tempo perduto dalle altre istruzioni.'],
+    saFare: ['Sommare i ritardi dei blocchi attraversati da un’istruzione.', 'Individuare l’istruzione limitante.', 'Calcolare il periodo minimo e il tempo perduto dalle altre istruzioni.'],
     esercizi: [
       { d: 'In un processore a ciclo singolo il prelievo richiede 100 ps, la lettura dei registri 40 ps, l’ALU 60 ps e la memoria dei dati 120 ps. Un carico attraversa i quattro blocchi, e i registri chiedono un margine di 20 ps. Qual è il periodo minimo, in picosecondi?', segnaposto: 'Un numero di picosecondi', giuste: ['340', '340ps'],
         ok: 'Il percorso del carico dura 100 + 40 + 60 + 120 = 320 ps, e con il margine si arriva a 340 ps.',
@@ -119,7 +119,7 @@ SL.registra('3.4.3', {
           { se: ['220', '220ps'], msg: 'Manca la memoria dei dati, che il carico deve interrogare dopo l’ALU.' },
           { se: ['200', '200ps'], msg: 'Questo è il tratto fino all’ALU. Vanno aggiunti la memoria dei dati e il margine.' }
         ],
-        altro: 'Il numero è diverso. Somma i quattro ritardi del carico e aggiungi il margine.',
+        altro: 'Il numero è diverso. Somma i quattro ritardi del carico e si aggiunga il margine.',
         indizi: ['Il carico attraversa prelievo, registri, ALU e memoria.', '100 + 40 + 60 + 120 = 320.', '320 + 20.'],
         svolgimento: ['Percorso del carico: 100 + 40 + 60 + 120 = 320 ps.', 'Margine dei registri: 20 ps.', 'Periodo minimo: 340 ps.'] },
       { d: 'Nello stesso processore il periodo è di 340 ps. Un’operazione aritmetica avrebbe bisogno di 220 ps in tutto, margine compreso. Per quanti picosecondi resta inattiva a ogni ciclo?', segnaposto: 'Un numero di picosecondi', giuste: ['120', '120ps'],
@@ -129,7 +129,7 @@ SL.registra('3.4.3', {
           { se: ['220', '220ps'], msg: 'Questo è il tempo che l’operazione usa. Il resto del ciclo è il tempo perduto.' },
           { se: ['560', '560ps'], msg: 'I due tempi vanno sottratti: periodo meno tempo usato.' }
         ],
-        altro: 'Il numero è diverso. Sottrai dal periodo il tempo che l’operazione usa.',
+        altro: 'Il numero è diverso. Si sottragga dal periodo il tempo che l’operazione usa.',
         indizi: ['Il ciclo dura 340 ps per tutte le istruzioni.', 'All’operazione aritmetica bastano 220 ps.', '340 − 220.'],
         svolgimento: ['Periodo: 340 ps.', 'Tempo usato: 220 ps.', 'Tempo perduto: 340 − 220 = 120 ps.'] }
     ],

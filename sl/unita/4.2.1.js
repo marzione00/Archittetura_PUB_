@@ -19,7 +19,7 @@ SL.unita421 = (() => {
 })();
 SL.registra('4.2.1', {
   titolo: 'Dalla richiesta utente all’esecuzione nel kernel',
-  obiettivo: 'Alla fine saprai dire come il kernel, ricevuta una chiamata di sistema, sceglie il servizio da eseguire, e perché lo stesso valore in RDI può avere significati diversi.',
+  obiettivo: 'Obiettivo: dire come il kernel, ricevuta una chiamata di sistema, sceglie il servizio da eseguire, e perché lo stesso valore in RDI può avere significati diversi.',
   concetti: [['gate', 'Un solo ingresso'], ['tabella', 'Il numero sceglie il servizio'], ['register', 'Il servizio dà senso agli argomenti']],
   filigrana: ['gate', 'tabella', 'register'],
   richiami: {
@@ -70,7 +70,7 @@ SL.registra('4.2.1', {
       domanda: (p) => 'Il programma mette ' + SL.unita421.S[p.s].n + ' in RAX e ' + p.a + ' in RDI, poi esegue SYSCALL. Come interpreta il kernel il valore ' + p.a + '?',
       opzioni: () => [['r', 'Come il descrittore da cui leggere'], ['w', 'Come il descrittore su cui scrivere'], ['x', 'Come il codice di uscita del programma']]
     },
-    confronto: (pred, esito, p) => { const N = { r: 'il descrittore da cui leggere', w: 'il descrittore su cui scrivere', x: 'il codice di uscita' }; return 'Avevi previsto ' + N[pred] + '. Per il kernel è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il significato di RDI dipende dal servizio, e RAX = ' + SL.unita421.S[p.s].n + ' sceglie ' + p.s + '.'); },
+    confronto: (pred, esito, p) => { const N = { r: 'il descrittore da cui leggere', w: 'il descrittore su cui scrivere', x: 'il codice di uscita' }; return 'La previsione indicava ' + N[pred] + '. Per il kernel è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il significato di RDI dipende dal servizio, e RAX = ' + SL.unita421.S[p.s].n + ' sceglie ' + p.s + '.'); },
     costruisci(p) {
       const U = SL.unita421, passi = [], s = U.S[p.s];
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'REGISTRI', 'mono'), SL.el.nota('t1', 290, 0, 'TABELLA DELLE CHIAMATE', 'mono'), SL.el.nota('t2', 590, 0, 'SERVIZIO', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w1: 250, w2: 280, gap: 20, h: 58, hc: 38 }));
@@ -96,9 +96,9 @@ SL.registra('4.2.1', {
       ['Cercare le chiamate di sistema nella IDT.', 'SYSCALL ha un ingresso proprio, unico. La scelta del servizio avviene dopo, nella tabella delle chiamate.'],
       ['Aspettarsi un ritorno da exit.', 'RCX riceve comunque l’indirizzo di ripresa, che resta inutilizzato: il programma termina.']
     ],
-    saFare: ['Descrivo lo smistamento di una chiamata di sistema.', 'Dico quale servizio corrisponde a RAX = 0, 1 e 60.', 'Interpreto RDI secondo il servizio richiesto.'],
+    saFare: ['Descrivere lo smistamento di una chiamata di sistema.', 'Indicare quale servizio corrisponde a RAX = 0, 1 e 60.', 'Interpretare RDI secondo il servizio richiesto.'],
     esercizi: [
-      { d: 'Un programma esegue SYSCALL con RAX = 60 e RDI = 2. Che cosa chiede al kernel?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un programma esegue SYSCALL con RAX = 60 e RDI = 2. Che cosa chiede al kernel?', guida: 'Si scelga la risposta.', o: [
         { t: 'Di terminare con il codice di uscita 2', ok: true, fb: 'Il numero 60 sceglie exit, per cui RDI è il codice di uscita.' },
         { t: 'Di scrivere sul descrittore 2', fb: 'Per scrivere servirebbe RAX = 1. Con RAX = 60 il servizio è exit.' },
         { t: 'Di leggere 60 byte dal descrittore 2', fb: 'RAX contiene il numero del servizio. La quantità di byte viaggerebbe in RDX.' }] },
@@ -111,7 +111,7 @@ SL.registra('4.2.1', {
         altro: 'Il valore è diverso. RCX riceve l’indirizzo dell’istruzione che segue SYSCALL, lunga 2 byte.',
         indizi: ['RCX riceve l’indirizzo di ripresa.', 'SYSCALL occupa 2 byte.', '0x40A6 + 2.'],
         svolgimento: ['Indirizzo di SYSCALL: 0x40A6.', 'Lunghezza: 2 byte.', 'RCX = 0x40A8.'] },
-      { d: 'Due programmi eseguono SYSCALL, il primo con RAX = 0 e il secondo con RAX = 1. Da quale indirizzo del kernel comincia l’esecuzione nei due casi?', guida: 'Scegli la risposta.', o: [
+      { d: 'Due programmi eseguono SYSCALL, il primo con RAX = 0 e il secondo con RAX = 1. Da quale indirizzo del kernel comincia l’esecuzione nei due casi?', guida: 'Si scelga la risposta.', o: [
         { t: 'Dallo stesso indirizzo', ok: true, fb: 'L’ingresso è unico. I due percorsi si separano dopo, allo smistamento.' },
         { t: 'Da due indirizzi diversi, scelti da RAX', fb: 'RAX viene usato dal kernel, come indice nella tabella. Il processore entra sempre dallo stesso punto.' },
         { t: 'Dall’indirizzo contenuto in RCX', fb: 'RCX riceve l’indirizzo di ripresa nel programma, che servirà al ritorno.' }] }

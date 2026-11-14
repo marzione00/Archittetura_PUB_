@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.3.4', {
   titolo: 'Classi di istruzioni, stato e controllo',
-  obiettivo: 'Alla fine saprai dire quale codice di stato produce un’istruzione, e stabilire se un accesso di otto byte rientra per intero nella memoria disponibile.',
+  obiettivo: 'Obiettivo: dire quale codice di stato produce un’istruzione, e stabilire se un accesso di otto byte rientra per intero nella memoria disponibile.',
   concetti: [['scudo', 'Quattro esiti possibili'], ['memory', 'I due estremi di una parola'], ['conflitto', 'Un errore blocca le scritture']],
   filigrana: ['scudo', 'memory', 'conflitto'],
   richiami: {
@@ -53,7 +53,7 @@ SL.registra('3.3.4', {
       domanda: (p) => 'La memoria dei dati ha 64 celle, numerate da 0 a 63, e %rbx vale ' + p.a + '. ' + SL.unita334.DESCR[p.op] + ' Quale codice di stato ne risulta?',
       opzioni: () => ['AOK', 'HLT', 'ADR', 'INS']
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + '. Il codice di stato è ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 'INS' ? 'Il primo byte F0 ha icode F, che non corrisponde ad alcuna classe.' : esito === 'HLT' ? '`halt` è un’istruzione valida, che chiede l’arresto.' : esito === 'ADR' ? 'L’accesso userebbe le celle da ' + p.a + ' a ' + (p.a + 7) + ', e la memoria finisce alla cella 63.' : 'Le celle da ' + p.a + ' a ' + (p.a + 7) + ' esistono tutte, e l’istruzione va a buon fine.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. Il codice di stato è ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 'INS' ? 'Il primo byte F0 ha icode F, che non corrisponde ad alcuna classe.' : esito === 'HLT' ? '`halt` è un’istruzione valida, che chiede l’arresto.' : esito === 'ADR' ? 'L’accesso userebbe le celle da ' + p.a + ' a ' + (p.a + 7) + ', e la memoria finisce alla cella 63.' : 'Le celle da ' + p.a + ' a ' + (p.a + 7) + ' esistono tutte, e l’istruzione va a buon fine.'),
     costruisci(p) {
       const el = SL.el, U = SL.unita334, passi = [], op = p.op, a = p.a, mem = op === 'mrmovq' || op === 'rmmovq', B0 = { mrmovq: '50', rmmovq: '40', halt: '00', ris: 'F0' }[op];
       const fuori = mem && a + 7 > 63, stat = op === 'ris' ? 'INS' : op === 'halt' ? 'HLT' : fuori ? 'ADR' : 'AOK', s0 = a <= 44 ? a - 2 : 54;
@@ -104,7 +104,7 @@ SL.registra('3.3.4', {
       ['Trattare HLT come un errore.', '`halt` è un’istruzione valida: il programma ha chiesto di fermarsi, e lo stato lo registra.'],
       ['Lasciare scrivere l’istruzione sbagliata.', 'Con ADR o INS le abilitazioni di scrittura restano a 0, altrimenti lo stato visibile mescolerebbe il prima e il dopo dell’errore.']
     ],
-    saFare: ['Associo a ogni situazione il suo codice di stato.', 'Verifico che un accesso di otto byte stia per intero nella memoria.', 'Spiego perché un errore blocca le scritture dell’istruzione.'],
+    saFare: ['Associare a ogni situazione il suo codice di stato.', 'Verificare che un accesso di otto byte stia per intero nella memoria.', 'Spiegare perché un errore blocca le scritture dell’istruzione.'],
     esercizi: [
       { d: 'Una memoria ha 256 celle, numerate da 0 a 255. Qual è l’indirizzo più alto da cui può cominciare un accesso di otto byte?', segnaposto: 'Un numero', giuste: ['248', 'duecentoquarantotto'],
         ok: 'L’ultima cella usata è valE + 7, e deve valere al massimo 255: valE = 248.',
@@ -116,7 +116,7 @@ SL.registra('3.3.4', {
         altro: 'Il numero è diverso. L’ultima cella usata, valE + 7, deve essere al massimo 255.',
         indizi: ['L’accesso usa le celle da valE a valE + 7.', 'Deve valere valE + 7 ≤ 255.', '255 − 7.'],
         svolgimento: ['Ultima cella usata: valE + 7.', 'Condizione: valE + 7 ≤ 255.', 'valE massimo: 255 − 7 = 248.'] },
-      { d: 'Il primo byte di un’istruzione vale 00. Quale codice di stato ne risulta?', guida: 'Scegli la risposta.', o: [
+      { d: 'Il primo byte di un’istruzione vale 00. Quale codice di stato ne risulta?', guida: 'Si scelga la risposta.', o: [
         { t: 'HLT', ok: true, fb: 'Il byte 00 ha icode 0, la classe di `halt`.' },
         { t: 'INS', fb: 'L’icode 0 corrisponde a una classe esistente, quella di `halt`.' },
         { t: 'AOK', fb: 'AOK accompagna le istruzioni dopo le quali si prosegue. `halt` chiede l’arresto.' },

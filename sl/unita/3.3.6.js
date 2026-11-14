@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.3.6', {
   titolo: 'Assemblaggio manuale come verifica',
-  obiettivo: 'Alla fine saprai assemblare a mano un breve programma Y86-64: assegnare un indirizzo a ogni istruzione e a ogni etichetta, e scrivere i byte di un salto.',
+  obiettivo: 'Obiettivo: assemblare a mano un breve programma Y86-64: assegnare un indirizzo a ogni istruzione e a ogni etichetta, e scrivere i byte di un salto.',
   concetti: [['file', 'Dal testo ai byte'], ['puntatore', 'Un nome per un indirizzo'], ['lente', 'Due letture del testo']],
   filigrana: ['file', 'puntatore', 'tabella'],
   richiami: {
@@ -57,7 +57,7 @@ SL.registra('3.3.6', {
       domanda: (p) => 'Il programma comincia all’indirizzo ' + SL.y86.esa(p.pc) + ' con una `irmovq`, poi una `jmp fine`, poi ' + (p.n ? p.n + ' `nop`' : 'nessuna `nop`') + ' e, all’etichetta `fine`, una `halt`. Quale indirizzo riceve l’etichetta `fine`?',
       opzioni: (p) => Array.from(new Set([p.pc + 19 + p.n, p.pc + 19, p.pc + 20 + p.n, p.pc + 10 + p.n, p.pc + 18 + p.n])).sort((a, b) => a - b).map(SL.y86.esa)
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + '. L’etichetta `fine` vale ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Prima di `fine` stanno una `irmovq` da 10 byte, una `jmp` da 9 e ' + p.n + ' `nop` da un byte: ' + SL.y86.esa(p.pc) + ' + 10 + 9 + ' + p.n + ' = ' + esito + '. L’etichetta stessa occupa zero byte.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. L’etichetta `fine` vale ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Prima di `fine` stanno una `irmovq` da 10 byte, una `jmp` da 9 e ' + p.n + ' `nop` da un byte: ' + SL.y86.esa(p.pc) + ' + 10 + 9 + ' + p.n + ' = ' + esito + '. L’etichetta stessa occupa zero byte.'),
     costruisci(p) {
       const el = SL.el, Y = SL.y86, H = Y.esa, passi = [], n = p.n, A = [p.pc, p.pc + 10, p.pc + 19, p.pc + 19 + n], fine = A[3];
       const TESTI = ['irmovq $5, %rax', 'jmp fine', n ? 'nop, ' + n + ' volte' : 'nessuna nop', 'fine: halt'], LUNG = [10, 9, n, 1];
@@ -113,7 +113,7 @@ SL.registra('3.3.6', {
       ['Scrivere nel salto la distanza.', 'In Y86-64 la costante di un salto è l’indirizzo assoluto della destinazione.'],
       ['Scrivere l’indirizzo dal byte più significativo.', 'La costante è in little-endian: per 0x1A4 i primi due byte sono A4 e 01.']
     ],
-    saFare: ['Assegno un indirizzo a ogni riga di un breve programma.', 'Compilo la tabella dei simboli.', 'Scrivo i byte di un salto verso un’etichetta.'],
+    saFare: ['Assegnare un indirizzo a ogni riga di un breve programma.', 'Compilare la tabella dei simboli.', 'Scrivere i byte di un salto verso un’etichetta.'],
     esercizi: [
       { d: 'Un programma comincia all’indirizzo 0x100 e contiene, nell’ordine: una `irmovq`, una `rrmovq`, una `jmp fine`, due `nop` e, all’etichetta `fine`, una `halt`. Quale indirizzo riceve `fine`? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x120', giuste: ['0x117', '117', '117h'],
         ok: 'Prima di `fine` stanno 10 + 2 + 9 + 2 = 23 byte: 0x100 + 23 = 0x117.',
@@ -122,7 +122,7 @@ SL.registra('3.3.6', {
           { se: ['0x115', '115', '115h'], msg: 'Fra la `jmp` e l’etichetta ci sono due `nop`, da un byte ciascuna.' },
           { se: ['0x123', '123', '123h'], msg: 'I byte prima dell’etichetta sono 23 in decimale, cioè 0x17 in esadecimale.' }
         ],
-        altro: 'L’indirizzo è diverso. Somma le lunghezze delle istruzioni che precedono l’etichetta, e aggiungi il totale a 0x100 in esadecimale.',
+        altro: 'L’indirizzo è diverso. Somma le lunghezze delle istruzioni che precedono l’etichetta, e si aggiunga il totale a 0x100 in esadecimale.',
         indizi: ['Lunghezze: `irmovq` 10, `rrmovq` 2, `jmp` 9, `nop` 1.', '10 + 2 + 9 + 1 + 1 = 23.', '23 in esadecimale è 0x17.'],
         svolgimento: ['Byte prima di `fine`: 10 + 2 + 9 + 2 = 23.', '23 = 0x17.', 'fine = 0x100 + 0x17 = 0x117.'] },
       { d: 'Quali sono i primi tre byte della codifica di `jmp 0x1A4`? Scrivili in esadecimale, nell’ordine in cui stanno in memoria.', segnaposto: 'Per esempio 70 00 00', giuste: ['70a401'],
@@ -132,7 +132,7 @@ SL.registra('3.3.6', {
           { se: ['70a400'], msg: 'Il secondo byte della costante è la parte alta di 0x1A4, cioè 01.' },
           { se: ['a40170', 'a401'], msg: 'Il primo byte dell’istruzione è il codice, 70. La destinazione viene dopo.' }
         ],
-        altro: 'I byte sono diversi. Scrivi il codice della `jmp`, poi la destinazione a partire dal byte meno significativo.',
+        altro: 'I byte sono diversi. Si scriva il codice della `jmp`, poi la destinazione a partire dal byte meno significativo.',
         indizi: ['Il codice di `jmp` è 70.', '0x1A4 su otto byte è 00 … 00 01 A4.', 'In memoria i byte della costante compaiono rovesciati: A4, 01, 00, …'],
         svolgimento: ['Codice: 70.', 'Costante 0x1A4 in little-endian: A4 01 00 00 00 00 00 00.', 'Primi tre byte: 70 A4 01.'] }
     ]

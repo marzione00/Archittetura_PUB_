@@ -17,7 +17,7 @@
           { se: MS(rpm / 60), msg: 'Questi sono i giri al secondo. La durata di un giro è 60 000 ms diviso i giri al minuto.' },
           { se: MS(giro / 2), msg: 'Questo è mezzo giro, l’attesa media. Un giro intero dura il doppio.' }
         ]),
-        altro: 'Il valore è diverso. Dividi i millisecondi di un minuto per i giri al minuto.',
+        altro: 'Il valore è diverso. Si dividano i millisecondi di un minuto per i giri al minuto.',
         indizi: ['Un minuto vale 60 000 ms.', 'In quel tempo il disco compie ' + rpm + ' giri.', '60 000 ÷ ' + rpm + ' = ' + giro + '.'],
         svolgimento: ['Millisecondi in un minuto: 60 000.', 'Giri in un minuto: ' + rpm + '.', 'Un giro: ' + giro + ' ms.'] }; }
       if (cosa === 1) { const giuste = MS(giro / 2); return { u: '4.5.1', d: 'Un disco ruota a ' + rpm + ' giri al minuto. Quanto vale, in media, il ritardo di rotazione, in millisecondi?', segnaposto: 'Un numero', giuste,
@@ -26,7 +26,7 @@
           { se: MS(giro), msg: 'Questa è la durata di un giro intero. In media il settore dista mezzo giro.' },
           { se: MS(rpm / 60), msg: 'Questi sono i giri al secondo. Serve prima la durata di un giro: 60 000 ÷ ' + rpm + '.' }
         ]),
-        altro: 'Il valore è diverso. Calcola la durata di un giro e prendine la metà.',
+        altro: 'Il valore è diverso. Si calcoli la durata di un giro e prendine la metà.',
         indizi: ['Un giro: 60 000 ÷ ' + rpm + ' ms.', 'Un giro dura ' + giro + ' ms.', 'Metà giro: ' + giro / 2 + ' ms.'],
         svolgimento: ['Un giro: 60 000 ÷ ' + rpm + ' = ' + giro + ' ms.', 'Attesa media: ' + giro + ' ÷ 2 = ' + giro / 2 + ' ms.'] }; }
       const k = r.scegli(D[2]), s = r.int(2, 12), rot = giro * k / 4, v = s + rot, giuste = MS(v);
@@ -38,7 +38,7 @@
           k !== 2 ? { se: MS(s + giro / 2), msg: 'Mezzo giro è l’attesa media. In questo caso manca ' + FR[k] + '.' } : null,
           { se: MS(s), msg: 'Questo è il solo seek. Poi si attende che il settore arrivi sotto la testina.' }
         ]),
-        altro: 'Il valore è diverso. Calcola la durata di un giro, prendine la frazione indicata e sommala al seek.',
+        altro: 'Il valore è diverso. Si calcoli la durata di un giro, prendine la frazione indicata e la si sommi al seek.',
         indizi: ['Un giro dura 60 000 ÷ ' + rpm + ' = ' + giro + ' ms.', 'La parte che manca vale ' + giro + ' × ' + k + ' ÷ 4 = ' + rot + ' ms.', s + ' + ' + rot + ' = ' + v + '.'],
         svolgimento: ['Un giro: ' + giro + ' ms.', 'Rotazione residua: ' + rot + ' ms.', 'Seek: ' + s + ' ms.', 'Primo byte: ' + v + ' ms.'] };
     },
@@ -62,7 +62,7 @@
           { se: I((l - 1) * b), msg: 'Prima del blocco ' + l + ' ci sono ' + l + ' blocchi interi: la numerazione parte da 0.' },
           { se: I(l + b), msg: 'Numero del blocco e dimensione vanno moltiplicati.' }
         ]),
-        altro: 'Il numero è diverso. Moltiplica il numero del blocco per la dimensione.',
+        altro: 'Il numero è diverso. Si moltiplichi il numero del blocco per la dimensione.',
         indizi: ['Prima del blocco ' + l + ' ci sono ' + l + ' blocchi.', 'Ognuno occupa ' + b + ' byte.', l + ' × ' + b + ' = ' + v + '.'],
         svolgimento: ['Blocchi precedenti: ' + l + '.', 'Byte: ' + l + ' × ' + b + ' = ' + v + '.'] }; }
       const s = r.int(2, 9), rot = r.int(1, 5), byte = n * b, tras = byte / 128, v = (s + rot) * 1000 + tras, giuste = US(v);
@@ -74,7 +74,7 @@
           { se: US((s + rot) * 1000), msg: 'Questo è il solo posizionamento. Manca il trasferimento.' },
           { se: US(n * (s + rot) * 1000 + tras), msg: 'I blocchi sono consecutivi: seek e rotazione si pagano una volta sola.' }
         ]),
-        altro: 'Il valore è diverso. Converti seek e rotazione in microsecondi e somma il trasferimento.',
+        altro: 'Il valore è diverso. Si converta seek e rotazione in microsecondi e si sommi il trasferimento.',
         indizi: ['Posizionamento: ' + s + ' + ' + rot + ' = ' + (s + rot) + ' ms, cioè ' + (s + rot) * 1000 + ' µs.', 'Byte: ' + n + ' × ' + b + ' = ' + byte + '. Trasferimento: ' + byte + ' ÷ 128 = ' + tras + ' µs.', (s + rot) * 1000 + ' + ' + tras + ' = ' + v + '.'],
         svolgimento: ['Posizionamento: ' + (s + rot) + ' ms = ' + (s + rot) * 1000 + ' µs.', 'Byte richiesti: ' + byte + '.', 'Trasferimento: ' + tras + ' µs.', 'Servizio: ' + v + ' µs.'] };
     },
@@ -93,7 +93,7 @@
           sstf ? { se: CIL(unaVolta), msg: 'La scelta della più vicina va rifatta dopo ogni lettura, dalla nuova posizione.' } : null,
           { se: CIL(eff.reduce((x, y) => x + y, 0)), msg: 'Hai sommato i numeri dei cilindri. Vanno sommate le distanze fra una posizione e la successiva.' }
         ]),
-        altro: 'Il numero è diverso. Scrivi l’ordine di servizio e somma le distanze fra posizioni consecutive.',
+        altro: 'Il numero è diverso. Si scriva l’ordine di servizio e si sommino le distanze fra posizioni consecutive.',
         indizi: [(cache ? 'Il disco deve servire soltanto i cilindri ' + eff.join(' e ') + '. ' : '') + (sstf ? 'Da ' + pos + ' la richiesta più vicina è ' + G.t[0][1] + '.' : 'La prima richiesta da servire è ' + G.t[0][1] + '.'), 'Ordine: ' + G.t.map((x) => x[1]).join(', ') + '.', G.t.map((x) => x[2]).join(' + ') + ' = ' + v + '.'],
         svolgimento: G.t.map((x) => x[0] + ' → ' + x[1] + ': ' + x[2] + ' cilindri.').concat(['Cammino: ' + v + ' cilindri.']) };
     }

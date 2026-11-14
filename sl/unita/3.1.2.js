@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.1.2', {
   titolo: 'Selezionare un ingresso con un multiplexer',
-  obiettivo: 'Alla fine saprai dire quale ingresso un multiplexer porta in uscita per ogni valore del comando, e come si costruisce un multiplexer a quattro ingressi con tre selettori a due ingressi.',
+  obiettivo: 'Obiettivo: dire quale ingresso un multiplexer porta in uscita per ogni valore del comando, e come si costruisce un multiplexer a quattro ingressi con tre selettori a due ingressi.',
   concetti: [['mux', 'Scegliere fra dati già pronti'], ['bit', 'Due bit di comando'], ['bus', 'Parole che viaggiano intere']],
   filigrana: ['mux', 'bus', 'bit'],
   richiami: {
@@ -59,7 +59,7 @@ SL.registra('3.1.2', {
       domanda: (p) => 'Gli ingressi I0, I1, I2 e I3 portano ' + SL.unita312.DATI[p.dati].join(', ') + '. Il comando vale S1 S0 = ' + SL.unita312.B2(p.s) + '. Quale valore arriva in uscita?',
       opzioni: (p) => Array.from(new Set(SL.unita312.DATI[p.dati])).sort((a, b) => a - b)
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + '. In uscita arriva ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il comando ' + SL.unita312.B2(p.s) + ' scrive il numero ' + p.s + ', quindi il multiplexer copia l’ingresso I' + p.s + '.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. In uscita arriva ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il comando ' + SL.unita312.B2(p.s) + ' scrive il numero ' + p.s + ', quindi il multiplexer copia l’ingresso I' + p.s + '.'),
     costruisci(p) {
       const el = SL.el, U = SL.unita312, I = U.DATI[p.dati], s = p.s, s1 = s >> 1, s0 = s & 1, passi = [];
       const B4 = (v) => v.toString(2).padStart(4, '0'), YI = [34, 104, 174, 244];
@@ -109,7 +109,7 @@ SL.registra('3.1.2', {
       ['Pensare che gli ingressi scartati vengano spenti.', 'Tutti gli ingressi restano presenti sui loro fili. Il multiplexer ne copia uno e ignora gli altri.'],
       ['Dare un comando diverso a ogni bit della parola.', 'I bit di una parola devono seguire la stessa strada. Con comandi diversi in uscita arriverebbe un miscuglio di parole.']
     ],
-    saFare: ['Dico quale ingresso esce da un multiplexer, dato il comando.', 'Calcolo quanti bit di comando servono per un dato numero di ingressi.', 'Descrivo un multiplexer a quattro ingressi come tre selettori su due livelli.'],
+    saFare: ['Indicare quale ingresso esce da un multiplexer, dato il comando.', 'Calcolare quanti bit di comando servono per un dato numero di ingressi.', 'Descrivere un multiplexer a quattro ingressi come tre selettori su due livelli.'],
     esercizi: [
       { d: 'Un multiplexer a quattro ingressi riceve I0 = 6, I1 = 1, I2 = 12 e I3 = 7. Il comando vale S1 S0 = 01. Quale valore esce?', segnaposto: 'Un numero', giuste: ['1', 'uno'],
         ok: 'Il comando 01 scrive il numero 1, e il multiplexer copia I1.',
@@ -118,7 +118,7 @@ SL.registra('3.1.2', {
           { se: ['6', 'sei'], msg: 'I0 corrisponde al comando 00. Qui il bit S0 vale 1.' },
           { se: ['7', 'sette'], msg: 'I3 corrisponde al comando 11. Qui il bit S1 vale 0.' }
         ],
-        altro: 'Il valore è diverso. Calcola 2 × S1 + S0 e prendi l’ingresso con quel numero.',
+        altro: 'Il valore è diverso. Si calcoli 2 × S1 + S0 e si prenda l’ingresso con quel numero.',
         indizi: ['S1 = 0 e S0 = 1.', '2 × 0 + 1 = 1.', 'Esce l’ingresso I1.'],
         svolgimento: ['Comando: S1 = 0, S0 = 1.', 'Posizione: 2 × 0 + 1 = 1.', 'Uscita: I1 = 1.'] },
       { d: 'Un multiplexer deve scegliere fra 16 ingressi. Quanti bit di comando servono?', segnaposto: 'Un numero', giuste: ['4', 'quattro'],

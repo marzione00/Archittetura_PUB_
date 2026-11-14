@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('4.1.2', {
   titolo: 'Interrupt, fault, trap e abort',
-  obiettivo: 'Alla fine saprai classificare un evento come interrupt, fault, trap o abort, e dire per ciascuna classe quale indirizzo viene salvato per la ripresa.',
+  obiettivo: 'Obiettivo: classificare un evento come interrupt, fault, trap o abort, e dire per ciascuna classe quale indirizzo viene salvato per la ripresa.',
   concetti: [['interrupt', 'Dall’esterno, oppure dall’istruzione'], ['lente', 'Durante oppure dopo'], ['conflitto', 'Quando la ripresa manca']],
   filigrana: ['interrupt', 'conflitto', 'lente'],
   richiami: {
@@ -56,7 +56,7 @@ SL.registra('4.1.2', {
       domanda: (p) => { const e = SL.kern.EVENTI[p.evento]; return 'L’istruzione `' + e.ist + '` comincia a ' + SL.kern.H(p.pc) + ' e occupa ' + (e.lung === 1 ? 'un byte' : e.lung + ' byte') + '. L’evento è: ' + e.nome + '. Quale indirizzo viene salvato per la ripresa?'; },
       opzioni: (p) => [[p.pc, SL.kern.H(p.pc) + ', la stessa istruzione'], [p.pc + 1, SL.kern.H(p.pc + 1)], [p.pc + 4, SL.kern.H(p.pc + 4)], [0, 'Nessuno affidabile']]
     },
-    confronto: (pred, esito, p) => { const K = SL.kern, e = K.EVENTI[p.evento], N = (v) => (v ? K.H(v) : 'nessun indirizzo affidabile'); return 'Avevi previsto ' + N(pred) + '. L’esito è ' + N(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : e.classe === 'trap' ? 'Una trap viene segnalata dopo l’istruzione, e `int3` occupa un solo byte.' : e.classe === 'fault' ? 'Un fault lascia l’istruzione incompiuta, e l’indirizzo salvato è il suo.' : e.classe === 'interrupt' ? 'Un interrupt viene accettato dopo l’istruzione in corso, che occupa 4 byte.' : 'Dopo un abort lo stato può essere compromesso, e nessun indirizzo garantisce la ripresa.'); },
+    confronto: (pred, esito, p) => { const K = SL.kern, e = K.EVENTI[p.evento], N = (v) => (v ? K.H(v) : 'nessun indirizzo affidabile'); return 'La previsione indicava ' + N(pred) + '. L’esito è ' + N(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : e.classe === 'trap' ? 'Una trap viene segnalata dopo l’istruzione, e `int3` occupa un solo byte.' : e.classe === 'fault' ? 'Un fault lascia l’istruzione incompiuta, e l’indirizzo salvato è il suo.' : e.classe === 'interrupt' ? 'Un interrupt viene accettato dopo l’istruzione in corso, che occupa 4 byte.' : 'Dopo un abort lo stato può essere compromesso, e nessun indirizzo garantisce la ripresa.'); },
     costruisci(p) {
       const K = SL.kern, H = K.H, passi = [], pc = p.pc, e = K.EVENTI[p.evento], r = K.ripresa(p.evento, pc), R = r ? H(r) : 'inaffidabile';
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'PROGRAMMA IN MODO UTENTE', 'mono')].concat(K.flusso('q', p.evento, pc, f, { x: 20, y: 24, w: 264, gap: 14, h: 62, classe: true }));
@@ -82,7 +82,7 @@ SL.registra('4.1.2', {
       ['Usare sempre 4 byte per trovare la seguente.', 'La lunghezza dipende dall’istruzione. `int3` occupa un solo byte.'],
       ['Fidarsi dell’indirizzo salvato dopo un abort.', 'Un indirizzo numerico esiste comunque. Manca la garanzia che lo stato del programma sia integro.']
     ],
-    saFare: ['Classifico un evento in una delle quattro classi.', 'Dico se l’istruzione è stata completata.', 'Calcolo l’indirizzo salvato per la ripresa.'],
+    saFare: ['Classificare un evento in una delle quattro classi.', 'Indicare se l’istruzione è stata completata.', 'Calcolare l’indirizzo salvato per la ripresa.'],
     esercizi: [
       { d: 'Un programma di diagnosi mette `int3`, lunga un byte, all’indirizzo 0x5020. Quale indirizzo viene salvato quando il programma la esegue? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['5021', '0x5021', '5021h'],
         ok: 'Una trap viene segnalata dopo l’istruzione: 0x5020 + 1 = 0x5021.',
@@ -93,12 +93,12 @@ SL.registra('4.1.2', {
         altro: 'Il valore è diverso. Dopo una trap si riprende dall’istruzione seguente, e `int3` occupa un byte.',
         indizi: ['`int3` provoca una trap.', 'Una trap viene segnalata dopo l’istruzione.', '0x5020 + 1.'],
         svolgimento: ['Classe: trap.', 'Lunghezza di `int3`: 1 byte.', 'Indirizzo salvato: 0x5021.'] },
-      { d: 'Una istruzione `div` divide per zero. A quale classe appartiene l’evento?', guida: 'Scegli la risposta.', o: [
+      { d: 'Una istruzione `div` divide per zero. A quale classe appartiene l’evento?', guida: 'Si scelga la risposta.', o: [
         { t: 'Fault', ok: true, fb: 'L’errore viene scoperto durante l’istruzione, prima che produca un risultato. L’indirizzo salvato è quello della `div`.' },
         { t: 'Trap', fb: 'Una trap viene segnalata dopo che l’istruzione ha finito. Qui la divisione non può produrre alcun risultato.' },
         { t: 'Interrupt', fb: 'Un interrupt arriva dall’esterno. Qui la causa è l’istruzione stessa.' },
         { t: 'Abort', fb: 'L’hardware funziona correttamente, e lo stato del programma è integro. L’errore sta nei dati del programma.' }] },
-      { d: 'La tastiera segnala che è stato premuto un tasto. A quale classe appartiene l’evento?', guida: 'Scegli la risposta.', o: [
+      { d: 'La tastiera segnala che è stato premuto un tasto. A quale classe appartiene l’evento?', guida: 'Si scelga la risposta.', o: [
         { t: 'Interrupt', ok: true, fb: 'La richiesta arriva da una periferica, in un momento estraneo a ciò che il programma sta facendo.' },
         { t: 'Fault', fb: 'Un fault nasce da una istruzione che non riesce a completarsi. La tastiera è esterna al programma.' },
         { t: 'Trap', fb: 'Una trap è provocata da una istruzione del programma. La tastiera è esterna.' }] }

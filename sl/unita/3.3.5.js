@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.3.5', {
   titolo: 'Tracce complete delle istruzioni',
-  obiettivo: 'Alla fine saprai compilare la traccia completa di `call` e di `ret` attraverso le sei fasi, e dire quale valore finisce nel PC, quale in %rsp e quale in memoria.',
+  obiettivo: 'Obiettivo: compilare la traccia completa di `call` e di `ret` attraverso le sei fasi, e dire quale valore finisce nel PC, quale in %rsp e quale in memoria.',
   concetti: [['tabella', 'Una riga per fase'], ['pila', 'Chiamare e tornare'], ['puntatore', 'Tre candidati per il PC']],
   filigrana: ['tabella', 'pila', 'puntatore'],
   richiami: {
@@ -59,7 +59,7 @@ SL.registra('3.3.5', {
       domanda: (p) => { const H = SL.y86.esa; return 'Una `call ' + H(p.t) + '` comincia all’indirizzo ' + H(p.pc) + ', con %rsp = ' + H(p.sp) + '. Quale valore scrive in memoria, e a quale indirizzo?'; },
       opzioni: (p) => { const H = SL.y86.esa; return [[p.pc + 9, p.sp - 8], [p.pc + 9, p.sp], [p.t, p.sp - 8], [p.pc, p.sp - 8]].map((x) => [H(x[0]) + '@' + H(x[1]), H(x[0]) + ' all’indirizzo ' + H(x[1])]); }
     },
-    confronto: (pred, esito, p) => { const T = (k) => k.split('@')[0] + ' all’indirizzo ' + k.split('@')[1], H = SL.y86.esa; return 'Avevi previsto ' + T(pred) + '. La `call` scrive ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il valore salvato è valP = ' + H(p.pc) + ' + 9, l’istruzione da cui riprendere. La cella è quella appena riservata, valE = ' + H(p.sp) + ' − 8.'); },
+    confronto: (pred, esito, p) => { const T = (k) => k.split('@')[0] + ' all’indirizzo ' + k.split('@')[1], H = SL.y86.esa; return 'La previsione indicava ' + T(pred) + '. La `call` scrive ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il valore salvato è valP = ' + H(p.pc) + ' + 9, l’istruzione da cui riprendere. La cella è quella appena riservata, valE = ' + H(p.sp) + ' − 8.'); },
     costruisci(p) {
       const el = SL.el, H = SL.y86.esa, passi = [], FASI = ['prelievo', 'decodifica', 'esecuzione', 'memoria', 'scrittura', 'PC'], valP = p.pc + 9, giu = p.sp - 8;
       const st = { ist: 'call', f: 0, v: {}, rsp: p.sp, pc: p.pc, cella: null };
@@ -123,7 +123,7 @@ SL.registra('3.3.5', {
       ['Scrivere nella vecchia cima.', 'La `call` scrive a valE = %rsp − 8, la cella appena riservata. La vecchia cima contiene dati del chiamante.'],
       ['Far leggere a ret dalla cima nuova.', '`ret` legge all’indirizzo valA, cioè %rsp prima dell’aggiornamento. valE serve soltanto ad aggiornare il registro.']
     ],
-    saFare: ['Compilo la tabella delle fasi di `call` e di `ret`.', 'Dico quale valore va in memoria, quale in %rsp e quale nel PC.', 'Indico la sorgente del PC per ogni classe di istruzioni.'],
+    saFare: ['Compilare la tabella delle fasi di `call` e di `ret`.', 'Indicare quale valore va in memoria, quale in %rsp e quale nel PC.', 'Indicare la sorgente del PC per ogni classe di istruzioni.'],
     esercizi: [
       { d: 'Una `call 0x200` comincia all’indirizzo 0x124, con %rsp = 0x800. Quale valore viene scritto in memoria? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x130', giuste: ['0x12d', '12d', '12dh'],
         ok: 'Viene scritto valP = 0x124 + 9 = 0x12D, l’indirizzo di ritorno.',
@@ -133,10 +133,10 @@ SL.registra('3.3.5', {
           { se: ['0x12e', '12e', '12eh'], msg: 'La `call` occupa 9 byte: uno di codice e otto di destinazione.' },
           { se: ['0x7f8', '7f8', '7f8h'], msg: 'Questo è l’indirizzo della cella in cui si scrive. La domanda chiede il valore scritto.' }
         ],
-        altro: 'Il valore è diverso. Calcola valP sommando all’indirizzo della `call` la sua lunghezza.',
+        altro: 'Il valore è diverso. Si calcoli valP sommando all’indirizzo della `call` la sua lunghezza.',
         indizi: ['In memoria va l’indirizzo di ritorno, valP.', 'Una `call` occupa 9 byte.', '0x124 + 9.'],
         svolgimento: ['Lunghezza della `call`: 9 byte.', 'valP = 0x124 + 9 = 0x12D.', 'M8[0x7F8] = 0x12D.'] },
-      { d: 'Per quale di queste istruzioni il PC riceve valM?', guida: 'Scegli la risposta.', o: [
+      { d: 'Per quale di queste istruzioni il PC riceve valM?', guida: 'Si scelga la risposta.', o: [
         { t: 'ret', ok: true, fb: 'L’indirizzo di ritorno viene letto dalla pila nella fase di memoria, ed è valM.' },
         { t: 'call 0x200', fb: 'Per `call` il PC riceve la destinazione scritta nell’istruzione, valC.' },
         { t: 'mrmovq 8(%rbx), %rax', fb: '`mrmovq` legge una parola valM, e la deposita in un registro. Il PC riceve valP.' },

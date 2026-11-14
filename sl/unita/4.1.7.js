@@ -30,7 +30,7 @@ SL.unita417 = (() => {
 })();
 SL.registra('4.1.7', {
   titolo: 'Ripresa, annidamento e priorità',
-  obiettivo: 'Alla fine saprai dire se una seconda richiesta di interrupt sospende il gestore in corso oppure attende, e in quale ordine avvengono i ritorni.',
+  obiettivo: 'Obiettivo: dire se una seconda richiesta di interrupt sospende il gestore in corso oppure attende, e in quale ordine avvengono i ritorni.',
   concetti: [['interrupt', 'Due richieste, un processore'], ['flag', 'Il flag IF'], ['pila', 'Frame impilati']],
   filigrana: ['interrupt', 'pila', 'flag'],
   richiami: {
@@ -80,7 +80,7 @@ SL.registra('4.1.7', {
       domanda: (p) => 'Il gestore A, di priorità 4, ' + (p.iflag === 'uno' ? 'ha riportato IF a 1' : 'ha lasciato IF a 0') + '. Arriva una richiesta di priorità ' + p.q + '. Che cosa accade?',
       opzioni: () => [['subito', 'Viene servita subito, e il gestore A resta sospeso'], ['dopo', 'Resta pendente finché il gestore A ha finito']]
     },
-    confronto: (pred, esito, p) => 'Avevi previsto che ' + (pred === 'subito' ? 'fosse servita subito' : 'restasse pendente') + '. La richiesta ' + (esito === 'subito' ? 'viene servita subito' : 'resta pendente') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 'subito' ? 'Le due condizioni sono soddisfatte: la priorità ' + p.q + ' supera 4, e IF vale 1.' : p.q <= 4 ? 'Il controller trattiene le richieste di priorità pari o inferiore a quella in servizio.' : 'Con IF a 0 il processore rinvia la richiesta, anche se la priorità è più alta.'),
+    confronto: (pred, esito, p) => 'La previsione indicava che ' + (pred === 'subito' ? 'fosse servita subito' : 'restasse pendente') + '. La richiesta ' + (esito === 'subito' ? 'viene servita subito' : 'resta pendente') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 'subito' ? 'Le due condizioni sono soddisfatte: la priorità ' + p.q + ' supera 4, e IF vale 1.' : p.q <= 4 ? 'Il controller trattiene le richieste di priorità pari o inferiore a quella in servizio.' : 'Con IF a 0 il processore rinvia la richiesta, anche se la priorità è più alta.'),
     costruisci(p) {
       const U = SL.unita417, passi = [], n = U.annida(p), ifa = p.iflag === 'uno', alta = p.q > 4;
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'PILA DEL KERNEL', 'mono'), SL.el.nota('t1', 300, 0, 'PROCESSORE', 'mono'), SL.el.nota('t2', 580, 0, 'CONDIZIONI', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w: 264, gap: 14, h: 58 }));
@@ -108,7 +108,7 @@ SL.registra('4.1.7', {
       ['Pensare che una richiesta rinviata vada perduta.', 'Il controller la conserva come pendente, e la presenta appena possibile.'],
       ['Far tornare il secondo gestore al programma.', 'Il frame più recente riporta al primo gestore, che era stato sospeso per ultimo.']
     ],
-    saFare: ['Applico le due condizioni per l’annidamento.', 'Conto i frame presenti sulla pila del kernel.', 'Dico a chi riporta ciascuna IRETQ.'],
+    saFare: ['Applicare le due condizioni per l’annidamento.', 'Contare i frame presenti sulla pila del kernel.', 'Indicare a chi riporta ciascuna IRETQ.'],
     esercizi: [
       { d: 'Un gestore di priorità 2 ha riportato IF a 1. Arrivano, una dopo l’altra, una richiesta di priorità 6 e, durante il suo servizio con IF a 1, una di priorità 9. Quanti frame ci sono sulla pila del kernel mentre gira il terzo gestore?', segnaposto: 'Un numero', giuste: ['3', 'tre'],
         ok: 'Tre ingressi senza alcun ritorno: programma, primo gestore, secondo gestore.',
@@ -119,11 +119,11 @@ SL.registra('4.1.7', {
         altro: 'Il numero è diverso. Conta un frame per ogni ingresso non ancora seguito da IRETQ.',
         indizi: ['Il primo ingresso sospende il programma.', 'Il secondo sospende il gestore di priorità 2.', 'Il terzo sospende il gestore di priorità 6.'],
         svolgimento: ['Frame 1: ripresa del programma.', 'Frame 2: ripresa del gestore di priorità 2.', 'Frame 3: ripresa del gestore di priorità 6.'] },
-      { d: 'Un gestore di priorità 4 ha lasciato IF a 0. Arriva una richiesta di priorità 7. Che cosa accade?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un gestore di priorità 4 ha lasciato IF a 0. Arriva una richiesta di priorità 7. Che cosa accade?', guida: 'Si scelga la risposta.', o: [
         { t: 'Resta pendente fino al ritorno del gestore', ok: true, fb: 'La priorità basterebbe. Con IF a 0, però, il processore rinvia, e la richiesta resta nel controller.' },
         { t: 'Viene servita subito, perché è più urgente', fb: 'La priorità è una delle due condizioni. Con IF a 0 il processore non accetta interrupt mascherabili.' },
         { t: 'Va perduta', fb: 'Il controller registra la richiesta e la presenta appena IF torna a 1.' }] },
-      { d: 'Durante un annidamento, quando IF torna al valore che aveva nel programma sospeso?', guida: 'Scegli la risposta.', o: [
+      { d: 'Durante un annidamento, quando IF torna al valore che aveva nel programma sospeso?', guida: 'Si scelga la risposta.', o: [
         { t: 'Quando l’ultima IRETQ ripristina RFLAGS dal primo frame', ok: true, fb: 'IF fa parte di RFLAGS, e ogni frame conserva il valore che RFLAGS aveva prima di quell’ingresso.' },
         { t: 'Appena il secondo gestore comincia', fb: 'A ogni ingresso il processore azzera IF. Il valore precedente resta conservato nel frame.' },
         { t: 'Mai, finché il kernel non lo imposta a mano', fb: 'IRETQ ripristina RFLAGS dal frame, senza interventi del kernel.' }] }

@@ -7,7 +7,7 @@ SL.scena = (ospite, misura) => {
   ospite.innerHTML = '<div class="piano-fisso palco" style="width:' + W + 'px;height:' + H + 'px"><svg class="linee" width="' + W + '" height="' + H + '" aria-hidden="true"></svg></div>';
   const palco = ospite.firstElementChild, svg = palco.firstElementChild;
   const nodi = new Map(), linee = new Map();
-  ospite.insertAdjacentHTML('afterend', '<p class="nota avviso-scorri">La scena è più larga dello schermo: scorrila con il dito, oppure ruota il telefono.</p>');
+  ospite.insertAdjacentHTML('afterend', '<p class="nota avviso-scorri">La scena è più larga dello schermo: può essere scorsa in orizzontale, oppure visualizzata con il dispositivo ruotato.</p>');
   const ferma = SL.scala(ospite, W, H, 0.62);
 
   const corpo = (e) => {

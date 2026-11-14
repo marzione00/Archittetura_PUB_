@@ -18,7 +18,7 @@ SL.unita474 = (() => {
 })();
 SL.registra('4.7.4', {
   titolo: 'Coerenza, ordinamento e indirizzi visibili al dispositivo',
-  obiettivo: 'Alla fine saprai spiegare quali due condizioni servono perché un dispositivo legga con il DMA il dato giusto: l’indirizzo adatto a lui, e la memoria aggiornata.',
+  obiettivo: 'Obiettivo: spiegare quali due condizioni servono perché un dispositivo legga con il DMA il dato giusto: l’indirizzo adatto a lui, e la memoria aggiornata.',
   concetti: [['puntatore', 'Ogni osservatore ha i suoi indirizzi'], ['cache', 'Il dato nuovo può essere altrove'], ['scudo', 'Un filtro sugli accessi del dispositivo']],
   filigrana: ['cache', 'puntatore', 'scudo'],
   richiami: {
@@ -67,7 +67,7 @@ SL.registra('4.7.4', {
       domanda: (p) => 'Il processore ha cambiato un byte del buffer da 17 a 34. Il driver ' + (p.op === 'ok' ? 'sincronizza il buffer e scrive nel descrittore l’indirizzo DMA' : p.op === 'cache' ? 'scrive nel descrittore l’indirizzo DMA, senza sincronizzare il buffer' : 'sincronizza il buffer e scrive nel descrittore l’indirizzo usato dal programma') + '. Che cosa riceve il dispositivo?',
       opzioni: () => [[34, 'Il valore nuovo, 34'], [17, 'Il valore vecchio, 17'], ['no', 'Nulla: l’accesso viene respinto']]
     },
-    confronto: (pred, esito) => { const N = { 34: 'il valore nuovo', 17: 'il valore vecchio', no: 'un accesso respinto' }; return 'Avevi previsto ' + N[pred] + '. L’esito è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 17 ? 'Senza sincronizzazione il 34 resta nella cache, e la RAM contiene ancora 17.' : esito === 'no' ? 'L’indirizzo del programma non è fra quelli che la IOMMU concede al dispositivo.' : 'RAM aggiornata e indirizzo DMA: le due condizioni sono rispettate.'); },
+    confronto: (pred, esito) => { const N = { 34: 'il valore nuovo', 17: 'il valore vecchio', no: 'un accesso respinto' }; return 'La previsione indicava ' + N[pred] + '. L’esito è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 17 ? 'Senza sincronizzazione il 34 resta nella cache, e la RAM contiene ancora 17.' : esito === 'no' ? 'L’indirizzo del programma non è fra quelli che la IOMMU concede al dispositivo.' : 'RAM aggiornata e indirizzo DMA: le due condizioni sono rispettate.'); },
     costruisci(p) {
       const U = SL.unita474, H = U.H, passi = [], cpu = 0x9000 + p.off, ram = 0x3000 + p.off, dma = 0x5000 + p.off, sinc = p.op !== 'cache', ok = p.op !== 'ptr', e = U.esito(p);
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, w: 820, h: 56 });
@@ -93,7 +93,7 @@ SL.registra('4.7.4', {
       ['Saltare la sincronizzazione perché l’indirizzo è giusto.', 'Il dispositivo raggiunge la cella e vi trova il valore vecchio.'],
       ['Considerare le due condizioni la stessa cosa.', 'Una riguarda dove leggere, l’altra che cosa si trova in quel punto.']
     ],
-    saFare: ['Distinguo i tre indirizzi di una stessa cella.', 'Spiego il ruolo della IOMMU.', 'Riconosco l’effetto di una sincronizzazione mancata.'],
+    saFare: ['Distinguere i tre indirizzi di una stessa cella.', 'Spiegare il ruolo della IOMMU.', 'Riconoscere l’effetto di una sincronizzazione mancata.'],
     esercizi: [
       { d: 'La pagina di un buffer è vista dal programma a 0x9000, si trova nella RAM a 0x3000 e ha indirizzo DMA 0x5000. Quale indirizzo va scritto nel descrittore per il byte di scostamento 0x2C?', segnaposto: 'Un indirizzo', giuste: ['502c', '0x502c', '502ch'],
         ok: 'Al dispositivo va l’indirizzo DMA: 0x5000 + 0x2C = 0x502C.',
@@ -102,14 +102,14 @@ SL.registra('4.7.4', {
           { se: ['302c', '0x302c'], msg: 'Questa è la posizione nella RAM. Il dispositivo deve presentare l’indirizzo DMA, che la IOMMU traduce.' },
           { se: ['5000', '0x5000'], msg: 'Questo è l’inizio della pagina. Va aggiunto lo scostamento 0x2C.' }
         ],
-        altro: 'L’indirizzo è un altro. Parti dall’indirizzo DMA della pagina e aggiungi lo scostamento.',
+        altro: 'L’indirizzo è un altro. Si parta dall’indirizzo DMA della pagina e si aggiunga lo scostamento.',
         indizi: ['Il dispositivo usa l’indirizzo DMA.', 'La pagina ha indirizzo DMA 0x5000.', '0x5000 + 0x2C = 0x502C.'],
         svolgimento: ['Numerazione giusta: indirizzo DMA.', 'Base: 0x5000.', 'Indirizzo: 0x502C.'] },
-      { d: 'Il driver scrive nel descrittore l’indirizzo DMA corretto, ma cede il buffer senza sincronizzarlo. Il processore vi aveva appena cambiato un byte da 17 a 34. Che cosa legge il dispositivo?', guida: 'Scegli la risposta.', o: [
+      { d: 'Il driver scrive nel descrittore l’indirizzo DMA corretto, ma cede il buffer senza sincronizzarlo. Il processore vi aveva appena cambiato un byte da 17 a 34. Che cosa legge il dispositivo?', guida: 'Si scelga la risposta.', o: [
         { t: '17, il valore ancora presente nella RAM', ok: true, fb: 'Il 34 è rimasto nella cache del processore, che il dispositivo non vede.' },
         { t: '34, il valore più recente', fb: 'Il valore recente si trova nella cache. Il dispositivo legge la RAM.' },
         { t: 'Nulla: la IOMMU respinge l’accesso', fb: 'L’indirizzo è corretto, e la IOMMU lo traduce. Sbagliato è il contenuto.' }] },
-      { d: 'Qual è il compito della IOMMU?', guida: 'Scegli la risposta.', o: [
+      { d: 'Qual è il compito della IOMMU?', guida: 'Si scelga la risposta.', o: [
         { t: 'Tradurre gli indirizzi presentati dai dispositivi, concedendo a ciascuno soltanto la memoria assegnata', ok: true, fb: 'È insieme un traduttore e un filtro.' },
         { t: 'Riportare nella RAM le modifiche rimaste nella cache', fb: 'Questo è il compito della sincronizzazione, svolto dal driver.' },
         { t: 'Decidere quale dispositivo ottiene il bus', fb: 'Questo è il compito dell’arbitro.' }] }

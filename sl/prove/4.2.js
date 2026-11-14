@@ -10,7 +10,7 @@
     (r) => {
       if (r.int(0, 2) > 0) {
         const s = r.scegli([[0, 0], [1, 1], [60, 2]]), a = r.int(0, 9), OPZ = ['Di leggere dal descrittore ' + a, 'Di scrivere sul descrittore ' + a, 'Di terminare con il codice di uscita ' + a], NOMI = ['read', 'write', 'exit'];
-        return { u: '4.2.1', d: 'Un programma esegue SYSCALL con RAX = ' + s[0] + ' e RDI = ' + a + '. Che cosa chiede al kernel?', guida: 'Scegli la risposta.', o: [{ t: OPZ[s[1]], ok: true, fb: 'Il numero ' + s[0] + ' sceglie ' + NOMI[s[1]] + ', e per ' + NOMI[s[1]] + ' RDI è ' + (s[1] === 2 ? 'il codice di uscita.' : 'il descrittore di file.') }]
+        return { u: '4.2.1', d: 'Un programma esegue SYSCALL con RAX = ' + s[0] + ' e RDI = ' + a + '. Che cosa chiede al kernel?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[s[1]], ok: true, fb: 'Il numero ' + s[0] + ' sceglie ' + NOMI[s[1]] + ', e per ' + NOMI[s[1]] + ' RDI è ' + (s[1] === 2 ? 'il codice di uscita.' : 'il descrittore di file.') }]
           .concat([0, 1, 2].filter((k) => k !== s[1]).map((k) => ({ t: OPZ[k], fb: 'Per questo servizio RAX dovrebbe valere ' + [0, 1, 60][k] + '. Con RAX = ' + s[0] + ' il kernel sceglie ' + NOMI[s[1]] + '.' }))) };
       }
       const a = 0x4000 + r.int(1, 3000), v = a + 2, giuste = ESA(v, 4);
@@ -21,7 +21,7 @@
           { se: ESA(a + 4, 4), msg: 'SYSCALL occupa 2 byte.' },
           { se: ESA(a + 1, 4), msg: 'SYSCALL occupa 2 byte.' }
         ]),
-        altro: 'Il valore è diverso. Aggiungi 2 all’indirizzo della SYSCALL, in esadecimale.',
+        altro: 'Il valore è diverso. Si aggiunga 2 all’indirizzo della SYSCALL, in esadecimale.',
         indizi: ['RCX riceve l’indirizzo di ripresa.', 'SYSCALL occupa 2 byte.', H(a) + ' + 2.'],
         svolgimento: ['Indirizzo di SYSCALL: ' + H(a) + '.', 'Lunghezza: 2 byte.', 'RCX = ' + H(v) + '.'] };
     },
@@ -48,7 +48,7 @@
           ok ? { se: ['nessuna'], msg: 'Il descrittore è valido, e la copia avviene.' } : { se: [parola.slice(0, n).toLowerCase()], msg: 'Queste lettere entrerebbero con un descrittore valido. Qui la convalida fallisce.' },
           ok ? { se: [parola.slice(-n).toLowerCase()], msg: 'La write parte dall’inizio del buffer.' } : null
         ]),
-        altro: 'La risposta è diversa. Controlla il descrittore, poi conta i byte a partire dal primo.',
+        altro: 'La risposta è diversa. Si controlli il descrittore, poi si contino i byte a partire dal primo.',
         indizi: [ok ? 'Il descrittore è valido.' : 'Il descrittore è chiuso.', ok ? 'La write parte dal primo byte del buffer.' : 'La convalida precede la copia.', ok ? 'I primi ' + n + ' byte di ' + parola + '.' : 'Nessun byte viene copiato.'],
         svolgimento: ['Convalida: ' + (ok ? 'riuscita.' : 'fallita.'), ok ? 'Byte richiesti: ' + n + '.' : 'Nessuna copia.', ok ? 'Nella pipe: ' + parola.slice(0, n) + '.' : 'Nella pipe: nessuna lettera.'] };
     },
@@ -73,7 +73,7 @@
           ok ? { se: I(n), msg: 'Con la lunghezza invariata la chiamata chiederebbe ' + k + ' byte oltre la fine del buffer.' } : { se: I(n - 9), msg: 'Il 9 è il codice dell’errore. Nessun byte è partito.' },
           ok ? { se: I(k), msg: 'Questi sono i byte già partiti. Servono quelli che restano.' } : { se: I(n + 9), msg: 'Un valore negativo resta fuori dai conti.' }
         ]),
-        altro: ok ? 'Il numero è diverso. Togli dai byte richiesti quelli confermati.' : 'Il numero è diverso. Dopo un errore la lunghezza resta invariata.',
+        altro: ok ? 'Il numero è diverso. Si tolga dai byte richiesti quelli confermati.' : 'Il numero è diverso. Dopo un errore la lunghezza resta invariata.',
         indizi: ok ? ['Erano richiesti ' + n + ' byte.', 'Ne sono partiti ' + k + '.', n + ' − ' + k + '.'] : ['Un valore negativo è un errore.', 'Nessun byte è partito.', 'La lunghezza resta ' + n + '.'],
         svolgimento: ok ? ['Richiesti: ' + n + '.', 'Confermati: ' + k + '.', 'RDX = ' + v + '.'] : ['RAX negativo: errore.', 'Confermati: 0.', 'RDX = ' + n + '.'] };
     },
@@ -97,7 +97,7 @@
         diagnosi: DIAG(giuste, [
           { se: I(bl ? 1 : 0), msg: bl ? 'La read bloccante, quando riprende, toglie il byte dalla pipe.' : 'Nessuna read è in corso quando il byte arriva. Il byte resta nella pipe.' }
         ]),
-        altro: 'Il numero è diverso. Chiediti se una read ha prelevato il byte.',
+        altro: 'Il numero è diverso. Ci si chieda se una read ha prelevato il byte.',
         indizi: [bl ? 'Il lettore attende il byte dentro la read.' : 'La read è finita a 0 ms, senza dati.', 'Il byte arriva a ' + t + ' ms.', bl ? 'La read lo preleva a ' + (t + d) + ' ms.' : 'Nessuno lo preleva.'],
         svolgimento: ['Byte nella pipe a ' + t + ' ms: 1.', bl ? 'La read riprende e lo preleva.' : 'Nessuna read lo preleva.', 'Byte nella pipe: ' + v + '.'] };
     },
@@ -105,7 +105,7 @@
     (r) => {
       const c = [r.scegli([6, 7, 4]), r.scegli([0, 4, 6, 2]), r.scegli([0, 4, 6, 2])], chi = r.int(0, 2), cosa = r.int(0, 2) > 0 ? 'lettura' : 'scrittura', peso = cosa === 'lettura' ? 4 : 2, ok = (c[chi] & peso) !== 0;
       const CHI = ['Il proprietario', 'Un utente del gruppo del file', 'Un utente estraneo al gruppo'], NOMI = ['il proprietario', 'il gruppo', 'gli altri'];
-      return { u: '4.2.5', d: 'Un file ha i permessi 0' + c.join('') + '. ' + CHI[chi] + ' chiede di aprirlo in ' + cosa + '. Che cosa restituisce open?', guida: 'Scegli la risposta.', o: [
+      return { u: '4.2.5', d: 'Un file ha i permessi 0' + c.join('') + '. ' + CHI[chi] + ' chiede di aprirlo in ' + cosa + '. Che cosa restituisce open?', guida: 'Si scelga la risposta.', o: [
         { t: '3, un nuovo descrittore', ok, fb: ok ? 'Per ' + NOMI[chi] + ' vale la cifra ' + c[chi] + ', che contiene il peso ' + peso + ' della ' + cosa + '.' : 'Per ' + NOMI[chi] + ' vale la cifra ' + c[chi] + ', priva del peso ' + peso + ' della ' + cosa + '.' },
         { t: '−13, accesso negato', ok: !ok, fb: !ok ? 'Per ' + NOMI[chi] + ' vale la cifra ' + c[chi] + ', priva del peso ' + peso + ' della ' + cosa + '. La politica nega, con EACCES.' : 'Per ' + NOMI[chi] + ' vale la cifra ' + c[chi] + ', che contiene il peso ' + peso + ' della ' + cosa + '.' },
         { t: '−9, descrittore non valido', fb: 'EBADF riguarda un descrittore sbagliato. Qui la domanda è se i permessi concedono l’apertura.' }] };

@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.1.6', {
   titolo: 'Implementazioni alternative e flag di stato',
-  obiettivo: 'Alla fine saprai spiegare come un sommatore può conoscere il riporto di un gruppo di bit senza attendere la propagazione, e saprai ricavare i quattro flag dai fili del sommatore.',
+  obiettivo: 'Obiettivo: spiegare come un sommatore può conoscere il riporto di un gruppo di bit senza attendere la propagazione, e saprai ricavare i quattro flag dai fili del sommatore.',
   concetti: [['alu', 'Generare oppure propagare'], ['clock', 'Un riporto pronto in anticipo'], ['flag', 'I flag come fili']],
   filigrana: ['alu', 'flag', 'clock'],
   richiami: {
@@ -57,7 +57,7 @@ SL.registra('3.1.6', {
       domanda: (p) => 'Si sommano i byte A = ' + SL.unita316.H(p.a) + ' e B = ' + SL.unita316.H(p.b) + ', divisi in due gruppi di quattro bit. Dal gruppo alto esce un riporto?',
       opzioni: () => [['no', 'No'], ['gen', 'Sì, generato dal gruppo alto'], ['prop', 'Sì, propagato dal gruppo basso']]
     },
-    confronto: (pred, esito, p) => { const c = SL.unita316.conto(p), N = { no: 'nessun riporto', gen: 'un riporto generato dal gruppo alto', prop: 'un riporto propagato dal gruppo basso' }; return 'Avevi previsto ' + N[pred] + '. L’esito è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'I pezzi del gruppo alto valgono ' + c.ha + ' e ' + c.hb + ', e la loro somma è ' + (c.ha + c.hb) + (c.g ? ', oltre 15: il gruppo genera il riporto da solo.' : c.p ? ', esattamente 15: il gruppo propaga il riporto in arrivo, che vale ' + c.c4 + '.' : ', sotto 15: un riporto in arrivo viene assorbito.')); },
+    confronto: (pred, esito, p) => { const c = SL.unita316.conto(p), N = { no: 'nessun riporto', gen: 'un riporto generato dal gruppo alto', prop: 'un riporto propagato dal gruppo basso' }; return 'La previsione indicava ' + N[pred] + '. L’esito è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'I pezzi del gruppo alto valgono ' + c.ha + ' e ' + c.hb + ', e la loro somma è ' + (c.ha + c.hb) + (c.g ? ', oltre 15: il gruppo genera il riporto da solo.' : c.p ? ', esattamente 15: il gruppo propaga il riporto in arrivo, che vale ' + c.c4 + '.' : ', sotto 15: un riporto in arrivo viene assorbito.')); },
     costruisci(p) {
       const el = SL.el, X = SL.x86, U = SL.unita316, H = U.H, passi = [], c = U.conto(p), B4 = (v) => v.toString(2).padStart(4, '0');
       const FO = { x: 230, passo: 54, tagli: [4], gap: 70, h: 42, indici: false };
@@ -109,13 +109,13 @@ SL.registra('3.1.6', {
       ['Chiamare propagazione ogni somma grande.', 'Il gruppo propaga soltanto con una somma di 15 esatti. Con 14 assorbe il riporto in arrivo, con 16 ne genera uno comunque.'],
       ['Confondere CF e OF.', 'La somma 127 + 1 lascia CF = 0 e OF = 1: il totale 128 sta in otto bit senza segno ed esce dall’intervallo con segno.']
     ],
-    saFare: ['Calcolo G e P di un gruppo dai suoi bit.', 'Ricavo il riporto in uscita da G, P e dal riporto in arrivo.', 'Dico da quali fili del sommatore nasce ciascun flag.'],
+    saFare: ['Calcolare G e P di un gruppo dai suoi bit.', 'Ricavare il riporto in uscita da G, P e dal riporto in arrivo.', 'Indicare da quali fili del sommatore nasce ciascun flag.'],
     esercizi: [
-      { d: 'Il gruppo alto di un sommatore riceve i pezzi 1010 e 0101. Quanto valgono i suoi segnali G e P?', guida: 'Scegli la risposta.', o: [
+      { d: 'Il gruppo alto di un sommatore riceve i pezzi 1010 e 0101. Quanto valgono i suoi segnali G e P?', guida: 'Si scelga la risposta.', o: [
         { t: 'G = 0 e P = 1', ok: true, fb: 'Dieci più cinque fa 15 esatti: in ogni colonna i due bit sono diversi, e il gruppo propaga.' },
         { t: 'G = 1 e P = 0', fb: 'Il gruppo genera quando la somma supera 15. Qui vale 15 esatti.' },
         { t: 'G = 0 e P = 0', fb: 'Sarebbe così con una somma minore di 15. Qui la somma vale 15.' }] },
-      { d: 'Su otto bit si calcola 0x50 + 0x30, cioè 80 + 48. Quali flag valgono 1 fra CF e OF?', guida: 'Scegli la risposta.', o: [
+      { d: 'Su otto bit si calcola 0x50 + 0x30, cioè 80 + 48. Quali flag valgono 1 fra CF e OF?', guida: 'Si scelga la risposta.', o: [
         { t: 'Soltanto OF', ok: true, fb: 'Il totale 128 sta in otto bit, quindi CF = 0. Con segno, 128 supera 127, quindi OF = 1.' },
         { t: 'Soltanto CF', fb: 'CF chiede un totale senza segno oltre 255. Qui il totale è 128.' },
         { t: 'Nessuno dei due', fb: 'Con segno il massimo è 127, e il totale 128 lo supera di uno.' },

@@ -31,7 +31,7 @@ SL.unita363 = (() => {
 })();
 SL.registra('3.6.3', {
   titolo: 'Dipendenze dei dati e inoltro',
-  obiettivo: 'Alla fine saprai dire quale valore riceve una istruzione nello stadio D quando il registro che le serve sta per essere scritto da istruzioni ancora nella pipeline.',
+  obiettivo: 'Obiettivo: dire quale valore riceve una istruzione nello stadio D quando il registro che le serve sta per essere scritto da istruzioni ancora nella pipeline.',
   concetti: [['register', 'Il banco è in ritardo'], ['bus', 'L’inoltro'], ['lente', 'Il produttore più vicino']],
   filigrana: ['bus', 'register', 'lente'],
   richiami: {
@@ -83,7 +83,7 @@ SL.registra('3.6.3', {
       domanda: (p) => 'Lo stadio D deve leggere %rax. Nello stadio E c’è ' + SL.unita363.E[p.e][2] + ', nello stadio M ' + SL.unita363.M[p.m][3] + ', e nello stadio W una istruzione che sta per scrivere 31 in %rax. Il banco contiene 12. Quale valore riceve lo stadio D?',
       opzioni: (p) => [[52, '52, dall’ALU nello stadio E']].concat(p.m === 'load' ? [[93, '93, dalla memoria nello stadio M']] : p.m === 'op' ? [[74, '74, dal registro M']] : [], [[31, '31, dal registro W'], [12, '12, dal banco']])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + '. Lo stadio D riceve ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 12 ? 'Il banco contiene un valore superato, perché almeno una istruzione nella pipeline sta per scrivere %rax.' : pred === 52 ? (p.e === 'cmov' ? 'La copia condizionata ha la condizione falsa, e la sua destinazione effettiva è RNONE.' : 'La `addq` nello stadio E scrive %rbx, un registro diverso da quello richiesto.') : 'Fra più istruzioni che scrivono %rax conta la più vicina allo stadio D, perché è l’ultima nell’ordine del programma.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. Lo stadio D riceve ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 12 ? 'Il banco contiene un valore superato, perché almeno una istruzione nella pipeline sta per scrivere %rax.' : pred === 52 ? (p.e === 'cmov' ? 'La copia condizionata ha la condizione falsa, e la sua destinazione effettiva è RNONE.' : 'La `addq` nello stadio E scrive %rbx, un registro diverso da quello richiesto.') : 'Fra più istruzioni che scrivono %rax conta la più vicina allo stadio D, perché è l’ultima nell’ordine del programma.'),
     costruisci(p) {
       const U = SL.unita363, passi = [], c = U.candidati(p), t = U.trovato(p), v = c[t][2], sigla = c[t][1];
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 8, wd: 180, wc: 400, wr: 180, gap: 30, h: 56, py: 64, hd: 72 });
@@ -110,7 +110,7 @@ SL.registra('3.6.3', {
       ['Prendere il valore dallo stadio più avanzato.', 'Lo stadio W ospita l’istruzione più vecchia. Il valore più recente è quello dello stadio più vicino a D.'],
       ['Fermarsi alla destinazione scritta nel testo.', 'Conta la scrittura effettiva. Una copia condizionata con la condizione falsa ha destinazione RNONE.']
     ],
-    saFare: ['Elenco i candidati per l’inoltro.', 'Scelgo il produttore più vicino.', 'Riconosco una istruzione priva di scrittura effettiva.'],
+    saFare: ['Elencare i candidati per l’inoltro.', 'Scegliere il produttore più vicino.', 'Riconoscere una istruzione priva di scrittura effettiva.'],
     esercizi: [
       { d: 'Lo stadio D legge %rcx. Nello stadio E una `addq` sta calcolando 40 per %rdx. Nello stadio M una `addq` trasporta 25 per %rcx. Nello stadio W una istruzione sta per scrivere 9 in %rcx. Il banco contiene 3. Quale valore riceve lo stadio D?', segnaposto: 'Un numero', giuste: ['25', 'venticinque'],
         ok: 'Lo stadio E scrive un altro registro. Il primo confronto riuscito è quello con lo stadio M, che trasporta 25.',
@@ -119,14 +119,14 @@ SL.registra('3.6.3', {
           { se: ['9', 'nove'], msg: 'Lo stadio W ospita una istruzione più vecchia di quella nello stadio M. Vale la più vicina.' },
           { se: ['3', 'tre'], msg: 'Il banco contiene un valore superato: due istruzioni nella pipeline stanno per scrivere %rcx.' }
         ],
-        altro: 'Il numero è diverso. Confronta %rcx con le destinazioni degli stadi E, M e W, in quest’ordine.',
+        altro: 'Il numero è diverso. Si confronti %rcx con le destinazioni degli stadi E, M e W, in quest’ordine.',
         indizi: ['Lo stadio E scrive %rdx: il confronto fallisce.', 'Lo stadio M scrive %rcx: il confronto riesce.', 'Il valore trasportato dallo stadio M è 25.'],
         svolgimento: ['Stadio E: destinazione %rdx, diversa.', 'Stadio M: destinazione %rcx, uguale. Valore 25.', 'La ricerca si ferma: d_valA = 25.'] },
-      { d: 'Nello stadio E c’è una `cmove %rsi, %rax` con la condizione falsa. Nello stadio M c’è una `nop`. Nello stadio W una istruzione sta per scrivere 31 in %rax. Lo stadio D legge %rax. Da dove arriva il valore?', guida: 'Scegli la risposta.', o: [
+      { d: 'Nello stadio E c’è una `cmove %rsi, %rax` con la condizione falsa. Nello stadio M c’è una `nop`. Nello stadio W una istruzione sta per scrivere 31 in %rax. Lo stadio D legge %rax. Da dove arriva il valore?', guida: 'Si scelga la risposta.', o: [
         { t: 'Dal registro W, con W_valE', ok: true, fb: 'La copia ha destinazione RNONE e la `nop` è priva di destinazione. Il primo confronto riuscito è quello con lo stadio W.' },
         { t: 'Dallo stadio E, con e_valE', fb: 'La copia ha la condizione falsa, e la sua destinazione effettiva è RNONE.' },
         { t: 'Dal banco dei registri', fb: 'Il banco contiene ancora il valore vecchio. La scrittura dello stadio W avviene al fronte.' }] },
-      { d: 'Una `mrmovq` è seguita subito da una istruzione che ne usa il dato. Perché l’inoltro da solo è insufficiente?', guida: 'Scegli la risposta.', o: [
+      { d: 'Una `mrmovq` è seguita subito da una istruzione che ne usa il dato. Perché l’inoltro da solo è insufficiente?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il dato esce dalla memoria alla fine dello stadio M, un ciclo dopo il momento in cui servirebbe', ok: true, fb: 'Quando l’istruzione che usa il dato è nello stadio D, il carico è ancora nello stadio E. Serve un ciclo di stallo, poi l’inoltro di m_valM.' },
         { t: 'Fra lo stadio M e lo stadio D manca un collegamento', fb: 'Il collegamento esiste, con la sigla m_valM. Il problema è il momento in cui il dato diventa disponibile.' },
         { t: 'La mrmovq scrive il banco più tardi delle altre istruzioni', fb: 'Tutte le istruzioni scrivono il banco nello stadio W. L’inoltro serve proprio a evitare quell’attesa.' }] }

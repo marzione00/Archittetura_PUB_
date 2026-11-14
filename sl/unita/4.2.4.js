@@ -26,7 +26,7 @@ SL.unita424 = (() => {
 })();
 SL.registra('4.2.4', {
   titolo: 'Quando una chiamata di sistema si blocca',
-  obiettivo: 'Alla fine saprai dire quando termina una read su una pipe vuota, nel modo bloccante e nel modo non bloccante, e che fine fa il byte che arriva più tardi.',
+  obiettivo: 'Obiettivo: dire quando termina una read su una pipe vuota, nel modo bloccante e nel modo non bloccante, e che fine fa il byte che arriva più tardi.',
   concetti: [['coda', 'Aspettare dentro la chiamata'], ['clock', 'Tre momenti distinti'], ['scudo', 'Tornare subito con un errore']],
   filigrana: ['clock', 'coda', 'scudo'],
   richiami: {
@@ -77,7 +77,7 @@ SL.registra('4.2.4', {
       domanda: (p) => 'All’istante 0 un processo chiama read su una pipe vuota, nel modo ' + (p.modo === 'blocco' ? 'bloccante' : 'non bloccante') + '. Un byte arriverà nella pipe a ' + p.t + ' ms. A quale istante la read restituisce il controllo al programma?',
       opzioni: (p) => [[0, 'A 0 ms'], [p.t, 'A ' + p.t + ' ms'], [p.t + 1, 'A ' + (p.t + 1) + ' ms']]
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + ' ms. La read termina a ' + esito + ' ms. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.modo === 'subito' ? 'Nel modo non bloccante la read torna subito con EAGAIN, senza attendere il byte.' : pred === p.t ? 'All’arrivo del byte il lettore torna pronto. Per ripartire deve ancora ricevere il processore dallo scheduler.' : 'Nel modo bloccante il lettore resta sospeso finché la pipe è vuota.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' ms. La read termina a ' + esito + ' ms. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.modo === 'subito' ? 'Nel modo non bloccante la read torna subito con EAGAIN, senza attendere il byte.' : pred === p.t ? 'All’arrivo del byte il lettore torna pronto. Per ripartire deve ancora ricevere il processore dallo scheduler.' : 'Nel modo bloccante il lettore resta sospeso finché la pipe è vuota.'),
     costruisci(p) {
       const U = SL.unita424, passi = [], bl = p.modo === 'blocco', t = p.t, fine = bl ? t + 1 : 0;
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'TEMPO IN MILLISECONDI · STATO DEL LETTORE', 'mono')].concat(U.quadro('q', p, f, { x: 24, y: 22, w: 812, hc: 32, conti: true, h: 58, gap: 14 }));
@@ -104,7 +104,7 @@ SL.registra('4.2.4', {
       ['Trattare EAGAIN come un guasto.', 'Segnala soltanto che in questo momento manca il dato. La stessa chiamata, più tardi, può riuscire.'],
       ['Credere perduto il byte arrivato dopo EAGAIN.', 'Il byte resta nella pipe finché qualcuno lo legge.']
     ],
-    saFare: ['Distinguo una chiamata bloccante da una non bloccante.', 'Separo l’arrivo del dato, il risveglio e l’assegnazione del processore.', 'Interpreto il valore −11.'],
+    saFare: ['Distinguere una chiamata bloccante da una non bloccante.', 'Separare l’arrivo del dato, il risveglio e l’assegnazione del processore.', 'Interpretare il valore −11.'],
     esercizi: [
       { d: 'Un processo chiama read, nel modo bloccante, su una pipe vuota. Un byte arriva dopo 8 ms, e lo scheduler assegna il processore al lettore 2 ms dopo il risveglio. Dopo quanti millisecondi termina la read?', segnaposto: 'Un numero', giuste: ['10', 'dieci', '10ms'],
         ok: 'Il byte arriva a 8 ms, il processore a 8 + 2 = 10 ms.',
@@ -116,11 +116,11 @@ SL.registra('4.2.4', {
         altro: 'Il numero è diverso. Somma l’istante di arrivo del byte e l’attesa per il processore.',
         indizi: ['Il lettore torna pronto a 8 ms.', 'Riceve il processore 2 ms dopo.', '8 + 2.'],
         svolgimento: ['Arrivo del byte e risveglio: 8 ms.', 'Attesa del processore: 2 ms.', 'Fine della read: 10 ms.'] },
-      { d: 'Lo stesso processo usa invece O_NONBLOCK. Che cosa trova in RAX, e quando?', guida: 'Scegli la risposta.', o: [
+      { d: 'Lo stesso processo usa invece O_NONBLOCK. Che cosa trova in RAX, e quando?', guida: 'Si scelga la risposta.', o: [
         { t: '−11, subito', ok: true, fb: 'La pipe è vuota, e la read torna all’istante 0 con EAGAIN.' },
         { t: '1, dopo 8 ms', fb: 'Così si comporta, più o meno, il modo bloccante. Con O_NONBLOCK la read non attende.' },
         { t: '0, subito', fb: 'Uno zero significherebbe che i dati sono finiti. Qui lo scrittore è ancora attivo, e il kernel risponde con EAGAIN.' }] },
-      { d: 'Dopo quella read non bloccante, il byte arriva nella pipe a 8 ms. Dove si trova a 20 ms, se il programma non ha più chiamato read?', guida: 'Scegli la risposta.', o: [
+      { d: 'Dopo quella read non bloccante, il byte arriva nella pipe a 8 ms. Dove si trova a 20 ms, se il programma non ha più chiamato read?', guida: 'Si scelga la risposta.', o: [
         { t: 'Nella pipe', ok: true, fb: 'La pipe conserva i byte finché una read li preleva.' },
         { t: 'Nel buffer del programma', fb: 'Nel buffer i byte arrivano soltanto durante una read.' },
         { t: 'È andato perduto', fb: 'Un byte scritto in una pipe resta disponibile al lettore.' }] }

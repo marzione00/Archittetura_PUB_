@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.1.5', {
   titolo: 'Tempi, costo e realizzazione fisica',
-  obiettivo: 'Alla fine saprai trovare il cammino critico di un piccolo circuito e calcolare dopo quanto tempo la sua uscita è affidabile, e saprai dire perché la velocità di un circuito ha un costo.',
+  obiettivo: 'Obiettivo: trovare il cammino critico di un piccolo circuito e calcolare dopo quanto tempo la sua uscita è affidabile, e saprai dire perché la velocità di un circuito ha un costo.',
   concetti: [['clock', 'Ritardi in fila e in parallelo'], ['lente', 'Il cammino critico'], ['bilancio', 'Velocità contro superficie']],
   filigrana: ['clock', 'gate', 'bilancio'],
   richiami: {
@@ -58,7 +58,7 @@ SL.registra('3.1.5', {
       domanda: (p) => 'La AND risponde in ' + p.and + ' ps e la XOR in ' + p.xor + ' ps. Lavorano in parallelo e consegnano a una OR, che risponde in ' + p.or + ' ps. Dopo quanti picosecondi dal cambio degli ingressi l’uscita è affidabile?',
       opzioni: (p) => Array.from(new Set([Math.max(p.and, p.xor) + p.or, Math.min(p.and, p.xor) + p.or, p.and + p.xor + p.or, Math.max(p.and, p.xor)])).sort((a, b) => a - b).map((v) => [v, v + ' ps'])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + ' ps. L’uscita è affidabile dopo ' + esito + ' ps. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.and + p.xor + p.or ? 'I due rami lavorano nello stesso tempo, quindi fra i loro ritardi conta soltanto il maggiore.' : pred === Math.max(p.and, p.xor) ? 'All’arrivo del ramo più lento va aggiunto il ritardo della OR, che comincia a lavorare sui dati giusti soltanto in quel momento.' : 'La OR deve attendere il ramo più lento, che arriva dopo ' + Math.max(p.and, p.xor) + ' ps.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' ps. L’uscita è affidabile dopo ' + esito + ' ps. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.and + p.xor + p.or ? 'I due rami lavorano nello stesso tempo, quindi fra i loro ritardi conta soltanto il maggiore.' : pred === Math.max(p.and, p.xor) ? 'All’arrivo del ramo più lento va aggiunto il ritardo della OR, che comincia a lavorare sui dati giusti soltanto in quel momento.' : 'La OR deve attendere il ramo più lento, che arriva dopo ' + Math.max(p.and, p.xor) + ' ps.'),
     costruisci(p) {
       const el = SL.el, passi = [], X0 = 150, K = 4.8, lento = Math.max(p.and, p.xor), veloce = Math.min(p.and, p.xor), tot = lento + p.or;
       const NL = p.and > p.xor ? 'AND' : 'XOR', NV = p.and > p.xor ? 'XOR' : 'AND';
@@ -99,7 +99,7 @@ SL.registra('3.1.5', {
       ['Fermarsi all’arrivo del ramo più lento.', 'La porta che riunisce i rami comincia in quel momento il proprio lavoro, e il suo ritardo va aggiunto.'],
       ['Ottimizzare la porta sbagliata.', 'Portare la AND da 30 a 10 ps, con una XOR da 65 ps sull’altro ramo, lascia il totale dov’era.']
     ],
-    saFare: ['Sommo i ritardi lungo un percorso e scelgo il maggiore fra rami paralleli.', 'Individuo il cammino critico di un circuito a pochi rami.', 'Spiego perché il sommatore a propagazione rallenta con la larghezza.'],
+    saFare: ['Sommare i ritardi lungo un percorso e scelgo il maggiore fra rami paralleli.', 'Individuare il cammino critico di un circuito a pochi rami.', 'Spiegare perché il sommatore a propagazione rallenta con la larghezza.'],
     esercizi: [
       { d: 'Una AND da 40 ps e una XOR da 55 ps lavorano in parallelo e consegnano a una OR da 25 ps. Dopo quanti picosecondi l’uscita è affidabile?', segnaposto: 'Un numero di picosecondi', giuste: ['80', '80ps'],
         ok: 'Il ramo più lento arriva dopo 55 ps, e la OR aggiunge 25 ps.',
@@ -108,7 +108,7 @@ SL.registra('3.1.5', {
           { se: ['65', '65ps'], msg: 'Hai aggiunto la OR al ramo più rapido. La OR deve attendere anche l’altro ramo.' },
           { se: ['55', '55ps'], msg: 'Questo è l’arrivo del ramo più lento. Manca il ritardo della OR.' }
         ],
-        altro: 'Il numero è diverso. Prendi il maggiore fra i ritardi dei due rami e aggiungi quello della OR.',
+        altro: 'Il numero è diverso. Si prenda il maggiore fra i ritardi dei due rami e si aggiunga quello della OR.',
         indizi: ['I due rami lavorano in parallelo.', 'Il più lento arriva dopo 55 ps.', '55 + 25.'],
         svolgimento: ['Arrivi: 40 ps e 55 ps.', 'Il più lento: 55 ps.', 'Uscita affidabile: 55 + 25 = 80 ps.'] },
       { d: 'In un sommatore a propagazione di riporto ogni cella impiega 30 ps per produrre il proprio riporto. Nel caso peggiore, dopo quanti picosecondi è pronto il riporto finale di un sommatore a 8 bit?', segnaposto: 'Un numero di picosecondi', giuste: ['240', '240ps'],

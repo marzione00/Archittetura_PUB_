@@ -18,7 +18,7 @@ SL.unita463 = (() => {
 })();
 SL.registra('4.6.3', {
   titolo: 'Memoria flash e traduzione',
-  obiettivo: 'Alla fine saprai spiegare perché un’unità a stato solido scrive ogni aggiornamento in una pagina nuova, e come una mappa tiene traccia di dove si trova ogni dato.',
+  obiettivo: 'Obiettivo: spiegare perché un’unità a stato solido scrive ogni aggiornamento in una pagina nuova, e come una mappa tiene traccia di dove si trova ogni dato.',
   concetti: [['ssd', 'Nessuna parte in movimento'], ['tabella', 'Una mappa da logico a fisico'], ['memory', 'Si scrive sempre altrove']],
   filigrana: ['ssd', 'tabella', 'memory'],
   richiami: {
@@ -68,7 +68,7 @@ SL.registra('4.6.3', {
       domanda: (p) => 'La pagina logica L' + p.l + ' si trova nella pagina fisica P' + p.l + '. Il computer la aggiorna ' + (p.n === 1 ? 'una volta' : 'due volte di seguito') + '. Le pagine P2 e P3 sono libere. Da quale pagina fisica verrà letta L' + p.l + ' alla fine?',
       opzioni: (p) => [['P' + p.l, 'P' + p.l + ', la stessa di prima'], ['P2', 'P2'], ['P3', 'P3']]
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + '. La mappa indica ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 'P' + p.l ? 'Una pagina flash già scritta non si può riprogrammare senza cancellare l’intero blocco.' : p.n === 2 ? 'Ogni aggiornamento consuma una pagina libera: il primo usa P2, il secondo P3.' : 'L’aggiornamento è uno solo, e usa la prima pagina libera, P2.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. La mappa indica ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 'P' + p.l ? 'Una pagina flash già scritta non si può riprogrammare senza cancellare l’intero blocco.' : p.n === 2 ? 'Ogni aggiornamento consuma una pagina libera: il primo usa P2, il secondo P3.' : 'L’aggiornamento è uno solo, e usa la prima pagina libera, P2.'),
     costruisci(p) {
       const U = SL.unita463, passi = [], idx = p.l, vecchio = [17, 34][idx], O = { x: 20, y: 0, wm: 200, wp: 140, h: 54 };
       const hud = (scritte, letta) => { const S = U.stato(p, scritte); return [['L' + idx, '→ P' + S.mappa[idx], 'a'], ['Invalide', String(S.pag.filter((g) => g.s === 'invalida').length)], ['Libere', String(S.pag.filter((g) => g.s === 'libera').length - (letta === 'prog' ? 1 : 0)), 'c']]; };
@@ -98,7 +98,7 @@ SL.registra('4.6.3', {
       ['Considerare libera una pagina invalida.', 'Contiene dati superati, e resta inutilizzabile fino alla cancellazione del blocco.'],
       ['Aggiornare la mappa prima di programmare la pagina.', 'Se la scrittura si interrompesse, la mappa indicherebbe una pagina senza il dato.']
     ],
-    saFare: ['Spiego perché la flash non si corregge sul posto.', 'Seguo la mappa dopo un aggiornamento.', 'Conto pagine valide, invalide e libere.'],
+    saFare: ['Spiegare perché la flash non si corregge sul posto.', 'Seguire la mappa dopo un aggiornamento.', 'Contare pagine valide, invalide e libere.'],
     esercizi: [
       { d: 'Una pagina logica si trova nella pagina fisica P0. Viene aggiornata tre volte, e il controller usa le pagine libere P4, P5 e P6, in quest’ordine. In quale pagina fisica si trova alla fine il valore corrente?', segnaposto: 'Una pagina', giuste: ['p6', '6'],
         ok: 'Ogni aggiornamento usa una pagina nuova: P4, poi P5, poi P6.',
@@ -117,10 +117,10 @@ SL.registra('4.6.3', {
           { se: ['4', 'quattro'], msg: 'L’ultima pagina scritta, P6, contiene la versione corrente.' },
           { se: ['1', 'uno'], msg: 'Ogni aggiornamento rende invalida la pagina precedente, e gli aggiornamenti sono tre.' }
         ],
-        altro: 'Il numero è diverso. Elenca le pagine che hanno contenuto il dato ed escludi l’ultima.',
+        altro: 'Il numero è diverso. Si elenchino le pagine che hanno contenuto il dato ed escludi l’ultima.',
         indizi: ['Il dato è passato per P0, P4, P5 e P6.', 'Soltanto l’ultima è valida.', 'Le altre sono tre.'],
         svolgimento: ['Pagine usate: P0, P4, P5, P6.', 'Valida: P6.', 'Invalide: 3.'] },
-      { d: 'Perché il controller di un’unità a stato solido non riscrive un dato nella pagina fisica in cui si trova?', guida: 'Scegli la risposta.', o: [
+      { d: 'Perché il controller di un’unità a stato solido non riscrive un dato nella pagina fisica in cui si trova?', guida: 'Si scelga la risposta.', o: [
         { t: 'Perché una pagina si programma soltanto dopo la cancellazione, che riguarda un blocco intero', ok: true, fb: 'Cancellare il blocco distruggerebbe anche le pagine vicine.' },
         { t: 'Perché la mappa ha bisogno di cambiare a ogni scrittura', fb: 'La mappa è una conseguenza. La causa è il modo in cui la flash si cancella.' },
         { t: 'Perché le pagine libere sono più veloci da leggere', fb: 'La velocità di lettura è la stessa per tutte le pagine.' }] }

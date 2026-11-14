@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.5.3', {
   titolo: 'Conflitti dovuti alla sovrapposizione',
-  obiettivo: 'Alla fine saprai riconoscere i tre tipi di conflitto che nascono dalla sovrapposizione delle istruzioni, e dire per ciascuno come reagisce la pipeline e quanti cicli vanno perduti.',
+  obiettivo: 'Obiettivo: riconoscere i tre tipi di conflitto che nascono dalla sovrapposizione delle istruzioni, e dire per ciascuno come reagisce la pipeline e quanti cicli vanno perduti.',
   concetti: [['conflitto', 'Tre ostacoli alla sovrapposizione'], ['pipeline', 'Trattenere oppure annullare'], ['bilancio', 'Il prezzo in cicli']],
   filigrana: ['conflitto', 'pipeline', 'bilancio'],
   richiami: {
@@ -53,7 +53,7 @@ SL.registra('3.5.3', {
       domanda: (p) => SL.unita353.DOM[p.h][p.v] + ' Quanti cicli vanno perduti rispetto al flusso ideale?',
       opzioni: () => [[0, 'Nessuno'], [1, '1 ciclo'], [2, '2 cicli'], [3, '3 cicli']]
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + (pred === 0 ? 'nessun ciclo perduto' : pred + (pred === 1 ? ' ciclo perduto' : ' cicli perduti')) + '. I cicli perduti sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : SL.unita353.PERCHE[p.h][p.v]),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + (pred === 0 ? 'nessun ciclo perduto' : pred + (pred === 1 ? ' ciclo perduto' : ' cicli perduti')) + '. I cicli perduti sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : SL.unita353.PERCHE[p.h][p.v]),
     costruisci(p) {
       const el = SL.el, U = SL.unita353, passi = [], S = U.SCENE[p.h][p.v], F5 = ['F', 'D', 'E', 'M', 'W'];
       const quadro = (o) => {
@@ -84,9 +84,9 @@ SL.registra('3.5.3', {
       ['Fermare soltanto l’istruzione che attende.', 'Uno stallo trattiene anche le istruzioni che la seguono, altrimenti le finirebbero addosso.'],
       ['Credere che ogni salto costi due cicli.', 'I cicli si perdono soltanto quando la previsione è sbagliata. Con la previsione giusta il salto costa quanto ogni altra istruzione.']
     ],
-    saFare: ['Riconosco un conflitto sui dati, strutturale e di controllo.', 'Disegno sul diagramma uno stallo con la sua bolla.', 'Dico quanti cicli costa ciascun conflitto.'],
+    saFare: ['Riconoscere un conflitto sui dati, strutturale e di controllo.', 'Disegnare sul diagramma uno stallo con la sua bolla.', 'Indicare quanti cicli costa ciascun conflitto.'],
     esercizi: [
-      { d: 'Una `mrmovq` scrive in %rax, e l’istruzione che la segue immediatamente è `addq %rax, %rbx`. Di che tipo è il conflitto, e come reagisce la pipeline?', guida: 'Scegli la risposta.', o: [
+      { d: 'Una `mrmovq` scrive in %rax, e l’istruzione che la segue immediatamente è `addq %rax, %rbx`. Di che tipo è il conflitto, e come reagisce la pipeline?', guida: 'Si scelga la risposta.', o: [
         { t: 'Sui dati: la addq viene trattenuta per un ciclo', ok: true, fb: 'Il dato caricato arriva alla fine dello stadio M, un ciclo più tardi di quanto servirebbe alla addq.' },
         { t: 'Di controllo: la addq viene annullata', fb: 'Il conflitto di controllo riguarda i salti. Qui la addq va eseguita, e deve soltanto attendere il proprio operando.' },
         { t: 'Strutturale: la addq viene prelevata più tardi', fb: 'Il conflitto strutturale nasce da una risorsa contesa. Qui la addq attende un valore.' }] },
@@ -97,7 +97,7 @@ SL.registra('3.5.3', {
           { se: ['3', 'tre'], msg: 'Ogni previsione sbagliata annulla due istruzioni, quindi costa due cicli.' },
           { se: ['14', 'quattordici'], msg: 'I sette salti previsti bene non fanno perdere cicli. Contano i tre previsti male.' }
         ],
-        altro: 'Il numero è diverso. Moltiplica le previsioni sbagliate per i cicli che ciascuna fa perdere.',
+        altro: 'Il numero è diverso. Si moltiplichino le previsioni sbagliate per i cicli che ciascuna fa perdere.',
         indizi: ['Le previsioni sbagliate sono 3.', 'Ciascuna costa 2 cicli.', '3 × 2.'],
         svolgimento: ['Previsioni sbagliate: 3.', 'Cicli per ciascuna: 2.', 'Cicli perduti: 3 × 2 = 6.'] }
     ],

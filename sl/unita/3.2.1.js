@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.2.1', {
   titolo: 'Dalla logica combinatoria allo stato memorizzato',
-  obiettivo: 'Alla fine saprai dire che cosa distingue un circuito con memoria da un circuito combinatorio, e saprai prevedere il contenuto di un registro dopo un fronte del clock, con il comando di caricamento a 0 e a 1.',
+  obiettivo: 'Obiettivo: dire che cosa distingue un circuito con memoria da un circuito combinatorio, e saprai prevedere il contenuto di un registro dopo un fronte del clock, con il comando di caricamento a 0 e a 1.',
   concetti: [['register', 'Un circuito che ricorda'], ['clock', 'L’istante che decide'], ['riproduci', 'Conservare riscrivendo']],
   filigrana: ['register', 'clock', 'mux'],
   richiami: {
@@ -59,7 +59,7 @@ SL.registra('3.2.1', {
       domanda: (p) => 'R1 contiene 3 e R2 contiene 12. Sul bus D c’è ' + p.d + '. Il comando Carica vale ' + p.e1 + ' per R1 e ' + p.e2 + ' per R2. Che cosa contengono i registri dopo il fronte di salita?',
       opzioni: (p) => Array.from(new Set(['3,12', p.d + ',12', '3,' + p.d, p.d + ',' + p.d])).map((k) => [k, 'R1 = ' + k.split(',')[0] + ' e R2 = ' + k.split(',')[1]])
     },
-    confronto: (pred, esito, p) => { const T = (k) => 'R1 = ' + k.split(',')[0] + ' e R2 = ' + k.split(',')[1]; return 'Avevi previsto ' + T(pred) + '. Dopo il fronte: ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Un registro con Carica = 1 copia il bus, uno con Carica = 0 riscrive il proprio contenuto. Qui Carica vale ' + p.e1 + ' per R1 e ' + p.e2 + ' per R2.'); },
+    confronto: (pred, esito, p) => { const T = (k) => 'R1 = ' + k.split(',')[0] + ' e R2 = ' + k.split(',')[1]; return 'La previsione indicava ' + T(pred) + '. Dopo il fronte: ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Un registro con Carica = 1 copia il bus, uno con Carica = 0 riscrive il proprio contenuto. Qui Carica vale ' + p.e1 + ' per R1 e ' + p.e2 + ' per R2.'); },
     costruisci(p) {
       const el = SL.el, passi = [], B4 = (v) => v.toString(2).padStart(4, '0'), E = [p.e1, p.e2], X = [250, 560];
       const st = { q: [3, 12], in: [null, null], ck: 'basso' };
@@ -106,7 +106,7 @@ SL.registra('3.2.1', {
       ['Credere che conservare significhi restare inattivi.', 'A ogni fronte il registro scrive comunque. Con Carica = 0 ciò che scrive è il proprio contenuto.'],
       ['Aspettarsi lo stesso valore in due registri sullo stesso bus.', 'Ciascuno ha il proprio comando Carica, e conserva l’ultima parola che ha caricato.']
     ],
-    saFare: ['Distinguo un circuito combinatorio da uno sequenziale.', 'Prevedo il contenuto di un registro dopo un fronte, dato il comando Carica.', 'Spiego come la retroazione permette a un registro di conservare una parola.'],
+    saFare: ['Distinguere un circuito combinatorio da uno sequenziale.', 'Prevedere il contenuto di un registro dopo un fronte, dato il comando Carica.', 'Spiegare come la retroazione permette a un registro di conservare una parola.'],
     esercizi: [
       { d: 'Un registro contiene 9. Per tre fronti consecutivi il bus D porta 4, 6 e 2, e il comando Carica vale 0, 1 e 0. Che cosa contiene il registro dopo il terzo fronte?', segnaposto: 'Un numero', giuste: ['6', 'sei'],
         ok: 'Al primo fronte il registro riscrive 9, al secondo carica 6, al terzo riscrive 6.',
@@ -115,10 +115,10 @@ SL.registra('3.2.1', {
           { se: ['9', 'nove'], msg: 'Al secondo fronte Carica vale 1, e il registro copia il bus, che porta 6.' },
           { se: ['4', 'quattro'], msg: 'Al primo fronte Carica vale 0, quindi il 4 sul bus viene ignorato.' }
         ],
-        altro: 'Il numero è diverso. Segui un fronte alla volta: con Carica = 1 il registro copia il bus, con Carica = 0 riscrive se stesso.',
+        altro: 'Il numero è diverso. Si segua un fronte alla volta: con Carica = 1 il registro copia il bus, con Carica = 0 riscrive se stesso.',
         indizi: ['Primo fronte, Carica = 0: il registro resta a 9.', 'Secondo fronte, Carica = 1: il registro copia il bus.', 'Terzo fronte, Carica = 0: il registro conserva.'],
         svolgimento: ['Dopo il primo fronte: 9.', 'Dopo il secondo fronte: 6.', 'Dopo il terzo fronte: 6.'] },
-      { d: 'In un registro con il comando Carica, che cosa presenta il multiplexer all’ingresso del registro quando Carica vale 0?', guida: 'Scegli la risposta.', o: [
+      { d: 'In un registro con il comando Carica, che cosa presenta il multiplexer all’ingresso del registro quando Carica vale 0?', guida: 'Si scelga la risposta.', o: [
         { t: 'L’uscita Q del registro stesso', ok: true, fb: 'È la retroazione: riscrivendo ciò che contiene, il registro lo conserva.' },
         { t: 'Il dato sul bus D', fb: 'Il bus passa quando Carica vale 1.' },
         { t: 'Una parola di tutti zeri', fb: 'Con una parola di zeri il registro si azzererebbe a ogni fronte, e perderebbe il contenuto.' }] }

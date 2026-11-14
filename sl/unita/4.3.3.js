@@ -21,7 +21,7 @@ SL.unita433 = (() => {
 })();
 SL.registra('4.3.3', {
   titolo: 'Instradamento, vettori e conferma dell’interrupt',
-  obiettivo: 'Alla fine saprai seguire una richiesta di interruzione dalla linea della periferica fino al gestore, e dire in quale ordine il gestore deve togliere la causa e confermare il servizio.',
+  obiettivo: 'Obiettivo: seguire una richiesta di interruzione dalla linea della periferica fino al gestore, e dire in quale ordine il gestore deve togliere la causa e confermare il servizio.',
   concetti: [['interrupt', 'Dalla linea al vettore'], ['tabella', 'Dal vettore al gestore'], ['scudo', 'Due conferme, in ordine']],
   filigrana: ['interrupt', 'tabella', 'scudo'],
   richiami: {
@@ -71,7 +71,7 @@ SL.registra('4.3.3', {
       domanda: (p) => 'La linea ' + p.q + ' è attiva, e resta attiva finché il dato non viene prelevato. Il gestore ' + (p.ack === 'prima' ? 'preleva il dato e poi manda EOI' : 'manda EOI e poi preleva il dato') + '. Quante volte viene chiamato per questo evento?',
       opzioni: () => [['no', 'Una volta'], ['si', 'Due volte']]
     },
-    confronto: (pred, esito) => 'Avevi previsto ' + (pred === 'si' ? 'due chiamate' : 'una chiamata') + '. Il gestore viene chiamato ' + (esito === 'si' ? 'due volte' : 'una volta') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 'si' ? 'All’arrivo di EOI la linea è ancora attiva, e il controller la prende per una richiesta nuova.' : 'Quando arriva EOI la linea è già a riposo, e il controller non ha nulla da consegnare.'),
+    confronto: (pred, esito) => 'La previsione indicava ' + (pred === 'si' ? 'due chiamate' : 'una chiamata') + '. Il gestore viene chiamato ' + (esito === 'si' ? 'due volte' : 'una volta') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 'si' ? 'All’arrivo di EOI la linea è ancora attiva, e il controller la prende per una richiesta nuova.' : 'Quando arriva EOI la linea è già a riposo, e il controller non ha nulla da consegnare.'),
     costruisci(p) {
       const U = SL.unita433, passi = [], v = 32 + p.q, off = 16 * v, bene = p.ack === 'prima';
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'PERIFERICA', 'mono'), SL.el.nota('t1', 300, 0, 'CONTROLLER DEGLI INTERRUPT', 'mono'), SL.el.nota('t2', 580, 0, 'PROCESSORE', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w: 264, gap: 14, h: 58, esito: true }));
@@ -98,7 +98,7 @@ SL.registra('4.3.3', {
       ['Usare il numero della linea come vettore.', 'Il controller aggiunge 32, perché i primi vettori sono riservati alle eccezioni.'],
       ['Dimenticare EOI.', 'Il controller continuerebbe a considerare la richiesta in servizio, trattenendo le altre di priorità pari o inferiore.']
     ],
-    saFare: ['Ricavo il vettore dal numero della linea.', 'Trovo la voce della IDT per quel vettore.', 'Metto in ordine le due conferme del gestore.'],
+    saFare: ['Ricavare il vettore dal numero della linea.', 'Determinare la voce della IDT per quel vettore.', 'Porre in ordine le due conferme del gestore.'],
     esercizi: [
       { d: 'Un controller assegna alla linea n il vettore 32 + n. Quanti byte separano dall’inizio della IDT la voce usata dalla linea 6?', segnaposto: 'Un numero', giuste: ['608', 'seicentootto'],
         ok: 'Il vettore è 32 + 6 = 38, e la voce dista 38 × 16 = 608 byte.',
@@ -107,14 +107,14 @@ SL.registra('4.3.3', {
           { se: ['38', 'trentotto'], msg: 'Trentotto è il vettore. La distanza in byte si ottiene moltiplicandolo per 16.' },
           { se: ['304'], msg: 'Le voci occupano 16 byte, il doppio di 8.' }
         ],
-        altro: 'Il numero è diverso. Ricava prima il vettore, poi moltiplica per 16.',
+        altro: 'Il numero è diverso. Si ricavi prima il vettore, poi si moltiplichi per 16.',
         indizi: ['Vettore: 32 + 6.', 'Ogni voce occupa 16 byte.', '38 × 16.'],
         svolgimento: ['Vettore: 32 + 6 = 38.', 'Voce: 38 × 16.', 'Distanza: 608 byte.'] },
-      { d: 'Una linea sensibile al livello è ancora attiva quando il gestore manda EOI. Che cosa fa il controller?', guida: 'Scegli la risposta.', o: [
+      { d: 'Una linea sensibile al livello è ancora attiva quando il gestore manda EOI. Che cosa fa il controller?', guida: 'Si scelga la risposta.', o: [
         { t: 'Consegna di nuovo la stessa richiesta', ok: true, fb: 'Tornato libero, il controller vede la linea attiva e la tratta come una richiesta da servire.' },
         { t: 'Spegne la linea', fb: 'La linea è comandata dalla periferica. Il controller può soltanto osservarla.' },
         { t: 'Attende che il gestore finisca', fb: 'Con EOI il gestore ha dichiarato finito il servizio. Per il controller la richiesta successiva può partire.' }] },
-      { d: 'Un gestore toglie la causa nella periferica e dimentica di mandare EOI. Qual è la conseguenza?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un gestore toglie la causa nella periferica e dimentica di mandare EOI. Qual è la conseguenza?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il controller trattiene le richieste di priorità pari o inferiore', ok: true, fb: 'Per il controller il servizio è ancora in corso, e le richieste meno urgenti restano pendenti.' },
         { t: 'La stessa richiesta viene consegnata due volte', fb: 'La doppia consegna avviene quando EOI arriva con la linea ancora attiva. Qui EOI non arriva affatto.' },
         { t: 'Nessuna, perché la linea è già a riposo', fb: 'La periferica è a posto. Il controller, invece, attende ancora la conferma.' }] }

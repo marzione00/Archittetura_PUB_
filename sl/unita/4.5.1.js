@@ -19,7 +19,7 @@ SL.unita451 = (() => {
 })();
 SL.registra('4.5.1', {
   titolo: 'Geometria e latenza meccanica',
-  obiettivo: 'Alla fine saprai descrivere com’è fatto un disco magnetico e calcolare dopo quanto tempo la testina raggiunge il primo byte richiesto.',
+  obiettivo: 'Obiettivo: descrivere com’è fatto un disco magnetico e calcolare dopo quanto tempo la testina raggiunge il primo byte richiesto.',
   concetti: [['disco', 'Piste, cilindri, settori'], ['puntatore', 'La testina si sposta'], ['clock', 'Il disco gira']],
   filigrana: ['disco', 'clock', 'puntatore'],
   richiami: {
@@ -70,7 +70,7 @@ SL.registra('4.5.1', {
       domanda: (p) => { const U = SL.unita451, c = U.conto(p); return 'Il seek dura ' + p.s + ' ms. A ' + p.rpm + ' giri al minuto un giro dura ' + U.ms(c.giro) + ' ms, e all’arrivo della testina ' + (p.f === 0 ? 'il settore sta giusto arrivando' : 'manca ' + U.FRAZ[p.f]) + '. Dopo quanto tempo è leggibile il primo byte?'; },
       opzioni: (p) => { const U = SL.unita451, c = U.conto(p); return [c.rot, c.tot, p.s + c.giro].map((v) => [U.R2(v), U.ms(v) + ' ms']); }
     },
-    confronto: (pred, esito, p) => { const U = SL.unita451, c = U.conto(p); return 'Avevi previsto ' + U.ms(pred) + ' ms. Il primo byte è leggibile dopo ' + U.ms(esito) + ' ms. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === U.R2(c.rot) ? 'Alla rotazione residua va sommato il seek, che viene prima.' : 'Dopo il seek si attende soltanto la parte di giro che manca, e un giro intero sarebbe troppo.'); },
+    confronto: (pred, esito, p) => { const U = SL.unita451, c = U.conto(p); return 'La previsione indicava ' + U.ms(pred) + ' ms. Il primo byte è leggibile dopo ' + U.ms(esito) + ' ms. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === U.R2(c.rot) ? 'Alla rotazione residua va sommato il seek, che viene prima.' : 'Dopo il seek si attende soltanto la parte di giro che manca, e un giro intero sarebbe troppo.'); },
     costruisci(p) {
       const U = SL.unita451, c = U.conto(p), ms = U.ms, passi = [];
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, wc: 60, ws: 76, w: 820 });
@@ -95,7 +95,7 @@ SL.registra('4.5.1', {
       ['Valutare la posizione del settore all’inizio del seek.', 'Durante il seek il disco gira: conta la posizione all’arrivo della testina.'],
       ['Attendersi un seek più breve da un disco più veloce.', 'La velocità di rotazione accorcia il ritardo di rotazione. Il seek dipende dal braccio.']
     ],
-    saFare: ['Distinguo pista, cilindro e settore.', 'Calcolo la durata di un giro.', 'Sommo seek e ritardo di rotazione.'],
+    saFare: ['Distinguere pista, cilindro e settore.', 'Calcolare la durata di un giro.', 'Sommare seek e ritardo di rotazione.'],
     esercizi: [
       { d: 'Un disco ruota a 6000 giri al minuto. Quanti millisecondi dura un giro?', segnaposto: 'Un numero', giuste: ['10', '10ms', '10millisecondi', 'dieci'],
         ok: '60 000 ÷ 6000 = 10 ms.',
@@ -104,7 +104,7 @@ SL.registra('4.5.1', {
           { se: ['0.01', '0.01ms'], msg: 'Un centesimo di secondo è la durata giusta, espressa però in secondi. In millisecondi vale 10.' },
           { se: ['5', '5ms'], msg: 'Cinque millisecondi sono mezzo giro, l’attesa media. Un giro intero dura il doppio.' }
         ],
-        altro: 'Il valore è diverso. Dividi i millisecondi di un minuto per i giri al minuto.',
+        altro: 'Il valore è diverso. Si dividano i millisecondi di un minuto per i giri al minuto.',
         indizi: ['Un minuto vale 60 000 ms.', 'In quel tempo il disco compie 6000 giri.', '60 000 ÷ 6000 = 10.'],
         svolgimento: ['Millisecondi in un minuto: 60 000.', 'Giri in un minuto: 6000.', 'Un giro: 10 ms.'] },
       { d: 'Un disco a 15 000 giri al minuto compie un giro in 4 ms. Il seek dura 5 ms, e quando la testina arriva mancano tre quarti di giro al settore richiesto. Dopo quanti millisecondi è leggibile il primo byte?', segnaposto: 'Un numero', giuste: ['8', '8ms', '8millisecondi', 'otto'],
@@ -114,10 +114,10 @@ SL.registra('4.5.1', {
           { se: ['7', '7ms'], msg: 'Mezzo giro è l’attesa media. In questo caso ne mancano tre quarti.' },
           { se: ['3', '3ms'], msg: 'Questa è la sola rotazione residua. Prima c’è il seek.' }
         ],
-        altro: 'Il valore è diverso. Calcola i tre quarti di un giro e sommali al seek.',
+        altro: 'Il valore è diverso. Si calcolino i tre quarti di un giro e li si sommi al seek.',
         indizi: ['Un giro dura 4 ms.', 'Tre quarti di giro: 3 ms.', '5 + 3 = 8.'],
         svolgimento: ['Seek: 5 ms.', 'Rotazione residua: 4 × 3 ÷ 4 = 3 ms.', 'Primo byte: 8 ms.'] },
-      { d: 'Un disco a 5400 giri al minuto viene sostituito con uno a 7200, che ha lo stesso seek. Quale parte dell’attesa diminuisce?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un disco a 5400 giri al minuto viene sostituito con uno a 7200, che ha lo stesso seek. Quale parte dell’attesa diminuisce?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il ritardo di rotazione', ok: true, fb: 'Un giro dura meno, e con esso ogni frazione di giro.' },
         { t: 'Il seek', fb: 'Il seek dipende dal movimento del braccio, che è rimasto lo stesso.' },
         { t: 'Entrambe, nella stessa misura', fb: 'Soltanto la rotazione è diventata più veloce.' }] }

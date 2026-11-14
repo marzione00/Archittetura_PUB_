@@ -23,7 +23,7 @@ SL.unita415 = (() => {
 })();
 SL.registra('4.1.5', {
   titolo: 'Codice di ingresso Linux e contesto salvato',
-  obiettivo: 'Alla fine saprai dire che cosa posa sulla pila il processore quando entra in un gestore, che cosa aggiunge il codice di ingresso, e dove si trova la cima della pila quando il gestore comincia.',
+  obiettivo: 'Obiettivo: dire che cosa posa sulla pila il processore quando entra in un gestore, che cosa aggiunge il codice di ingresso, e dove si trova la cima della pila quando il gestore comincia.',
   concetti: [['pila', 'Una pila riservata al kernel'], ['cpu', 'La parte del processore'], ['gate', 'La parte del software']],
   filigrana: ['pila', 'gate', 'cpu'],
   richiami: {
@@ -75,7 +75,7 @@ SL.registra('4.1.5', {
       domanda: (p) => 'La cima della pila del kernel è a ' + SL.kern.H(p.r) + '. L’evento è una ' + (p.e === 'pf' ? 'pagina assente, che ha il codice di errore' : 'divisione per zero, priva di codice di errore') + '. Lo stub salva ' + p.n + ' registri generali. Quanto vale RSP quando lo stub ha finito?',
       opzioni: (p) => { const c = SL.unita415.conti(p); return Array.from(new Set([c.fine, c.base - c.hw, c.top - c.hw - c.sw, c.base - 40 - 8 * p.n])).sort((a, b) => b - a).map((v) => [v, SL.kern.H(v)]); }
     },
-    confronto: (pred, esito, p) => { const c = SL.unita415.conti(p), H = SL.kern.H; return 'Avevi previsto ' + H(pred) + '. La cima finale è a ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === c.base - c.hw ? 'Dopo il processore lavora lo stub, che posa altri ' + c.sw + ' byte.' : pred === c.base - 40 - 8 * p.n ? 'Fra i cinque campi e i registri c’è ancora una casella: il codice di errore, oppure lo zero che ne prende il posto.' : 'Prima di posare il frame il processore allinea la cima a un multiplo di 16.'); },
+    confronto: (pred, esito, p) => { const c = SL.unita415.conti(p), H = SL.kern.H; return 'La previsione indicava ' + H(pred) + '. La cima finale è a ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === c.base - c.hw ? 'Dopo il processore lavora lo stub, che posa altri ' + c.sw + ' byte.' : pred === c.base - 40 - 8 * p.n ? 'Fra i cinque campi e i registri c’è ancora una casella: il codice di errore, oppure lo zero che ne prende il posto.' : 'Prima di posare il frame il processore allinea la cima a un multiplo di 16.'); },
     costruisci(p) {
       const U = SL.unita415, H = U.H, passi = [], c = U.conti(p), pf = c.cod, allineata = c.top === c.base;
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'PILA DEL KERNEL', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w: 230, passo: 30, conti: true, xb: 600, wb: 240, hb: 62 }));
@@ -104,7 +104,7 @@ SL.registra('4.1.5', {
       ['Contare sempre 48 byte per il processore.', 'Il codice di errore esiste soltanto per alcune eccezioni. Per le altre il processore posa 40 byte, e gli 8 mancanti li aggiunge lo stub.'],
       ['Pensare che il processore salvi i registri generali.', 'Il frame contiene cinque valori. I registri generali sono compito dello stub.']
     ],
-    saFare: ['Elenco i cinque valori del frame di interruzione.', 'Distinguo i byte posati dal processore da quelli posati dallo stub.', 'Calcolo la cima della pila alla fine dell’ingresso.'],
+    saFare: ['Elencare i cinque valori del frame di interruzione.', 'Distinguere i byte posati dal processore da quelli posati dallo stub.', 'Calcolare la cima della pila alla fine dell’ingresso.'],
     esercizi: [
       { d: 'La cima della pila del kernel è a 0x3000, già allineata. Arriva un interrupt del timer, privo di codice di errore. Quanto vale RSP subito dopo che il processore ha posato il frame? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['2fd8', '0x2fd8', '2fd8h'],
         ok: 'Cinque valori da 8 byte: 0x3000 − 40 = 0x3000 − 0x28 = 0x2FD8.',
@@ -113,7 +113,7 @@ SL.registra('4.1.5', {
           { se: ['2fc0', '0x2fc0', '2fc0h'], msg: 'Quaranta byte in esadecimale sono 0x28.' },
           { se: ['3028', '0x3028', '3028h'], msg: 'La pila cresce verso gli indirizzi bassi: RSP diminuisce.' }
         ],
-        altro: 'Il valore è diverso. Togli a 0x3000 i 40 byte del frame, in esadecimale.',
+        altro: 'Il valore è diverso. Si tolga a 0x3000 i 40 byte del frame, in esadecimale.',
         indizi: ['Il frame ha cinque valori da 8 byte.', '40 byte sono 0x28.', '0x3000 − 0x28.'],
         svolgimento: ['Frame: 5 × 8 = 40 byte = 0x28.', 'Nessun codice di errore.', 'RSP = 0x3000 − 0x28 = 0x2FD8.'] },
       { d: 'Dopo una divisione per zero lo stub posa lo zero di riempimento e salva 6 registri generali. Quanti byte ha posato lo stub?', segnaposto: 'Un numero', giuste: ['56', 'cinquantasei'],
@@ -126,7 +126,7 @@ SL.registra('4.1.5', {
         altro: 'Il numero è diverso. Conta le caselle posate dallo stub e moltiplica per 8.',
         indizi: ['La divisione per zero non ha codice di errore.', 'Lo stub posa uno zero, poi 6 registri.', '7 × 8.'],
         svolgimento: ['Zero di riempimento: 1 casella.', 'Registri: 6 caselle.', 'Byte: 7 × 8 = 56.'] },
-      { d: 'Perché lo stub posa uno zero quando l’evento non ha codice di errore?', guida: 'Scegli la risposta.', o: [
+      { d: 'Perché lo stub posa uno zero quando l’evento non ha codice di errore?', guida: 'Si scelga la risposta.', o: [
         { t: 'Perché la pila abbia la stessa forma per ogni evento', ok: true, fb: 'Il codice che segue trova ogni valore sempre alla stessa distanza dalla cima.' },
         { t: 'Perché il processore lo richiede per poter tornare', fb: 'Al processore bastano i cinque valori del frame. Lo zero serve al software.' },
         { t: 'Per allineare la pila a 16 byte', fb: 'L’allineamento lo fa il processore, prima di posare il frame.' }] }

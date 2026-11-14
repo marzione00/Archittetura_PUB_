@@ -27,7 +27,7 @@
           { se: I(fine), msg: 'Questo è il ciclo in cui il dato diventa pronto.' },
           { se: I(0), msg: 'Il dato era pronto prima dell’arrivo del driver.' }
         ]),
-        altro: 'Il numero è diverso. Sottrai il ciclo in cui il dato è pronto dal ciclo della lettura.',
+        altro: 'Il numero è diverso. Si sottragga il ciclo in cui il dato è pronto dal ciclo della lettura.',
         indizi: ['Il dato è pronto dal ciclo ' + fine + '.', 'Il driver lo legge al ciclo ' + t + '.', t + ' − ' + fine + '.'],
         svolgimento: ['Dato pronto: ciclo ' + fine + '.', 'Lettura: ciclo ' + t + '.', 'Ritardo: ' + (t - fine) + ' cicli.'] };
     },
@@ -42,7 +42,7 @@
           { se: I(n * per), msg: 'Questo è l’istante della scoperta. Il ritardo si conta dall’evento.' },
           { se: I(per), msg: 'Il ritardo vale un periodo intero soltanto se l’evento cade subito dopo un controllo.' }
         ]),
-        altro: 'Il numero è diverso. Trova il primo controllo che avviene dopo ' + t + ' µs, poi sottrai.',
+        altro: 'Il numero è diverso. Si determini il primo controllo che avviene dopo ' + t + ' µs, poi si sottragga.',
         indizi: ['I controlli avvengono ai multipli di ' + per + '.', 'Il primo dopo l’evento è a ' + (n * per) + ' µs.', (n * per) + ' − ' + t + '.'],
         svolgimento: ['Controlli: ' + Array.from({ length: n }, (_, k) => (k + 1) * per).join(', ') + ' µs.', 'Primo controllo utile: ' + (n * per) + ' µs.', 'Ritardo: ' + v + ' µs.'] }; }
       const v = n * costo, giuste = I(v);
@@ -68,7 +68,7 @@
             cosa ? { se: I(v), msg: 'Questo è il vettore. La distanza in byte si ottiene moltiplicandolo per 16.' } : { se: I(16 * v), msg: 'Questa è la distanza in byte della voce. Il vettore è il numero della voce.' },
             cosa ? { se: I(8 * v), msg: 'Le voci occupano 16 byte, il doppio di 8.' } : null
           ]),
-          altro: cosa ? 'Il numero è diverso. Ricava prima il vettore, poi moltiplica per 16.' : 'Il numero è diverso. Aggiungi 32 al numero della linea.',
+          altro: cosa ? 'Il numero è diverso. Si ricavi prima il vettore, poi si moltiplichi per 16.' : 'Il numero è diverso. Si aggiunga 32 al numero della linea.',
           indizi: cosa ? ['Vettore: 32 + ' + q + '.', 'Ogni voce occupa 16 byte.', v + ' × 16.'] : ['I primi 32 vettori sono riservati.', 'La linea 0 riceve il vettore 32.', '32 + ' + q + '.'],
           svolgimento: cosa ? ['Vettore: ' + v + '.', 'Voce: ' + v + ' × 16.', 'Distanza: ' + (16 * v) + ' byte.'] : ['Linea: ' + q + '.', 'Vettore: 32 + ' + q + '.', 'Vettore: ' + v + '.'] };
       }
@@ -76,7 +76,7 @@
       const D = ['Il gestore di un interrupt a livello sulla linea ' + q + ' toglie la causa nella periferica, e poi manda EOI al controller. Che cosa accade dopo EOI?', 'Il gestore di un interrupt a livello sulla linea ' + q + ' manda EOI al controller mentre la linea è ancora attiva. Che cosa accade dopo EOI?', 'Il gestore di un interrupt a livello sulla linea ' + q + ' toglie la causa nella periferica, e termina senza mandare EOI al controller. Che cosa accade?'][caso];
       const OPZ = ['Il servizio è chiuso, e nessuna nuova consegna avviene', 'Il controller consegna di nuovo la stessa richiesta', 'Il controller trattiene le richieste di priorità pari o inferiore'];
       const PERCHE = ['La linea è a riposo e il controller è libero: l’evento è chiuso su entrambi i fronti.', 'Tornato libero, il controller vede la linea attiva e la tratta come una richiesta nuova.', 'Senza EOI il controller considera il servizio ancora in corso.'];
-      return { u: '4.3.3', d: D, guida: 'Scegli la risposta.', o: [{ t: OPZ[caso], ok: true, fb: PERCHE[caso] }].concat([0, 1, 2].filter((k) => k !== caso).map((k) => ({ t: OPZ[k], fb: k === 0 ? (caso === 1 ? 'La linea è ancora attiva quando il controller torna libero.' : 'Al controller manca la conferma: per lui il servizio è ancora in corso.') : k === 1 ? (caso === 0 ? 'Quando arriva EOI la linea è già a riposo, e non c’è nulla da consegnare.' : 'La linea è a riposo. Il problema è la conferma mancante al controller.') : (caso === 0 ? 'EOI è arrivato, e il controller è tornato libero.' : 'EOI è arrivato, e il controller è libero. Il problema è la linea ancora attiva.') }))) };
+      return { u: '4.3.3', d: D, guida: 'Si scelga la risposta.', o: [{ t: OPZ[caso], ok: true, fb: PERCHE[caso] }].concat([0, 1, 2].filter((k) => k !== caso).map((k) => ({ t: OPZ[k], fb: k === 0 ? (caso === 1 ? 'La linea è ancora attiva quando il controller torna libero.' : 'Al controller manca la conferma: per lui il servizio è ancora in corso.') : k === 1 ? (caso === 0 ? 'Quando arriva EOI la linea è già a riposo, e non c’è nulla da consegnare.' : 'La linea è a riposo. Il problema è la conferma mancante al controller.') : (caso === 0 ? 'EOI è arrivato, e il controller è tornato libero.' : 'EOI è arrivato, e il controller è libero. Il problema è la linea ancora attiva.') }))) };
     },
     // 4.3.4 · il costo di una coda raggruppata, oppure un registro W1C
     (r) => {
@@ -90,7 +90,7 @@
             cosa ? { se: I(irq * fisso), msg: 'Mancano le letture dei campioni, ' + dato + ' cicli ciascuna.' } : { se: I(n), msg: 'Così sarebbe con un interrupt per campione.' },
             cosa ? { se: I(n * (fisso + dato)), msg: 'Questo sarebbe il costo con un interrupt per campione.' } : null
           ]),
-          altro: cosa ? 'Il numero è diverso. Conta gli interrupt arrotondando per eccesso, poi somma ingressi e letture.' : 'Il numero è diverso. Dividi i campioni per la dimensione del gruppo, arrotondando per eccesso.',
+          altro: cosa ? 'Il numero è diverso. Conta gli interrupt arrotondando per eccesso, poi somma ingressi e letture.' : 'Il numero è diverso. Si dividano i campioni per la dimensione del gruppo, arrotondando per eccesso.',
           indizi: [n + ' / ' + b + ' = ' + Math.floor(n / b) + (n % b ? ' con resto ' + (n % b) + '.' : ', senza resto.'), 'Gli interrupt sono ' + irq + '.', cosa ? irq + ' × ' + fisso + ' + ' + n + ' × ' + dato + '.' : 'Il gruppo incompleto conta come gli altri.'],
           svolgimento: cosa ? ['Interrupt: ' + irq + '.', 'Ingressi: ' + irq + ' × ' + fisso + ' = ' + (irq * fisso) + '.', 'Letture: ' + n + ' × ' + dato + ' = ' + (n * dato) + '.', 'Totale: ' + v + ' cicli.'] : ['Gruppi pieni: ' + Math.floor(n / b) + '.', n % b ? 'Campioni rimasti: ' + (n % b) + ', un gruppo in più.' : 'Nessun campione rimasto.', 'Interrupt: ' + irq + '.'] };
       }
@@ -104,7 +104,7 @@
           { se: E2(stato), msg: 'Così si cancellerebbero tutti i flag accesi.' },
           { se: E2(0), msg: 'Uno zero non cancella nulla.' }
         ]),
-        altro: 'Il valore è diverso. Scrivi 1 soltanto nel bit del flag da cancellare.',
+        altro: 'Il valore è diverso. Si scriva 1 soltanto nel bit del flag da cancellare.',
         indizi: ['Ogni 1 scritto cancella il proprio flag.', nomi[k0] + ' è il bit di peso ' + att[k0] + '.', 'Il valore è ' + H2(att[k0]) + '.'],
         svolgimento: ['Flag da cancellare: ' + nomi[k0] + '.', 'Peso: ' + att[k0] + '.', 'Valore da scrivere: ' + H2(att[k0]) + '.'] }; }
       const scritto = r.scegli([att[k0], stato & ~att[k0], stato]), dopo = stato & ~scritto, giuste = E2(dopo);

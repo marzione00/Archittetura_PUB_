@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.6.1', {
   titolo: 'Dalla sovrapposizione alla pipeline controllata',
-  obiettivo: 'Alla fine saprai dire che cosa contiene ogni stadio della pipeline dopo un fronte del clock, a partire da quello che conteneva prima, e spiegare perché ogni istruzione avanza di un solo posto.',
+  obiettivo: 'Obiettivo: dire che cosa contiene ogni stadio della pipeline dopo un fronte del clock, a partire da quello che conteneva prima, e spiegare perché ogni istruzione avanza di un solo posto.',
   concetti: [['register', 'I registri di pipeline'], ['clock', 'Il fronte comune'], ['pipeline', 'Un posto per ciclo']],
   filigrana: ['pipeline', 'register', 'clock'],
   richiami: {
@@ -53,7 +53,7 @@ SL.registra('3.6.1', {
       domanda: (p) => 'Un flusso di ' + p.n + ' istruzioni indipendenti attraversa PIPE. Il ciclo ' + p.c + ' sta per finire. Quale istruzione occuperà lo stadio W subito dopo il fronte?',
       opzioni: (p) => Array.from(new Set([3, 4, 2].map((j) => SL.unita361.occ(p.n, p.c, j)))).sort((a, b) => a - b).map((v) => [v, v ? 'I' + v : 'Nessuna'])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + (pred ? 'I' + pred : 'nessuna istruzione') + '. Dopo il fronte lo stadio W ospita ' + (esito ? 'I' + esito : 'nessuna istruzione') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === SL.unita361.occ(p.n, p.c, 4) ? 'Quella è la situazione di prima del fronte. Al fronte il contenuto di W viene sostituito.' : 'Il registro W cattura l’istruzione che prima del fronte si trovava in M, un posto più indietro.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + (pred ? 'I' + pred : 'nessuna istruzione') + '. Dopo il fronte lo stadio W ospita ' + (esito ? 'I' + esito : 'nessuna istruzione') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === SL.unita361.occ(p.n, p.c, 4) ? 'Quella è la situazione di prima del fronte. Al fronte il contenuto di W viene sostituito.' : 'Il registro W cattura l’istruzione che prima del fronte si trovava in M, un posto più indietro.'),
     costruisci(p) {
       const el = SL.el, U = SL.unita361, passi = [], n = p.n, c = p.c, ST = SL.pipe.NOMI;
       const A = ST.map((_, j) => U.occ(n, c, j)), B = ST.map((_, j) => U.occ(n, c + 1, j)), nome = (i) => (i ? 'I' + i : '');
@@ -89,7 +89,7 @@ SL.registra('3.6.1', {
       ['Confondere lo stadio con il registro.', 'Il registro conserva i dati. Lo stadio è la logica che li elabora durante il ciclo.'],
       ['Dimenticare lo stadio F quando il flusso è finito.', 'Dopo l’ultimo prelievo lo stadio F resta vuoto, mentre le istruzioni già entrate continuano ad avanzare.']
     ],
-    saFare: ['Dico che cosa contiene ogni registro dopo un fronte.', 'Distinguo le uscite di un registro dai suoi ingressi.', 'Leggo le sigle con la maiuscola e con la minuscola.'],
+    saFare: ['Indicare che cosa contiene ogni registro dopo un fronte.', 'Distinguere le uscite di un registro dai suoi ingressi.', 'Leggere le sigle con la maiuscola e con la minuscola.'],
     esercizi: [
       { d: 'Al ciclo 6 di un flusso di otto istruzioni indipendenti i registri contengono F = I6, D = I5, E = I4, M = I3, W = I2. Quale istruzione contiene il registro E dopo il fronte? Rispondi con il suo numero.', segnaposto: 'Un numero', giuste: ['5', 'i5', 'cinque'],
         ok: 'Il registro E cattura l’istruzione che prima del fronte si trovava in D, cioè I5.',
@@ -101,7 +101,7 @@ SL.registra('3.6.1', {
         altro: 'Il numero è diverso. Ogni registro riceve l’istruzione che stava un posto più indietro.',
         indizi: ['Ogni istruzione avanza di un posto.', 'Il registro E riceve dallo stadio D.', 'Prima del fronte D conteneva I5.'],
         svolgimento: ['Prima del fronte: D = I5.', 'Al fronte il registro E cattura il lavoro dello stadio D.', 'Dopo il fronte: E = I5.'] },
-      { d: 'Che cosa indica la sigla `W_valM`?', guida: 'Scegli la risposta.', o: [
+      { d: 'Che cosa indica la sigla `W_valM`?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il campo valM conservato nel registro W', ok: true, fb: 'La maiuscola iniziale indica un valore conservato in un registro di pipeline.' },
         { t: 'Il valore valM che uno stadio sta calcolando in questo ciclo', fb: 'Un valore in corso di calcolo ha l’iniziale minuscola, come `m_valM`.' },
         { t: 'La parola che lo stadio W scrive nella memoria dei dati', fb: 'Lo stadio W scrive nel banco dei registri. valM è la parola letta dalla memoria nello stadio M, arrivata ora al registro W.' }] },
@@ -111,7 +111,7 @@ SL.registra('3.6.1', {
           { se: ['5', 'i5'], msg: 'Il flusso ha quattro istruzioni: I5 non esiste, e dopo il fronte lo stadio F resta vuoto.' },
           { se: ['3', 'i3'], msg: 'I3 occupa D prima del fronte. Al fronte passa in E.' }
         ],
-        altro: 'Il numero è diverso. Trova l’istruzione che al ciclo 4 occupa F: al fronte passa in D.',
+        altro: 'Il numero è diverso. Si determini l’istruzione che al ciclo 4 occupa F: al fronte passa in D.',
         indizi: ['Al ciclo 4 entra in F la quarta istruzione.', 'Al fronte ogni istruzione avanza di un posto.', 'Da F si passa a D.'],
         svolgimento: ['Ciclo 4: F = I4, D = I3, E = I2, M = I1.', 'Al fronte I4 passa da F a D.', 'Ciclo 5: D = I4, e F resta vuoto.'] }
     ],

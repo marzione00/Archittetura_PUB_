@@ -17,7 +17,7 @@ SL.unita444 = (() => {
 })();
 SL.registra('4.4.4', {
   titolo: 'Banda, coordinamento e arbitraggio',
-  obiettivo: 'Alla fine saprai ricostruire l’ordine in cui un arbitro serve richieste simultanee, e calcolare quanto attende ciascun richiedente.',
+  obiettivo: 'Obiettivo: ricostruire l’ordine in cui un arbitro serve richieste simultanee, e calcolare quanto attende ciascun richiedente.',
   concetti: [['semaforo', 'Chi passa per primo'], ['coda', 'I turni si mettono in fila'], ['clock', 'L’attesa si conta in cicli']],
   filigrana: ['semaforo', 'coda', 'clock'],
   richiami: {
@@ -67,7 +67,7 @@ SL.registra('4.4.4', {
       domanda: (p) => 'A, B e C chiedono il bus nello stesso istante. La regola è ' + (p.pol === 'rr' ? 'il round-robin' : 'la priorità fissa A, B, C') + ', e l’ultimo servito era ' + p.last + '. Quanti cicli attende ' + p.oss + ' prima che cominci il suo turno?',
       opzioni: () => [[0, 'Nessuno: è il primo'], [5, '5 cicli'], [10, '10 cicli']]
     },
-    confronto: (pred, esito, p) => { const U = SL.unita444, ord = U.ordine(p); return 'Avevi previsto un’attesa di ' + pred + ' cicli. L’ordine è ' + ord.join(', ') + ', e ' + p.oss + ' attende ' + esito + ' cicli. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.pol === 'rr' ? 'La rotazione riparte dal successivo di ' + p.last + ', cioè da ' + ord[0] + '.' : 'Con la priorità fissa l’ultimo servito è ininfluente: l’ordine è sempre A, B, C.'); },
+    confronto: (pred, esito, p) => { const U = SL.unita444, ord = U.ordine(p); return 'La previsione indicava un’attesa di ' + pred + ' cicli. L’ordine è ' + ord.join(', ') + ', e ' + p.oss + ' attende ' + esito + ' cicli. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.pol === 'rr' ? 'La rotazione riparte dal successivo di ' + p.last + ', cioè da ' + ord[0] + '.' : 'Con la priorità fissa l’ultimo servito è ininfluente: l’ordine è sempre A, B, C.'); },
     costruisci(p) {
       const U = SL.unita444, el = SL.el, passi = [], ord = U.ordine(p), pos = ord.indexOf(p.oss), att = 5 * pos, rr = p.pol === 'rr';
       const quadro = (f, turni, evid) => {
@@ -98,7 +98,7 @@ SL.registra('4.4.4', {
       ['Confondere l’inizio del turno con il completamento.', 'Fra i due istanti c’è l’intero turno: arbitraggio e dati.'],
       ['Tenere conto dell’ultimo servito con la priorità fissa.', 'La priorità fissa guarda soltanto il rango.']
     ],
-    saFare: ['Ricavo l’ordine con la priorità fissa.', 'Ricavo l’ordine con il round-robin.', 'Calcolo attesa e completamento di un richiedente.'],
+    saFare: ['Ricavare l’ordine con la priorità fissa.', 'Ricavare l’ordine con il round-robin.', 'Calcolare attesa e completamento di un richiedente.'],
     esercizi: [
       { d: 'Arbitro round-robin, ordine circolare A, B, C. L’ultimo servito è stato A. Le tre richieste arrivano insieme, e ogni turno dura 5 cicli. Dopo quanti cicli di attesa comincia il turno di C?', segnaposto: 'Un numero', giuste: ['5', 'cinque', '5cicli'],
         ok: 'L’ordine è B, C, A. Prima di C c’è un solo turno, di 5 cicli.',
@@ -107,7 +107,7 @@ SL.registra('4.4.4', {
           { se: ['0', '0cicli'], msg: 'Dopo A la rotazione riparte da B, che viene servito per primo.' },
           { se: ['6', '6cicli'], msg: 'Il ciclo 6 è quello del primo dato di C. Il turno comincia un ciclo prima, con l’arbitraggio.' }
         ],
-        altro: 'Il numero è diverso. Scrivi l’ordine dei turni partendo dal successivo di A.',
+        altro: 'Il numero è diverso. Si scriva l’ordine dei turni partendo dal successivo di A.',
         indizi: ['Dopo A viene B.', 'L’ordine è B, C, A.', 'Un turno precede C: 5 cicli.'],
         svolgimento: ['Ultimo servito: A.', 'Ordine: B, C, A.', 'Attesa di C: 1 × 5 = 5 cicli.'] },
       { d: 'Nella stessa situazione, quanti cicli sono trascorsi dall’arrivo delle richieste quando A ha completato il suo trasferimento?', segnaposto: 'Un numero', giuste: ['15', 'quindici', '15cicli'],
@@ -120,7 +120,7 @@ SL.registra('4.4.4', {
         altro: 'Il numero è diverso. Somma l’attesa di A alla durata del suo turno.',
         indizi: ['L’ordine è B, C, A.', 'A attende due turni: 10 cicli.', '10 + 5 = 15.'],
         svolgimento: ['Attesa di A: 2 × 5 = 10 cicli.', 'Turno di A: 5 cicli.', 'Completamento: 15 cicli.'] },
-      { d: 'Un arbitro usa la priorità fissa A, B, C. A e B presentano una nuova richiesta ogni volta che vengono servite. Che cosa accade a C?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un arbitro usa la priorità fissa A, B, C. A e B presentano una nuova richiesta ogni volta che vengono servite. Che cosa accade a C?', guida: 'Si scelga la risposta.', o: [
         { t: 'Può attendere senza limite', ok: true, fb: 'A ogni scelta c’è una richiesta di rango più alto, e C viene sempre scavalcato.' },
         { t: 'Viene servito una volta ogni tre turni', fb: 'Questo accadrebbe con il round-robin.' },
         { t: 'Dopo due turni passa in testa', fb: 'Nella priorità fissa il rango resta quello stabilito all’inizio.' }] }

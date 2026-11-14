@@ -19,7 +19,7 @@
           { se: I(op === 'addq' ? b - a : b + a), msg: 'L’istruzione è `' + op + '`: controlla l’operazione.' },
           { se: I(a), msg: 'Questo è il valore della sorgente, che resta intatta.' }
         ]),
-        altro: 'Il numero è diverso. Calcola valE, tenendo conto che il registro lo riceve soltanto al fronte.',
+        altro: 'Il numero è diverso. Si calcoli valE, tenendo conto che il registro lo riceve soltanto al fronte.',
         indizi: ['valA = ' + a + ', valB = ' + b + '.', 'valE = valB ' + (op === 'addq' ? '+' : '−') + ' valA = ' + N(nuovo) + '.', quando === 'prima' ? 'Prima del fronte il registro contiene ancora valB.' : 'Dopo il fronte il registro contiene valE.'],
         svolgimento: ['valA = ' + a + ', valB = ' + b + '.', 'valE = ' + b + (op === 'addq' ? ' + ' : ' − ') + a + ' = ' + N(nuovo) + '.', 'Subito ' + quando + ' il fronte: %' + d + ' = ' + N(giusto) + '.'] };
     },
@@ -30,7 +30,7 @@
         const OPZ = ['aluA = valA e aluB = valB', 'aluA = valC e aluB = valB', 'aluA = −8 e aluB = valB', 'aluA = +8 e aluB = valB', 'aluA = valC e aluB = 0', 'aluA = valA e aluB = 0'];
         const PERCHE = ['L’operazione lavora su due registri.', 'L’ALU somma la base e lo spostamento scritto nell’istruzione.', 'L’ALU toglie 8 alla cima della pila, per riservare una cella.', 'L’ALU aggiunge 8 alla cima della pila, per restituire una cella.', 'La costante attraversa l’ALU sommata a zero.', 'Il registro sorgente attraversa l’ALU sommato a zero.'];
         const c = r.scegli(CASI), altre = r.mescola([0, 1, 2, 3, 4, 5].filter((k) => k !== c[1])).slice(0, 3);
-        return { u: '3.4.2', d: 'SEQ esegue `' + c[0] + '`. Che cosa arriva ai due ingressi dell’ALU?', guida: 'Scegli la risposta.', o: [{ t: OPZ[c[1]], ok: true, fb: PERCHE[c[1]] }].concat(altre.map((k) => ({ t: OPZ[k], fb: 'Questa è la scelta di un’altra classe di istruzioni. ' + PERCHE[k] }))) };
+        return { u: '3.4.2', d: 'SEQ esegue `' + c[0] + '`. Che cosa arriva ai due ingressi dell’ALU?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[c[1]], ok: true, fb: PERCHE[c[1]] }].concat(altre.map((k) => ({ t: OPZ[k], fb: 'Questa è la scelta di un’altra classe di istruzioni. ' + PERCHE[k] }))) };
       }
       const sp = 0x100 + 8 * r.int(1, 200), v = r.int(2, 250), cosa = r.int(0, 1), giusto = sp - 8, giuste = ESA(giusto, 3);
       return { u: '3.4.2', d: 'SEQ esegue `pushq %rax` con %rsp = ' + H(sp) + ' e %rax = ' + H(v) + '. ' + (cosa ? 'Quanto vale %rsp dopo il fronte?' : 'A quale indirizzo viene scritto il valore ' + H(v) + '?') + ' Rispondi in esadecimale.', segnaposto: 'Per esempio ' + H(sp + 16), giuste,
@@ -41,7 +41,7 @@
           { se: ESA(v, 3), msg: 'Questo è il dato. La domanda riguarda la cima della pila.' },
           { se: ESA(sp - 1, 3), msg: 'Una parola occupa 8 byte, quindi la cima si sposta di 8.' }
         ]),
-        altro: 'Il valore è diverso. Togli 8 al vecchio %rsp, in esadecimale.',
+        altro: 'Il valore è diverso. Si tolga 8 al vecchio %rsp, in esadecimale.',
         indizi: ['aluB = valB = ' + H(sp) + '.', 'aluA = −8.', H(sp) + ' − 8.'],
         svolgimento: ['valB = ' + H(sp) + '.', 'valE = ' + H(sp) + ' − 8 = ' + H(giusto) + '.', 'M8[' + H(giusto) + '] = ' + H(v) + ', e %rsp = ' + H(giusto) + '.'] };
     },
@@ -56,7 +56,7 @@
           { se: I(com + se + m + mg), msg: 'Selettore e memoria appartengono a istruzioni diverse: i due percorsi sono alternative, e conta il più lungo.' },
           { se: I(com + mg), msg: 'Dopo l’ALU ogni istruzione attraversa ancora un blocco: il selettore oppure la memoria.' }
         ]),
-        altro: 'Il numero è diverso. Calcola i due percorsi, prendi il più lungo e aggiungi il margine.',
+        altro: 'Il numero è diverso. Si calcolino i due percorsi, si prenda il più lungo e si aggiunga il margine.',
         indizi: ['Tratto comune: ' + f + ' + ' + g + ' + ' + al + ' = ' + com + ' ps.', 'Aritmetica: ' + com + ' + ' + se + ' = ' + A + '. Carico: ' + com + ' + ' + m + ' = ' + L + '.', 'Il maggiore dei due, più ' + mg + '.'],
         svolgimento: ['Percorso aritmetico: ' + com + ' + ' + se + ' = ' + A + ' ps.', 'Percorso del carico: ' + com + ' + ' + m + ' = ' + L + ' ps.', 'Periodo minimo: ' + lim + ' + ' + mg + ' = ' + (lim + mg) + ' ps.'] };
     },
@@ -67,7 +67,7 @@
         const OPZ = ['mem_addr = valE, e la memoria scrive', 'mem_addr = valE, e la memoria legge', 'mem_addr = valA, e la memoria legge', 'mem_addr = valA, e la memoria scrive'];
         const c = r.scegli(CASI), nome = c[0].split(' ')[0];
         const fb = (k) => (k === c[1] ? (c[1] === 0 ? '`' + nome + '` scrive una parola all’indirizzo calcolato dall’ALU.' : c[1] === 1 ? '`mrmovq` legge la parola che comincia all’indirizzo calcolato dall’ALU.' : '`' + nome + '` legge la parola alla cima attuale della pila, cioè al vecchio %rsp.') : (k < 2) !== (c[1] < 2) ? (c[1] < 2 ? 'Per `' + nome + '` l’indirizzo è quello calcolato dall’ALU, valE.' : 'Per `' + nome + '` l’indirizzo è la cima attuale, valA. valE è già la cima successiva.') : 'L’indirizzo è giusto, ma `' + nome + '` ' + (c[1] === 0 ? 'scrive in memoria.' : 'legge dalla memoria.'));
-        return { u: '3.4.4', d: 'SEQ esegue `' + c[0] + '`. Quale indirizzo riceve la memoria dei dati, e in quale direzione avviene il trasferimento?', guida: 'Scegli la risposta.', o: OPZ.map((t, k) => (k === c[1] ? { t, ok: true, fb: fb(k) } : { t, fb: fb(k) })) };
+        return { u: '3.4.4', d: 'SEQ esegue `' + c[0] + '`. Quale indirizzo riceve la memoria dei dati, e in quale direzione avviene il trasferimento?', guida: 'Si scelga la risposta.', o: OPZ.map((t, k) => (k === c[1] ? { t, ok: true, fb: fb(k) } : { t, fb: fb(k) })) };
       }
       const sp = 0x100 + 8 * r.int(1, 200), op = r.scegli(['popq', 'pushq']), giusto = op === 'popq' ? sp + 8 : sp - 8, giuste = ESA(giusto, 3);
       return { u: '3.4.4', d: 'SEQ esegue `' + op + ' %rbx` con %rsp = ' + H(sp) + '. Quanto vale %rsp dopo il fronte? Rispondi in esadecimale.', segnaposto: 'Per esempio ' + H(sp + 32), giuste,
@@ -77,7 +77,7 @@
           { se: ESA(sp, 3), msg: 'Questo è il vecchio %rsp. Entrambe le istruzioni della pila lo modificano.' },
           { se: ESA(op === 'popq' ? sp + 1 : sp - 1, 3), msg: 'Una parola occupa 8 byte, quindi il puntatore si sposta di 8.' }
         ]),
-        altro: 'Il valore è diverso. ' + (op === 'popq' ? 'Aggiungi 8' : 'Togli 8') + ' al vecchio %rsp, in esadecimale.',
+        altro: 'Il valore è diverso. ' + (op === 'popq' ? 'Si aggiunga 8' : 'Si tolga 8') + ' al vecchio %rsp, in esadecimale.',
         indizi: ['aluB = valB = ' + H(sp) + '.', 'Per `' + op + '`, aluA = ' + (op === 'popq' ? '+8' : '−8') + '.', H(sp) + (op === 'popq' ? ' + 8.' : ' − 8.')],
         svolgimento: ['valB = ' + H(sp) + '.', 'valE = ' + H(sp) + (op === 'popq' ? ' + 8 = ' : ' − 8 = ') + H(giusto) + '.', 'Al fronte: %rsp = ' + H(giusto) + '.'] };
     },
@@ -87,7 +87,7 @@
       const base = 'Un programma contiene ' + a + ' operazioni aritmetiche e ' + l + (l === 1 ? ' carico' : ' carichi') + '. SEQ usa un ciclo da ' + per + ' ps per istruzione. Una macchina multiciclo usa 3 cicli per un’operazione e 5 per un carico, con un periodo di ' + t + ' ps. ';
       if (cosa === 2) {
         const esito = ts < tm ? 0 : tm < ts ? 1 : 2, perche = 'SEQ impiega ' + n + ' × ' + per + ' = ' + ts + ' ps. La macchina multiciclo impiega ' + cm + ' × ' + t + ' = ' + tm + ' ps.';
-        return { u: '3.4.5', d: base + 'Quale macchina finisce prima?', guida: 'Scegli la risposta.', o: ['SEQ', 'La macchina multiciclo', 'Finiscono insieme'].map((x, k) => (k === esito ? { t: x, ok: true, fb: perche } : { t: x, fb: perche })) };
+        return { u: '3.4.5', d: base + 'Quale macchina finisce prima?', guida: 'Si scelga la risposta.', o: ['SEQ', 'La macchina multiciclo', 'Finiscono insieme'].map((x, k) => (k === esito ? { t: x, ok: true, fb: perche } : { t: x, fb: perche })) };
       }
       const giusto = cosa ? tm : ts, giuste = PS(giusto);
       return { u: '3.4.5', d: base + (cosa ? 'Quanto dura il programma sulla macchina multiciclo, in picosecondi?' : 'Quanto dura il programma su SEQ, in picosecondi?'), segnaposto: 'Un numero di picosecondi', giuste,

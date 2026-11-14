@@ -17,11 +17,11 @@
     const lab = unita.lab;
     const disegna = () => {
       const opz = lab.previsione.opzioni(ctx.p).map(voce);
-      ospite.innerHTML = '<h3 class="titolo3">La tua previsione</h3>' +
+      ospite.innerHTML = '<h3 class="titolo3">Previsione</h3>' +
         '<p style="color:#d6ccb5">' + SL.T(lab.previsione.domanda(ctx.p)) + '</p>' +
         '<div class="riga-bottoni" role="group" aria-label="Valori possibili">' +
         opz.map((o, k) => '<button type="button" class="tessera" data-k="' + k + '" aria-pressed="' + (ctx.pred === o.v) + '">' + E(o.t) + '</button>').join('') + '</div>' +
-        '<div class="nota" role="status">' + (ctx.pred == null ? 'Scegli un valore: alla fine lo confronteremo con l’esito.' : 'Previsione registrata: ' + E((opz.find((o) => o.v === ctx.pred) || { t: ctx.pred }).t) + '.') + '</div>';
+        '<div class="nota" role="status">' + (ctx.pred == null ? 'Si selezioni un valore: al termine sarà confrontato con l’esito.' : 'Previsione registrata: ' + E((opz.find((o) => o.v === ctx.pred) || { t: ctx.pred }).t) + '.') + '</div>';
       ospite.querySelectorAll('[data-k]').forEach((b) => b.addEventListener('click', () => {
         ctx.pred = opz[Number(b.dataset.k)].v; disegna(); if (alCambio) alCambio();
       }));
@@ -69,13 +69,13 @@
           h += salti.slice().reverse().map((s) => '<button type="button" class="tessera" data-c="' + c.id + '" data-d="' + (-s) + '" aria-label="Diminuisci di ' + s + '">−' + s + '</button>').join('') +
             '<span class="valore">' + E(ctx.p[c.id]) + (c.unita ? ' ' + E(c.unita) : '') + '</span>' +
             salti.map((s) => '<button type="button" class="tessera" data-c="' + c.id + '" data-d="' + s + '" aria-label="Aumenta di ' + s + '">+' + s + '</button>').join('');
-          if (c.pronti) h += '<span class="nota" style="margin-left:8px">Casi pronti</span>' + c.pronti.map((v) => '<button type="button" class="tessera" data-c="' + c.id + '" data-v="' + v + '">' + v + '</button>').join('');
+          if (c.pronti) h += '<span class="nota" style="margin-left:8px">Casi predefiniti</span>' + c.pronti.map((v) => '<button type="button" class="tessera" data-c="' + c.id + '" data-v="' + v + '">' + v + '</button>').join('');
         } else if (c.tipo === 'scelta') {
           h += c.opzioni.map(voce).map((o) => '<button type="button" class="tessera" data-c="' + c.id + '" data-s="' + E(o.v) + '" aria-pressed="' + (String(ctx.p[c.id]) === String(o.v)) + '">' + E(o.t) + '</button>').join('');
         } else if (c.tipo === 'testo') {
           h += '<input type="text" data-t="' + c.id + '" value="' + E(ctx.p[c.id]) + '" maxlength="' + (c.max || 8) + '" aria-label="' + E(c.eti) + '" autocomplete="off" spellcheck="false">' +
             '<button type="button" class="tessera" data-applica="' + c.id + '">Applica</button>' +
-            (c.pronti ? '<span class="nota" style="margin-left:8px">Casi pronti</span>' + c.pronti.map((v) => '<button type="button" class="tessera" data-c="' + c.id + '" data-s="' + E(v) + '">' + E(v) + '</button>').join('') : '');
+            (c.pronti ? '<span class="nota" style="margin-left:8px">Casi predefiniti</span>' + c.pronti.map((v) => '<button type="button" class="tessera" data-c="' + c.id + '" data-s="' + E(v) + '">' + E(v) + '</button>').join('') : '');
         }
         return h + '</div>';
       });
@@ -114,7 +114,7 @@
     function aggiorna() {
       const s = costr.passi[i], fine = i === ultimo();
       ospite.querySelectorAll('[data-modo]').forEach((b) => { b.classList.toggle('attivo', b.dataset.modo === modo); b.setAttribute('aria-pressed', String(b.dataset.modo === modo)); });
-      if (R('notamodo')) R('notamodo').textContent = modo === 'guidato' ? 'A ogni bivio decidi tu. Se sbagli, il banco spiega perché e ti lascia riprovare.' : 'Il banco esegue una mossa per volta e la racconta.';
+      if (R('notamodo')) R('notamodo').textContent = modo === 'guidato' ? 'Alcuni passi richiedono una risposta. In caso di errore viene fornita la spiegazione, ed è ammesso un nuovo tentativo.' : 'L’esperimento procede un passo alla volta, e ogni passo è accompagnato dalla sua descrizione.';
       R('hud').innerHTML = (s.hud || []).map((x) => '<div class="' + (x[2] || '') + '"><small>' + E(x[0]) + '</small><b>' + E(x[1]) + '</b></div>').join('') +
         '<div><small>Passo</small><b>' + due(i + 1) + '<span style="font-size:15px;color:var(--muto)"> di ' + costr.passi.length + '</span></b></div>';
       scena.mostra(s.els || []);
@@ -139,8 +139,8 @@
       }
       R('bottoni').hidden = senzaPrev;
       R('bottoni').innerHTML = '<button type="button" class="bottone" data-b="prima"' + (i === 0 ? ' disabled' : '') + '>Passo precedente</button>' +
-        (q ? '' : '<button type="button" class="bottone primo" data-b="dopo"' + (fine ? ' disabled' : '') + '>Passo successivo</button><button type="button" class="bottone" data-b="gira"' + (fine ? ' disabled' : '') + ' aria-pressed="' + Boolean(timer) + '">' + (timer ? 'Pausa' : 'Riproduci') + '</button>') +
-        '<button type="button" class="bottone" data-b="capo">Ricomincia</button>';
+        (q ? '' : '<button type="button" class="bottone primo" data-b="dopo"' + (fine ? ' disabled' : '') + '>Passo successivo</button><button type="button" class="bottone" data-b="gira"' + (fine ? ' disabled' : '') + ' aria-pressed="' + Boolean(timer) + '">' + (timer ? 'Pausa' : 'Riproduzione') + '</button>') +
+        '<button type="button" class="bottone" data-b="capo">Da capo</button>';
       R('bottoni').querySelectorAll('[data-b]').forEach((b) => b.addEventListener('click', () => {
         const a = b.dataset.b;
         if (a === 'prima') { ferma(); vai(i - 1); }
@@ -156,8 +156,8 @@
         ferma(); ctx.esito = costr.esito; ctx.fatto = true;
         const giusta = ctx.pred === costr.esito;
         const frase = lab.confronto ? lab.confronto(ctx.pred, costr.esito, ctx.p) :
-          'Avevi previsto ' + ctx.pred + '. L’esito dell’esperimento è ' + costr.esito + '. ' + (giusta ? 'La previsione coincide con l’esito.' : 'Nel bilancio vedremo da dove nasce la differenza.');
-        esito.innerHTML = '<div class="riga-bottoni" style="justify-content:space-between;gap:16px 32px"><div class="colonna" style="gap:6px;max-width:700px"><div class="occhiello c">Previsione ed esito</div><div style="font-size:18px;color:#e9fafc">' + SL.T(frase) + '</div></div><button type="button" class="bottone ciano" data-r="alfine">Fase 5 · Vai al bilancio</button></div>';
+          'La previsione indicava ' + ctx.pred + '. L’esito dell’esperimento è ' + costr.esito + '. ' + (giusta ? 'La previsione coincide con l’esito.' : 'L’origine della differenza è discussa nel bilancio.');
+        esito.innerHTML = '<div class="riga-bottoni" style="justify-content:space-between;gap:16px 32px"><div class="colonna" style="gap:6px;max-width:700px"><div class="occhiello c">Previsione ed esito</div><div style="font-size:18px;color:#e9fafc">' + SL.T(frase) + '</div></div><button type="button" class="bottone ciano" data-r="alfine">Fase 5 · Bilancio</button></div>';
         esito.querySelector('[data-r="alfine"]').addEventListener('click', () => alFine && alFine());
       }
     }

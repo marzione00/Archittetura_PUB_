@@ -20,7 +20,7 @@ SL.unita432 = (() => {
 })();
 SL.registra('4.3.2', {
   titolo: 'Polling e interrupt',
-  obiettivo: 'Alla fine saprai confrontare i due modi con cui un driver si accorge di un evento, il controllo periodico e la notifica, misurando per ciascuno il ritardo e il lavoro del processore.',
+  obiettivo: 'Obiettivo: confrontare i due modi con cui un driver si accorge di un evento, il controllo periodico e la notifica, misurando per ciascuno il ritardo e il lavoro del processore.',
   concetti: [['clock', 'Chiedere a intervalli'], ['interrupt', 'Farsi avvisare'], ['bilancio', 'Ritardo e lavoro']],
   filigrana: ['clock', 'interrupt', 'bilancio'],
   richiami: {
@@ -71,7 +71,7 @@ SL.registra('4.3.2', {
       domanda: (p) => 'Un evento avviene a ' + p.t + ' µs. Il driver controlla la periferica ogni ' + p.p + ' µs, a partire da ' + p.p + ' µs. Quanti microsecondi passano fra l’evento e la sua scoperta?',
       opzioni: (p) => { const c = SL.unita432.conti(p); return Array.from(new Set([c.ritardo, p.p, p.t % p.p, 2])).sort((a, b) => a - b).map((v) => [v, v + ' µs']); }
     },
-    confronto: (pred, esito, p) => { const c = SL.unita432.conti(p); return 'Avevi previsto ' + pred + ' µs. Il ritardo è di ' + esito + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il primo controllo dopo l’evento avviene a ' + c.quando + ' µs: ' + c.quando + ' − ' + p.t + ' = ' + c.ritardo + '.'); },
+    confronto: (pred, esito, p) => { const c = SL.unita432.conti(p); return 'La previsione indicava ' + pred + ' µs. Il ritardo è di ' + esito + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il primo controllo dopo l’evento avviene a ' + c.quando + ' µs: ' + c.quando + ' − ' + p.t + ' = ' + c.ritardo + '.'); },
     costruisci(p) {
       const U = SL.unita432, passi = [], c = U.conti(p), t = p.t, per = p.p;
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'TEMPO IN MICROSECONDI', 'mono')].concat(U.quadro('q', p, f, { x: 24, y: 22, w: 812, conti: true, h: 58, gap: 12 }));
@@ -99,7 +99,7 @@ SL.registra('4.3.2', {
       ['Considerare gratuito un interrupt.', 'Ogni ingresso comporta il salvataggio e il ripristino del contesto.'],
       ['Scegliere una volta per tutte.', 'Con eventi rari conviene l’interrupt, con eventi fittissimi il polling.']
     ],
-    saFare: ['Trovo il controllo che scopre un evento.', 'Calcolo ritardo e lavoro del polling.', 'Confronto polling e interrupt su uno stesso evento.'],
+    saFare: ['Determinare il controllo che scopre un evento.', 'Calcolare ritardo e lavoro del polling.', 'Confrontare polling e interrupt su uno stesso evento.'],
     esercizi: [
       { d: 'Un driver controlla una periferica ogni 10 µs, a partire da 10 µs. Un evento avviene a 34 µs. Dopo quanti microsecondi dall’evento viene scoperto?', segnaposto: 'Un numero', giuste: ['6', 'sei'],
         ok: 'Il primo controllo dopo l’evento è a 40 µs: 40 − 34 = 6.',
@@ -108,7 +108,7 @@ SL.registra('4.3.2', {
           { se: ['40', 'quaranta'], msg: 'Quaranta è l’istante della scoperta. Il ritardo si conta dall’evento.' },
           { se: ['10', 'dieci'], msg: 'Il ritardo sarebbe di un periodo intero soltanto se l’evento cadesse subito dopo un controllo.' }
         ],
-        altro: 'Il numero è diverso. Trova il primo controllo dopo 34 µs, poi sottrai.',
+        altro: 'Il numero è diverso. Si determini il primo controllo dopo 34 µs, poi si sottragga.',
         indizi: ['I controlli avvengono a 10, 20, 30, 40 µs.', 'Il primo dopo l’evento è a 40 µs.', '40 − 34.'],
         svolgimento: ['Controlli: 10, 20, 30, 40.', 'Primo controllo utile: 40 µs.', 'Ritardo: 40 − 34 = 6 µs.'] },
       { d: 'Nella stessa situazione ogni controllo costa 4 cicli. Quanti cicli ha speso il driver fino alla scoperta?', segnaposto: 'Un numero', giuste: ['16', 'sedici'],
@@ -120,7 +120,7 @@ SL.registra('4.3.2', {
         altro: 'Il numero è diverso. Conta tutti i controlli fino a quello utile, compreso, e moltiplica per 4.',
         indizi: ['I controlli fino alla scoperta sono 4.', 'Ognuno costa 4 cicli.', '4 × 4.'],
         svolgimento: ['Controlli: 4.', 'Costo di ciascuno: 4 cicli.', 'Totale: 16 cicli.'] },
-      { d: 'Una tastiera produce in media un evento ogni 200 millisecondi. Quale tecnica conviene al suo driver?', guida: 'Scegli la risposta.', o: [
+      { d: 'Una tastiera produce in media un evento ogni 200 millisecondi. Quale tecnica conviene al suo driver?', guida: 'Si scelga la risposta.', o: [
         { t: 'L’interrupt', ok: true, fb: 'Gli eventi sono rari. Il polling farebbe migliaia di controlli a vuoto fra un tasto e l’altro.' },
         { t: 'Il polling con un periodo molto breve', fb: 'Sarebbe pronto, e occuperebbe il processore quasi sempre per nulla.' },
         { t: 'Il polling con un periodo molto lungo', fb: 'Lavorerebbe poco, e i tasti verrebbero riconosciuti con un ritardo avvertibile.' }] }

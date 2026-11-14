@@ -21,7 +21,7 @@ SL.unita453 = (() => {
 })();
 SL.registra('4.5.3', {
   titolo: 'Code, scheduling e cache',
-  obiettivo: 'Alla fine saprai calcolare il cammino della testina con due regole di servizio, e spiegare che cosa cambia quando un blocco si trova già nella cache.',
+  obiettivo: 'Obiettivo: calcolare il cammino della testina con due regole di servizio, e spiegare che cosa cambia quando un blocco si trova già nella cache.',
   concetti: [['coda', 'Più richieste in attesa'], ['disco', 'L’ordine cambia il cammino'], ['cache', 'Una copia a portata di mano']],
   filigrana: ['disco', 'coda', 'cache'],
   richiami: {
@@ -71,7 +71,7 @@ SL.registra('4.5.3', {
       domanda: (p) => 'La testina è sul cilindro ' + p.pos + '. Le richieste, in ordine di arrivo, riguardano i cilindri 80, 15 e 55' + (p.cache === 'hit' ? ', e il blocco del cilindro 80 è già nella cache' : '') + '. Con la regola ' + SL.unita453.NOMI[p.disc] + ', quanti cilindri percorre in tutto la testina?',
       opzioni: (p) => { const U = SL.unita453, a = U.totale(p, 'fcfs'), b = U.totale(p, 'sstf'); return Array.from(new Set([b, a, Math.max(a, b) + 40])).sort((x, y) => x - y).map((v) => [v, v + ' cilindri']); }
     },
-    confronto: (pred, esito, p) => { const U = SL.unita453; return 'Avevi previsto ' + pred + ' cilindri. La testina ne percorre ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.disc === 'fcfs' ? 'FCFS segue l’ordine di arrivo, anche quando obbliga a tornare indietro.' : 'SSTF sceglie ogni volta la richiesta più vicina alla posizione attuale.'); },
+    confronto: (pred, esito, p) => { const U = SL.unita453; return 'La previsione indicava ' + pred + ' cilindri. La testina ne percorre ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.disc === 'fcfs' ? 'FCFS segue l’ordine di arrivo, anche quando obbliga a tornare indietro.' : 'SSTF sceglie ogni volta la richiesta più vicina alla posizione attuale.'); },
     costruisci(p) {
       const U = SL.unita453, el = SL.el, passi = [], tappe = U.percorso(p), hit = p.cache === 'hit', altra = p.disc === 'fcfs' ? 'sstf' : 'fcfs', totAltra = U.totale(p, altra), tot = tappe[tappe.length - 1].tot;
       const quadro = (fatte, cacheVista, fine) => {
@@ -108,7 +108,7 @@ SL.registra('4.5.3', {
       ['Sommare i numeri dei cilindri.', 'Si sommano le distanze, cioè le differenze fra posizioni consecutive.'],
       ['Ritenere SSTF migliore in ogni senso.', 'Accorcia il cammino, e può far attendere a lungo una richiesta lontana.']
     ],
-    saFare: ['Calcolo il cammino con FCFS.', 'Calcolo il cammino con SSTF.', 'Tolgo dall’itinerario una richiesta servita dalla cache.'],
+    saFare: ['Calcolare il cammino con FCFS.', 'Calcolare il cammino con SSTF.', 'Togliere dall’itinerario una richiesta servita dalla cache.'],
     esercizi: [
       { d: 'La testina è sul cilindro 50. Le richieste arrivano nell’ordine 10, 60, 30. Quanti cilindri percorre in tutto con la regola FCFS?', segnaposto: 'Un numero', giuste: ['120', 'centoventi', '120cilindri'],
         ok: 'Da 50 a 10 sono 40, da 10 a 60 sono 50, da 60 a 30 sono 30: 120.',
@@ -126,10 +126,10 @@ SL.registra('4.5.3', {
           { se: ['120', '120cilindri'], msg: 'Questo è il cammino con FCFS. SSTF sceglie ogni volta la richiesta più vicina.' },
           { se: ['80', '80cilindri'], msg: 'Dopo il cilindro 60 la scelta va rifatta: da 60 il più vicino è 30, a distanza 30.' }
         ],
-        altro: 'Il numero è diverso. Scegli la richiesta più vicina, spostati, e ripeti la scelta dalla nuova posizione.',
+        altro: 'Il numero è diverso. Si scelga la richiesta più vicina, spostati, e si ripeta la scelta dalla nuova posizione.',
         indizi: ['Da 50 le distanze sono 40, 10 e 20: si va a 60.', 'Da 60 le distanze sono 50 e 30: si va a 30, poi a 10.', '10 + 30 + 20 = 60.'],
         svolgimento: ['50 → 60: 10 cilindri.', '60 → 30: 30 cilindri.', '30 → 10: 20 cilindri.', 'Cammino: 60 cilindri.'] },
-      { d: 'Tre richieste sono in coda, e il blocco chiesto dalla prima si trova già nella cache. Che cosa accade?', guida: 'Scegli la risposta.', o: [
+      { d: 'Tre richieste sono in coda, e il blocco chiesto dalla prima si trova già nella cache. Che cosa accade?', guida: 'Si scelga la risposta.', o: [
         { t: 'La prima richiesta è soddisfatta dalla copia, e il braccio serve soltanto le altre due', ok: true, fb: 'Il cilindro di quel blocco esce dall’itinerario.' },
         { t: 'Il braccio va comunque sul cilindro, per controllare che la copia sia giusta', fb: 'La cache esiste proprio per evitare lo spostamento.' },
         { t: 'Le tre richieste vengono servite tutte dalla cache', fb: 'Nella cache si trova soltanto il blocco della prima.' }] }

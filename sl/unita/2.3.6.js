@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('2.3.6', {
   titolo: 'Codificare e riconoscere i calcoli di indirizzo',
-  obiettivo: 'Alla fine saprai separare i campi del byte SIB, ricostruire l’operando di memoria che descrive e compiere il percorso inverso.',
+  obiettivo: 'Obiettivo: separare i campi del byte SIB, ricostruire l’operando di memoria che descrive e compiere il percorso inverso.',
   concetti: [['byte', 'I byte di un’istruzione'], ['bit', 'I campi del byte SIB'], ['lente', 'Dai byte all’istruzione']],
   filigrana: ['byte', 'bit', 'lente'],
   richiami: {
@@ -17,23 +17,23 @@ SL.registra('2.3.6', {
     ] }
   },
   idea: {
-    titolo: 'Un’istruzione vista da dentro',
+    titolo: 'La struttura interna di un’istruzione',
     termini: ['codice operativo', 'modr/m', 'sib'],
     testo: [
-      'Il processore legge byte. L’assembly è una scrittura comoda per le persone, e ogni istruzione ha una traduzione esatta in codice macchina. Nell’unità 2.1.1 le istruzioni occupavano un numero variabile di byte. Questa unità ne apre una per vedere che cosa contengono.',
-      'Il primo byte è di norma il [[codice operativo]], che dice quale operazione eseguire. Il byte 8B, per esempio, indica una MOV che carica un registro. Segue il byte [[modr/m|ModR/M]], che descrive gli operandi: tre dei suoi bit scelgono il registro, gli altri dicono dove si trova il secondo operando.',
-      'Quando l’operando di memoria usa un indice con una scala, ModR/M rimanda a un terzo byte, il byte [[sib|SIB]]. Il nome viene dalle iniziali inglesi di scala, indice e base. I suoi otto bit formano tre campi: due bit per la scala, tre per il registro indice, tre per il registro base.',
-      { fig: 'celle', titolo: 'I tre campi del byte SIB', nota: 'L’esempio è il byte 0x8B. I confini dei campi cadono dentro le cifre esadecimali: per leggerli occorre passare dal binario.', celle: [
+      'Il processore legge byte. L’assembly è una notazione destinata alle persone, e ogni istruzione ha una traduzione esatta in codice macchina. Nell’unità 2.1.1 le istruzioni occupavano un numero variabile di byte. In questa unità se ne esamina il contenuto.',
+      'Il primo byte è di norma il [[codice operativo]], che indica l’operazione da eseguire. Il byte 8B, per esempio, indica una MOV che carica un registro. Segue il byte [[modr/m|ModR/M]], che descrive gli operandi: tre dei suoi bit selezionano il registro, gli altri indicano la posizione del secondo operando.',
+      'Quando l’operando di memoria impiega un indice con una scala, ModR/M rinvia a un terzo byte, il byte [[sib|SIB]]. Il nome deriva dalle iniziali inglesi di scala, indice e base. I suoi otto bit formano tre campi: due bit per la scala, tre per il registro indice, tre per il registro base.',
+      { fig: 'celle', titolo: 'I tre campi del byte SIB', nota: 'L’esempio è il byte 0x8B. I confini dei campi cadono all’interno delle cifre esadecimali: la loro lettura richiede il passaggio dal binario.', celle: [
         { so: 'scala', v: '1', st: 'amb' }, { so: 'scala', v: '0', st: 'amb' }, { so: 'indice', v: '0', st: 'on' }, { so: 'indice', v: '0', st: 'on' }, { so: 'indice', v: '1', st: 'on' }, { so: 'base', v: '0', st: '' }, { so: 'base', v: '1', st: '' }, { so: 'base', v: '1', st: '' }] },
-      'I registri sono indicati con un numero di tre bit: 000 per RAX, 001 per RCX, 010 per RDX, 011 per RBX, 110 per RSI, 111 per RDI. La scala è scritta come esponente di 2: i bit 00 valgono 1, i bit 01 valgono 2, i bit 10 valgono 4, i bit 11 valgono 8. Due bit bastano per quattro esponenti, e da qui viene l’elenco delle scale ammesse.',
-      'Lo spiazzamento, quando è presente, segue il byte SIB e occupa uno oppure quattro byte, in ordine little-endian. Per questo le istruzioni con uno spiazzamento grande sono più lunghe delle altre.',
-      'Leggere questi campi serve a due scopi. Chi esamina un programma di cui manca il sorgente parte dai byte e ricostruisce le istruzioni. Inoltre i campi spiegano i limiti dell’assembly: una scala 3 è impossibile da scrivere perché nel byte manca il modo di rappresentarla.'
+      'I registri sono indicati con un numero di tre bit: 000 per RAX, 001 per RCX, 010 per RDX, 011 per RBX, 110 per RSI, 111 per RDI. La scala è scritta come esponente di 2: i bit 00 valgono 1, i bit 01 valgono 2, i bit 10 valgono 4, i bit 11 valgono 8. Due bit sono sufficienti per quattro esponenti, e da ciò deriva l’elenco delle scale ammesse.',
+      'Lo spiazzamento, quando è presente, segue il byte SIB e occupa uno oppure quattro byte, in ordine little-endian. Per questa ragione le istruzioni con uno spiazzamento grande sono più lunghe delle altre.',
+      'La lettura di tali campi ha due impieghi. L’esame di un programma privo del sorgente parte dai byte e ricostruisce le istruzioni. I campi spiegano inoltre i limiti dell’assembly: una scala 3 è impossibile da scrivere perché nel byte manca il modo di rappresentarla.'
     ]
   },
   esperimento: {
     faremo: [
-      'Un’istruzione di tre byte carica in EAX un dato dalla memoria. Sceglierai la scala, il registro indice e il registro base, e il terzo byte cambierà di conseguenza. Il registro base contiene 0x6000 e il registro indice contiene 3.',
-      'Partiremo dai byte, come fa il processore: scriveremo il byte SIB in binario, separeremo i tre campi e ricostruiremo l’istruzione. Dopo il caso proposto, cambia soltanto la scala e osserva quali bit si muovono.'
+      'Un’istruzione di tre byte carica in EAX un dato dalla memoria. I controlli fissano la scala, il registro indice e il registro base, e il terzo byte cambia di conseguenza. Il registro base contiene 0x6000 e il registro indice contiene 3.',
+      'Il percorso parte dai byte, come nel processore: il byte SIB è scritto in binario, i tre campi sono separati e l’istruzione è ricostruita. Dopo il caso proposto, è istruttivo cambiare soltanto la scala e individuare i bit che variano.'
     ],
     vedrai: [
       ['byte', 'I tre byte', 'In alto: codice operativo, ModR/M e SIB, con l’istruzione che si ricompone accanto.'],
@@ -55,7 +55,7 @@ SL.registra('2.3.6', {
       domanda: (p) => { const U = SL.unita236, c = U.conto(p); return 'I tre byte di un’istruzione sono 8B 04 ' + c.HX + '. Il terzo è il byte SIB, che in binario si scrive ' + c.campi.join(' ') + '. I codici dei registri sono RAX 000, RCX 001, RDX 010, RBX 011, RSI 110, RDI 111. Quale istruzione rappresentano?'; },
       opzioni: (p) => { const U = SL.unita236, s2 = { 1: 2, 2: 4, 4: 2, 8: 4 }[p.s]; return [U.ist(p.b, p.i, p.s), U.ist(p.i, p.b, p.s), U.ist(p.b, p.i, s2), U.ist(p.i, p.b, s2)].sort(); }
     },
-    confronto: (pred, esito, p) => { const c = SL.unita236.conto(p); return 'Avevi previsto `' + pred + '`. L’istruzione è `' + esito + '`. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'I due bit più alti, ' + c.campi[0] + ', sono l’esponente della scala: 2 elevato a ' + c.esp + ' fa ' + p.s + '. I tre bit centrali, ' + c.campi[1] + ', indicano l’indice ' + p.i.toUpperCase() + '. I tre bit più bassi, ' + c.campi[2] + ', indicano la base ' + p.b.toUpperCase() + '.'); },
+    confronto: (pred, esito, p) => { const c = SL.unita236.conto(p); return 'La previsione indicava `' + pred + '`. L’istruzione è `' + esito + '`. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'I due bit più alti, ' + c.campi[0] + ', sono l’esponente della scala: 2 elevato a ' + c.esp + ' fa ' + p.s + '. I tre bit centrali, ' + c.campi[1] + ', indicano l’indice ' + p.i.toUpperCase() + '. I tre bit più bassi, ' + c.campi[2] + ', indicano la base ' + p.b.toUpperCase() + '.'); },
     costruisci(p) {
       const el = SL.el, X = SL.x86, U = SL.unita236, c = U.conto(p), passi = [], I = p.i.toUpperCase(), B = p.b.toUpperCase();
       const A = '0x' + (0x6000 + 3 * p.s).toString(16).toUpperCase();
@@ -88,50 +88,50 @@ SL.registra('2.3.6', {
       const P = (o, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(o.fase), els: quadro(o) }, extra));
 
       const bin = X.bin8(c.sib), inv = bin.slice(5) + ' ' + bin.slice(0, 4), rov = X.bin8(c.sib ^ 0xFF), o0 = Array.from(new Set([bin, inv, rov])).sort();
-      P({ fase: 0 }, 0, 'Tre byte', 'L’istruzione occupa tre byte: 8B, 04 e ' + c.HX + '. Il primo è il codice operativo, e 8B indica una MOV che carica un registro dalla memoria. Il secondo, ModR/M, dice che il registro è EAX e che l’indirizzo è descritto dal byte successivo. Il terzo è il byte SIB.',
+      P({ fase: 0 }, 0, 'Tre byte', 'L’istruzione occupa tre byte: 8B, 04 e ' + c.HX + '. Il primo è il codice operativo, e 8B indica una MOV che carica un registro dalla memoria. Il secondo, ModR/M, indica che il registro è EAX e che l’indirizzo è descritto dal byte successivo. Il terzo è il byte SIB.',
         { chiedi: { d: 'Il byte SIB vale 0x' + c.HX + '. Come si scrive in binario?', o: o0, g: o0.indexOf(bin), no: 'La cifra ' + c.HX[0] + ' vale ' + bin.slice(0, 4) + ' e la cifra ' + c.HX[1] + ' vale ' + bin.slice(5) + '.' } });
-      P({ fase: 1 }, 1, 'Otto bit, tre campi', 'In binario il byte 0x' + c.HX + ' si scrive ' + bin + '. I campi hanno larghezze fisse: due bit per la scala, tre per l’indice, tre per la base. Raggruppati così, i bit diventano ' + c.campi.join(' ') + '. I confini dei campi cadono dentro le cifre esadecimali.',
+      P({ fase: 1 }, 1, 'Otto bit, tre campi', 'In binario il byte 0x' + c.HX + ' si scrive ' + bin + '. I campi hanno larghezze fisse: due bit per la scala, tre per l’indice, tre per la base. Con tale raggruppamento i bit diventano ' + c.campi.join(' ') + '. I confini dei campi cadono all’interno delle cifre esadecimali.',
         { calc: '0x' + c.HX + ' = ' + c.campi.join(' '), chiedi: { d: 'I due bit più alti valgono ' + c.campi[0] + ' e sono l’esponente della scala. Quanto vale la scala?', o: ['1', '2', '4', '8'], g: c.esp, no: 'I bit ' + c.campi[0] + ' valgono ' + c.esp + ' in decimale. La scala è 2 elevato a ' + c.esp + ', cioè ' + p.s + '.' } });
       st.sc = p.s;
-      P({ fase: 2 }, 2, 'La scala', 'I bit 7 e 6 valgono ' + c.campi[0] + ', cioè ' + c.esp + ' in decimale. Sono un esponente: la scala è 2 elevato a ' + c.esp + ', quindi ' + p.s + '. Due bit bastano per quattro esponenti, da 0 a 3, e le scale possibili sono 1, 2, 4 e 8.',
-        { calc: c.campi[0] + ' → 2 alla ' + c.esp + ' = ' + p.s, chiedi: { d: 'I tre bit centrali valgono ' + c.campi[1] + '. Quale registro fa da indice?', o: ['RCX', 'RDX', 'RSI'], g: ['rcx', 'rdx', 'rsi'].indexOf(p.i), no: 'Nella tabella dei codici, ' + c.campi[1] + ' è il numero di ' + I + '.' } });
+      P({ fase: 2 }, 2, 'La scala', 'I bit 7 e 6 valgono ' + c.campi[0] + ', cioè ' + c.esp + ' in decimale. Essi sono un esponente: la scala è 2 elevato a ' + c.esp + ', quindi ' + p.s + '. Due bit sono sufficienti per quattro esponenti, da 0 a 3, e le scale possibili sono 1, 2, 4 e 8.',
+        { calc: c.campi[0] + ' → 2 alla ' + c.esp + ' = ' + p.s, chiedi: { d: 'I tre bit centrali valgono ' + c.campi[1] + '. Quale registro ha la funzione di indice?', o: ['RCX', 'RDX', 'RSI'], g: ['rcx', 'rdx', 'rsi'].indexOf(p.i), no: 'Nella tabella dei codici, ' + c.campi[1] + ' è il numero di ' + I + '.' } });
       st.ix = p.i;
-      P({ fase: 3 }, 3, 'Il registro indice', 'I bit 5, 4 e 3 valgono ' + c.campi[1] + '. Nella tabella dei codici questo numero indica ' + I + ': è il registro che verrà moltiplicato per la scala.',
-        { calc: c.campi[1] + ' → ' + I, chiedi: { d: 'I tre bit più bassi valgono ' + c.campi[2] + '. Quale registro fa da base?', o: ['RAX', 'RBX', 'RDI'], g: ['rax', 'rbx', 'rdi'].indexOf(p.b), no: 'Nella tabella dei codici, ' + c.campi[2] + ' è il numero di ' + B + '.' } });
+      P({ fase: 3 }, 3, 'Il registro indice', 'I bit 5, 4 e 3 valgono ' + c.campi[1] + '. Nella tabella dei codici tale numero indica ' + I + ': è il registro che sarà moltiplicato per la scala.',
+        { calc: c.campi[1] + ' → ' + I, chiedi: { d: 'I tre bit più bassi valgono ' + c.campi[2] + '. Quale registro ha la funzione di base?', o: ['RAX', 'RBX', 'RDI'], g: ['rax', 'rbx', 'rdi'].indexOf(p.b), no: 'Nella tabella dei codici, ' + c.campi[2] + ' è il numero di ' + B + '.' } });
       st.bs = p.b;
       P({ fase: 4 }, 3, 'Il registro base', 'I bit 2, 1 e 0 valgono ' + c.campi[2] + ', il numero di ' + B + '. Con i tre campi decodificati l’operando di memoria è completo.', { calc: c.campi[2] + ' → ' + B });
-      P({ fase: 5 }, 4, 'L’istruzione e l’indirizzo', 'I tre byte rappresentano `' + U.ist(p.b, p.i, p.s) + '`. Con ' + B + ' = 0x6000 e ' + I + ' = 3, l’indirizzo efficace è 0x6000 + 3 × ' + p.s + ' = ' + A + ', e da lì l’istruzione legge quattro byte. Il processore compie questo percorso a ogni istruzione: legge i byte, separa i campi, calcola l’indirizzo.',
+      P({ fase: 5 }, 4, 'L’istruzione e l’indirizzo', 'I tre byte rappresentano `' + U.ist(p.b, p.i, p.s) + '`. Con ' + B + ' = 0x6000 e ' + I + ' = 3, l’indirizzo efficace è 0x6000 + 3 × ' + p.s + ' = ' + A + ', e da tale indirizzo l’istruzione legge quattro byte. Il processore compie questo percorso a ogni istruzione: legge i byte, separa i campi, calcola l’indirizzo.',
         { calc: '0x6000 + 3 × ' + p.s + ' = ' + A, esito: [U.ist(p.b, p.i, p.s), 'si'] });
       return { passi, esito: U.ist(p.b, p.i, p.s) };
     }
   },
   bilancio: {
     regola: [
-      'Un’istruzione è una sequenza di byte: codice operativo, ModR/M e, quando servono, SIB e spiazzamento. Il byte SIB contiene tre campi: scala in due bit, indice in tre, base in tre.',
-      'La scala è scritta come esponente di 2 e i registri come numeri di tre bit. Per decodificare si scrive il byte in binario e si separano i campi.'
+      'Un’istruzione è una sequenza di byte: codice operativo, ModR/M e, quando occorrono, SIB e spiazzamento. Il byte SIB contiene tre campi: scala in due bit, indice in tre, base in tre.',
+      'La scala è scritta come esponente di 2 e i registri come numeri di tre bit. La decodifica consiste nella scrittura del byte in binario e nella separazione dei campi.'
     ],
     errori: [
       ['Leggere i due bit della scala come la scala stessa.', 'I bit 10 valgono 2 come esponente. La scala è 2 elevato a 2, cioè 4.'],
       ['Scambiare l’indice con la base.', 'Il campo centrale è l’indice, quello più a destra è la base.'],
-      ['Separare i campi sulle cifre esadecimali.', 'I campi sono larghi 2, 3 e 3 bit, e i loro confini cadono dentro le cifre. Occorre passare dal binario.']
+      ['Separare i campi sulle cifre esadecimali.', 'I campi sono larghi 2, 3 e 3 bit, e i loro confini cadono all’interno delle cifre. Occorre il passaggio dal binario.']
     ],
-    saFare: ['Scrivo in binario un byte SIB e ne separo i tre campi.', 'Ricostruisco base, indice e scala dell’operando di memoria.', 'Compongo il byte SIB di un operando assegnato.'],
+    saFare: ['Scrivere in binario un byte SIB e separarne i tre campi.', 'Ricostruire base, indice e scala dell’operando di memoria.', 'Comporre il byte SIB di un operando assegnato.'],
     esercizi: [
-      { d: 'Quale byte SIB codifica l’operando `[rdi + rsi*8]`? I codici sono 110 per RSI e 111 per RDI. Rispondi in esadecimale.', segnaposto: 'Per esempio 0x8B', giuste: ['0xf7', 'f7', 'f7h'],
-        ok: 'La scala 8 è 2 alla terza, quindi i bit della scala sono 11. L’indice RSI è 110 e la base RDI è 111. In fila: 11 110 111, cioè 1111 0111.',
+      { d: 'Quale byte SIB codifica l’operando `[rdi + rsi*8]`? I codici sono 110 per RSI e 111 per RDI. Si risponda in esadecimale.', segnaposto: 'Per esempio 0x8B', giuste: ['0xf7', 'f7', 'f7h'],
+        ok: 'La scala 8 è 2 alla terza, e i bit della scala sono quindi 11. L’indice RSI è 110 e la base RDI è 111. In sequenza: 11 110 111, cioè 1111 0111.',
         diagnosi: [
           { se: ['0xfe', 'fe'], msg: 'Indice e base sono scambiati. Il campo centrale spetta all’indice, RSI, e quello a destra alla base, RDI.' },
-          { se: ['0xb7', 'b7'], msg: 'I campi dei registri sono giusti. La scala 8 è 2 alla terza: i suoi due bit sono 11.' },
-          { se: ['0x37', '37'], msg: 'I campi dei registri sono giusti. Mancano i due bit della scala: 8 è 2 alla terza, quindi 11.' },
-          { se: ['11110111', '11 110 111', '1111 0111'], msg: 'I bit sono giusti. Raggruppali a quattro e scrivi le due cifre esadecimali.' }
+          { se: ['0xb7', 'b7'], msg: 'I campi dei registri sono corretti. La scala 8 è 2 alla terza: i suoi due bit sono 11.' },
+          { se: ['0x37', '37'], msg: 'I campi dei registri sono corretti. Mancano i due bit della scala: 8 è 2 alla terza, e quindi 11.' },
+          { se: ['11110111', '11 110 111', '1111 0111'], msg: 'I bit sono corretti. Vanno raggruppati a quattro e scritti come due cifre esadecimali.' }
         ],
-        altro: 'Il byte è diverso. Scrivi in fila i due bit della scala, i tre dell’indice e i tre della base.',
-        indizi: ['La scala 8 è 2 alla terza: i due bit valgono 11.', 'Indice RSI: 110. Base RDI: 111.', 'In fila 11 110 111. A gruppi di quattro: 1111 0111.'],
+        altro: 'Il byte è diverso. Si scrivano in sequenza i due bit della scala, i tre dell’indice e i tre della base.',
+        indizi: ['La scala 8 è 2 alla terza: i due bit valgono 11.', 'Indice RSI: 110. Base RDI: 111.', 'In sequenza 11 110 111. A gruppi di quattro: 1111 0111.'],
         svolgimento: ['Scala 8 = 2 alla 3: bit 11.', 'Indice RSI: 110. Base RDI: 111.', 'Il byte è 11 110 111 = 1111 0111.', '1111 è F, 0111 è 7: il byte vale 0xF7.'] },
-      { d: 'Da che cosa dipende il fatto che l’indirizzo efficace ammetta soltanto le scale 1, 2, 4 e 8?', guida: 'Scegli la risposta.', o: [
-        { t: 'Dal byte SIB, che riserva alla scala due bit usati come esponente di 2.', ok: true, fb: 'Due bit rappresentano gli esponenti da 0 a 3, cioè le scale 1, 2, 4 e 8. Per altre scale manca una codifica.' },
-        { t: 'Dalla larghezza dei registri, che arrivano al massimo a 8 byte.', fb: 'La coincidenza con le ampiezze degli accessi è voluta, ma il limite viene dalla codifica: il campo della scala ha due bit.' },
-        { t: 'Dall’istruzione LEA, che conosce soltanto queste quattro moltiplicazioni.', fb: 'Il limite riguarda ogni operando di memoria, con qualunque istruzione. Viene dal campo della scala nel byte SIB.' }] }
+      { d: 'Da che cosa dipende il fatto che l’indirizzo efficace ammetta soltanto le scale 1, 2, 4 e 8?', guida: 'Si scelga la risposta.', o: [
+        { t: 'Dal byte SIB, che riserva alla scala due bit impiegati come esponente di 2.', ok: true, fb: 'Due bit rappresentano gli esponenti da 0 a 3, cioè le scale 1, 2, 4 e 8. Per altre scale manca una codifica.' },
+        { t: 'Dalla larghezza dei registri, che raggiungono al massimo 8 byte.', fb: 'La coincidenza con le ampiezze degli accessi è voluta. Il limite deriva tuttavia dalla codifica: il campo della scala ha due bit.' },
+        { t: 'Dall’istruzione LEA, che dispone soltanto di queste quattro moltiplicazioni.', fb: 'Il limite riguarda ogni operando di memoria, con qualunque istruzione. Esso deriva dal campo della scala nel byte SIB.' }] }
     ]
   }
 });

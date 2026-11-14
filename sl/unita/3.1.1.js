@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.1.1', {
   titolo: 'Dalla specifica booleana ai blocchi del percorso dati',
-  obiettivo: 'Alla fine saprai tradurre una richiesta espressa a parole in un circuito di porte, e verificare che due circuiti diversi calcolano la stessa funzione.',
+  obiettivo: 'Obiettivo: tradurre una richiesta espressa a parole in un circuito di porte, e verificare che due circuiti diversi calcolano la stessa funzione.',
   concetti: [['tabella', 'Dalla richiesta alla tabella'], ['porta', 'Tre coppie e una OR'], ['bilancio', 'Due circuiti, una funzione']],
   filigrana: ['porta', 'tabella', 'gate'],
   richiami: {
@@ -55,7 +55,7 @@ SL.registra('3.1.1', {
       domanda: (p) => 'I sensori valgono A = ' + p.a + ', B = ' + p.b + ' e C = ' + p.c + '. Quante delle tre porte AND, una per coppia di sensori, daranno 1?',
       opzioni: () => [0, 1, 2, 3]
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + '. Le AND che danno 1 sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 3 ? 'Con tre sensori a 1 ogni coppia è completa, quindi le AND accese sono tre.' : esito === 1 ? 'Con due sensori a 1 esiste una sola coppia completa: quella formata proprio da quei due.' : 'Con meno di due sensori a 1 nessuna coppia è completa.') + (pred === 2 ? ' Due AND accese sono un caso impossibile, perché due coppie complete richiedono tre sensori a 1, e allora è completa anche la terza.' : ''),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. Le AND che danno 1 sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 3 ? 'Con tre sensori a 1 ogni coppia è completa, quindi le AND accese sono tre.' : esito === 1 ? 'Con due sensori a 1 esiste una sola coppia completa: quella formata proprio da quei due.' : 'Con meno di due sensori a 1 nessuna coppia è completa.') + (pred === 2 ? ' Due AND accese sono un caso impossibile, perché due coppie complete richiedono tre sensori a 1, e allora è completa anche la terza.' : ''),
     costruisci(p) {
       const el = SL.el, passi = [], V = { A: p.a, B: p.b, C: p.c }, n = p.a + p.b + p.c;
       const COPPIE = [['A', 'B'], ['A', 'C'], ['B', 'C']], YS = { A: 50, B: 136, C: 222 }, YA = [42, 128, 214];
@@ -101,7 +101,7 @@ SL.registra('3.1.1', {
       ['Giudicare equivalenti due circuiti provando pochi casi.', 'Servono tutte le righe. Con tre ingressi sono otto, e una sola riga diversa basta a distinguere due funzioni.'],
       ['Confondere «almeno due» con «esattamente due».', 'Con tre sensori a 1 la spia deve restare accesa, perché la specifica chiede almeno due segnalazioni.']
     ],
-    saFare: ['Traduco una richiesta a parole in una tabella di verità.', 'Costruisco la maggioranza di tre bit con tre AND e una OR.', 'Verifico l’equivalenza di due circuiti confrontando le tabelle.'],
+    saFare: ['Tradurre una richiesta a parole in una tabella di verità.', 'Costruire la maggioranza di tre bit con tre AND e una OR.', 'Verificare l’equivalenza di due circuiti confrontando le tabelle.'],
     esercizi: [
       { d: 'Una seconda spia deve accendersi quando esattamente due sensori su tre valgono 1. In quante righe della tabella di verità la sua uscita vale 1?', segnaposto: 'Un numero', giuste: ['3', 'tre'],
         ok: 'Le righe sono 011, 101 e 110. La riga 111 ha tre sensori a 1 e resta esclusa.',
@@ -110,10 +110,10 @@ SL.registra('3.1.1', {
           { se: ['2', 'due'], msg: 'Due è il numero di sensori richiesto. La domanda riguarda le righe della tabella che soddisfano la richiesta.' },
           { se: ['8', 'otto'], msg: 'Otto sono tutte le righe della tabella. Vanno contate soltanto quelle con due sensori a 1.' }
         ],
-        altro: 'Il numero è diverso. Scrivi le otto combinazioni e conta quelle che contengono due 1 e uno 0.',
+        altro: 'Il numero è diverso. Si scrivano le otto combinazioni e si contino quelle che contengono due 1 e uno 0.',
         indizi: ['Le combinazioni di tre bit sono otto.', 'Cerca quelle con due 1 e uno 0.', 'Lo 0 può stare in tre posizioni diverse.'],
         svolgimento: ['Combinazioni con due 1: 011, 101, 110.', 'La riga 111 ne ha tre e va esclusa.', 'Righe con uscita 1: 3.'] },
-      { d: 'Quale formula calcola la maggioranza dei tre bit A, B e C?', guida: 'Scegli la risposta.', o: [
+      { d: 'Quale formula calcola la maggioranza dei tre bit A, B e C?', guida: 'Si scelga la risposta.', o: [
         { t: 'AB OR AC OR BC', ok: true, fb: 'Almeno due bit a 1 significa almeno una coppia completa, e le coppie sono tre.' },
         { t: 'A AND B AND C', fb: 'Questa formula vale 1 soltanto quando tutti e tre i bit valgono 1. Alla maggioranza ne bastano due.' },
         { t: 'A OR B OR C', fb: 'Questa formula vale 1 già con un solo bit a 1.' },

@@ -28,7 +28,7 @@ SL.unita366 = (() => {
 })();
 SL.registra('3.6.6', {
   titolo: 'Traccia e conteggio delle prestazioni',
-  obiettivo: 'Alla fine saprai seguire ciclo per ciclo una sequenza con un carico e il suo uso, contare i cicli e le attese, e dire quando un cambio d’ordine elimina l’attesa.',
+  obiettivo: 'Obiettivo: seguire ciclo per ciclo una sequenza con un carico e il suo uso, contare i cicli e le attese, e dire quando un cambio d’ordine elimina l’attesa.',
   concetti: [['tabella', 'La traccia ciclo per ciclo'], ['stallo', 'Un ciclo di attesa'], ['bilancio', 'Lo stesso lavoro in meno cicli']],
   filigrana: ['tabella', 'stallo', 'bilancio'],
   richiami: {
@@ -78,7 +78,7 @@ SL.registra('3.6.6', {
       domanda: (p) => 'Le tre istruzioni entrano nell’ordine ' + SL.unita366.NOME[p.ordine].replace(/ · /g, ', ') + (p.g > 1 ? ', e il gruppo si ripete ' + p.g + ' volte' : '') + '. La pipeline parte vuota. Quanti cicli passano prima che l’ultima istruzione esca?',
       opzioni: (p) => [3 * p.g, 3 * p.g + 4, 4 * p.g + 4, 5 * p.g + 4].map((v) => [v, v + ' cicli'])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + ' cicli. La sequenza ne occupa ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 3 * p.g ? 'Mancano i 4 cicli che l’ultima istruzione impiega per arrivare allo stadio W.' : p.ordine === 'vicino' ? (pred === 3 * p.g + 4 ? 'Quello è il flusso ideale. In quest’ordine ogni U segue subito il proprio carico, e attende un ciclo.' : 'Grazie all’inoltro ogni carico seguito da un uso costa un ciclo soltanto.') : 'In quest’ordine I separa ogni carico dal suo uso, e nessuna istruzione attende.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' cicli. La sequenza ne occupa ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 3 * p.g ? 'Mancano i 4 cicli che l’ultima istruzione impiega per arrivare allo stadio W.' : p.ordine === 'vicino' ? (pred === 3 * p.g + 4 ? 'Quello è il flusso ideale. In quest’ordine ogni U segue subito il proprio carico, e attende un ciclo.' : 'Grazie all’inoltro ogni carico seguito da un uso costa un ciclo soltanto.') : 'In quest’ordine I separa ogni carico dal suo uso, e nessuna istruzione attende.'),
     costruisci(p) {
       const el = SL.el, U = SL.unita366, passi = [], T = U.traccia(p.ordine, p.g), n = 3 * p.g, vicino = p.ordine === 'vicino', larghi = 4 * p.g + 4, altro = U.traccia(vicino ? 'separa' : 'vicino', p.g), s = p.g > 1 ? '1' : '';
       const yb = 46 + T.righe.length * 27;
@@ -113,7 +113,7 @@ SL.registra('3.6.6', {
       ['Riordinare senza controllare le dipendenze.', 'Lo scambio è lecito soltanto se l’istruzione spostata è indipendente dalle altre nei registri, nella memoria e nei codici di condizione.'],
       ['Contare due cicli di attesa per un carico.', 'Con l’inoltro basta un ciclo: il dato viene consegnato appena esce dalla memoria.']
     ],
-    saFare: ['Seguo una traccia con uno stallo.', 'Conto cicli e attese di una sequenza.', 'Riconosco quando un riordino è lecito.'],
+    saFare: ['Seguire una traccia con uno stallo.', 'Contare cicli e attese di una sequenza.', 'Riconoscere quando un riordino è lecito.'],
     esercizi: [
       { d: 'Il gruppo L, U, I viene ripetuto tre volte, a partire dalla pipeline vuota. Quanti cicli occupa in tutto?', segnaposto: 'Un numero', giuste: ['16', 'sedici'],
         ok: 'Nove istruzioni, 4 cicli di riempimento e 3 attese: 9 + 4 + 3 = 16.',
@@ -134,7 +134,7 @@ SL.registra('3.6.6', {
         altro: 'Il numero è diverso. In quest’ordine nessuna istruzione attende.',
         indizi: ['Le istruzioni sono ancora 9.', 'Fra ogni carico e il suo uso c’è una istruzione.', '9 + 4.'],
         svolgimento: ['Istruzioni: 9.', 'Attese: 0.', 'Totale: 9 + 4 = 13 cicli.'] },
-      { d: 'Un programma contiene, nell’ordine, `mrmovq 0(%rbx), %rax`, `addq %rax, %rcx` e `subq %rcx, %rdx`. Si può spostare la `subq` fra le altre due per evitare l’attesa?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un programma contiene, nell’ordine, `mrmovq 0(%rbx), %rax`, `addq %rax, %rcx` e `subq %rcx, %rdx`. Si può spostare la `subq` fra le altre due per evitare l’attesa?', guida: 'Si scelga la risposta.', o: [
         { t: 'No: la subq legge %rcx, che la addq deve ancora scrivere', ok: true, fb: 'Spostata prima della addq, la subq leggerebbe il vecchio valore di %rcx, e il risultato cambierebbe.' },
         { t: 'Sì: la subq è indipendente dal carico', fb: 'La subq è indipendente dal carico. Dipende però dalla addq, perché legge %rcx.' },
         { t: 'Sì: due operazioni aritmetiche si possono sempre scambiare', fb: 'Lo scambio è lecito soltanto fra istruzioni indipendenti. Qui la seconda legge il risultato della prima.' }] }

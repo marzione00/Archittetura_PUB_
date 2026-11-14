@@ -24,7 +24,7 @@ SL.unita431 = (() => {
 })();
 SL.registra('4.3.1', {
   titolo: 'Interfaccia del controller e notifiche',
-  obiettivo: 'Alla fine saprai descrivere come un driver comanda una periferica attraverso i registri del suo controller, e in quale momento può leggere il dato richiesto.',
+  obiettivo: 'Obiettivo: descrivere come un driver comanda una periferica attraverso i registri del suo controller, e in quale momento può leggere il dato richiesto.',
   concetti: [['dispositivo', 'Il controller fra periferica e processore'], ['register', 'Comando, stato, dato'], ['clock', 'Troppo presto, troppo tardi']],
   filigrana: ['dispositivo', 'register', 'clock'],
   richiami: {
@@ -75,7 +75,7 @@ SL.registra('4.3.1', {
       domanda: (p) => 'Il driver avvia la misura al ciclo 0. Il controller la completa al ciclo 4. Il driver legge STATUS per la prima volta al ciclo ' + p.t + '. In quale ciclo riesce a leggere il dato?',
       opzioni: (p) => Array.from(new Set([p.t, 4, p.t + 4])).sort((a, b) => a - b).map((v) => [v, 'Al ciclo ' + v])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto il ciclo ' + pred + '. Il driver legge il dato al ciclo ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t < 4 ? 'Al ciclo ' + p.t + ' READY vale ancora 0. Il driver deve attendere la fine della misura, al ciclo 4.' : 'Il dato è pronto dal ciclo 4, e il driver lo preleva quando arriva, al ciclo ' + p.t + '.'),
+    confronto: (pred, esito, p) => 'La previsione indicava il ciclo ' + pred + '. Il driver legge il dato al ciclo ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t < 4 ? 'Al ciclo ' + p.t + ' READY vale ancora 0. Il driver deve attendere la fine della misura, al ciclo 4.' : 'Il dato è pronto dal ciclo 4, e il driver lo preleva quando arriva, al ciclo ' + p.t + '.'),
     costruisci(p) {
       const U = SL.unita431, H = U.H, passi = [], t = p.t, presto = t < U.FINE, letto = Math.max(U.FINE, t);
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'BIT READY, CICLO PER CICLO', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 40, w: 826, hc: 34, conti: true, h: 58, gap: 14 }));
@@ -102,7 +102,7 @@ SL.registra('4.3.1', {
       ['Confondere i registri del dispositivo con quelli del processore.', 'Stanno nel controller, e ciascuno ha un compito fisso stabilito dal costruttore.'],
       ['Pensare che il dato resti leggibile per sempre.', 'In questo controller la lettura consuma il campione, e READY torna a 0.']
     ],
-    saFare: ['Descrivo il compito di COMMAND, STATUS e DATA.', 'Dico quando il driver può leggere il dato.', 'Calcolo il ritardo di una lettura tardiva.'],
+    saFare: ['Descrivere il compito di COMMAND, STATUS e DATA.', 'Indicare quando il driver può leggere il dato.', 'Calcolare il ritardo di una lettura tardiva.'],
     esercizi: [
       { d: 'Un controller completa una misura 6 cicli dopo il comando, dato al ciclo 0. Il driver legge STATUS al ciclo 9, trova READY a 1 e legge subito DATA. Di quanti cicli ha ritardato la lettura rispetto al primo momento possibile?', segnaposto: 'Un numero', giuste: ['3', 'tre'],
         ok: 'Il dato era pronto dal ciclo 6, e la lettura avviene al ciclo 9: 9 − 6 = 3 cicli.',
@@ -111,14 +111,14 @@ SL.registra('4.3.1', {
           { se: ['6', 'sei'], msg: 'Sei è il ciclo in cui il dato diventa pronto.' },
           { se: ['0', 'zero'], msg: 'Il dato era pronto prima dell’arrivo del driver.' }
         ],
-        altro: 'Il numero è diverso. Sottrai il ciclo in cui il dato è pronto dal ciclo della lettura.',
+        altro: 'Il numero è diverso. Si sottragga il ciclo in cui il dato è pronto dal ciclo della lettura.',
         indizi: ['Il dato è pronto dal ciclo 6.', 'Il driver lo legge al ciclo 9.', '9 − 6.'],
         svolgimento: ['Dato pronto: ciclo 6.', 'Lettura: ciclo 9.', 'Ritardo: 3 cicli.'] },
-      { d: 'Lo stesso driver legge STATUS al ciclo 2 e trova READY a 0. Che cosa deve fare?', guida: 'Scegli la risposta.', o: [
+      { d: 'Lo stesso driver legge STATUS al ciclo 2 e trova READY a 0. Che cosa deve fare?', guida: 'Si scelga la risposta.', o: [
         { t: 'Attendere, e leggere di nuovo STATUS più tardi', ok: true, fb: 'La misura è in corso. Il dato sarà valido soltanto quando READY passerà a 1.' },
         { t: 'Leggere comunque DATA', fb: 'Con READY a 0 il registro DATA non contiene il risultato di questa misura.' },
         { t: 'Scrivere di nuovo START', fb: 'La misura è già in corso. Un secondo comando la farebbe ripartire, oppure verrebbe ignorato.' }] },
-      { d: 'Quale parte del sistema conosce l’ordine in cui usare i registri di un controller?', guida: 'Scegli la risposta.', o: [
+      { d: 'Quale parte del sistema conosce l’ordine in cui usare i registri di un controller?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il driver di quella periferica', ok: true, fb: 'Il driver racchiude la conoscenza del controller. Il resto del kernel gli chiede il servizio.' },
         { t: 'Il programma dell’utente', fb: 'Nel modo utente i registri dei dispositivi sono irraggiungibili. Il programma chiede al kernel.' },
         { t: 'Il processore', fb: 'Il processore esegue le istruzioni del driver. Il significato dei registri sta nel driver.' }] }

@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('4.1.1', {
   titolo: 'Interruzione del flusso sequenziale',
-  obiettivo: 'Alla fine saprai dire che cosa accade quando un evento sospende un programma, e da quale indirizzo il programma riprende dopo un interrupt del timer e dopo una pagina assente.',
+  obiettivo: 'Obiettivo: dire che cosa accade quando un evento sospende un programma, e da quale indirizzo il programma riprende dopo un interrupt del timer e dopo una pagina assente.',
   concetti: [['puntatore', 'Il flusso normale'], ['interrupt', 'Un evento lo devia'], ['gate', 'Il gestore e la ripresa']],
   filigrana: ['interrupt', 'puntatore', 'gate'],
   richiami: {
@@ -52,7 +52,7 @@ SL.registra('4.1.1', {
       domanda: (p) => 'L’istruzione corrente comincia a ' + SL.kern.H(p.pc) + ' e occupa 4 byte. ' + (p.evento === 'irq' ? 'Mentre viene eseguita, il timer chiede attenzione.' : 'Il dato che chiede si trova in una pagina assente.') + ' Da quale indirizzo riprenderà il programma dopo il gestore?',
       opzioni: (p) => [p.pc, p.pc + 4, p.pc + 8].map((v) => [v, SL.kern.H(v)])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + SL.kern.H(pred) + '. Il programma riprende da ' + SL.kern.H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.evento === 'irq' ? 'Il processore completa l’istruzione prima di servire il timer, e riprende dalla seguente.' : 'L’istruzione è rimasta incompiuta, e va ripetuta dall’inizio.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + SL.kern.H(pred) + '. Il programma riprende da ' + SL.kern.H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.evento === 'irq' ? 'Il processore completa l’istruzione prima di servire il timer, e riprende dalla seguente.' : 'L’istruzione è rimasta incompiuta, e va ripetuta dall’inizio.'),
     costruisci(p) {
       const K = SL.kern, H = K.H, passi = [], pc = p.pc, irq = p.evento === 'irq', r = K.ripresa(p.evento, pc), ist = K.EVENTI[p.evento].ist;
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'PROGRAMMA IN MODO UTENTE', 'mono')].concat(K.flusso('q', p.evento, pc, f, { x: 20, y: 24, w: 264, gap: 14, h: 62 }));
@@ -79,7 +79,7 @@ SL.registra('4.1.1', {
       ['Riprendere sempre dall’istruzione seguente.', 'Dopo una pagina assente l’istruzione è incompiuta. Saltarla lascerebbe il programma senza il dato.'],
       ['Credere che il programma si accorga della sospensione.', 'Il gestore lavora per conto del kernel. Al ritorno il programma ritrova i propri dati e prosegue.']
     ],
-    saFare: ['Descrivo il percorso da un evento al gestore e ritorno.', 'Calcolo l’indirizzo di ripresa dopo un interrupt.', 'Calcolo l’indirizzo di ripresa dopo una pagina assente.'],
+    saFare: ['Descrivere il percorso da un evento al gestore e ritorno.', 'Calcolare l’indirizzo di ripresa dopo un interrupt.', 'Calcolare l’indirizzo di ripresa dopo una pagina assente.'],
     esercizi: [
       { d: 'Una istruzione di 4 byte comincia all’indirizzo 0x3008. Mentre viene eseguita arriva un interrupt del timer. Quale indirizzo viene salvato per la ripresa? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['300c', '0x300c', '300ch'],
         ok: 'L’istruzione viene completata, e il programma riprende dalla seguente: 0x3008 + 4 = 0x300C.',
@@ -99,7 +99,7 @@ SL.registra('4.1.1', {
         altro: 'Il valore è diverso. Dopo una pagina assente il programma ripete l’istruzione interrotta.',
         indizi: ['La lettura è fallita.', 'L’istruzione è incompiuta.', 'Si riprende da lei: 0x3008.'],
         svolgimento: ['La pagina manca, e l’istruzione resta incompiuta.', 'Il gestore prepara la pagina.', 'Indirizzo salvato: 0x3008.'] },
-      { d: 'Dopo un interrupt del timer il processore riprendesse per errore dalla stessa istruzione, `add rax, 8`. Che cosa accadrebbe a RAX?', guida: 'Scegli la risposta.', o: [
+      { d: 'Dopo un interrupt del timer il processore riprendesse per errore dalla stessa istruzione, `add rax, 8`. Che cosa accadrebbe a RAX?', guida: 'Si scelga la risposta.', o: [
         { t: 'Verrebbe aumentato di 16 al posto di 8', ok: true, fb: 'L’istruzione era già stata completata, e ripeterla ne raddoppia l’effetto.' },
         { t: 'Resterebbe corretto, perché l’istruzione è la stessa', fb: 'L’istruzione è la stessa, e proprio per questo il suo effetto si sommerebbe due volte.' },
         { t: 'Verrebbe azzerato dal gestore', fb: 'Il gestore lascia i dati del programma come li ha trovati. L’errore starebbe nell’indirizzo di ripresa.' }] }

@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.4.4', {
   titolo: 'Equazioni di controllo, traccia e verifica',
-  obiettivo: 'Alla fine saprai scrivere i segnali di controllo di SEQ per `pushq` e per `popq`: l’indirizzo presentato alla memoria, la direzione del trasferimento e i registri da scrivere.',
+  obiettivo: 'Obiettivo: scrivere i segnali di controllo di SEQ per `pushq` e per `popq`: l’indirizzo presentato alla memoria, la direzione del trasferimento e i registri da scrivere.',
   concetti: [['mux', 'Regole che scelgono'], ['memory', 'Quale indirizzo, quale direzione'], ['lente', 'Verificare con una traccia']],
   filigrana: ['mux', 'memory', 'tabella'],
   richiami: {
@@ -60,7 +60,7 @@ SL.registra('3.4.4', {
       domanda: (p) => { const H = SL.y86.esa; return 'Lo stato iniziale è %rsp = ' + H(p.sp) + ' e %rax = ' + H(p.v) + ', e la cella ' + H(p.sp) + ' contiene ' + H(p.m) + '. SEQ esegue `' + p.op + ' %rax`. Che cosa fa la memoria dei dati?'; },
       opzioni: (p) => { const H = SL.y86.esa; return [['W' + H(p.sp - 8), 'Scrive nella cella ' + H(p.sp - 8)], ['W' + H(p.sp), 'Scrive nella cella ' + H(p.sp)], ['R' + H(p.sp), 'Legge la cella ' + H(p.sp)], ['R' + H(p.sp + 8), 'Legge la cella ' + H(p.sp + 8)]]; }
     },
-    confronto: (pred, esito, p) => { const T = (k) => (k[0] === 'W' ? 'una scrittura nella cella ' : 'una lettura della cella ') + k.slice(1); return 'Avevi previsto ' + T(pred) + '. La memoria esegue ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.op === 'pushq' ? '`pushq` scrive, e lo fa alla cima nuova: mem_addr = valE = %rsp − 8.' : '`popq` legge, e lo fa alla cima attuale: mem_addr = valA = %rsp. valE, una cella più su, serve soltanto ad aggiornare il puntatore.'); },
+    confronto: (pred, esito, p) => { const T = (k) => (k[0] === 'W' ? 'una scrittura nella cella ' : 'una lettura della cella ') + k.slice(1); return 'La previsione indicava ' + T(pred) + '. La memoria esegue ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.op === 'pushq' ? '`pushq` scrive, e lo fa alla cima nuova: mem_addr = valE = %rsp − 8.' : '`popq` legge, e lo fa alla cima attuale: mem_addr = valA = %rsp. valE, una cella più su, serve soltanto ad aggiornare il puntatore.'); },
     costruisci(p) {
       const el = SL.el, H = SL.y86.esa, passi = [], push = p.op === 'pushq', valE = push ? p.sp - 8 : p.sp + 8, addr = push ? valE : p.sp, giu = p.sp - 8;
       const st = { v: {}, s: {}, rsp: p.sp, rax: p.v, cg: null, ck: 'basso' };
@@ -109,9 +109,9 @@ SL.registra('3.4.4', {
       ['Attivare insieme mem_read e mem_write.', 'In un ciclo la memoria dei dati legge oppure scrive, quindi al massimo una delle due abilitazioni vale 1.'],
       ['Dimenticare che popq scrive due registri.', 'Allo stesso fronte %rsp riceve valE e rA riceve valM.']
     ],
-    saFare: ['Scrivo mem_addr, mem_read e mem_write per le istruzioni che usano la memoria.', 'Indico dstE e dstM per ogni classe.', 'Verifico un’equazione con una traccia che parte da uno stato noto.'],
+    saFare: ['Scrivere mem_addr, mem_read e mem_write per le istruzioni che usano la memoria.', 'Indicare dstE e dstM per ogni classe.', 'Verificare un’equazione con una traccia che parte da uno stato noto.'],
     esercizi: [
-      { d: 'Per quale gruppo di istruzioni il segnale mem_write vale 1?', guida: 'Scegli la risposta.', o: [
+      { d: 'Per quale gruppo di istruzioni il segnale mem_write vale 1?', guida: 'Si scelga la risposta.', o: [
         { t: 'rmmovq, pushq, call', ok: true, fb: 'Sono le tre classi che scrivono una parola in memoria.' },
         { t: 'mrmovq, popq, ret', fb: 'Queste tre classi leggono dalla memoria: per loro vale 1 mem_read.' },
         { t: 'addq, subq, rrmovq', fb: 'Queste istruzioni lavorano soltanto sui registri, e le due abilitazioni della memoria valgono 0.' }] },
@@ -122,7 +122,7 @@ SL.registra('3.4.4', {
           { se: ['0x1f0', '1f0', '1f0h'], msg: 'Questo è l’indirizzo da cui `popq` legge. Dopo il prelievo il puntatore avanza di 8.' },
           { se: ['0x200', '200', '200h'], msg: 'Una parola occupa 8 byte, quindi il puntatore avanza di 8.' }
         ],
-        altro: 'Il valore è diverso. Aggiungi 8 al vecchio %rsp, in esadecimale.',
+        altro: 'Il valore è diverso. Si aggiunga 8 al vecchio %rsp, in esadecimale.',
         indizi: ['aluB = valB = 0x1F0.', 'Per `popq`, aluA = +8.', '0x1F0 + 8.'],
         svolgimento: ['valB = 0x1F0.', 'valE = 0x1F0 + 8 = 0x1F8.', 'Al fronte: %rsp = 0x1F8.'] }
     ],

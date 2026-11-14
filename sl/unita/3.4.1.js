@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.4.1', {
   titolo: 'Dalle fasi dell’ISA a una macchina sincrona',
-  obiettivo: 'Alla fine saprai descrivere il processore SEQ, che esegue un’intera istruzione in un ciclo di clock, e distinguere i valori che si propagano durante il ciclo dalle parti dello stato che cambiano al fronte.',
+  obiettivo: 'Obiettivo: descrivere il processore SEQ, che esegue un’intera istruzione in un ciclo di clock, e distinguere i valori che si propagano durante il ciclo dalle parti dello stato che cambiano al fronte.',
   concetti: [['cpu', 'Sei fasi, un solo ciclo'], ['bus', 'Segnali che si propagano'], ['clock', 'Lo stato cambia al fronte']],
   filigrana: ['cpu', 'clock', 'strati'],
   richiami: {
@@ -60,7 +60,7 @@ SL.registra('3.4.1', {
       domanda: (p) => 'SEQ sta eseguendo `subq %rax, %rbx` con %rax = ' + SL.x86.num(p.a) + ' e %rbx = ' + p.b + '. L’ALU ha appena prodotto valE, e il fronte del clock deve ancora arrivare. Che cosa contiene %rbx in questo momento?',
       opzioni: (p) => Array.from(new Set([p.b, p.b - p.a, p.a])).sort((x, y) => x - y).map((v) => [v, SL.x86.num(v)])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + SL.x86.num(pred) + '. Prima del fronte %rbx contiene ' + SL.x86.num(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il risultato ' + SL.x86.num(p.b - p.a) + ' è valE, un valore sui fili. Il registro lo cattura soltanto al fronte, e fino ad allora conserva il vecchio contenuto.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + SL.x86.num(pred) + '. Prima del fronte %rbx contiene ' + SL.x86.num(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il risultato ' + SL.x86.num(p.b - p.a) + ' è valE, un valore sui fili. Il registro lo cattura soltanto al fronte, e fino ad allora conserva il vecchio contenuto.'),
     costruisci(p) {
       const el = SL.el, N = SL.x86.num, passi = [], FASI = ['prelievo', 'decodifica', 'esecuzione', 'memoria', 'scrittura', 'PC'], r = p.b - p.a, zf = r === 0 ? 1 : 0, sf = r < 0 ? 1 : 0;
       const st = { f: -1, s: {}, rbx: p.b, cc: [0, 0, 0], pc: 0x40, att: false, ck: 'basso' };
@@ -110,9 +110,9 @@ SL.registra('3.4.1', {
       ['Credere che valE entri subito nel registro.', 'Fino al fronte valE è un valore sui fili, e il registro conserva il vecchio contenuto.'],
       ['Aspettarsi aggiornamenti in momenti diversi.', 'Registro di destinazione, codici di condizione e PC cambiano tutti allo stesso fronte.']
     ],
-    saFare: ['Elenco gli elementi di stato di SEQ.', 'Distinguo un valore sui fili da un valore memorizzato.', 'Dico che cosa cambia al fronte per un’operazione aritmetica.'],
+    saFare: ['Elencare gli elementi di stato di SEQ.', 'Distinguere un valore sui fili da un valore memorizzato.', 'Indicare che cosa cambia al fronte per un’operazione aritmetica.'],
     esercizi: [
-      { d: 'In SEQ, quale di questi valori cambia soltanto al fronte del clock?', guida: 'Scegli la risposta.', o: [
+      { d: 'In SEQ, quale di questi valori cambia soltanto al fronte del clock?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il contenuto del registro di destinazione', ok: true, fb: 'Il banco dei registri è un elemento di stato: scrive al fronte.' },
         { t: 'L’uscita dell’ALU, valE', fb: 'L’ALU è combinatoria: la sua uscita segue gli ingressi durante il ciclo.' },
         { t: 'I valori letti dal banco, valA e valB', fb: 'La lettura del banco è combinatoria, e segue gli indirizzi presentati alle porte.' }] },
@@ -123,7 +123,7 @@ SL.registra('3.4.1', {
           { se: ['10', 'dieci'], msg: 'Questo è il contenuto prima del fronte. Dopo il fronte il registro contiene valE.' },
           { se: ['13', 'tredici'], msg: 'Questa è la somma. `subq` calcola una differenza.' }
         ],
-        altro: 'Il numero è diverso. Calcola valE = valB − valA: è il valore che %rbx cattura al fronte.',
+        altro: 'Il numero è diverso. Si calcoli valE = valB − valA: è il valore che %rbx cattura al fronte.',
         indizi: ['valA è il contenuto di %rax, valB quello di %rbx.', 'valE = valB − valA.', '10 − 3.'],
         svolgimento: ['valA = 3, valB = 10.', 'valE = 10 − 3 = 7.', 'Al fronte: %rbx = 7.'] }
     ],

@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.1.3', {
   titolo: 'Aritmetica e costruzione dell’ALU',
-  obiettivo: 'Alla fine saprai spiegare come lo stesso sommatore esegue anche le sottrazioni, e saprai ricostruire il valore matematico a partire dalla parola conservata e dal riporto finale.',
+  obiettivo: 'Obiettivo: spiegare come lo stesso sommatore esegue anche le sottrazioni, e saprai ricostruire il valore matematico a partire dalla parola conservata e dal riporto finale.',
   concetti: [['alu', 'Un riporto entrante da pilotare'], ['segno', 'Sottrarre sommando'], ['bilancio', 'La parola e il riporto finale']],
   filigrana: ['alu', 'segno', 'porta'],
   richiami: {
@@ -59,7 +59,7 @@ SL.registra('3.1.3', {
       domanda: (p) => 'Un sommatore-sottrattore a quattro bit calcola ' + p.a + (p.op === 'sub' ? ' − ' : ' + ') + p.b + '. Quale parola di quattro bit conserva?',
       opzioni: (p) => { const U = SL.unita313, r = U.conto(p).r; return Array.from(new Set([r, (p.a + p.b) & 15, (p.a - p.b) & 15, Math.abs(p.a - p.b), (p.b - p.a) & 15, (p.a + (p.b ^ 15)) & 15])).slice(0, 4).sort((x, y) => x - y).map((v) => [v, U.B4(v)]); }
     },
-    confronto: (pred, esito, p) => { const U = SL.unita313, c = U.conto(p); return 'Avevi previsto ' + U.B4(pred) + '. La parola conservata è ' + U.B4(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.op === 'add' ? 'La somma vera vale ' + (p.a + p.b) + (c.c4 ? ', che supera 15: nei quattro bit resta ' + esito + ' e il riporto finale porta via 16.' : ', che sta in quattro bit.') : 'Il circuito somma ' + U.B4(p.a) + ', i bit invertiti di B, cioè ' + U.B4(p.b ^ 15) + ', e il riporto entrante 1.' + (p.a < p.b ? ' La parola vale ' + esito + ' senza segno, e ' + (esito - 16) + ' in complemento a due.' : '')); },
+    confronto: (pred, esito, p) => { const U = SL.unita313, c = U.conto(p); return 'La previsione indicava ' + U.B4(pred) + '. La parola conservata è ' + U.B4(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.op === 'add' ? 'La somma vera vale ' + (p.a + p.b) + (c.c4 ? ', che supera 15: nei quattro bit resta ' + esito + ' e il riporto finale porta via 16.' : ', che sta in quattro bit.') : 'Il circuito somma ' + U.B4(p.a) + ', i bit invertiti di B, cioè ' + U.B4(p.b ^ 15) + ', e il riporto entrante 1.' + (p.a < p.b ? ' La parola vale ' + esito + ' senza segno, e ' + (esito - 16) + ' in complemento a due.' : '')); },
     costruisci(p) {
       const el = SL.el, U = SL.unita313, B4 = U.B4, passi = [], sub = p.op === 'sub' ? 1 : 0, c = U.conto(p), bx = c.bx;
       const bit = (v, i) => (v >> i) & 1, xc = (i) => 300 + (3 - i) * 120, SEG = sub ? ' − ' : ' + ';
@@ -112,7 +112,7 @@ SL.registra('3.1.3', {
       ['Leggere C4 nella sottrazione come nella somma.', 'Nella sottrazione il significato si rovescia: C4 = 1 accompagna una differenza che sta nei quattro bit, C4 = 0 segnala un prestito.'],
       ['Immaginare due circuiti separati per somma e sottrazione.', 'Il sommatore è uno solo. La sottrazione costa in più una XOR per bit e un filo di comando.']
     ],
-    saFare: ['Spiego come un sommatore esegue una sottrazione.', 'Seguo i riporti colonna per colonna a partire dal riporto entrante.', 'Ricostruisco il valore matematico dalla parola e dal riporto finale.'],
+    saFare: ['Spiegare come un sommatore esegue una sottrazione.', 'Seguire i riporti colonna per colonna a partire dal riporto entrante.', 'Ricostruire il valore matematico dalla parola e dal riporto finale.'],
     esercizi: [
       { d: 'Un sommatore-sottrattore a quattro bit calcola 6 − 9. Quale parola conserva? Scrivila in binario.', segnaposto: 'Quattro cifre binarie', giuste: ['1101'],
         ok: 'Il circuito somma 0110, i bit invertiti di 1001, cioè 0110, e il riporto entrante 1. Il risultato è 1101, che in complemento a due vale −3.',
@@ -121,7 +121,7 @@ SL.registra('3.1.3', {
           { se: ['1100'], msg: 'Manca il riporto entrante. Dopo avere invertito i bit di B va aggiunto 1.' },
           { se: ['1111'], msg: 'Questa è la parola di 6 + 9. Nella sottrazione i bit di B passano dalle XOR e ne escono invertiti.' }
         ],
-        altro: 'La parola è diversa. Inverti i bit di 1001, poi somma il risultato a 0110 e aggiungi 1.',
+        altro: 'La parola è diversa. Inverti i bit di 1001, poi somma il risultato a 0110 e si aggiunga 1.',
         indizi: ['6 vale 0110 e 9 vale 1001.', 'Invertendo i bit di 9 si ottiene 0110.', '0110 + 0110 + 1.'],
         svolgimento: ['Bit di B invertiti: 0110.', '0110 + 0110 = 1100.', 'Con il riporto entrante: 1101, cioè −3.'] },
       { d: 'Su quattro bit la somma 12 + 7 lascia la parola 0011 e il riporto finale C4 = 1. Quanto vale il totale matematico?', segnaposto: 'Un numero', giuste: ['19', 'diciannove'],

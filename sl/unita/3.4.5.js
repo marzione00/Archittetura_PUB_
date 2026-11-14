@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.4.5', {
   titolo: 'Oltre SEQ a ciclo singolo',
-  obiettivo: 'Alla fine saprai confrontare due processori che eseguono lo stesso programma, uno a ciclo singolo e uno a più cicli, calcolando per ciascuno il tempo totale come prodotto fra cicli e periodo.',
+  obiettivo: 'Obiettivo: confrontare due processori che eseguono lo stesso programma, uno a ciclo singolo e uno a più cicli, calcolando per ciascuno il tempo totale come prodotto fra cicli e periodo.',
   concetti: [['bilancio', 'Cicli per periodo'], ['clock', 'Cicli brevi, e più numerosi'], ['lente', 'Dipende dal programma']],
   filigrana: ['bilancio', 'clock', 'cpu'],
   richiami: {
@@ -55,7 +55,7 @@ SL.registra('3.4.5', {
       domanda: (p) => 'Un programma contiene ' + p.a + ' operazioni aritmetiche e ' + p.l + ' carichi. SEQ usa un ciclo da 240 ps per istruzione. La macchina multiciclo usa 3 cicli per un’operazione e 5 per un carico, con un periodo di ' + p.t + ' ps. Quale finisce prima?',
       opzioni: () => [['seq', 'SEQ'], ['multi', 'La macchina multiciclo'], ['pari', 'Finiscono insieme']]
     },
-    confronto: (pred, esito, p) => { const N = { seq: 'SEQ', multi: 'la macchina multiciclo', pari: 'un arrivo alla pari' }, ts = 240 * (p.a + p.l), cm = 3 * p.a + 5 * p.l; return 'Avevi previsto ' + N[pred] + '. L’esito è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'SEQ impiega ' + (p.a + p.l) + ' × 240 = ' + SL.num(ts) + ' ps. La macchina multiciclo impiega ' + cm + ' × ' + p.t + ' = ' + SL.num(cm * p.t) + ' ps. Vanno confrontati i prodotti, e guardare soltanto il periodo o soltanto i cicli porta fuori strada.'); },
+    confronto: (pred, esito, p) => { const N = { seq: 'SEQ', multi: 'la macchina multiciclo', pari: 'un arrivo alla pari' }, ts = 240 * (p.a + p.l), cm = 3 * p.a + 5 * p.l; return 'La previsione indicava ' + N[pred] + '. L’esito è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'SEQ impiega ' + (p.a + p.l) + ' × 240 = ' + SL.num(ts) + ' ps. La macchina multiciclo impiega ' + cm + ' × ' + p.t + ' = ' + SL.num(cm * p.t) + ' ps. Vanno confrontati i prodotti, e guardare soltanto il periodo o soltanto i cicli porta fuori strada.'); },
     costruisci(p) {
       const el = SL.el, passi = [], n = p.a + p.l, ts = 240 * n, cm = 3 * p.a + 5 * p.l, tm = cm * p.t, X0 = 180, K = 660 / 4400, pari = ts / cm, F = SL.num, FD = (v) => String(Math.round(v * 100) / 100).replace('.', ',');
       const esito = ts < tm ? 'seq' : tm < ts ? 'multi' : 'pari';
@@ -104,7 +104,7 @@ SL.registra('3.4.5', {
       ['Confrontare soltanto i cicli.', 'Ventisette cicli da 55 ps durano meno di sette cicli da 240 ps.'],
       ['Contare gli stessi cicli per tutte le istruzioni.', 'Nella macchina multiciclo un carico usa cinque cicli e un’operazione aritmetica tre.']
     ],
-    saFare: ['Conto i cicli di un programma su SEQ e su una macchina multiciclo.', 'Calcolo i due tempi di esecuzione.', 'Trovo il periodo con cui le due macchine sarebbero pari.'],
+    saFare: ['Contare i cicli di un programma su SEQ e su una macchina multiciclo.', 'Calcolare i due tempi di esecuzione.', 'Determinare il periodo con cui le due macchine sarebbero pari.'],
     esercizi: [
       { d: 'Un programma ha 10 operazioni aritmetiche e 5 carichi. Una macchina multiciclo usa 3 cicli per le prime e 5 per i secondi, con un periodo di 60 ps. Quanto dura il programma, in picosecondi?', segnaposto: 'Un numero di picosecondi', giuste: ['3300', '3.300', '3300ps', '3.300ps'],
         ok: 'I cicli sono 3 × 10 + 5 × 5 = 55, e 55 × 60 = 3300 ps.',

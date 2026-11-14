@@ -19,7 +19,7 @@ SL.unita414 = (() => {
 })();
 SL.registra('4.1.4', {
   titolo: 'Ingresso preciso in una macchina con pipeline',
-  obiettivo: 'Alla fine saprai dire quale stato trova il gestore quando un fault colpisce una istruzione in una pipeline: quali effetti sono definitivi, quali vengono scartati e da dove si riparte.',
+  obiettivo: 'Obiettivo: dire quale stato trova il gestore quando un fault colpisce una istruzione in una pipeline: quali effetti sono definitivi, quali vengono scartati e da dove si riparte.',
   concetti: [['pipeline', 'Più istruzioni in lavorazione'], ['scudo', 'Il confine del ritiro'], ['puntatore', 'Da dove si riparte']],
   filigrana: ['pipeline', 'scudo', 'puntatore'],
   richiami: {
@@ -69,7 +69,7 @@ SL.registra('4.1.4', {
       domanda: (p) => 'RAX vale ' + p.r + '. Sei istruzioni sommano ciascuna 1 a RAX, e sono tutte in lavorazione nella pipeline. La ' + ['', '', 'seconda', '', 'quarta', '', 'sesta'][p.k] + ' trova una pagina assente. Quale valore di RAX trova il gestore?',
       opzioni: (p) => Array.from(new Set([p.r, p.r + p.k - 1, p.r + p.k, p.r + 6])).sort((a, b) => a - b)
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + '. Il gestore trova ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.r ? 'Le istruzioni che precedono il fault sono state ritirate, e i loro effetti restano.' : pred === p.r + p.k ? 'L’istruzione con il fault è rimasta incompiuta, e il suo incremento manca.' : 'Le istruzioni più giovani vengono scartate, anche se avevano già calcolato un risultato.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. Il gestore trova ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.r ? 'Le istruzioni che precedono il fault sono state ritirate, e i loro effetti restano.' : pred === p.r + p.k ? 'L’istruzione con il fault è rimasta incompiuta, e il suo incremento manca.' : 'Le istruzioni più giovani vengono scartate, anche se avevano già calcolato un risultato.'),
     costruisci(p) {
       const U = SL.unita414, H = U.H, passi = [], k = p.k, r = p.r, v = r + k - 1, a = U.BASE + 4 * (k - 1), ORD = ['', 'prima', 'seconda', 'terza', 'quarta', 'quinta', 'sesta'];
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'ISTRUZIONI NELLA PIPELINE, IN ORDINE DI PROGRAMMA', 'mono')].concat(U.quadro('q', k, r, f, { x: 20, y: 24, w: 126, gap: 12, h: 62 }));
@@ -96,7 +96,7 @@ SL.registra('4.1.4', {
       ['Contare l’effetto dell’istruzione con il fault.', 'L’istruzione è incompiuta, e verrà ripetuta dopo il gestore.'],
       ['Ripartire dall’inizio del gruppo.', 'Le istruzioni ritirate hanno effetti definitivi. Ripeterle li sommerebbe due volte.']
     ],
-    saFare: ['Distinguo un risultato provvisorio da uno ritirato.', 'Dico quale stato trova il gestore dopo un fault.', 'Calcolo l’indirizzo da cui il programma riparte.'],
+    saFare: ['Distinguere un risultato provvisorio da uno ritirato.', 'Indicare quale stato trova il gestore dopo un fault.', 'Calcolare l’indirizzo da cui il programma riparte.'],
     esercizi: [
       { d: 'Otto istruzioni consecutive sommano ciascuna 1 a un registro che vale 20. Sono tutte nella pipeline quando la sesta incontra un fault. Quale valore del registro trova il gestore?', segnaposto: 'Un numero', giuste: ['25', 'venticinque'],
         ok: 'Le cinque istruzioni che precedono il fault sono ritirate: 20 + 5 = 25.',
@@ -118,7 +118,7 @@ SL.registra('4.1.4', {
         altro: 'Il valore è diverso. Serve l’indirizzo della sesta istruzione.',
         indizi: ['Prima della sesta ci sono cinque istruzioni.', '5 × 4 = 20 byte, cioè 0x14.', '0x2000 + 0x14.'],
         svolgimento: ['Istruzioni che precedono la sesta: 5.', 'Distanza: 5 × 4 = 20 = 0x14.', 'Indirizzo salvato: 0x2014.'] },
-      { d: 'Perché il processore scarta le istruzioni più giovani di quella con il fault, anche se avevano già calcolato un risultato?', guida: 'Scegli la risposta.', o: [
+      { d: 'Perché il processore scarta le istruzioni più giovani di quella con il fault, anche se avevano già calcolato un risultato?', guida: 'Si scelga la risposta.', o: [
         { t: 'Perché il gestore deve vedere lo stato che si avrebbe eseguendo le istruzioni una alla volta', ok: true, fb: 'Eseguite in fila, le istruzioni dopo il fault non sarebbero nemmeno cominciate.' },
         { t: 'Perché i loro risultati sono sbagliati', fb: 'I risultati potrebbero essere giusti. Vengono scartati perché nel programma quelle istruzioni vengono dopo il fault.' },
         { t: 'Perché la pipeline deve essere svuotata a ogni interrupt', fb: 'Lo scarto serve a rendere preciso lo stato. Le istruzioni scartate vengono poi eseguite di nuovo.' }] }

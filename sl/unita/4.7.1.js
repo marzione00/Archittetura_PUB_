@@ -18,7 +18,7 @@ SL.unita471 = (() => {
 })();
 SL.registra('4.7.1', {
   titolo: 'I/O programmato e motivazione del DMA',
-  obiettivo: 'Alla fine saprai confrontare il lavoro che un trasferimento costa al processore con l’I/O programmato e con il DMA, e trovare la lunghezza da cui il DMA conviene.',
+  obiettivo: 'Obiettivo: confrontare il lavoro che un trasferimento costa al processore con l’I/O programmato e con il DMA, e trovare la lunghezza da cui il DMA conviene.',
   concetti: [['cpu', 'Il processore sposta ogni parola'], ['dispositivo', 'Oppure delega al dispositivo'], ['bilancio', 'Un costo fisso da ripagare']],
   filigrana: ['dispositivo', 'cpu', 'bilancio'],
   richiami: {
@@ -67,7 +67,7 @@ SL.registra('4.7.1', {
       domanda: (p) => 'Vanno trasferite ' + p.n + ' parole. L’I/O programmato costa al processore 6 cicli per parola. Il DMA gli costa ' + p.s + ' cicli di preparazione e 8 di completamento. Quale dei due modi impegna meno il processore?',
       opzioni: () => [['pio', 'L’I/O programmato'], ['dma', 'Il DMA'], ['pari', 'Nessuno dei due: i costi sono uguali']]
     },
-    confronto: (pred, esito, p) => { const c = SL.unita471.conto(p), N = { pio: 'l’I/O programmato', dma: 'il DMA', pari: 'la parità' }; return 'Avevi previsto: ' + N[pred] + '. I/O programmato ' + c.pio + ' cicli, DMA ' + c.dma + ' cicli: ' + (esito === 'pari' ? 'i costi coincidono. ' : 'impegna meno ' + N[esito] + '. ') + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il costo del DMA è fisso, quello dell’I/O programmato cresce con le parole: la soglia è a ' + c.soglia + ' parole.'); },
+    confronto: (pred, esito, p) => { const c = SL.unita471.conto(p), N = { pio: 'l’I/O programmato', dma: 'il DMA', pari: 'la parità' }; return 'La previsione indicava: ' + N[pred] + '. I/O programmato ' + c.pio + ' cicli, DMA ' + c.dma + ' cicli: ' + (esito === 'pari' ? 'i costi coincidono. ' : 'impegna meno ' + N[esito] + '. ') + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il costo del DMA è fisso, quello dell’I/O programmato cresce con le parole: la soglia è a ' + c.soglia + ' parole.'); },
     costruisci(p) {
       const U = SL.unita471, c = U.conto(p), passi = [];
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, w: 820, wv: 190 });
@@ -93,7 +93,7 @@ SL.registra('4.7.1', {
       ['Contare come soglia il punto di pareggio.', 'Al pareggio i costi sono uguali. Il risparmio comincia dalla parola successiva.'],
       ['Confondere il lavoro del processore con la durata del trasferimento.', 'Con il DMA i dati impiegano comunque tempo sul bus, ma il processore intanto è libero.']
     ],
-    saFare: ['Calcolo i cicli dell’I/O programmato.', 'Calcolo il costo fisso del DMA.', 'Trovo la lunghezza da cui il DMA conviene.'],
+    saFare: ['Calcolare i cicli dell’I/O programmato.', 'Calcolare il costo fisso del DMA.', 'Determinare la lunghezza da cui il DMA conviene.'],
     esercizi: [
       { d: 'L’I/O programmato costa 6 cicli per parola. Una richiesta DMA costa 20 cicli di preparazione e 8 di completamento. Per 10 parole, quanti cicli fa risparmiare il DMA al processore?', segnaposto: 'Un numero', giuste: ['32', '32cicli', 'trentadue'],
         ok: 'I/O programmato: 60 cicli. DMA: 28 cicli. Differenza: 32.',
@@ -102,7 +102,7 @@ SL.registra('4.7.1', {
           { se: ['60', '60cicli'], msg: 'Questo è il costo dell’I/O programmato. Va sottratto il costo del DMA.' },
           { se: ['40', '40cicli'], msg: 'Al DMA vanno addebitati anche gli 8 cicli del completamento.' }
         ],
-        altro: 'Il numero è diverso. Calcola i due costi e sottrai.',
+        altro: 'Il numero è diverso. Si calcolino i due costi e si sottragga.',
         indizi: ['I/O programmato: 6 × 10.', 'DMA: 20 + 8.', '60 − 28 = 32.'],
         svolgimento: ['I/O programmato: 6 × 10 = 60 cicli.', 'DMA: 20 + 8 = 28 cicli.', 'Risparmio: 32 cicli.'] },
       { d: 'Con gli stessi costi, 6 cicli per parola contro 20 + 8, qual è la prima lunghezza in parole per cui il DMA fa risparmiare?', segnaposto: 'Un numero', giuste: ['5', 'cinque', '5parole'],
@@ -114,7 +114,7 @@ SL.registra('4.7.1', {
         altro: 'Il numero è diverso. Cerca la prima lunghezza per cui 6 × n supera 28.',
         indizi: ['Il costo fisso del DMA è 28 cicli.', '6 × 4 = 24, 6 × 5 = 30.', 'Il primo valore che supera 28 è 30, con 5 parole.'],
         svolgimento: ['Costo del DMA: 28 cicli.', '6 × 4 = 24: conviene l’I/O programmato.', '6 × 5 = 30: conviene il DMA.'] },
-      { d: 'Un trasferimento DMA di 64 parole tiene occupato il bus per centinaia di cicli, eppure il conto dell’unità gli addebita soltanto preparazione e completamento. Perché?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un trasferimento DMA di 64 parole tiene occupato il bus per centinaia di cicli, eppure il conto dell’unità gli addebita soltanto preparazione e completamento. Perché?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il conto misura il lavoro del processore, che durante il trasferimento è libero', ok: true, fb: 'Le parole le sposta il dispositivo, mentre il processore esegue altro.' },
         { t: 'Con il DMA i dati viaggiano senza occupare il bus', fb: 'I dati passano comunque dal bus. A cambiare è chi li sposta.' },
         { t: 'Il completamento comprende già tutti i cicli del bus', fb: 'Il completamento è il solo controllo finale, di 8 cicli.' }] }

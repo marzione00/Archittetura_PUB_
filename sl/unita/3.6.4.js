@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.6.4', {
   titolo: 'Conflitti di controllo, stalli e bolle',
-  obiettivo: 'Alla fine saprai seguire un salto condizionato dentro PIPE: quali istruzioni vengono prelevate prima di conoscerne l’esito, quali diventano bolle se la previsione è sbagliata, e da quale indirizzo riparte il prelievo.',
+  obiettivo: 'Obiettivo: seguire un salto condizionato dentro PIPE: quali istruzioni vengono prelevate prima di conoscerne l’esito, quali diventano bolle se la previsione è sbagliata, e da quale indirizzo riparte il prelievo.',
   concetti: [['conflitto', 'La scommessa sul salto'], ['stallo', 'Due bolle al posto di due istruzioni'], ['puntatore', 'Da dove si riparte']],
   filigrana: ['conflitto', 'stallo', 'puntatore'],
   richiami: {
@@ -55,7 +55,7 @@ SL.registra('3.6.4', {
       domanda: (p) => { const g = SL.unita364.G[p.a], H = SL.y86.esa; return 'Uno `jne` comincia all’indirizzo ' + H(g.b) + ', occupa 9 byte e ha destinazione ' + H(g.d) + '. PIPE ha già prelevato dalla destinazione due `nop` da un byte. Nello stadio E la condizione risulta ' + (p.t ? 'vera' : 'falsa') + '. Da quale indirizzo avviene il prelievo successivo?'; },
       opzioni: (p) => { const g = SL.unita364.G[p.a], H = SL.y86.esa; return [g.b + 9, g.d, g.d + 1, g.d + 2].map((v) => [v, H(v)]); }
     },
-    confronto: (pred, esito, p) => { const g = SL.unita364.G[p.a], H = SL.y86.esa; return 'Avevi previsto ' + H(pred) + '. Il prelievo avviene da ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t ? (pred === g.b + 9 ? 'La condizione è vera, come PIPE aveva previsto, e la strada sequenziale resta inutilizzata.' : 'Le istruzioni a ' + H(g.d) + ' e ' + H(g.d + 1) + ' sono già state prelevate. Il prelievo prosegue dopo di loro.') : (pred === g.d + 2 ? 'Quello sarebbe il prelievo con la previsione giusta. Qui la condizione è falsa.' : 'Gli indirizzi della destinazione appartengono alla strada da abbandonare.')); },
+    confronto: (pred, esito, p) => { const g = SL.unita364.G[p.a], H = SL.y86.esa; return 'La previsione indicava ' + H(pred) + '. Il prelievo avviene da ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t ? (pred === g.b + 9 ? 'La condizione è vera, come PIPE aveva previsto, e la strada sequenziale resta inutilizzata.' : 'Le istruzioni a ' + H(g.d) + ' e ' + H(g.d + 1) + ' sono già state prelevate. Il prelievo prosegue dopo di loro.') : (pred === g.d + 2 ? 'Quello sarebbe il prelievo con la previsione giusta. Qui la condizione è falsa.' : 'Gli indirizzi della destinazione appartengono alla strada da abbandonare.')); },
     costruisci(p) {
       const el = SL.el, H = SL.y86.esa, passi = [], g = SL.unita364.G[p.a], t = p.t, seq = g.b + 9, v = t ? g.d + 2 : seq;
       const quadro = (f) => {
@@ -91,7 +91,7 @@ SL.registra('3.6.4', {
       ['Ripartire dalla destinazione dopo una previsione sbagliata.', 'La destinazione era la strada prevista. Si riparte dall’altra, cioè dall’istruzione che segue il salto in memoria.'],
       ['Pensare che le istruzioni annullate vadano disfatte.', 'Si trovano negli stadi F e D, dove nessuna istruzione scrive registri, memoria o codici di condizione.']
     ],
-    saFare: ['Dico quali istruzioni seguono un salto nella pipeline.', 'Ricavo i segnali di bolla da e_Cnd.', 'Calcolo l’indirizzo del prelievo successivo.'],
+    saFare: ['Indicare quali istruzioni seguono un salto nella pipeline.', 'Ricavare i segnali di bolla da e_Cnd.', 'Calcolare l’indirizzo del prelievo successivo.'],
     esercizi: [
       { d: 'Uno `je` comincia all’indirizzo 0x70, occupa 9 byte e ha destinazione 0x200. Nello stadio E risulta e_Cnd = 0. Da quale indirizzo avviene il prelievo successivo? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['79', '0x79', '79h', '079', '0x079'],
         ok: 'La previsione era sbagliata, e si riparte dall’istruzione che segue il salto: 0x70 + 9 = 0x79.',
@@ -113,7 +113,7 @@ SL.registra('3.6.4', {
         altro: 'Il valore è diverso. Con e_Cnd = 1 il prelievo prosegue dopo le istruzioni già prelevate dalla destinazione.',
         indizi: ['e_Cnd = 1: la previsione era giusta.', 'Dalla destinazione sono state prelevate due istruzioni.', '0x200 + 2 + 2.'],
         svolgimento: ['Prima istruzione: da 0x200 a 0x201.', 'Seconda istruzione: da 0x202 a 0x203.', 'Prelievo successivo: 0x204.'] },
-      { d: 'Dopo una previsione sbagliata, quali registri di pipeline ricevono una bolla al fronte?', guida: 'Scegli la risposta.', o: [
+      { d: 'Dopo una previsione sbagliata, quali registri di pipeline ricevono una bolla al fronte?', guida: 'Si scelga la risposta.', o: [
         { t: 'I registri D ed E', ok: true, fb: 'Le due istruzioni da scartare si trovano negli stadi F e D, e al fronte sarebbero entrate nei registri D ed E.' },
         { t: 'I registri F e D', fb: 'Il registro F riceve il nuovo PC previsto. Le istruzioni da scartare sarebbero entrate nei registri D ed E.' },
         { t: 'I registri E ed M', fb: 'Nel registro M entra il salto stesso, che deve proseguire.' }] }

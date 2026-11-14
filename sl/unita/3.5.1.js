@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.5.1', {
   titolo: 'Sovrapposizione, capacità di completamento e latenza',
-  obiettivo: 'Alla fine saprai distinguere la latenza di un’istruzione dalla cadenza con cui una pipeline completa le istruzioni, e calcolare in quale ciclo esce l’ultima istruzione di un flusso.',
+  obiettivo: 'Obiettivo: distinguere la latenza di un’istruzione dalla cadenza con cui una pipeline completa le istruzioni, e calcolare in quale ciclo esce l’ultima istruzione di un flusso.',
   concetti: [['pipeline', 'Più istruzioni in viaggio insieme'], ['clock', 'Latenza e cadenza'], ['bilancio', 'Quanti cicli in tutto']],
   filigrana: ['pipeline', 'clock', 'bilancio'],
   richiami: {
@@ -54,7 +54,7 @@ SL.registra('3.5.1', {
       domanda: (p) => 'In una pipeline vuota di ' + p.k + ' stadi entrano ' + (p.n === 1 ? 'una sola istruzione' : p.n + ' istruzioni indipendenti, una per ciclo') + '. Alla fine di quale ciclo esce ' + (p.n === 1 ? 'dall’ultimo stadio?' : 'l’ultima?'),
       opzioni: (p) => Array.from(new Set([p.k + p.n - 1, p.k * p.n, p.k + p.n, p.n, p.k - 1])).filter((v) => v > 0).sort((a, b) => a - b).map((v) => [v, 'Ciclo ' + v])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto il ciclo ' + pred + '. L’ultima istruzione esce alla fine del ciclo ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.k * p.n ? 'Il prodotto stadi per istruzioni vale per una macchina che ne esegue una alla volta. Qui le istruzioni si sovrappongono.' : 'La prima istruzione esce al ciclo ' + p.k + ', e ogni ciclo successivo ne esce un’altra: ' + p.k + ' + ' + p.n + ' − 1 = ' + esito + '.'),
+    confronto: (pred, esito, p) => 'La previsione indicava il ciclo ' + pred + '. L’ultima istruzione esce alla fine del ciclo ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.k * p.n ? 'Il prodotto stadi per istruzioni vale per una macchina che ne esegue una alla volta. Qui le istruzioni si sovrappongono.' : 'La prima istruzione esce al ciclo ' + p.k + ', e ogni ciclo successivo ne esce un’altra: ' + p.k + ' + ' + p.n + ' − 1 = ' + esito + '.'),
     costruisci(p) {
       const el = SL.el, passi = [], k = p.k, n = p.n, T = p.t, tot = k + n - 1;
       const righe = Array.from({ length: n }, (_, i) => ({ n: 'I' + (i + 1), da: i + 1, s: Array.from({ length: k }, (_, j) => String(j + 1)) }));
@@ -96,7 +96,7 @@ SL.registra('3.5.1', {
       ['Moltiplicare stadi per istruzioni.', 'Il prodotto k × N è il conto della macchina che esegue un’istruzione alla volta.'],
       ['Dimenticare il riempimento.', 'Nei primi k − 1 cicli nessuna istruzione esce. Su un flusso breve questo tempo pesa molto.']
     ],
-    saFare: ['Distinguo latenza e cadenza di completamento.', 'Calcolo il ciclo in cui esce l’ultima istruzione di un flusso.', 'Confronto il tempo di una pipeline con quello di una macchina che procede con un’istruzione alla volta.'],
+    saFare: ['Distinguere latenza e cadenza di completamento.', 'Calcolare il ciclo in cui esce l’ultima istruzione di un flusso.', 'Confrontare il tempo di una pipeline con quello di una macchina che procede con un’istruzione alla volta.'],
     esercizi: [
       { d: 'Una pipeline ha 5 stadi e un periodo di 50 ps. Qual è la latenza di un’istruzione, in picosecondi?', segnaposto: 'Un numero di picosecondi', giuste: ['250', '250ps'],
         ok: 'L’istruzione attraversa 5 stadi, uno per ciclo: 5 × 50 = 250 ps.',
@@ -105,7 +105,7 @@ SL.registra('3.5.1', {
           { se: ['10', '10ps'], msg: 'Il periodo va moltiplicato per il numero degli stadi.' },
           { se: ['5'], msg: 'Cinque è il numero dei cicli. La domanda chiede il tempo, in picosecondi.' }
         ],
-        altro: 'Il numero è diverso. Moltiplica il numero degli stadi per il periodo.',
+        altro: 'Il numero è diverso. Si moltiplichi il numero degli stadi per il periodo.',
         indizi: ['L’istruzione occupa uno stadio per ciclo.', 'Gli stadi sono 5.', '5 × 50.'],
         svolgimento: ['Stadi: 5.', 'Periodo: 50 ps.', 'Latenza: 5 × 50 = 250 ps.'] },
       { d: 'In una pipeline vuota di 5 stadi entrano 20 istruzioni indipendenti, una per ciclo. Alla fine di quale ciclo esce l’ultima?', segnaposto: 'Un numero', giuste: ['24', 'ventiquattro'],

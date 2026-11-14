@@ -14,7 +14,7 @@ SL.unita365 = (() => {
 })();
 SL.registra('3.6.5', {
   titolo: 'Priorità dei conflitti e stato preciso',
-  obiettivo: 'Alla fine saprai dire quali registri di pipeline restano fermi e quali ricevono una bolla quando un carico seguito da un uso e una `ret` si presentano, da soli o insieme, e perché un errore in una istruzione più vecchia toglie gli effetti a quelle più giovani.',
+  obiettivo: 'Obiettivo: dire quali registri di pipeline restano fermi e quali ricevono una bolla quando un carico seguito da un uso e una `ret` si presentano, da soli o insieme, e perché un errore in una istruzione più vecchia toglie gli effetti a quelle più giovani.',
   concetti: [['stallo', 'Fermare oppure svuotare'], ['conflitto', 'Due richieste sullo stesso registro'], ['scudo', 'Fermarsi in uno stato preciso']],
   filigrana: ['stallo', 'scudo', 'conflitto'],
   richiami: {
@@ -69,7 +69,7 @@ SL.registra('3.6.5', {
       domanda: (p) => { const c = SL.unita365.CASI[p.h]; return 'Nello stadio E c’è ' + c.te + ', e nello stadio D c’è ' + c.td + '. Al prossimo fronte, che cosa fa il registro D?'; },
       opzioni: () => [['s', 'Resta fermo'], ['b', 'Riceve una bolla'], ['n', 'Cattura l’ingresso normale']]
     },
-    confronto: (pred, esito, p) => { const U = SL.unita365, N = { s: 'che resti fermo', b: 'che riceva una bolla', n: 'che catturi l’ingresso normale' }; return 'Avevi previsto ' + N[pred] + '. Il registro D ' + (esito === 'n' ? 'cattura l’ingresso normale' : U.SORTE[esito]) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.h === 'both' ? 'Con le due cause insieme vince lo stallo: una bolla cancellerebbe la `ret`.' : p.h === 'load' ? 'L’istruzione che attende il dato va trattenuta nello stadio D.' : p.h === 'ret' ? 'L’istruzione prelevata dopo la `ret` va scartata, e nel registro D entra una bolla.' : 'Nessuna causa di attesa è presente.'); },
+    confronto: (pred, esito, p) => { const U = SL.unita365, N = { s: 'che resti fermo', b: 'che riceva una bolla', n: 'che catturi l’ingresso normale' }; return 'La previsione indicava ' + N[pred] + '. Il registro D ' + (esito === 'n' ? 'cattura l’ingresso normale' : U.SORTE[esito]) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.h === 'both' ? 'Con le due cause insieme vince lo stallo: una bolla cancellerebbe la `ret`.' : p.h === 'load' ? 'L’istruzione che attende il dato va trattenuta nello stadio D.' : p.h === 'ret' ? 'L’istruzione prelevata dopo la `ret` va scartata, e nel registro D entra una bolla.' : 'Nessuna causa di attesa è presente.'); },
     costruisci(p) {
       const el = SL.el, U = SL.unita365, passi = [], c = U.CASI[p.h], s = U.segnali(c), guasto = p.stat === 'adr', opE = !c.load, cc = opE && !guasto ? 1 : 0, sorte = U.sorteD(c);
       const quadro = (f) => {
@@ -108,13 +108,13 @@ SL.registra('3.6.5', {
       ['Fermare soltanto il registro D.', 'Se il registro F proseguisse, l’istruzione nello stadio F andrebbe perduta. I due registri restano fermi insieme.'],
       ['Lasciare che una istruzione più giovane aggiorni i codici di condizione dopo un errore.', 'Nel programma quella istruzione viene dopo l’errore, e deve restare senza effetti.']
     ],
-    saFare: ['Ricavo i quattro segnali per un carico seguito da un uso.', 'Ricavo i segnali per una ret.', 'Dico chi vince quando le due cause coincidono.'],
+    saFare: ['Ricavare i quattro segnali per un carico seguito da un uso.', 'Ricavare i segnali per una ret.', 'Indicare chi vince quando le due cause coincidono.'],
     esercizi: [
-      { d: 'Nello stadio E c’è `mrmovq 0(%rdi), %rdx`, e nello stadio D c’è `addq %rdx, %rax`. Quali segnali valgono 1?', guida: 'Scegli la risposta.', o: [
+      { d: 'Nello stadio E c’è `mrmovq 0(%rdi), %rdx`, e nello stadio D c’è `addq %rdx, %rax`. Quali segnali valgono 1?', guida: 'Si scelga la risposta.', o: [
         { t: 'F_stall, D_stall ed E_bubble', ok: true, fb: 'I registri F e D restano fermi, e nel registro E entra una bolla.' },
         { t: 'F_stall e D_bubble', fb: 'Questi sono i segnali di una ret. Qui l’istruzione nello stadio D va trattenuta.' },
         { t: 'D_bubble ed E_bubble', fb: 'Questi sono i segnali di una previsione sbagliata, che scarta due istruzioni.' }] },
-      { d: 'Nello stadio E c’è `mrmovq 8(%rbx), %rsp`, e nello stadio D c’è `ret`. Che cosa accade al registro D al fronte?', guida: 'Scegli la risposta.', o: [
+      { d: 'Nello stadio E c’è `mrmovq 8(%rbx), %rsp`, e nello stadio D c’è `ret`. Che cosa accade al registro D al fronte?', guida: 'Si scelga la risposta.', o: [
         { t: 'Resta fermo, e la ret ripete lo stadio D', ok: true, fb: 'La ret legge %rsp, che sta arrivando dalla memoria. Lo stallo ha la precedenza sulla bolla.' },
         { t: 'Riceve una bolla, come sempre con una ret', fb: 'La bolla cancellerebbe la ret. Con un carico in corso su %rsp vince lo stallo.' },
         { t: 'Cattura l’istruzione che segue la ret', fb: 'L’istruzione che segue la ret in memoria è quasi mai quella giusta, e in ogni caso la ret deve attendere %rsp.' }] },

@@ -10,13 +10,18 @@ window.SL = (() => {
   SL.T = (s) => SL.E(s)
     .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (m, id, t) => '<button type="button" class="termine" data-termine="' + id.trim() + '">' + t + '</button>')
     .replace(/\[\[([^\]]+)\]\]/g, (m, t) => '<button type="button" class="termine" data-termine="' + t.trim().toLowerCase() + '">' + t + '</button>')
+    .replace(/(<button type="button" class="termine"[^>]*>[^<]*<\/button>)([.,;:!?»)]+)/g, '<span class="unito">$1$2</span>') // la punteggiatura resta unita al termine
     .replace(/`([^`]+)`/g, '<code>$1</code>');
 
   SL.sim = (id, lato, cls) => '<svg class="sim' + (cls ? ' ' + cls : '') + '" width="' + lato + '" height="' + lato + '" viewBox="0 0 64 64" aria-hidden="true"><use href="#sl-' + id + '"></use></svg>';
 
   SL.registra = (id, def) => { def.id = id; SL.unita[id] = def; };
   const attese = Object.create(null);
+  // L'identificativo finisce nell'indirizzo di uno script: si accettano soltanto numeri separati da punti.
+  SL.idUnita = (id) => typeof id === 'string' && /^\d{1,2}(\.\d{1,2}){1,2}$/.test(id);
+  SL.idCapitolo = (id) => typeof id === 'string' && /^\d{1,2}\.\d{1,2}$/.test(id);
   SL.carica = (id) => {
+    if (!SL.idUnita(id)) return Promise.reject(new Error('Identificativo di unità non valido'));
     if (SL.unita[id]) return Promise.resolve(SL.unita[id]);
     if (attese[id]) return attese[id];
     attese[id] = new Promise((ok, no) => {
@@ -54,7 +59,7 @@ window.SL = (() => {
   document.addEventListener('click', (ev) => {
     const b = ev.target.closest && ev.target.closest('[data-termine]');
     if (!b) { chiudi(); return; }
-    const voce = SL.glossario && SL.glossario[b.dataset.termine];
+    const voce = SL.glossario && Object.prototype.hasOwnProperty.call(SL.glossario, b.dataset.termine) ? SL.glossario[b.dataset.termine] : null;
     chiudi();
     if (!voce) return;
     fumetto = document.createElement('div');
@@ -69,12 +74,23 @@ window.SL = (() => {
     fumetto.style.top = (r.bottom + window.scrollY + 8) + 'px';
   });
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') chiudi(); });
+  // Collegamento «Vai al contenuto»: sposta il fuoco senza cambiare l'indirizzo.
+  document.addEventListener('click', (ev) => {
+    const a = ev.target.closest && ev.target.closest('a.salta');
+    if (!a) return;
+    ev.preventDefault();
+    const main = document.getElementById('contenuto');
+    if (main) main.focus();
+  });
   window.addEventListener('hashchange', chiudi);
 
   // Percorsi: #/  #/m/<modulo>  #/c/<capitolo>  #/u/<unità>/<fase>  #/p/<capitolo>/<variante>  #/glossario
   SL.percorso = () => {
-    const p = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-    return { vista: p[0] || 'rete', a: p[1] || '', b: p[2] || '' };
+    // Ogni parte dell'indirizzo è accettata soltanto se breve e fatta di lettere, cifre, punti e trattini:
+    // qualunque altra forma vale come parte assente, e porta alla pagina «non trovato».
+    const pulita = (x) => (typeof x === 'string' && /^[A-Za-z0-9._-]{1,24}$/.test(x) ? x : '');
+    const p = location.hash.slice(0, 200).replace(/^#\/?/, '').split('/').filter(Boolean);
+    return { vista: pulita(p[0]) || 'rete', a: pulita(p[1]), b: pulita(p[2]) };
   };
   let smonta = null;
   SL.mostra = () => {

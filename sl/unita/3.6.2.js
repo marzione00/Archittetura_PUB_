@@ -23,7 +23,7 @@ SL.unita362 = (() => {
 })();
 SL.registra('3.6.2', {
   titolo: 'Stato della pipeline e controllo del prelievo',
-  obiettivo: 'Alla fine saprai dire da quale indirizzo PIPE preleva la prossima istruzione, scegliendo fra il PC previsto, la correzione di un salto e l’indirizzo di ritorno di una `ret`.',
+  obiettivo: 'Obiettivo: dire da quale indirizzo PIPE preleva la prossima istruzione, scegliendo fra il PC previsto, la correzione di un salto e l’indirizzo di ritorno di una `ret`.',
   concetti: [['puntatore', 'Tre candidati per il prelievo'], ['mux', 'Un selettore con priorità'], ['pipeline', 'Chi decide, e in quale stadio']],
   filigrana: ['puntatore', 'mux', 'pipeline'],
   richiami: {
@@ -75,7 +75,7 @@ SL.registra('3.6.2', {
       domanda: (p) => 'Nello stadio M ' + (p.j ? 'c’è un salto condizionato previsto male' : 'manca un salto da correggere') + ', e nello stadio W ' + (p.r ? 'c’è una ret' : 'manca una ret') + '. Da quale indirizzo preleva lo stadio F?',
       opzioni: (p) => { const g = SL.unita362.GRUPPI[p.a], H = SL.unita362.H; return [[g.m, H(g.m) + ', salvato dal salto'], [g.w, H(g.w) + ', letto dalla pila'], [g.p, H(g.p) + ', il PC previsto']]; }
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + SL.unita362.H(pred) + '. Il prelievo usa ' + SL.unita362.H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.j ? 'Un salto previsto male nello stadio M ha la precedenza sugli altri candidati.' : p.r ? 'Una ret nello stadio W offre l’indirizzo letto dalla pila, che prevale sul PC previsto.' : 'Senza richieste di correzione passa il PC previsto.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + SL.unita362.H(pred) + '. Il prelievo usa ' + SL.unita362.H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.j ? 'Un salto previsto male nello stadio M ha la precedenza sugli altri candidati.' : p.r ? 'Una ret nello stadio W offre l’indirizzo letto dalla pila, che prevale sul PC previsto.' : 'Senza richieste di correzione passa il PC previsto.'),
     costruisci(p) {
       const el = SL.el, U = SL.unita362, H = U.H, passi = [], g = U.GRUPPI[p.a], s = U.scelta(p.j, p.r), v = g[s];
       const quadro = (f) => [el.nota('t0', 20, 0, 'CANDIDATI', 'mono'), el.nota('t1', 300, 0, 'VERIFICHE, IN ORDINE', 'mono'), el.nota('t2', 590, 0, 'PRELIEVO', 'mono')].concat(U.quadro('q', p.j, p.r, g, f, { x: 20, y: 24, wc: 250, wk: 260, wf: 250, gap: 30, h: 64, py: 80, memoria: true }));
@@ -101,7 +101,7 @@ SL.registra('3.6.2', {
       ['Correggere il salto con la destinazione.', 'La destinazione era la previsione. La correzione è l’altra strada: l’istruzione che segue il salto, conservata in M_valA.'],
       ['Leggere le tre sigle come valori dello stesso stadio.', 'F_predPC sta nel registro F, M_valA nel registro M, W_valM nel registro W. Appartengono a tre istruzioni diverse.']
     ],
-    saFare: ['Elenco i tre candidati per il prelievo.', 'Applico la priorità del selettore.', 'Ricavo il PC previsto dal tipo di istruzione.'],
+    saFare: ['Elencare i tre candidati per il prelievo.', 'Applicare la priorità del selettore.', 'Ricavare il PC previsto dal tipo di istruzione.'],
     esercizi: [
       { d: 'Il registro F contiene F_predPC = 0x200. Nello stadio M c’è una `addq`, e nello stadio W c’è una `ret` con W_valM = 0x58. Quanto vale f_pc? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['58', '0x58', '58h', '058', '0x058'],
         ok: 'Nello stadio M manca un salto da correggere, e nello stadio W c’è una ret: passa W_valM.',
@@ -121,7 +121,7 @@ SL.registra('3.6.2', {
         altro: 'Il valore è diverso. Serve l’indirizzo dell’istruzione che segue il salto in memoria.',
         indizi: ['La previsione era la destinazione, e si è rivelata sbagliata.', 'La strada giusta è l’istruzione che segue il salto.', '0x30 + 9.'],
         svolgimento: ['Indirizzo del salto: 0x30.', 'Lunghezza: 9 byte.', 'M_valA = valP = 0x30 + 9 = 0x39.'] },
-      { d: 'Lo stadio F ha appena prelevato una `call 0x400` che comincia all’indirizzo 0x20. Quanto vale il PC previsto?', guida: 'Scegli la risposta.', o: [
+      { d: 'Lo stadio F ha appena prelevato una `call 0x400` che comincia all’indirizzo 0x20. Quanto vale il PC previsto?', guida: 'Si scelga la risposta.', o: [
         { t: '0x400', ok: true, fb: 'La destinazione di una call è la costante valC, scritta nell’istruzione e nota fin dal prelievo.' },
         { t: '0x29', fb: 'Questo è valP, l’indirizzo di ritorno che la call salva sulla pila.' },
         { t: 'Resta ignoto fino allo stadio M', fb: 'Questo vale per la ret. La destinazione di una call si legge nei byte dell’istruzione.' }] }

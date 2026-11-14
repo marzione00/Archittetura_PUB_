@@ -16,7 +16,7 @@ SL.unita354 = (() => {
 })();
 SL.registra('3.5.4', {
   titolo: 'Dalla portata ideale al CPI misurato',
-  obiettivo: 'Alla fine saprai contare i cicli che un tratto di programma occupa davvero in una pipeline di cinque stadi, compresi il riempimento e i conflitti, e ricavarne il CPI.',
+  obiettivo: 'Obiettivo: contare i cicli che un tratto di programma occupa davvero in una pipeline di cinque stadi, compresi il riempimento e i conflitti, e ricavarne il CPI.',
   concetti: [['clock', 'Contare i cicli veri'], ['stallo', 'Le penalità'], ['bilancio', 'Il CPI come media']],
   filigrana: ['bilancio', 'clock', 'stallo'],
   richiami: {
@@ -69,7 +69,7 @@ SL.registra('3.5.4', {
       domanda: (p) => 'Un tratto di ' + p.n + ' istruzioni entra in una pipeline vuota di cinque stadi. ' + SL.unita354.frase(p) + ' Quanti cicli di clock passano prima che l’ultima istruzione esca?',
       opzioni: (p) => Array.from(new Set([p.n + 4 + p.l + 2 * p.s, p.n + p.l + 2 * p.s, p.n + 4 + p.l + p.s, 5 * p.n])).sort((a, b) => a - b).map((v) => [v, v + ' cicli'])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + ' cicli. Il tratto ne occupa ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.n + p.l + 2 * p.s ? 'Mancano i 4 cicli di riempimento, durante i quali nessuna istruzione arriva in fondo.' : pred === 5 * p.n ? 'Il prodotto vale per una macchina che esegue un’istruzione alla volta. Nella pipeline le istruzioni si sovrappongono.' : 'Ogni salto previsto male costa due cicli, uno per ciascuna delle due istruzioni annullate.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' cicli. Il tratto ne occupa ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.n + p.l + 2 * p.s ? 'Mancano i 4 cicli di riempimento, durante i quali nessuna istruzione arriva in fondo.' : pred === 5 * p.n ? 'Il prodotto vale per una macchina che esegue un’istruzione alla volta. Nella pipeline le istruzioni si sovrappongono.' : 'Ogni salto previsto male costa due cicli, uno per ciascuna delle due istruzioni annullate.'),
     costruisci(p) {
       const el = SL.el, U = SL.unita354, passi = [], N = p.n, d = p.l, b = 2 * p.s, C = N + 4 + d + b, D3 = U.D3;
       const parziale = [null, 4, N + 4, N + 4 + d, C, C, C, C];
@@ -111,7 +111,7 @@ SL.registra('3.5.4', {
       ['Contare gli errori di previsione al posto dei cicli.', 'Un salto previsto male costa due cicli. Nel conteggio entrano i cicli perduti.'],
       ['Aspettarsi un CPI intero.', 'Il CPI è una media sul tratto misurato, e di solito ha una parte decimale.']
     ],
-    saFare: ['Conto i cicli di un tratto con riempimento e penalità.', 'Calcolo il CPI dai due conteggi.', 'Distinguo la quota di riempimento dal peso delle penalità.'],
+    saFare: ['Contare i cicli di un tratto con riempimento e penalità.', 'Calcolare il CPI dai due conteggi.', 'Distinguere la quota di riempimento dal peso delle penalità.'],
     esercizi: [
       { d: 'Un tratto di 20 istruzioni entra in una pipeline vuota di cinque stadi. Tre carichi sono seguiti subito da un uso, e un salto viene previsto male. Quanti cicli occupa il tratto?', segnaposto: 'Un numero', giuste: ['29', 'ventinove'],
         ok: 'Riempimento 4, uscite 20, attese 3, salto 2: in tutto 29 cicli.',
@@ -131,10 +131,10 @@ SL.registra('3.5.4', {
           { se: ['1.2', '1.20', '1.200'], msg: 'Questo valore tiene conto del solo riempimento. I cicli misurati sono 29.' },
           { se: ['1', '1.0'], msg: 'Il valore 1 è quello del flusso ideale a regime. Qui i cicli sono 29 per 20 istruzioni.' }
         ],
-        altro: 'Il valore è diverso. Dividi i cicli per le istruzioni completate.',
+        altro: 'Il valore è diverso. Si dividano i cicli per le istruzioni completate.',
         indizi: ['CPI significa cicli per istruzione.', 'I cicli sono 29, le istruzioni 20.', '29 / 20.'],
         svolgimento: ['Cicli: 29.', 'Istruzioni completate: 20.', 'CPI = 29 / 20 = 1,45.'] },
-      { d: 'Due tratti di programma perdono entrambi 2 cicli per le penalità. Il primo contiene 10 istruzioni, il secondo 100. Quale ha il CPI più basso?', guida: 'Scegli la risposta.', o: [
+      { d: 'Due tratti di programma perdono entrambi 2 cicli per le penalità. Il primo contiene 10 istruzioni, il secondo 100. Quale ha il CPI più basso?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il secondo: riempimento e penalità si distribuiscono su più istruzioni', ok: true, fb: 'Il primo spende 16 cicli per 10 istruzioni, CPI 1,6. Il secondo ne spende 106 per 100, CPI 1,06.' },
         { t: 'Il primo: ha meno istruzioni da eseguire', fb: 'Il primo dura meno, ma il CPI è una media: i suoi 6 cicli in più pesano su 10 istruzioni soltanto.' },
         { t: 'Sono uguali: le penalità sono le stesse', fb: 'I cicli in più sono gli stessi, 6. Divisi per 10 pesano 0,6, divisi per 100 pesano 0,06.' }] }

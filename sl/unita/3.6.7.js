@@ -18,7 +18,7 @@ SL.unita367 = (() => {
 })();
 SL.registra('3.6.7', {
   titolo: 'Misurare e spiegare le prestazioni',
-  obiettivo: 'Alla fine saprai misurare il guadagno di un riordino su un programma intero in cicli, in tempo, in CPI e come accelerazione, distinguendo il risparmio assoluto dal rapporto.',
+  obiettivo: 'Obiettivo: misurare il guadagno di un riordino su un programma intero in cicli, in tempo, in CPI e come accelerazione, distinguendo il risparmio assoluto dal rapporto.',
   concetti: [['clock', 'Dai cicli al tempo'], ['bilancio', 'Il CPI prima e dopo'], ['lente', 'Risparmio e accelerazione']],
   filigrana: ['bilancio', 'clock', 'lente'],
   richiami: {
@@ -69,7 +69,7 @@ SL.registra('3.6.7', {
       domanda: (p) => 'Un programma ripete ' + p.g + ' volte il gruppo L, U, I, con un periodo di ' + p.t + ' ps. Riordinato in L, I, U, quanto tempo risparmia?',
       opzioni: (p) => Array.from(new Set([p.t, p.g * p.t, 4 * p.t, 2 * p.g * p.t])).sort((a, b) => a - b).map((v) => [v, v + ' ps'])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + ' ps. Il riordino risparmia ' + esito + ' ps. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.t ? 'Il riordino toglie un’attesa a ogni gruppo, e i gruppi sono ' + p.g + '.' : 'Il risparmio è di un ciclo per gruppo: ' + p.g + ' cicli da ' + p.t + ' ps.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' ps. Il riordino risparmia ' + esito + ' ps. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.t ? 'Il riordino toglie un’attesa a ogni gruppo, e i gruppi sono ' + p.g + '.' : 'Il risparmio è di un ciclo per gruppo: ' + p.g + ' cicli da ' + p.t + ' ps.'),
     costruisci(p) {
       const el = SL.el, U = SL.unita367, D3 = U.D3, passi = [], g = p.g, t = p.t, c = U.conti(g, t);
       const quadro = (f) => {
@@ -106,7 +106,7 @@ SL.registra('3.6.7', {
       ['Calcolare l’accelerazione al contrario.', 'Il tempo vecchio sta sopra, quello nuovo sotto. Un miglioramento dà un valore maggiore di 1.'],
       ['Aspettarsi che l’accelerazione raddoppi con il programma.', 'Raddoppiando i gruppi raddoppia il risparmio. L’accelerazione cambia poco, perché cresce anche il tempo di partenza.']
     ],
-    saFare: ['Passo dai cicli al tempo.', 'Calcolo il CPI delle due versioni.', 'Calcolo risparmio e accelerazione, e li distinguo.'],
+    saFare: ['Passare dai cicli al tempo.', 'Calcolare il CPI delle due versioni.', 'Calcolare risparmio e accelerazione, e li distinguo.'],
     esercizi: [
       { d: 'Un programma ripete 6 volte il gruppo L, U, I a partire dalla pipeline vuota, con un periodo di 50 ps. Quanto dura, in picosecondi?', segnaposto: 'Un tempo in ps', giuste: ['1400', '1.400', '1400ps', '1.400ps'],
         ok: 'I cicli sono 18 + 4 + 6 = 28, e il tempo 28 × 50 = 1400 ps.',
@@ -126,10 +126,10 @@ SL.registra('3.6.7', {
           { se: ['300', '300ps'], msg: 'Questo è il risparmio in picosecondi. L’accelerazione è un rapporto fra i due tempi.' },
           { se: ['6', 'sei'], msg: 'Questa è la differenza in cicli. L’accelerazione è un rapporto.' }
         ],
-        altro: 'Il valore è diverso. Dividi i cicli della versione originale per quelli della versione riordinata.',
+        altro: 'Il valore è diverso. Si dividano i cicli della versione originale per quelli della versione riordinata.',
         indizi: ['L’accelerazione è il tempo vecchio diviso per il tempo nuovo.', 'Con lo stesso periodo basta il rapporto fra i cicli.', '28 / 22.'],
         svolgimento: ['Tempo originale: 28 × 50 = 1400 ps.', 'Tempo riordinato: 22 × 50 = 1100 ps.', 'Accelerazione: 1400 / 1100 = 1,273.'] },
-      { d: 'Raddoppiando il numero di gruppi, che cosa accade al risparmio di tempo e all’accelerazione?', guida: 'Scegli la risposta.', o: [
+      { d: 'Raddoppiando il numero di gruppi, che cosa accade al risparmio di tempo e all’accelerazione?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il risparmio raddoppia, l’accelerazione aumenta di poco', ok: true, fb: 'Il risparmio è di un periodo per gruppo. L’accelerazione è un rapporto, e si avvicina lentamente a 4 / 3.' },
         { t: 'Raddoppiano entrambi', fb: 'L’accelerazione è un rapporto fra due tempi che crescono insieme, e resta sotto 4 / 3.' },
         { t: 'Restano uguali entrambi', fb: 'Ogni gruppo in più contiene un’attesa in più da eliminare, e il risparmio cresce.' }] }

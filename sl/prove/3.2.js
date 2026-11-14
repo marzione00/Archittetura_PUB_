@@ -19,7 +19,7 @@
           primo >= 0 ? { se: I(d[primo]), msg: 'Questo è il primo valore caricato. Un fronte successivo con Carica = 1 lo ha sostituito.' } : null,
           { se: I(d[0]), msg: 'Al primo fronte Carica vale ' + e[0] + (e[0] ? ', ma un fronte successivo ha caricato di nuovo.' : ', quindi il valore sul bus viene ignorato.') }
         ]),
-        altro: 'Il numero è diverso. Segui un fronte alla volta: con Carica = 1 il registro copia il bus, con Carica = 0 riscrive se stesso.',
+        altro: 'Il numero è diverso. Si segua un fronte alla volta: con Carica = 1 il registro copia il bus, con Carica = 0 riscrive se stesso.',
         indizi: d.map((x, k) => (k === 0 ? 'Primo' : k === 1 ? 'Secondo' : 'Terzo') + ' fronte, Carica = ' + e[k] + ': il registro ' + (e[k] ? 'copia il bus, che porta ' + x + '.' : 'conserva.')),
         svolgimento: storia.map((x, k) => 'Dopo il ' + (k === 0 ? 'primo' : k === 1 ? 'secondo' : 'terzo') + ' fronte: ' + x + '.') };
     },
@@ -29,14 +29,14 @@
         const q = r.int(0, 1), d = r.int(0, 1), e = r.int(0, 2) > 0 ? 1 - d : d, giusta = e + ',' + d;
         const T = (k) => 'Latch ' + k[0] + ', flip-flop ' + k[2];
         const fb = (k) => (k === giusta ? 'Il flip-flop ha catturato ' + d + ' al fronte. Il latch, aperto per tutto il livello alto, mostra l’ultimo valore di D, che è ' + e + '.' : Number(k[2]) !== d ? 'Il flip-flop cattura D al fronte, quando vale ' + d + ', e poi lo ignora fino al fronte successivo.' : 'Il latch resta aperto per tutto il livello alto, quindi mostra l’ultimo valore di D, che è ' + e + '.');
-        return { u: '3.2.2', d: 'Un latch D e un flip-flop D ricevono lo stesso dato e lo stesso clock, e conservano entrambi ' + q + '. Al fronte di salita D vale ' + d + '. Mentre il clock è ancora alto, D ' + (e === d ? 'resta a ' + d : 'passa a ' + e) + '. Subito prima che il clock scenda, quanto valgono le due uscite?', guida: 'Scegli la risposta.',
+        return { u: '3.2.2', d: 'Un latch D e un flip-flop D ricevono lo stesso dato e lo stesso clock, e conservano entrambi ' + q + '. Al fronte di salita D vale ' + d + '. Mentre il clock è ancora alto, D ' + (e === d ? 'resta a ' + d : 'passa a ' + e) + '. Subito prima che il clock scenda, quanto valgono le due uscite?', guida: 'Si scelga la risposta.',
           o: ['0,0', '0,1', '1,0', '1,1'].map((k) => (k === giusta ? { t: T(k), ok: true, fb: fb(k) } : { t: T(k), fb: fb(k) })) };
       }
       const q0 = r.int(0, 1), seq = [r.scegli(['S', 'R']), r.scegli(['S', 'R']), r.scegli(['S', 'R'])].slice(0, r.int(2, 3)), q = seq[seq.length - 1] === 'S' ? 1 : 0, giuste = [String(q)];
       return { u: '3.2.2', d: 'Un latch SR fatto con due NOR conserva Q = ' + q0 + '. Arrivano nell’ordine ' + seq.map((x) => 'un 1 su ' + x).join(', ') + ', e dopo ciascuno gli ingressi tornano a 0. Quanto vale Q alla fine?', segnaposto: '0 oppure 1', giuste,
         ok: 'Conta l’ultimo impulso: un 1 su ' + seq[seq.length - 1] + ' porta Q a ' + q + ', e con gli ingressi di nuovo a 0 il latch conserva quel valore.',
         diagnosi: [{ se: [String(1 - q)], msg: 'Un 1 su S porta Q a 1, un 1 su R lo porta a 0. Dopo l’ultimo impulso, che è su ' + seq[seq.length - 1] + ', il latch conserva.' }],
-        altro: 'La risposta è un solo bit. Segui gli impulsi nell’ordine: S porta Q a 1, R lo porta a 0.',
+        altro: 'La risposta è un solo bit. Si seguano gli impulsi nell’ordine: S porta Q a 1, R lo porta a 0.',
         indizi: ['Un 1 su S porta Q a 1.', 'Un 1 su R porta Q a 0.', 'L’ultimo impulso è su ' + seq[seq.length - 1] + '.'],
         svolgimento: seq.map((x, k) => 'Impulso ' + (k + 1) + ' su ' + x + ': Q = ' + (x === 'S' ? 1 : 0) + '.').concat(['Con S e R a 0 il valore resta: Q = ' + q + '.']) };
     },
@@ -52,7 +52,7 @@
           { se: I(R[w]), msg: 'Questo è il contenuto di R' + w + ', il registro indicato dalla scrittura. La porta A legge R' + a + '.' },
           { se: I(a), msg: 'Questo è l’indirizzo. La porta mostra la parola contenuta nel registro con quel numero.' }
         ]),
-        altro: 'Il numero è diverso. Stabilisci che cosa contiene R' + a + ' ' + quando + ' il fronte: la scrittura cambia un solo registro, soltanto al fronte e soltanto se è abilitata.',
+        altro: 'Il numero è diverso. Si stabilisca che cosa contiene R' + a + ' ' + quando + ' il fronte: la scrittura cambia un solo registro, soltanto al fronte e soltanto se è abilitata.',
         indizi: ['La porta A mostra il contenuto di R' + a + '.', 'La scrittura ha effetto al fronte, con l’abilitazione a 1, sul solo R' + w + '.', quando === 'prima' ? 'Prima del fronte nulla è ancora cambiato.' : en && w === a ? 'Il registro letto è proprio quello scritto.' : 'Il registro letto resta com’era.'],
         svolgimento: ['Registro letto: R' + a + ', che contiene ' + R[a] + '.', 'Scrittura: ' + v + ' in R' + w + ', abilitazione ' + en + '.', 'La porta A, ' + quando + ' il fronte, mostra ' + giusto + '.'] };
     },
@@ -80,7 +80,7 @@
           { se: I(lm - h), msg: 'All’arrivo contribuisce anche l’uscita del registro, ' + tq + ' ps.' },
           { se: I(tq - h), msg: 'All’arrivo contribuisce anche il percorso della logica, ' + lm + ' ps.' }
         ]),
-        altro: 'Il numero è diverso. Calcola l’arrivo più precoce e togli il tempo di hold.',
+        altro: 'Il numero è diverso. Si calcoli l’arrivo più precoce e si tolga il tempo di hold.',
         indizi: ['Arrivo più precoce: uscita rapida del registro più percorso breve della logica.', tq + ' + ' + lm + ' = ' + arrivo + ' ps.', arrivo + ' − ' + h + '.'],
         svolgimento: ['Arrivo più precoce: ' + tq + ' + ' + lm + ' = ' + arrivo + ' ps.', 'Hold richiesto: ' + h + ' ps.', 'Margine: ' + arrivo + ' − ' + h + ' = ' + SL.x86.num(giusto) + ' ps.'] };
     },
@@ -101,7 +101,7 @@
           { se: I(erog), msg: 'Questo è il numero dei prodotti consegnati. La domanda chiede il credito finale.' },
           { se: I(3), msg: 'Il credito conservato vale al massimo 2. A 3 esatti il prodotto esce e il credito torna a 0.' }
         ]),
-        altro: 'Il numero è diverso. Segui una moneta alla volta, applicando la regola al credito del momento.',
+        altro: 'Il numero è diverso. Si segua una moneta alla volta, applicando la regola al credito del momento.',
         indizi: ['Sotto 3 il credito aumenta.', 'A 3 esatti il prodotto esce e il credito torna a 0.', 'Oltre 3 la moneta torna indietro e il credito resta com’era.'],
         svolgimento: righe.concat([cosa ? 'Prodotti consegnati: ' + erog + '.' : 'Credito finale: ' + q + '.']) };
     }

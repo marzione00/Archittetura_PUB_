@@ -15,7 +15,7 @@ SL.unita472 = (() => {
 })();
 SL.registra('4.7.2', {
   titolo: 'Il DMA come transazione di memoria delegata',
-  obiettivo: 'Alla fine saprai leggere la richiesta che un driver affida a un dispositivo, e ricavare quante transazioni servono e quali indirizzi toccano.',
+  obiettivo: 'Obiettivo: leggere la richiesta che un driver affida a un dispositivo, e ricavare quante transazioni servono e quali indirizzi toccano.',
   concetti: [['tabella', 'Indirizzo, lunghezza, direzione'], ['bus', 'Il dispositivo diventa iniziatore'], ['memory', 'Il buffer ha due estremi']],
   filigrana: ['bus', 'memory', 'tabella'],
   richiami: {
@@ -66,7 +66,7 @@ SL.registra('4.7.2', {
       domanda: (p) => 'Il descrittore indica un buffer di ' + p.n + ' byte. Ogni transazione porta al massimo ' + p.w + ' byte. Quante transazioni emette il dispositivo?',
       opzioni: (p) => { const k = SL.unita472.conto(p).k; return [k - 1, k, k + 1].map((v) => [v, String(v)]); }
     },
-    confronto: (pred, esito, p) => { const c = SL.unita472.conto(p); return 'Avevi previsto ' + pred + ' transazioni. Il dispositivo ne emette ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : c.resto === p.w ? p.n + ' diviso ' + p.w + ' dà esattamente ' + c.k + ', senza resto.' : 'Le transazioni piene sono ' + c.piene + ', e i ' + c.resto + ' byte rimasti ne richiedono un’altra.'); },
+    confronto: (pred, esito, p) => { const c = SL.unita472.conto(p); return 'La previsione indicava ' + pred + ' transazioni. Il dispositivo ne emette ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : c.resto === p.w ? p.n + ' diviso ' + p.w + ' dà esattamente ' + c.k + ', senza resto.' : 'Le transazioni piene sono ' + c.piene + ', e i ' + c.resto + ' byte rimasti ne richiedono un’altra.'); },
     costruisci(p) {
       const U = SL.unita472, H = U.H, c = U.conto(p), passi = [], rx = p.d === 'rx', pieno = c.resto === p.w;
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, w: 820 });
@@ -91,7 +91,7 @@ SL.registra('4.7.2', {
       ['Calcolare l’ultimo byte come inizio + lunghezza.', 'Quell’indirizzo è il primo fuori dal buffer. Va sottratto 1.'],
       ['Chiamare lettura un trasferimento verso la memoria.', 'Quando il dispositivo deposita dati nel buffer, per la memoria è una scrittura.']
     ],
-    saFare: ['Leggo i tre campi di un descrittore.', 'Calcolo il numero di transazioni.', 'Trovo l’inizio dell’ultima transazione e l’ultimo byte.'],
+    saFare: ['Leggere i tre campi di un descrittore.', 'Calcolare il numero di transazioni.', 'Determinare l’inizio dell’ultima transazione e l’ultimo byte.'],
     esercizi: [
       { d: 'Un buffer comincia a 0x8000 ed è lungo 50 byte. Ogni transazione porta al massimo 16 byte. Quante transazioni servono?', segnaposto: 'Un numero', giuste: ['4', 'quattro'],
         ok: 'Tre transazioni piene coprono 48 byte, e i 2 rimasti ne richiedono una quarta.',
@@ -99,7 +99,7 @@ SL.registra('4.7.2', {
           { se: ['3', 'tre'], msg: 'Tre transazioni coprono 48 byte. Ne restano 2, che vanno trasferiti.' },
           { se: ['5', 'cinque'], msg: 'Dopo tre transazioni piene restano 2 byte, che stanno in una sola transazione.' }
         ],
-        altro: 'Il numero è diverso. Dividi 50 per 16 e arrotonda per eccesso.',
+        altro: 'Il numero è diverso. Si divida 50 per 16 e si arrotondi per eccesso.',
         indizi: ['16 × 3 = 48.', 'Restano 2 byte.', 'Serve una quarta transazione.'],
         svolgimento: ['Transazioni piene: 3, per 48 byte.', 'Byte rimasti: 2.', 'Transazioni: 4.'] },
       { d: 'Per lo stesso buffer, che comincia a 0x8000 ed è lungo 50 byte, qual è l’indirizzo dell’ultimo byte? Rispondi in esadecimale.', segnaposto: 'Un indirizzo', giuste: ['8031', '0x8031', '8031h'],
@@ -112,7 +112,7 @@ SL.registra('4.7.2', {
         altro: 'L’indirizzo è un altro. Somma a 0x8000 la lunghezza meno 1, scritta in esadecimale.',
         indizi: ['Lo scostamento dell’ultimo byte è 49.', '49 = 3 × 16 + 1, cioè 0x31.', '0x8000 + 0x31 = 0x8031.'],
         svolgimento: ['Scostamento: 50 − 1 = 49.', '49 = 0x31.', 'Ultimo byte: 0x8031.'] },
-      { d: 'Una scheda di rete deve trasmettere all’esterno un pacchetto che il sistema ha già preparato nel buffer. Quali transazioni emette sul bus?', guida: 'Scegli la risposta.', o: [
+      { d: 'Una scheda di rete deve trasmettere all’esterno un pacchetto che il sistema ha già preparato nel buffer. Quali transazioni emette sul bus?', guida: 'Si scelga la risposta.', o: [
         { t: 'Letture dalla memoria', ok: true, fb: 'I dati vanno dal buffer al dispositivo: per la memoria sono letture.' },
         { t: 'Scritture in memoria', fb: 'Scriverebbe in memoria se dovesse depositare nel buffer dati ricevuti.' },
         { t: 'Nessuna: i dati li sposta il processore', fb: 'Con il DMA è il dispositivo a comportarsi da iniziatore.' }] }

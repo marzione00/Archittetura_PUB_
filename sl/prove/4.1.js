@@ -15,7 +15,7 @@
           { se: ESA(irq ? pc : pc + 4, 4), msg: irq ? 'Dopo un interrupt l’istruzione in corso è già stata completata. Si riprende dalla seguente.' : 'Dopo una pagina assente l’istruzione interrotta va ripetuta.' },
           { se: ESA(pc + 1, 4), msg: 'L’istruzione occupa 4 byte.' }
         ]),
-        altro: 'Il valore è diverso. Chiediti se l’istruzione è stata completata, poi fai la somma in esadecimale.',
+        altro: 'Il valore è diverso. Ci si chieda se l’istruzione è stata completata, poi fai la somma in esadecimale.',
         indizi: [irq ? 'Il processore completa l’istruzione prima di servire il timer.' : 'La lettura è fallita, e l’istruzione è incompiuta.', irq ? 'Si riprende dall’istruzione seguente.' : 'Si riprende dalla stessa istruzione.', irq ? H(pc) + ' + 4.' : 'L’indirizzo è ' + H(pc) + '.'],
         svolgimento: [irq ? 'Evento: interrupt, accettato dopo l’istruzione.' : 'Evento: pagina assente, durante l’istruzione.', irq ? 'Ripresa dalla seguente.' : 'Ripresa dalla stessa istruzione.', 'RIP = ' + H(v) + '.'] };
     },
@@ -25,7 +25,7 @@
         const CASI = [['una istruzione `div` divide per zero', 0], ['una istruzione legge un dato da una pagina assente', 0], ['il programma esegue una `int3` messa da un programma di diagnosi', 1], ['la tastiera segnala che è stato premuto un tasto', 2], ['il timer segnala che un intervallo è scaduto', 2], ['la scheda di rete segnala l’arrivo di nuovi dati', 2], ['un circuito di controllo segnala un guasto dell’hardware che ha rovinato lo stato del processore', 3]];
         const NOMI = ['Fault', 'Trap', 'Interrupt', 'Abort'], PERCHE = ['Un fault viene scoperto durante una istruzione, che resta incompiuta.', 'Una trap viene segnalata dopo l’istruzione che la provoca.', 'Un interrupt arriva dall’esterno, da un timer o da una periferica.', 'Un abort segnala un guasto grave, dopo il quale la ripresa non è garantita.'];
         const c = r.scegli(CASI);
-        return { u: '4.1.2', d: 'A quale classe appartiene questo evento: ' + c[0] + '?', guida: 'Scegli la risposta.', o: [{ t: NOMI[c[1]], ok: true, fb: PERCHE[c[1]] }].concat([0, 1, 2, 3].filter((k) => k !== c[1]).map((k) => ({ t: NOMI[k], fb: PERCHE[k] }))) };
+        return { u: '4.1.2', d: 'A quale classe appartiene questo evento: ' + c[0] + '?', guida: 'Si scelga la risposta.', o: [{ t: NOMI[c[1]], ok: true, fb: PERCHE[c[1]] }].concat([0, 1, 2, 3].filter((k) => k !== c[1]).map((k) => ({ t: NOMI[k], fb: PERCHE[k] }))) };
       }
       const pc = 0x2000 + r.int(1, 2000), caso = r.int(0, 2), L = caso === 1 ? 1 : r.int(2, 7), v = caso === 0 ? pc : pc + L, giuste = ESA(v, 4);
       const frase = caso === 0 ? 'Provoca un fault' : caso === 1 ? 'È una `int3`, che provoca una trap' : 'Durante la sua esecuzione arriva un interrupt';
@@ -35,7 +35,7 @@
           { se: ESA(caso === 0 ? pc + L : pc, 4), msg: caso === 0 ? 'Questo è l’indirizzo della seguente. Un fault lascia l’istruzione incompiuta.' : 'Questo è l’indirizzo dell’istruzione stessa, che qui è stata completata.' },
           { se: ESA(pc + 4, 4), msg: 'L’istruzione occupa ' + (L === 1 ? 'un byte' : L + ' byte') + '.' }
         ]),
-        altro: 'Il valore è diverso. Stabilisci se l’istruzione è stata completata, e in quel caso aggiungi la sua lunghezza.',
+        altro: 'Il valore è diverso. Si stabilisca se l’istruzione è stata completata, e in quel caso aggiungi la sua lunghezza.',
         indizi: [caso === 0 ? 'Un fault viene scoperto durante l’istruzione.' : caso === 1 ? 'Una trap viene segnalata dopo l’istruzione.' : 'Un interrupt viene accettato dopo l’istruzione in corso.', caso === 0 ? 'L’istruzione andrà ripetuta.' : 'Si riprende dalla seguente.', caso === 0 ? 'L’indirizzo è ' + H(pc) + '.' : H(pc) + ' + ' + L + '.'],
         svolgimento: ['Classe: ' + ['fault', 'trap', 'interrupt'][caso] + '.', caso === 0 ? 'Istruzione incompiuta.' : 'Istruzione completata, lunga ' + L + (L === 1 ? ' byte.' : ' byte.'), 'Indirizzo salvato: ' + H(v) + '.'] };
     },
@@ -51,12 +51,12 @@
             { se: ESA(base + 16 * (v + 1), 4), msg: 'I vettori si contano da zero: prima della voce ' + v + ' ci sono ' + v + ' voci.' },
             { se: [String(base.toString(16)) + String(16 * v)], msg: 'Il prodotto va scritto in esadecimale prima di sommarlo.' }
           ]),
-          altro: 'Il valore è diverso. Moltiplica il vettore per 16, scrivi il prodotto in esadecimale e sommalo all’inizio della tabella.',
+          altro: 'Il valore è diverso. Si moltiplichi il vettore per 16, si scriva il prodotto in esadecimale e lo si sommi all’inizio della tabella.',
           indizi: ['Prima della voce ' + v + ' ci sono ' + v + ' voci da 16 byte.', v + ' × 16 = ' + (16 * v) + ', cioè ' + H(16 * v) + '.', H(base) + ' + ' + H(16 * v) + '.'],
           svolgimento: ['Distanza: ' + v + ' × 16 = ' + (16 * v) + ' byte.', (16 * v) + ' = ' + H(16 * v) + '.', 'Indirizzo: ' + H(base) + ' + ' + H(16 * v) + ' = ' + H(a) + '.'] };
       }
       const sw = r.int(0, 2) > 0, v = r.int(32, 200), dpl = r.scegli([0, 3]), ok = !sw || dpl === 3;
-      return { u: '4.1.3', d: 'Gira un programma di livello 3. ' + (sw ? 'Il programma esegue `int ' + v + '`' : 'Una periferica chiede attenzione sul vettore ' + v) + '. La voce ' + v + ' della IDT ha DPL ' + dpl + '. Che cosa fa il processore?', guida: 'Scegli la risposta.', o: [
+      return { u: '4.1.3', d: 'Gira un programma di livello 3. ' + (sw ? 'Il programma esegue `int ' + v + '`' : 'Una periferica chiede attenzione sul vettore ' + v) + '. La voce ' + v + ' della IDT ha DPL ' + dpl + '. Che cosa fa il processore?', guida: 'Si scelga la risposta.', o: [
         { t: 'Entra nel gestore indicato dalla voce', ok, fb: ok ? (sw ? 'La condizione CPL ≤ DPL diventa 3 ≤ 3, che è vera.' : 'Il DPL limita soltanto l’istruzione `int`. La richiesta di una periferica entra comunque.') : 'Serve CPL ≤ DPL, e 3 ≤ 0 è falso.' },
         { t: 'Rifiuta, e solleva #GP', ok: !ok, fb: !ok ? 'La condizione CPL ≤ DPL diventa 3 ≤ 0, che è falsa.' : sw ? 'Con DPL 3 la voce è offerta anche ai programmi di livello 3.' : 'Il confronto fra CPL e DPL si applica soltanto alle richieste fatte con `int`.' },
         { t: 'Ignora la richiesta e prosegue', fb: sw ? 'Una istruzione `int` produce sempre un ingresso oppure una eccezione.' : 'La richiesta di una periferica viene accettata al confine fra due istruzioni.' }] };
@@ -110,7 +110,7 @@
           { se: ESA(base - 40 - 8 * n, 4), msg: 'Fra i cinque campi e i registri c’è ancora una casella: il codice di errore, oppure lo zero che ne prende il posto.' },
           { se: ESA(base + hw + sw, 4), msg: 'La pila cresce verso gli indirizzi bassi: RSP diminuisce.' }
         ]),
-        altro: 'Il valore è diverso. Allinea la cima, poi togli i byte del processore e quelli dello stub, in esadecimale.',
+        altro: 'Il valore è diverso. Si allinei la cima, poi si tolgano i byte del processore e quelli dello stub, in esadecimale.',
         indizi: ['Cima allineata: ' + H(base) + '.', 'Il processore posa ' + hw + ' byte, lo stub ' + sw + '.', H(base) + ' − ' + (hw + sw) + ', cioè − ' + H(hw + sw) + '.'],
         svolgimento: ['Allineamento: ' + H(top) + ' → ' + H(base) + '.', 'Processore: ' + hw + ' byte. Stub: ' + sw + ' byte.', 'RSP = ' + H(base) + ' − ' + H(hw + sw) + ' = ' + H(fine) + '.'] }; }
       if (cosa === 1) { const giuste = I(sw); return { u: '4.1.5', d: testa + 'Quanti byte ha posato lo stub?', segnaposto: 'Un numero', giuste,
@@ -131,7 +131,7 @@
           { se: I(hw + sw), msg: 'Una parte di questi byte è stata posata dallo stub.' },
           { se: I(hw / 8), msg: 'Queste sono le caselle. Ognuna occupa 8 byte.' }
         ]),
-        altro: 'Il numero è diverso. Conta i valori del frame, e aggiungi il codice di errore se l’evento ne ha uno.',
+        altro: 'Il numero è diverso. Conta i valori del frame, e si aggiunga il codice di errore se l’evento ne ha uno.',
         indizi: ['Il frame ha cinque valori.', cod ? 'La pagina assente aggiunge un codice di errore.' : 'Questo evento non aggiunge altro.', (cod ? 6 : 5) + ' × 8.'],
         svolgimento: ['Frame: 5 valori.', cod ? 'Codice di errore: 1 valore.' : 'Nessun codice di errore.', 'Byte: ' + hw + '.'] };
     },
@@ -146,7 +146,7 @@
           { se: I(chi === 'RAX' ? b : a), msg: 'Questo è il valore dell’altro registro.' },
           { se: I(0), msg: 'Nessuno azzera i registri al ritorno.' }
         ]),
-        altro: 'Il numero è diverso. Chiediti se esiste una copia di ' + chi + ' da ricaricare.',
+        altro: 'Il numero è diverso. Ci si chieda se esiste una copia di ' + chi + ' da ricaricare.',
         indizi: ['Lo stub salva ' + salvati + '.', 'Il gestore scrive ' + suo + ' in ' + chi + '.', salvo ? 'La copia viene ricaricata.' : 'IRETQ non tocca i registri generali.'],
         svolgimento: [chi + (salvo ? ' viene salvato sulla pila.' : ' non viene salvato.'), 'Il gestore scrive ' + suo + ' in ' + chi + '.', 'Alla ripresa ' + chi + ' = ' + v + '.'] };
     },
@@ -154,7 +154,7 @@
     (r) => {
       if (r.int(0, 1) === 0) {
         const pa = r.int(2, 6), q = r.scegli([pa - 1, pa + 1, pa + 2, pa]), ifa = r.int(0, 1) === 1, n = ifa && q > pa;
-        return { u: '4.1.7', d: 'Un gestore di priorità ' + pa + ' ha ' + (ifa ? 'riportato IF a 1' : 'lasciato IF a 0') + '. Arriva una richiesta di priorità ' + q + '. Un numero più alto indica una urgenza maggiore. Che cosa accade?', guida: 'Scegli la risposta.', o: [
+        return { u: '4.1.7', d: 'Un gestore di priorità ' + pa + ' ha ' + (ifa ? 'riportato IF a 1' : 'lasciato IF a 0') + '. Arriva una richiesta di priorità ' + q + '. Un numero più alto indica una urgenza maggiore. Che cosa accade?', guida: 'Si scelga la risposta.', o: [
           { t: 'Viene servita subito, e il gestore resta sospeso', ok: n, fb: n ? 'La priorità ' + q + ' supera ' + pa + ', e IF vale 1: le due condizioni sono soddisfatte.' : q > pa ? 'La priorità basterebbe. Con IF a 0, però, il processore rinvia.' : 'Il controller trattiene le richieste di priorità pari o inferiore a quella in servizio.' },
           { t: 'Resta pendente finché il gestore ha finito', ok: !n, fb: !n ? (q > pa ? 'Con IF a 0 il processore rinvia gli interrupt mascherabili.' : 'La priorità ' + q + ' non supera ' + pa + ', e il controller trattiene la richiesta.') : 'La priorità è più alta e IF vale 1: nulla trattiene la richiesta.' },
           { t: 'Va perduta', fb: 'Il controller registra ogni richiesta, e la presenta appena possibile.' }] };
@@ -169,7 +169,7 @@
           { se: I(4), msg: 'Una richiesta viene accettata soltanto se la sua priorità supera quella del servizio in corso. Le altre restano pendenti.' },
           { se: I(1), msg: 'Con IF a 1 una richiesta più urgente sospende il gestore in corso, e posa un nuovo frame.' }
         ]),
-        altro: 'Il numero è diverso. Parti da un frame, e aggiungine uno per ogni richiesta più urgente del servizio in corso in quel momento.',
+        altro: 'Il numero è diverso. Si parta da un frame, e aggiungine uno per ogni richiesta più urgente del servizio in corso in quel momento.',
         indizi: ['Il primo frame riporta al programma.', 'Una richiesta entra soltanto se supera la priorità in servizio.', 'Le richieste rinviate restano pendenti, senza frame.'],
         svolgimento: (() => { let c = p0, f = 1; const out = ['All’inizio: 1 frame, priorità in servizio ' + p0 + '.']; seq.forEach((q) => { if (q > c) { f++; out.push('Richiesta ' + q + ' > ' + c + ': accettata, ' + f + ' frame.'); c = q; } else out.push('Richiesta ' + q + ' ≤ ' + c + ': pendente.'); }); return out; })() };
     }

@@ -20,7 +20,7 @@
           { se: [String(a + 1), 'i' + (a + 1)], msg: 'Ogni istruzione avanza di un posto soltanto per fronte.' },
           { se: [String(c), 'i' + c], msg: 'I' + c + ' durante il ciclo ' + c + ' è nello stadio F, e al fronte passa in D.' }
         ]),
-        altro: 'Il numero è diverso. Trova l’istruzione che durante il ciclo ' + c + ' occupa lo stadio ' + STADI[j - 1] + ': al fronte passa nel registro ' + STADI[j] + '.',
+        altro: 'Il numero è diverso. Si determini l’istruzione che durante il ciclo ' + c + ' occupa lo stadio ' + STADI[j - 1] + ': al fronte passa nel registro ' + STADI[j] + '.',
         indizi: ['Durante il ciclo ' + c + ' lo stadio F ospita I' + c + '.', 'Lo stadio ' + STADI[j - 1] + ' sta ' + (j - 1 === 0 ? 'all’inizio' : j - 1 === 1 ? 'un posto dopo F' : (j - 1) + ' posti dopo F') + ', e ospita I' + a + '.', 'Al fronte I' + a + ' passa nel registro ' + STADI[j] + '.'],
         svolgimento: ['Ciclo ' + c + ': lo stadio ' + STADI[j - 1] + ' ospita I' + a + '.', 'Al fronte ogni istruzione avanza di un posto.', 'Dopo il fronte il registro ' + STADI[j] + ' contiene I' + a + '.'] };
     },
@@ -53,7 +53,7 @@
           { se: ESA(b, 3), msg: 'Questo è l’indirizzo dell’istruzione appena prelevata. Serve quello della prossima.' },
           c[2] ? null : { se: ESA(b + 1, 3), msg: 'L’istruzione occupa ' + c[1] + ' byte. La successiva comincia dopo l’ultimo.' }
         ]),
-        altro: c[2] ? 'Il valore è diverso. La destinazione si legge nell’istruzione.' : 'Il valore è diverso. Aggiungi all’indirizzo la lunghezza dell’istruzione, in esadecimale.',
+        altro: c[2] ? 'Il valore è diverso. La destinazione si legge nell’istruzione.' : 'Il valore è diverso. Si aggiunga all’indirizzo la lunghezza dell’istruzione, in esadecimale.',
         indizi: c[2] ? ['L’istruzione contiene una costante, valC.', salto ? 'PIPE prevede che il salto venga eseguito.' : 'La destinazione è nota fin dal prelievo.', 'Il PC previsto è valC.'] : ['L’istruzione successiva comincia a valP.', 'Questa istruzione occupa ' + c[1] + ' byte.', H(b) + ' + ' + c[1] + '.'],
         svolgimento: c[2] ? ['valC = ' + H(t) + '.', 'Per `' + c[0].split(' ')[0] + '` il PC previsto è valC.', 'PC previsto = ' + H(t) + '.'] : ['Lunghezza: ' + c[1] + ' byte.', 'valP = ' + H(b) + ' + ' + c[1] + ' = ' + H(v) + '.', 'PC previsto = ' + H(v) + '.'] };
     },
@@ -73,7 +73,7 @@
           wOk ? { se: I(vW), msg: 'Lo stadio W ospita l’istruzione più vecchia. Una più vicina scrive lo stesso registro.' } : { se: I(vW), msg: 'L’istruzione nello stadio W scrive %' + y + ', un altro registro.' },
           { se: I(vB), msg: 'Il banco contiene un valore superato: una istruzione nella pipeline sta per scrivere %' + x + '.' }
         ]),
-        altro: 'Il numero è diverso. Confronta %' + x + ' con la destinazione degli stadi E, M e W, in quest’ordine.',
+        altro: 'Il numero è diverso. Si confronti %' + x + ' con la destinazione degli stadi E, M e W, in quest’ordine.',
         indizi: ['Stadio E: ' + (e === 0 ? 'scrive %' + x + ', e il confronto riesce.' : e === 1 ? 'scrive %' + y + ', e il confronto fallisce.' : 'destinazione RNONE, e il confronto fallisce.'), e === 0 ? 'La ricerca si ferma allo stadio E.' : 'Stadio M: ' + (m < 2 ? 'scrive %' + x + ', e il confronto riesce.' : 'la `nop` è priva di destinazione.'), 'Il primo confronto riuscito dà ' + v + '.'],
         svolgimento: ['Stadio E: ' + (e === 0 ? 'destinazione %' + x + ', uguale.' : e === 1 ? 'destinazione %' + y + ', diversa.' : 'destinazione RNONE.'), e === 0 ? 'La ricerca si ferma.' : 'Stadio M: ' + (m < 2 ? 'destinazione %' + x + ', uguale.' : 'nessuna destinazione.') + (m === 2 ? ' Stadio W: destinazione %' + (wOk ? x + ', uguale.' : y + ', diversa.') : ''), 'd_valA = ' + v + '.'] };
     },
@@ -116,7 +116,7 @@
         [op + ' %' + x + ', %' + y, '', op + ' %' + y + ', %' + z, 3, 'La seconda istruzione usa il risultato della prima, e l’inoltro glielo consegna dall’ALU senza attese.'],
         ['jne 0x' + (0x200 + 16 * r.int(1, 20)).toString(16).toUpperCase(), ', con e_Cnd = 0', 'nop', 2, 'Lo `jne` era stato previsto eseguito, e la condizione è falsa.']
       ][caso];
-      return { u: '3.6.5', d: 'Nello stadio E c’è `' + C[0] + '`' + C[1] + ', e nello stadio D c’è `' + C[2] + '`. Quali fra F_stall, D_stall, D_bubble ed E_bubble valgono 1?', guida: 'Scegli la risposta.', o: [{ t: OPZ[C[3]], ok: true, fb: C[4] }].concat([0, 1, 2, 3].filter((k) => k !== C[3]).map((k) => ({ t: OPZ[k], fb: PERCHE[k] + ' ' + C[4] }))) };
+      return { u: '3.6.5', d: 'Nello stadio E c’è `' + C[0] + '`' + C[1] + ', e nello stadio D c’è `' + C[2] + '`. Quali fra F_stall, D_stall, D_bubble ed E_bubble valgono 1?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[C[3]], ok: true, fb: C[4] }].concat([0, 1, 2, 3].filter((k) => k !== C[3]).map((k) => ({ t: OPZ[k], fb: PERCHE[k] + ' ' + C[4] }))) };
     },
     // 3.6.6 · cicli e attese di una sequenza
     (r) => {
@@ -179,7 +179,7 @@
           { se: DEC3(4 / 3), msg: 'Questo è il valore a cui l’accelerazione si avvicina nei programmi molto lunghi. Qui contano anche i 4 cicli di riempimento.' },
           { se: I(g), msg: 'Questa è la differenza in cicli. L’accelerazione è un rapporto.' }
         ]),
-        altro: 'Il valore è diverso. Dividi i cicli della versione originale per quelli della versione riordinata.',
+        altro: 'Il valore è diverso. Si dividano i cicli della versione originale per quelli della versione riordinata.',
         indizi: ['Cicli originali: ' + n + ' + 4 + ' + g + ' = ' + A + '.', 'Cicli riordinati: ' + n + ' + 4 = ' + B + '.', A + ' / ' + B + '.'],
         svolgimento: ['Tempo originale: ' + A + ' × ' + t + ' = ' + (A * t) + ' ps.', 'Tempo riordinato: ' + B + ' × ' + t + ' = ' + (B * t) + ' ps.', 'Accelerazione: ' + (A * t) + ' / ' + (B * t) + ' = ' + V3(A / B) + '.'] }; }
       const orig = r.int(0, 1) === 1, C = orig ? A : B, giuste = DEC3(C / n);

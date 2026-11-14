@@ -17,7 +17,7 @@ SL.unita422 = (() => {
 })();
 SL.registra('4.2.2', {
   titolo: 'Il percorso di write oltre il confine di privilegio',
-  obiettivo: 'Alla fine saprai seguire una write dal buffer del programma fino a una pipe, e dire che cosa controlla il kernel prima di copiare un solo byte.',
+  obiettivo: 'Obiettivo: seguire una write dal buffer del programma fino a una pipe, e dire che cosa controlla il kernel prima di copiare un solo byte.',
   concetti: [['bus', 'Un canale fra due programmi'], ['scudo', 'La convalida del descrittore'], ['register', 'Conteggio oppure errore']],
   filigrana: ['scudo', 'bus', 'register'],
   richiami: {
@@ -68,7 +68,7 @@ SL.registra('4.2.2', {
       domanda: (p) => 'Il programma chiama write sul descrittore 4 con RDX = ' + p.n + '. Il descrittore 4 ' + (p.fd === 'ok' ? 'indica una pipe aperta in scrittura' : 'è già stato chiuso') + '. Quale valore trova in RAX al ritorno?',
       opzioni: (p) => Array.from(new Set([p.n, 8, 0, -9])).sort((a, b) => b - a).map((v) => [v, v < 0 ? '−9' : String(v)])
     },
-    confronto: (pred, esito, p) => { const N = (v) => (v < 0 ? '−9' : String(v)); return 'Avevi previsto ' + N(pred) + '. Il programma trova RAX = ' + N(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.fd === 'bad' ? 'La voce 4 è vuota, e il kernel risponde con l’errore EBADF senza copiare nulla.' : 'RAX riporta i byte copiati, che qui sono quelli chiesti con RDX.'); },
+    confronto: (pred, esito, p) => { const N = (v) => (v < 0 ? '−9' : String(v)); return 'La previsione indicava ' + N(pred) + '. Il programma trova RAX = ' + N(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.fd === 'bad' ? 'La voce 4 è vuota, e il kernel risponde con l’errore EBADF senza copiare nulla.' : 'RAX riporta i byte copiati, che qui sono quelli chiesti con RDX.'); },
     costruisci(p) {
       const U = SL.unita422, passi = [], ok = p.fd === 'ok', v = ok ? p.n : -9, R = ok ? String(p.n) : '−9', pre = U.PAROLA.slice(0, p.n);
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'BUFFER DEL PROGRAMMA', 'mono'), SL.el.nota('t1', 452, 0, 'PIPE', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, passo: 50, sep: 32, hc: 40, h: 58, gap: 14, chi: true }));
@@ -94,7 +94,7 @@ SL.registra('4.2.2', {
       ['Leggere −9 come un conteggio.', 'Un valore negativo è sempre un errore. Nessun byte è stato copiato.'],
       ['Credere che un errore lasci la pipe a metà.', 'La convalida precede la copia. Se fallisce, la pipe resta com’era.']
     ],
-    saFare: ['Descrivo che cosa contiene la tabella dei descrittori.', 'Dico che cosa controlla il kernel prima di una write.', 'Distinguo un conteggio da un errore nel valore restituito.'],
+    saFare: ['Descrivere che cosa contiene la tabella dei descrittori.', 'Indicare che cosa controlla il kernel prima di una write.', 'Distinguere un conteggio da un errore nel valore restituito.'],
     esercizi: [
       { d: 'Il buffer contiene COMPUTER. Il programma chiama write su una pipe aperta, con RDX = 3. Quali lettere entrano nella pipe?', segnaposto: 'Le lettere, in ordine', giuste: ['com'],
         ok: 'RDX = 3 sceglie i primi tre byte del buffer: C, O e M.',
@@ -106,11 +106,11 @@ SL.registra('4.2.2', {
         altro: 'La risposta è diversa. Conta 3 byte a partire dal primo.',
         indizi: ['La write parte dal byte indicato da RSI.', 'RDX dice quanti byte scrivere.', 'I primi 3 byte di COMPUTER.'],
         svolgimento: ['Primo byte: C.', 'Byte richiesti: 3.', 'Nella pipe entrano C, O, M.'] },
-      { d: 'Un programma chiude il descrittore 5 e poi chiama write sul descrittore 5. Che cosa accade?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un programma chiude il descrittore 5 e poi chiama write sul descrittore 5. Che cosa accade?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il kernel restituisce −9 senza scrivere nulla', ok: true, fb: 'La voce 5 è vuota. La convalida fallisce prima della copia, con l’errore EBADF.' },
         { t: 'I byte vengono scritti sul file che il descrittore indicava', fb: 'Chiudendo il descrittore la voce è stata svuotata. Il kernel non ha più alcun oggetto a cui riferirsi.' },
         { t: 'Il programma viene terminato', fb: 'Un descrittore sbagliato produce un errore nel valore restituito. Il programma prosegue e può reagire.' }] },
-      { d: 'Dove si trova la tabella dei descrittori di un processo?', guida: 'Scegli la risposta.', o: [
+      { d: 'Dove si trova la tabella dei descrittori di un processo?', guida: 'Si scelga la risposta.', o: [
         { t: 'Nella memoria del kernel', ok: true, fb: 'Il programma ne conosce soltanto gli indici. Per questo ogni operazione richiede una chiamata di sistema.' },
         { t: 'Nel buffer del programma', fb: 'Se fosse lì il programma potrebbe modificarla, e darsi accesso a qualunque oggetto.' },
         { t: 'Nei registri del processore', fb: 'Nei registri viaggia il numero del descrittore. La tabella è una struttura dati del kernel.' }] }

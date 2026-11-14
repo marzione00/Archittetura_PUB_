@@ -21,7 +21,7 @@
           { se: I(k + n), msg: 'Il ciclo d’ingresso conta già come primo stadio: dopo l’ingresso restano ' + (k - 1) + ' stadi.' },
           { se: I(n), msg: 'Al ciclo ' + n + ' l’ultima istruzione entra nel primo stadio. Deve ancora percorrere gli altri.' }
         ]),
-        altro: 'Il numero è diverso. Trova il ciclo in cui entra l’ultima istruzione, poi aggiungi gli stadi che le restano.',
+        altro: 'Il numero è diverso. Si determini il ciclo in cui entra l’ultima istruzione, poi si aggiungano gli stadi che le restano.',
         indizi: ['L’ultima istruzione entra al ciclo ' + n + '.', 'Dopo il primo stadio ne restano ' + (k - 1) + '.', n + ' + ' + (k - 1) + '.'],
         svolgimento: ['Ingresso dell’ultima istruzione: ciclo ' + n + '.', 'Stadi restanti: ' + (k - 1) + '.', 'Uscita: ciclo ' + n + ' + ' + (k - 1) + ' = ' + cicli + '.'] }; }
       if (cosa === 1) { const giuste = PS(k * T); return { u: '3.5.1', d: testa + 'Quanto vale la latenza di una singola istruzione, in picosecondi?', segnaposto: 'Un tempo in ps', giuste,
@@ -31,7 +31,7 @@
           { se: PS(cicli * T), msg: 'Questa è la durata dell’intero flusso. La latenza riguarda una sola istruzione.' },
           { se: PS((k - 1) * T), msg: 'Gli stadi da attraversare sono ' + k + ', compreso il primo.' }
         ]),
-        altro: 'Il valore è diverso. Moltiplica il numero di stadi per il periodo.',
+        altro: 'Il valore è diverso. Si moltiplichi il numero di stadi per il periodo.',
         indizi: ['Una istruzione attraversa tutti gli stadi.', 'Gli stadi sono ' + k + ', e ciascuno dura un periodo.', k + ' × ' + T + '.'],
         svolgimento: ['Stadi: ' + k + '.', 'Periodo: ' + T + ' ps.', 'Latenza: ' + k + ' × ' + T + ' = ' + (k * T) + ' ps.'] }; }
       const giuste = PS(cicli * T);
@@ -65,7 +65,7 @@
       }
       const j = r.int(1, 8), t = r.int(0, 4), c = j + t, altre = r.mescola([0, 1, 2, 3, 4].filter((x) => x !== t)).slice(0, 3);
       const dove = (x) => (c - x >= 1 ? 'Al ciclo ' + c + ' lo stadio ' + STADI[x] + ' ospita I' + (c - x) + '.' : 'Al ciclo ' + c + ' lo stadio ' + STADI[x] + ' è ancora vuoto.');
-      return { u: '3.5.2', d: testa + 'In quale stadio si trova I' + j + ' al ciclo ' + c + '?', guida: 'Scegli la risposta.', o: [{ t: 'Nello stadio ' + STADI[t], ok: true, fb: 'I' + j + ' entra in F al ciclo ' + j + ' e avanza di uno stadio per ciclo: al ciclo ' + c + ' ha fatto ' + (t === 1 ? 'un passo' : t + ' passi') + '.' }].concat(altre.map((x) => ({ t: 'Nello stadio ' + STADI[x], fb: dove(x) }))) };
+      return { u: '3.5.2', d: testa + 'In quale stadio si trova I' + j + ' al ciclo ' + c + '?', guida: 'Si scelga la risposta.', o: [{ t: 'Nello stadio ' + STADI[t], ok: true, fb: 'I' + j + ' entra in F al ciclo ' + j + ' e avanza di uno stadio per ciclo: al ciclo ' + c + ' ha fatto ' + (t === 1 ? 'un passo' : t + ' passi') + '.' }].concat(altre.map((x) => ({ t: 'Nello stadio ' + STADI[x], fb: dove(x) }))) };
     },
     // 3.5.3 · riconoscere il conflitto, oppure contare i cicli perduti
     (r) => {
@@ -73,17 +73,17 @@
       const tipo = r.int(0, 3);
       if (tipo === 0) {
         const reg = r.mescola(['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi']), op = r.scegli(['addq', 'subq', 'andq', 'xorq']), caso = r.int(0, 2), a = caso === 0 ? reg[0] : reg[1], b = caso === 1 ? reg[0] : reg[2], g = caso === 2 ? 3 : 0;
-        return { u: '3.5.3', d: 'Una `mrmovq` carica un valore in %' + reg[0] + '. L’istruzione successiva è `' + op + ' %' + a + ', %' + b + '`. Che cosa accade nella pipeline?', guida: 'Scegli la risposta.', o: [{ t: OPZ[g], ok: true, fb: g === 0 ? 'La `' + op + '` legge %' + reg[0] + ', che la `mrmovq` consegna soltanto alla fine dello stadio M.' : 'La `' + op + '` legge %' + a + ' e %' + b + ', che la `mrmovq` non modifica.' }]
+        return { u: '3.5.3', d: 'Una `mrmovq` carica un valore in %' + reg[0] + '. L’istruzione successiva è `' + op + ' %' + a + ', %' + b + '`. Che cosa accade nella pipeline?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[g], ok: true, fb: g === 0 ? 'La `' + op + '` legge %' + reg[0] + ', che la `mrmovq` consegna soltanto alla fine dello stadio M.' : 'La `' + op + '` legge %' + a + ' e %' + b + ', che la `mrmovq` non modifica.' }]
           .concat([0, 1, 2, 3].filter((x) => x !== g).map((x) => ({ t: OPZ[x], fb: x === 0 ? 'Gli operandi della `' + op + '` sono %' + a + ' e %' + b + ', e il registro caricato è un altro.' : x === 3 ? 'La `' + op + '` legge %' + reg[0] + ', che non è ancora arrivato dalla memoria.' : x === 1 ? 'Il conflitto strutturale nasce da una risorsa contesa fra due stadi. Qui conta il valore di un registro.' : 'Il conflitto di controllo riguarda i salti condizionati. Qui non ce ne sono.' }))) };
       }
       if (tipo === 1) {
         const esito = r.int(0, 1), g = esito ? 3 : 2;
-        return { u: '3.5.3', d: 'La pipeline prevede che un salto condizionato venga eseguito, e preleva due istruzioni dalla destinazione. Nello stadio E la condizione risulta ' + (esito ? 'vera' : 'falsa') + '. Che cosa accade?', guida: 'Scegli la risposta.', o: [{ t: OPZ[g], ok: true, fb: esito ? 'La previsione era giusta, e le istruzioni prelevate sono quelle da eseguire.' : 'La previsione era sbagliata: le due istruzioni prelevate dalla destinazione vengono annullate.' }]
+        return { u: '3.5.3', d: 'La pipeline prevede che un salto condizionato venga eseguito, e preleva due istruzioni dalla destinazione. Nello stadio E la condizione risulta ' + (esito ? 'vera' : 'falsa') + '. Che cosa accade?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[g], ok: true, fb: esito ? 'La previsione era giusta, e le istruzioni prelevate sono quelle da eseguire.' : 'La previsione era sbagliata: le due istruzioni prelevate dalla destinazione vengono annullate.' }]
           .concat([0, 1, 2, 3].filter((x) => x !== g).map((x) => ({ t: OPZ[x], fb: x === 2 ? 'Le istruzioni vengono annullate soltanto quando la previsione è sbagliata. Qui la condizione è vera, come previsto.' : x === 3 ? 'La condizione è falsa, e la pipeline aveva previsto il contrario.' : x === 0 ? 'Il conflitto sui dati riguarda un valore non ancora prodotto. Qui la questione è la strada scelta dopo un salto.' : 'Il conflitto strutturale nasce da una risorsa contesa. Qui la questione è la strada scelta dopo un salto.' }))) };
       }
       if (tipo === 2) {
         const caso = r.int(0, 1), g = caso ? 3 : 1;
-        return { u: '3.5.3', d: 'Istruzioni e dati stanno in una memoria con una sola porta. In un certo ciclo lo stadio F deve prelevare un’istruzione, e lo stadio M ospita una `' + (caso ? r.scegli(['addq', 'xorq', 'rrmovq']) : r.scegli(['mrmovq', 'rmmovq'])) + '`. Che cosa accade?', guida: 'Scegli la risposta.', o: [{ t: OPZ[g], ok: true, fb: caso ? 'L’istruzione nello stadio M non accede alla memoria dei dati, e la porta è libera per il prelievo.' : 'L’istruzione nello stadio M usa la porta per i dati, e il prelievo deve attendere.' }]
+        return { u: '3.5.3', d: 'Istruzioni e dati stanno in una memoria con una sola porta. In un certo ciclo lo stadio F deve prelevare un’istruzione, e lo stadio M ospita una `' + (caso ? r.scegli(['addq', 'xorq', 'rrmovq']) : r.scegli(['mrmovq', 'rmmovq'])) + '`. Che cosa accade?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[g], ok: true, fb: caso ? 'L’istruzione nello stadio M non accede alla memoria dei dati, e la porta è libera per il prelievo.' : 'L’istruzione nello stadio M usa la porta per i dati, e il prelievo deve attendere.' }]
           .concat([0, 1, 2, 3].filter((x) => x !== g).map((x) => ({ t: OPZ[x], fb: x === 1 ? 'L’istruzione nello stadio M lavora soltanto sui registri, e lascia libera la porta.' : x === 3 ? 'L’istruzione nello stadio M accede alla memoria, e la porta è una sola.' : x === 0 ? 'Il conflitto sui dati riguarda un valore non ancora prodotto. Qui la questione è l’uso della porta di memoria.' : 'Il conflitto di controllo riguarda i salti condizionati. Qui non ce ne sono.' }))) };
       }
       const L = r.int(1, 5), S = r.int(2, 6), E = r.int(1, S - 1), persi = L + 2 * E, giuste = I(persi);

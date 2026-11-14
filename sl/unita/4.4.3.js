@@ -10,7 +10,7 @@ SL.unita443 = (() => {
 })();
 SL.registra('4.4.3', {
   titolo: 'Transazioni e semantica del protocollo',
-  obiettivo: 'Alla fine saprai contare i cicli di una transazione, e spiegare perché una raffica trasferisce le stesse parole in meno tempo.',
+  obiettivo: 'Obiettivo: contare i cicli di una transazione, e spiegare perché una raffica trasferisce le stesse parole in meno tempo.',
   concetti: [['clock', 'Ogni ciclo ha un compito'], ['coda', 'Parole una dopo l’altra'], ['bus', 'Il protocollo costa cicli']],
   filigrana: ['clock', 'bus', 'coda'],
   richiami: {
@@ -61,7 +61,7 @@ SL.registra('4.4.3', {
       domanda: (p) => 'Vanno trasferite ' + p.n + ' parole consecutive con ' + (p.modo === 'raffica' ? 'una raffica' : 'transazioni singole') + '. Ogni presentazione di indirizzo costa un ciclo ed è seguita da ' + (p.w === 0 ? 'nessun ciclo' : p.w === 1 ? 'un ciclo' : p.w + ' cicli') + ' di attesa. Quanti cicli servono in tutto?',
       opzioni: (p) => [p.n, 1 + p.w + p.n, p.n * (2 + p.w)].map((v) => [v, v + ' cicli'])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + ' cicli. La cronologia ne conta ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.n ? 'Ai ' + p.n + ' cicli dei dati vanno aggiunti quelli di indirizzo e di attesa.' : p.modo === 'raffica' ? 'La raffica paga indirizzo e attesa una volta sola.' : 'Ogni transazione singola ripete indirizzo e attesa.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' cicli. La cronologia ne conta ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.n ? 'Ai ' + p.n + ' cicli dei dati vanno aggiunti quelli di indirizzo e di attesa.' : p.modo === 'raffica' ? 'La raffica paga indirizzo e attesa una volta sola.' : 'Ogni transazione singola ripete indirizzo e attesa.'),
     costruisci(p) {
       const U = SL.unita443, el = SL.el, passi = [], raff = p.modo === 'raffica', seq = U.cicli(p.n, p.w, p.modo), altroModo = raff ? 'singole' : 'raffica', seq2 = U.cicli(p.n, p.w, altroModo), una = 2 + p.w, inizi = raff ? 1 : p.n;
       const H2 = (v) => '0x' + v.toString(16).toUpperCase();
@@ -101,7 +101,7 @@ SL.registra('4.4.3', {
       ['Ripetere l’attesa per ogni parola di una raffica.', 'Nel modello l’attesa segue la presentazione dell’indirizzo, che nella raffica avviene una volta.'],
       ['Concludere che la raffica trasferisce più byte.', 'I byte sono identici. Diminuisce il tempo necessario.']
     ],
-    saFare: ['Conto i cicli di una raffica.', 'Conto i cicli di una serie di transazioni singole.', 'Distinguo i cicli di dati da quelli di protocollo.'],
+    saFare: ['Contare i cicli di una raffica.', 'Contare i cicli di una serie di transazioni singole.', 'Distinguere i cicli di dati da quelli di protocollo.'],
     esercizi: [
       { d: 'Il protocollo prevede un ciclo di indirizzo e tre cicli di attesa. Quanti cicli richiede una raffica di otto parole?', segnaposto: 'Un numero', giuste: ['12', 'dodici', '12cicli'],
         ok: '1 + 3 + 8 = 12 cicli.',
@@ -121,10 +121,10 @@ SL.registra('4.4.3', {
           { se: ['32', '32cicli'], msg: 'A ogni transazione va aggiunto il ciclo in cui viaggia il dato: 5 cicli, e 8 × 5 = 40.' },
           { se: ['5', '5cicli'], msg: 'Questa è la durata di una transazione. Le transazioni sono otto.' }
         ],
-        altro: 'Il numero è diverso. Calcola la durata di una transazione e moltiplicala per otto.',
+        altro: 'Il numero è diverso. Si calcoli la durata di una transazione e la si moltiplichi per otto.',
         indizi: ['Una transazione: indirizzo, attese, dato.', '1 + 3 + 1 = 5 cicli.', '8 × 5 = 40.'],
         svolgimento: ['Una transazione: 1 + 3 + 1 = 5 cicli.', 'Otto transazioni: 40 cicli.'] },
-      { d: 'Si passa dalle transazioni singole a una raffica, con le stesse parole. Quale quantità resta uguale?', guida: 'Scegli la risposta.', o: [
+      { d: 'Si passa dalle transazioni singole a una raffica, con le stesse parole. Quale quantità resta uguale?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il numero di cicli che portano dati', ok: true, fb: 'Ogni parola occupa comunque un ciclo di dati.' },
         { t: 'Il numero di cicli di indirizzo', fb: 'La raffica presenta un solo indirizzo.' },
         { t: 'La durata complessiva', fb: 'La raffica dura meno, perché risparmia indirizzi e attese.' }] }

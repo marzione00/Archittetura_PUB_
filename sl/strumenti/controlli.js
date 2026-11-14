@@ -10,6 +10,7 @@
    2. esperimenti: per ogni combinazione dei comandi genera i passi e controlla esito, previsioni e domande;
    3. ordine dei termini: nessun termine del glossario prima dell'unità che lo introduce;
    4. costrutti da evitare nella prosa.
+   5. sicurezza del codice: risorse esterne, codice costruito da stringhe, archivi e rete, gestori in linea, politica dei contenuti.
    Non ha dipendenze oltre a Node. */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const radice = path.resolve(__dirname, '..', '..');
@@ -256,7 +257,8 @@ const ACCETTATI = {
   'pila ombra': 'l’unità 2.7.4 la annuncia fra le difese con un rinvio esplicito all’unità 2.7.6, che la spiega',
   'percorso dati': 'nell’unità 1.1.4 le due parole sono accostate per caso: «il percorso dati/voti.txt» indica un file nella directory dati',
   'pipeline': 'le unità 3.4.3 e 3.4.5 la annunciano come tema dei capitoli successivi, senza farne uso',
-  'codice di errore': 'nell’unità 2.5.2 l’espressione indica il numero conservato in errno, un oggetto diverso dal valore che il processore aggiunge al frame di interruzione'
+  'codice di errore': 'nell’unità 2.5.2 l’espressione indica il numero conservato in errno, un oggetto diverso dal valore che il processore aggiunge al frame di interruzione',
+  'autorizzazione': 'nelle unità 1.7.4 e 2.4.3 compare soltanto nel nome «byte di autorizzazione», un campo del formato descritto sul posto; la decisione di autorizzazione arriva nell’unità 6.7.1'
 };
 const piano = (s) => s.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2').replace(/\[\[([^\]]+)\]\]/g, '$1').replace(/`/g, '');
 const parola = (f) => new RegExp('(?<![\\p{L}\\p{N}])' + f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu');
@@ -325,6 +327,30 @@ for (const id of Object.keys(testi)) {
   if (visteScisse.size > 2) stile.push({ id, dove: 'tutta l’unità', nome: 'frase scissa ripetuta ' + visteScisse.size + ' volte', s: Array.from(visteScisse).join(' / ').slice(0, 200) });
 }
 
+/* ---------- registro accademico impersonale ---------- */
+// Il sito adotta la forma impersonale in ogni testo: teoria, laboratori ed esercizi. Lo strumento segnala la seconda persona,
+// la prima plurale, il lessico colloquiale, i superlativi, le formule a effetto e le serie di frasi brevissime.
+// Le unità già riscritte sono elencate in REGISTRO_FATTO: per loro ogni segnalazione è riportata; per le altre si dà il conto.
+const REGISTRO_FATTO = ['0.', '1.', '2.'];
+const IMPERATIVI = 'Prova|Guarda|Osserva|Scegli|Pensa|Immagina|Nota|Ricorda|Calcola|Scrivi|Leggi|Confronta|Aumenta|Riduci|Cambia|Ripeti|Conta|Cerca|Usa|Parti|Segui|Considera|Controlla|Verifica|Rispondi|Indica|Completa|Sposta|Premi|Apri|Torna|Dividi|Moltiplica|Somma|Sottrai|Aggiungi|Togli|Converti|Applica|Trova|Elenca|Tieni|Ragiona|Annota|Chiediti|Fermati|Lascia|Metti|Prendi|Porta|Ripassa|Rileggi|Riparti|Separa|Traduci|Individua|Stabilisci|Descrivi|Spiega|Fai|Vai|Scorri|Ricava|Ordina|Estrai|Isola|Esegui|Sostituisci|Riscrivi';
+const REGISTRO = [
+  ['seconda persona', /(?<![\p{L}’])(saprai|vedrai|sceglierai|potrai|dovrai|troverai|userai|avrai|farai|seguirai|leggerai|scriverai|otterrai|noterai|imparerai|capirai|sarai|vorrai|dirai|conterai|calcolerai|confronterai|proverai|guarderai|osserverai|incontrerai|riconoscerai|hai|avevi|puoi|devi|vuoi|sai|stai|eri|tu|ti|te|tuo|tua|tuoi|tue|fall[oiae]|scrivil[oiae]|contal[oiae]|leggil[oiae]|sommal[oiae]|dividil[oiae]|spostal[oiae]|mettil[oiae]|prendil[oiae]|chiediti|fermati|ricordati|confrontal[oiae]|calcolal[oiae]|trovali|trovalo|cercal[oiae]|usal[oiae]|tienil[oiae]|lascial[oiae]|guardal[oiae]|osserval[oiae]|scorril[oiae])(?![\p{L}’])/iu],
+  ['prima persona singolare', /(?<![\p{L}’])(dico|distinguo|spiego|riconosco|seguo|prevedo|leggo|stabilisco|ricavo|descrivo|trovo|scelgo|scrivo|ricostruisco|individuo|applico|sommo|compilo|aggiorno|verifico|separo|costruisco|metto|scompongo|interpreto|divido|decido|compongo|associo|assegno|traduco|tengo|posso|devo|faccio|voglio|mio|mia|miei|mie|mi|io)(?![\p{L}’])/iu],
+  ['imperativo', new RegExp('(?:^|[.:;!?»)]\\s+)(?:' + IMPERATIVI + ')(?![\\p{L}’:])', 'u')],
+  ['imperativo coordinato', /(?:^|[.!?»]\s+)Si \p{L}+[^.!?]*?(?:, | e | poi )(calcola|somma|conta|moltiplica|confronta|controlla|considera|applica|usa|porta|trova|elenca|annota|indica|sposta|aumenta|cambia|lascia|ricava|verifica|completa|separa|ordina|isola|individua|arrotonda|raddoppia|riporta|conserva|segna|raggruppa|lavora|aggiungi|togli|scrivi|dividi|leggi|segui|sottrai|converti|ripeti|scegli|tieni|metti|prendi|riduci|scorri|traduci|stabilisci|descrivi|esegui)(?![\p{L}’])/u],
+  ['prima persona plurale', /(?<![\p{L}’])((?!richiamo)\p{L}{3,}(?:iamo|eremo|iremo)|vedremo|faremo|diremo|avremo|saremo|potremo|dovremo|daremo|andremo|verremo|terremo|vorremo|noi|nostr[oaie])(?![\p{L}’])/iu],
+  ['lessico colloquiale', /(?<![\p{L}’])(un po’|un attimo|per fortuna|purtroppo|ecco|insomma|davvero|semplicemente|giocattolo|trucco|trucchi|numero civico|casellario|inquilin[oi]|da vicino|togli\p{L}* di mezzo|viene da chiedersi|con calma|a occhio|di fantasia|mai e poi mai|per finta|in fin dei conti|a ben vedere|non a caso|vale la pena|gioca un ruolo|è importante notare|il bello è|la buona notizia|la cattiva notizia|niente paura|pian piano|per filo e per segno|tutto qui|magi[ac]\p{L}*|comod[oaie]|svita\p{L}*|raccont\p{L}+|tace|tacciono|storia|storie|guai[o]?|pasticci\p{L}*|un sacco|parecchi\p{L}*|roba|sbirci\p{L}*|buttar\p{L}*|butta|salta fuori|saltano fuori|tira\p{L}* fuori|va a finire|fa finta|sul serio)(?![\p{L}’])/iu],
+  ['superlativo', /(?<![\p{L}’])\p{L}{3,}issim[oaie](?![\p{L}’])/iu],
+  ['rivelazione dopo i due punti', /(?:^|[.!?]\s+)(La prima|La seconda|La terza|Il primo|Il secondo|La risposta|La soluzione|Il risultato|Il motivo|La ragione|Il punto|L’idea|Il trucco|La regola): /u],
+  ['apertura a effetto', /(?:^|[.!?]\s+)(C’è poi|C’è però|Qui nasce|Ed è qui|Ecco|Viene allora|Il guaio|E qui|Ma c’è|Sembra poco|Non basta|Attenzione)(?![\p{L}’])/u]
+];
+const registro = [], vistoReg = new Set();
+for (const id of Object.keys(testi)) testi[id].forEach((t) => {
+  const s = piano(t.s);
+  REGISTRO.forEach((r) => { if (r[0] === 'imperativo' && /^(titolo|concetti|sfida)$/.test(t.dove)) return; /* titoli, etichette dei concetti e titoli delle sfide sono sintagmi nominali */ const m = s.match(r[1]); if (!m) return; const chiave = id + '|' + r[0] + '|' + s.slice(Math.max(0, m.index - 20), m.index + 40); if (vistoReg.has(chiave)) return; vistoReg.add(chiave); registro.push({ id, nome: r[0], dove: t.dove, s: s.slice(Math.max(0, m.index - 50), m.index + 70) }); });
+  if (t.genere === 'prosa' && /idea|racconto/.test(t.dove)) { const frasi = s.split(/(?<=[.!?])\s+/).map((f) => (f.match(/[\p{L}\p{N}]+/gu) || []).length); let serie = 0, peggio = 0; frasi.forEach((n) => { serie = n > 0 && n <= 7 ? serie + 1 : 0; peggio = Math.max(peggio, serie); }); if (peggio >= 3) { const chiave = id + '|brevi|' + s.slice(0, 60); if (!vistoReg.has(chiave)) { vistoReg.add(chiave); registro.push({ id, nome: 'frasi brevi in serie', dove: t.dove, s: s.slice(0, 120) }); } } }
+});
+
 /* ---------- leggibilità (indice Gulpease) ---------- */
 const gulpease = (s) => { const parole = (s.match(/[\p{L}\p{N}]+/gu) || []); const lettere = parole.join('').length; const frasi = (s.match(/[.!?]+(\s|$)/g) || []).length || 1; return Math.round(89 + (300 * frasi - 10 * lettere) / parole.length); };
 
@@ -341,6 +367,42 @@ if (statProve.length) {
   statProve.forEach((r) => console.log(riga(r)));
 }
 const fuori = anticipi.filter((a) => !ACCETTATI[a.k]);
+/* ---------- sicurezza del codice ---------- */
+// Regole statiche che tengono fermo ciò su cui si fonda la sicurezza del sito: nessuna risorsa esterna, nessun codice
+// costruito da stringhe, nessun dato conservato o trasmesso, nessun gestore di evento in linea, politica dei contenuti presente.
+{
+  const elenco = (dir, est) => (fs.existsSync(path.join(radice, dir)) ? fs.readdirSync(path.join(radice, dir)).filter((f) => f.endsWith(est)).sort().map((f) => dir + '/' + f) : []);
+  const codice = elenco('sl/js', '.js'), contenuti = elenco('sl/dati', '.js').concat(elenco('sl/unita', '.js'), elenco('sl/prove', '.js')), stili = elenco('sl/css', '.css');
+  const VIETATE = [[/\beval\s*\(/, 'eval'], [/\bnew\s+Function\b/, 'new Function'], [/\bdocument\.write/, 'document.write'], [/\b(localStorage|sessionStorage|indexedDB)\b/, 'archivi del browser'], [/\bdocument\.cookie\b/, 'cookie'], [/\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|\bsendBeacon\b|\bEventSource\b/, 'richieste di rete'], [/\bimport\s*\(/, 'import dinamico'], [/\bpostMessage\b/, 'postMessage'], [/\bset(Timeout|Interval)\s*\(\s*['"`]/, 'temporizzatore con codice in una stringa'], [/\bjavascript:/i, 'indirizzo javascript:']];
+  const SOLO_DATI = [[/\binnerHTML\b|\bouterHTML\b|\binsertAdjacentHTML\b/, 'scrittura diretta di HTML'], [/\bdocument\s*\./, 'accesso al documento'], [/\bwindow\s*\./, 'accesso alla finestra'], [/\blocation\s*\./, 'accesso all’indirizzo']];
+  const ESTERNO = /(?:https?:)?\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)+/gi, AMMESSI = new Set(['http://www.w3.org', 'https://creativecommons.org']);
+  const GESTORE = /\son(?:click|dblclick|change|input|load|error|submit|focus|blur|key\w+|mouse\w+|pointer\w+|touch\w+)\s*=\s*\\?["']/i;
+  let esaminati = 0;
+  const esamina = (f, soloDati) => {
+    const testo = leggi(f); esaminati++;
+    VIETATE.forEach((v) => { if (v[0].test(testo)) err('sicurezza', f + ' · uso non ammesso: ' + v[1]); });
+    if (soloDati) SOLO_DATI.forEach((v) => { if (v[0].test(testo)) err('sicurezza', f + ' · un file di contenuti deve restare privo di ' + v[1]); });
+    (testo.match(ESTERNO) || []).forEach((u) => { if (!AMMESSI.has(u)) err('sicurezza', f + ' · indirizzo esterno: ' + u); });
+    if (GESTORE.test(testo)) err('sicurezza', f + ' · gestore di evento in linea');
+  };
+  codice.forEach((f) => esamina(f, false)); contenuti.forEach((f) => esamina(f, true)); stili.forEach((f) => esamina(f, false));
+  const pagina = leggi('index.html'); esaminati++;
+  const politica = (pagina.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/) || [])[1] || '';
+  if (!politica) err('sicurezza', 'index.html · manca la politica di sicurezza dei contenuti');
+  else {
+    const direttive = {}; politica.split(';').forEach((d) => { const p = d.trim().split(/\s+/); if (p[0]) direttive[p[0]] = p.slice(1); });
+    if ((direttive['default-src'] || []).join(' ') !== "'none'") err('sicurezza', 'index.html · default-src deve valere soltanto \'none\'');
+    if ((direttive['script-src'] || []).join(' ') !== "'self'") err('sicurezza', 'index.html · script-src deve valere soltanto \'self\'');
+    ['object-src', 'base-uri', 'frame-src', 'form-action', 'connect-src'].forEach((d) => { if ((direttive[d] || []).join(' ') !== "'none'") err('sicurezza', 'index.html · ' + d + ' deve valere \'none\''); });
+  }
+  if (/<script(?![^>]*\bsrc=)[^>]*>/.test(pagina)) err('sicurezza', 'index.html · script in linea');
+  (pagina.match(/<script[^>]*\bsrc="([^"]+)"/g) || []).forEach((t) => { const u = t.replace(/^.*src="/, '').replace(/"$/, ''); if (!/^sl\/(js|dati)\/[a-z0-9-]+\.js$/.test(u)) err('sicurezza', 'index.html · script fuori dalle cartelle previste: ' + u); });
+  if (GESTORE.test(pagina)) err('sicurezza', 'index.html · gestore di evento in linea');
+  (pagina.match(ESTERNO) || []).forEach((u) => { if (!AMMESSI.has(u)) err('sicurezza', 'index.html · indirizzo esterno: ' + u); });
+  (pagina.match(/<a\b[^>]*target="_blank"[^>]*>/g) || []).forEach((a) => { if (!/rel="[^"]*noopener[^"]*"/.test(a)) err('sicurezza', 'index.html · collegamento in nuova scheda senza rel="noopener"'); });
+  console.log('\nSICUREZZA · file esaminati ' + esaminati + ' · regole: risorse esterne, codice da stringhe, archivi e rete, gestori in linea, politica dei contenuti');
+}
+
 console.log('\nERRORI ' + errori.length); errori.forEach((x) => console.log('  ' + x.testo + (x.n > 1 ? '  [e altri ' + (x.n - 1) + ' casi uguali]' : '')));
 console.log('\nTERMINI USATI PRIMA DELLA LORO UNITÀ ' + fuori.length + (TUTTO ? '' : ' (più ' + (anticipi.length - fuori.length) + ' accettati, visibili con --tutto)'));
 const gruppi = new Map();
@@ -353,5 +415,16 @@ for (const lista of gruppi.values()) {
 const unici = []; { const gia = new Set(); stile.forEach((x) => { const c = x.id + x.nome + x.s.replace(/\d+/g, '#'); if (!gia.has(c)) { gia.add(c); unici.push(x); } }); }
 console.log('\nCOSTRUTTI DA EVITARE ' + unici.length);
 unici.forEach((x) => console.log('  ' + x.id + ' · ' + x.nome + ' · ' + x.dove + ' · …' + x.s.replace(/\s+/g, ' ') + '…'));
+{
+  const fatto = (id) => REGISTRO_FATTO.some((p) => id === p || id.startsWith(p) || id === 'prova ' + p.replace(/\.$/, '') || id.startsWith('prova ' + p));
+  const perUnita = {}; registro.forEach((x) => { perUnita[x.id] = (perUnita[x.id] || 0) + 1; });
+  const tutte = Object.keys(testi), conformi = tutte.filter((id) => !perUnita[id]), perTipo = {}; registro.forEach((x) => { perTipo[x.nome] = (perTipo[x.nome] || 0) + 1; });
+  console.log('\nREGISTRO ACCADEMICO · testi conformi ' + conformi.length + ' su ' + tutte.length + ' · segnalazioni ' + registro.length + ' · ' + Object.keys(perTipo).map((k) => k + ' ' + perTipo[k]).join(', '));
+  const perModulo = {}; registro.forEach((x) => { const m = x.id.replace(/^prova /, '').split('.')[0]; perModulo[m] = (perModulo[m] || 0) + 1; });
+  console.log('  per modulo: ' + Object.keys(perModulo).sort().map((m) => m + ': ' + perModulo[m]).join(' · '));
+  const daCorreggere = registro.filter((x) => fatto(x.id) || process.argv.includes('--registro'));
+  console.log('REGISTRO DA CORREGGERE nelle parti già riscritte ' + registro.filter((x) => fatto(x.id)).length);
+  daCorreggere.slice(0, process.argv.includes('--registro') ? 400 : 200).forEach((x) => console.log('  ' + x.id + ' · ' + x.nome + ' · ' + x.dove + ' · …' + x.s.replace(/\s+/g, ' ') + '…'));
+}
 console.log('\nAVVISI ' + avvisi.length); avvisi.forEach((x) => console.log('  ' + x));
 process.exit(errori.length ? 1 : 0);

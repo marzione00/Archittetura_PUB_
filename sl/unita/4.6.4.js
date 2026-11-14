@@ -20,7 +20,7 @@ SL.unita464 = (() => {
 })();
 SL.registra('4.6.4', {
   titolo: 'FTL, durata e latenza dipendente dallo stato',
-  obiettivo: 'Alla fine saprai calcolare quanto dura una scrittura su un’unità a stato solido secondo lo stato in cui la trova, e che cosa misura l’amplificazione di scrittura.',
+  obiettivo: 'Obiettivo: calcolare quanto dura una scrittura su un’unità a stato solido secondo lo stato in cui la trova, e che cosa misura l’amplificazione di scrittura.',
   concetti: [['ssd', 'Recuperare lo spazio'], ['clock', 'La stessa richiesta, tempi diversi'], ['bilancio', 'Scritture richieste e scritture fatte']],
   filigrana: ['ssd', 'clock', 'bilancio'],
   richiami: {
@@ -69,7 +69,7 @@ SL.registra('4.6.4', {
       domanda: (p) => 'Il computer chiede di scrivere una pagina. ' + (p.st === 'gc' ? 'Il controller non ha pagine libere, e deve recuperare un blocco che contiene ' + (p.v === 1 ? '1 pagina valida' : p.v + ' pagine valide') + '.' : 'Il controller ha già una pagina libera. Un altro blocco contiene ' + (p.v === 1 ? '1 pagina valida' : p.v + ' pagine valide') + ' e alcune invalide.') + ' Quanto dura la scrittura?',
       opzioni: (p) => Array.from(new Set([200, 2200, p.v * 250 + 2200])).map((v) => [v, v + ' µs'])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + ' µs. La scrittura dura ' + esito + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.st === 'free' ? 'Con una pagina già libera basta la programmazione richiesta. Le pagine dell’altro blocco restano dove sono.' : pred === 200 ? 'Senza pagine libere il controller deve prima recuperare un blocco.' : 'Prima della cancellazione vanno copiate le pagine valide: 250 µs ciascuna.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' µs. La scrittura dura ' + esito + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.st === 'free' ? 'Con una pagina già libera basta la programmazione richiesta. Le pagine dell’altro blocco restano dove sono.' : pred === 200 ? 'Senza pagine libere il controller deve prima recuperare un blocco.' : 'Prima della cancellazione vanno copiate le pagine valide: 250 µs ciascuna.'),
     costruisci(p) {
       const U = SL.unita464, c = U.conto(p), passi = [];
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, wp: 44, w: 820 });
@@ -101,7 +101,7 @@ SL.registra('4.6.4', {
       ['Dimenticare la pagina richiesta nel conto delle programmazioni.', 'Alle copie va aggiunta la scrittura che il computer aveva chiesto.'],
       ['Attendersi la stessa durata da due scritture uguali.', 'La durata dipende dallo stato dell’unità: pagine libere pronte oppure blocco da recuperare.']
     ],
-    saFare: ['Calcolo la latenza di una scrittura con recupero.', 'Calcolo l’amplificazione di scrittura.', 'Spiego perché l’amplificazione accorcia la vita della flash.'],
+    saFare: ['Calcolare la latenza di una scrittura con recupero.', 'Calcolare l’amplificazione di scrittura.', 'Spiegare perché l’amplificazione accorcia la vita della flash.'],
     esercizi: [
       { d: 'Lettura 50 µs, programmazione 200 µs, cancellazione di un blocco 2000 µs. Per scrivere una pagina il controller deve recuperare un blocco con 5 pagine valide. Quanto dura la scrittura, in microsecondi?', segnaposto: 'Un numero', giuste: ['3450', '3450µs', '3450μs', '3450us'],
         ok: '5 × 250 = 1250, più 2000 di cancellazione, più 200 per la pagina richiesta: 3450 µs.',
@@ -119,10 +119,10 @@ SL.registra('4.6.4', {
           { se: ['5', 'cinque'], msg: 'Alle cinque copie va aggiunta la pagina che il computer aveva chiesto di scrivere.' },
           { se: ['1', 'uno'], msg: 'Varrebbe 1 se non servisse alcun recupero. Qui il controller ha copiato cinque pagine.' }
         ],
-        altro: 'Il numero è diverso. Conta tutte le pagine programmate e dividi per quelle richieste, che sono una.',
+        altro: 'Il numero è diverso. Conta tutte le pagine programmate e si divida per quelle richieste, che sono una.',
         indizi: ['Le copie sono cinque.', 'A queste si aggiunge la pagina richiesta.', '6 ÷ 1 = 6.'],
         svolgimento: ['Programmazioni per le copie: 5.', 'Programmazione richiesta: 1.', 'Amplificazione: 6 ÷ 1 = 6.'] },
-      { d: 'Due scritture identiche di una pagina arrivano in momenti diversi. La prima dura 200 µs, la seconda 2950 µs. Qual è la spiegazione più probabile?', guida: 'Scegli la risposta.', o: [
+      { d: 'Due scritture identiche di una pagina arrivano in momenti diversi. La prima dura 200 µs, la seconda 2950 µs. Qual è la spiegazione più probabile?', guida: 'Si scelga la risposta.', o: [
         { t: 'La seconda ha trovato l’unità senza pagine libere, e ha atteso il recupero di un blocco', ok: true, fb: 'Migrazioni e cancellazione si sommano alla programmazione richiesta.' },
         { t: 'La seconda ha scritto più dati', fb: 'Le due richieste sono identiche: una pagina ciascuna.' },
         { t: 'La seconda ha atteso seek e rotazione', fb: 'Un’unità a stato solido non ha parti in movimento.' }] }

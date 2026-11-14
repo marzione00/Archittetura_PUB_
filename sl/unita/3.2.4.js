@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.2.4', {
   titolo: 'Il modello sincrono e i limiti temporali',
-  obiettivo: 'Alla fine saprai calcolare il periodo minimo di clock per un percorso fra due registri, verificare la condizione di mantenimento e dire quale dei due problemi si risolve allungando il periodo.',
+  obiettivo: 'Obiettivo: calcolare il periodo minimo di clock per un percorso fra due registri, verificare la condizione di mantenimento e dire quale dei due problemi si risolve allungando il periodo.',
   concetti: [['clock', 'Da un fronte al successivo'], ['lente', 'Il dato più tardivo'], ['conflitto', 'Il dato più precoce']],
   filigrana: ['clock', 'register', 'conflitto'],
   richiami: {
@@ -58,7 +58,7 @@ SL.registra('3.2.4', {
       domanda: (p) => 'Il registro di partenza mostra il dato fra 12 e 30 ps dopo il fronte. La logica impiega da ' + p.min + ' a ' + p.max + ' ps. Il registro di arrivo chiede 15 ps di setup e 18 ps di hold, e il periodo è di ' + p.t + ' ps. Quali condizioni sono rispettate?',
       opzioni: () => [['ss', 'Setup e hold'], ['sn', 'Soltanto il setup'], ['ns', 'Soltanto l’hold'], ['nn', 'Nessuna delle due']]
     },
-    confronto: (pred, esito, p) => { const N = { ss: 'setup e hold', sn: 'soltanto il setup', ns: 'soltanto l’hold', nn: 'nessuna delle due' }; return 'Avevi previsto: ' + N[pred] + '. Esito: ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Per il setup servono 30 + ' + p.max + ' + 15 = ' + (45 + p.max) + ' ps, da confrontare con il periodo di ' + p.t + ' ps. Per l’hold il dato più precoce arriva dopo 12 + ' + p.min + ' = ' + (12 + p.min) + ' ps, da confrontare con 18 ps.'); },
+    confronto: (pred, esito, p) => { const N = { ss: 'setup e hold', sn: 'soltanto il setup', ns: 'soltanto l’hold', nn: 'nessuna delle due' }; return 'La previsione indicava: ' + N[pred] + '. Esito: ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Per il setup servono 30 + ' + p.max + ' + 15 = ' + (45 + p.max) + ' ps, da confrontare con il periodo di ' + p.t + ' ps. Per l’hold il dato più precoce arriva dopo 12 + ' + p.min + ' = ' + (12 + p.min) + ' ps, da confrontare con 18 ps.'); },
     costruisci(p) {
       const el = SL.el, passi = [], T = p.t, X0 = 190, K = 4.5, tardi = 30 + p.max, presto = 12 + p.min, ms = T - tardi - 15, mh = presto - 18;
       const S = (v) => (v >= 0 ? '+' : '−') + Math.abs(v) + ' ps';
@@ -108,7 +108,7 @@ SL.registra('3.2.4', {
       ['Usare i ritardi massimi anche per l’hold.', 'Per l’hold conta il dato che arriva prima di tutti, quindi i ritardi minimi.'],
       ['Dimenticare il ritardo di uscita del registro.', 'Dopo il fronte il registro di partenza impiega un tempo per mostrare la parola nuova, e quel tempo entra in entrambi i conti.']
     ],
-    saFare: ['Calcolo il periodo minimo di un percorso fra due registri.', 'Verifico la condizione di hold con i ritardi minimi.', 'Indico il rimedio adatto a una violazione di setup e a una di hold.'],
+    saFare: ['Calcolare il periodo minimo di un percorso fra due registri.', 'Verificare la condizione di hold con i ritardi minimi.', 'Indicare il rimedio adatto a una violazione di setup e a una di hold.'],
     esercizi: [
       { d: 'Un registro mostra la parola nuova entro 25 ps dal fronte. La logica ha un cammino critico di 140 ps, e il registro di arrivo chiede un setup di 20 ps. Qual è il periodo minimo del clock, in picosecondi?', segnaposto: 'Un numero di picosecondi', giuste: ['185', '185ps'],
         ok: 'Il periodo deve coprire i tre tempi in fila: 25 + 140 + 20 = 185 ps.',
@@ -127,7 +127,7 @@ SL.registra('3.2.4', {
           { se: ['13', '13ps'], msg: 'All’arrivo contribuisce anche l’uscita del registro, 10 ps, oltre ai 5 ps della logica.' },
           { se: ['8', '8ps'], msg: 'All’arrivo contribuisce anche il percorso della logica, 5 ps, oltre ai 10 ps del registro.' }
         ],
-        altro: 'Il numero è diverso. Calcola l’arrivo più precoce e sottrailo dal tempo di hold.',
+        altro: 'Il numero è diverso. Si calcoli l’arrivo più precoce e lo si sottragga dal tempo di hold.',
         indizi: ['Arrivo più precoce: uscita rapida del registro più percorso breve della logica.', '10 + 5 = 15 ps.', '18 − 15.'],
         svolgimento: ['Arrivo più precoce: 10 + 5 = 15 ps.', 'Hold richiesto: 18 ps.', 'Anticipo: 18 − 15 = 3 ps.'] }
     ]

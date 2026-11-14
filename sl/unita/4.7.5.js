@@ -17,7 +17,7 @@ SL.unita475 = (() => {
 })();
 SL.registra('4.7.5', {
   titolo: 'Completamento e ritorno allo scheduling',
-  obiettivo: 'Alla fine saprai ricostruire che cosa accade fra l’arrivo dell’ultimo byte e il momento in cui il processo che lo aspettava torna a eseguire.',
+  obiettivo: 'Obiettivo: ricostruire che cosa accade fra l’arrivo dell’ultimo byte e il momento in cui il processo che lo aspettava torna a eseguire.',
   concetti: [['dispositivo', 'I dati sono arrivati'], ['interrupt', 'Il sistema viene avvisato'], ['process', 'Il processo torna in fila']],
   filigrana: ['process', 'interrupt', 'clock'],
   richiami: {
@@ -67,7 +67,7 @@ SL.registra('4.7.5', {
       domanda: (p) => 'L’ultimo byte arriva nella memoria a ' + p.t + ' µs. L’interrupt parte ' + (p.b === 0 ? 'subito' : 'dopo ' + p.b + ' µs') + ', il gestore lavora per 3 µs, e lo scheduler fa attendere il processo ' + (p.s === 0 ? '0 µs' : p.s + ' µs') + '. Quanto tempo passa fra l’ultimo byte e la ripresa del processo?',
       opzioni: (p) => Array.from(new Set([p.s, p.b + p.s, p.b + 3 + p.s])).sort((a, b) => a - b).map((v) => [v, v + ' µs'])
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + ' µs. Fra l’ultimo byte e la ripresa passano ' + esito + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.s ? 'All’attesa dello scheduler vanno sommati la notifica e il lavoro del gestore.' : 'Vanno contati anche i 3 µs in cui il gestore controlla l’esito e risveglia il processo.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' µs. Fra l’ultimo byte e la ripresa passano ' + esito + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.s ? 'All’attesa dello scheduler vanno sommati la notifica e il lavoro del gestore.' : 'Vanno contati anche i 3 µs in cui il gestore controlla l’esito e risveglia il processo.'),
     costruisci(p) {
       const U = SL.unita475, c = U.conto(p), passi = [];
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, w: 820, h: 56 });
@@ -93,7 +93,7 @@ SL.registra('4.7.5', {
       ['Far eseguire il processo appena risvegliato.', 'Il risveglio lo rende pronto. Il processore glielo assegna lo scheduler.'],
       ['Attribuire tutto il ritardo allo scheduler.', 'Notifica e gestore restano anche quando il processore è libero.']
     ],
-    saFare: ['Metto in ordine ultimo byte, interrupt, risveglio e ripresa.', 'Calcolo l’istante della ripresa.', 'Separo la parte di ritardo dovuta allo scheduler.'],
+    saFare: ['Porre in ordine ultimo byte, interrupt, risveglio e ripresa.', 'Calcolare l’istante della ripresa.', 'Separare la parte di ritardo dovuta allo scheduler.'],
     esercizi: [
       { d: 'L’ultimo byte di un trasferimento DMA arriva all’istante 60 µs. L’interrupt parte dopo 5 µs, il gestore impiega 3 µs, e lo scheduler fa attendere il processo 12 µs. A quale istante riprende il processo, in microsecondi?', segnaposto: 'Un numero', giuste: ['80', '80µs', '80μs', '80us'],
         ok: '60 + 5 + 3 + 12 = 80 µs.',
@@ -115,7 +115,7 @@ SL.registra('4.7.5', {
         altro: 'Il valore è diverso. Somma notifica, gestore e attesa dello scheduler.',
         indizi: ['Notifica: 5 µs.', 'Gestore: 3 µs.', '5 + 3 + 12 = 20.'],
         svolgimento: ['Notifica: 5 µs.', 'Gestore: 3 µs.', 'Scheduler: 12 µs.', 'Intervallo: 20 µs.'] },
-      { d: 'Il processore è libero, e lo scheduler assegna subito il turno al processo risvegliato. L’intervallo fra l’ultimo byte e la ripresa si annulla?', guida: 'Scegli la risposta.', o: [
+      { d: 'Il processore è libero, e lo scheduler assegna subito il turno al processo risvegliato. L’intervallo fra l’ultimo byte e la ripresa si annulla?', guida: 'Si scelga la risposta.', o: [
         { t: 'No: restano il ritardo della notifica e il lavoro del gestore', ok: true, fb: 'Senza interrupt e senza gestore il sistema non saprebbe che i dati sono arrivati.' },
         { t: 'Sì: il processo riparte all’arrivo dell’ultimo byte', fb: 'All’arrivo dell’ultimo byte il processo è ancora sospeso.' },
         { t: 'Sì, purché il trasferimento usi il DMA', fb: 'Il DMA libera il processore durante il trasferimento. Il completamento va comunque notificato.' }] }

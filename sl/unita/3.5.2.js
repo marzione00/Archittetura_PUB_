@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.5.2', {
   titolo: 'Leggere i diagrammi temporali della pipeline',
-  obiettivo: 'Alla fine saprai leggere un diagramma di pipeline nei due sensi: lungo una riga, per seguire un’istruzione, e lungo una colonna, per sapere che cosa contiene ogni stadio in un dato ciclo.',
+  obiettivo: 'Obiettivo: leggere un diagramma di pipeline nei due sensi: lungo una riga, per seguire un’istruzione, e lungo una colonna, per sapere che cosa contiene ogni stadio in un dato ciclo.',
   concetti: [['pipeline', 'Cinque stadi con un nome'], ['tabella', 'Righe e colonne'], ['lente', 'La fotografia di un ciclo']],
   filigrana: ['pipeline', 'tabella', 'lente'],
   richiami: {
@@ -52,7 +52,7 @@ SL.registra('3.5.2', {
       domanda: (p) => p.n + ' istruzioni indipendenti, da I1 a I' + p.n + ', entrano una per ciclo nella pipeline F, D, E, M, W. Al ciclo ' + p.c + ', quale istruzione occupa lo stadio E?',
       opzioni: (p) => Array.from(new Set([p.c - 1, p.c - 2, p.c - 3, p.c, p.n, 1].filter((i) => i >= 1 && i <= p.n))).sort((a, b) => a - b).map((i) => [i, 'I' + i]).concat([[0, 'Nessuna istruzione']])
     },
-    confronto: (pred, esito, p) => { const T = (v) => (v ? 'I' + v : 'nessuna istruzione'); return 'Avevi previsto ' + T(pred) + '. Lo stadio E ospita ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Lo stadio E sta due passi dopo F, quindi al ciclo ' + p.c + ' vi si trova l’istruzione entrata al ciclo ' + (p.c - 2) + (esito ? ', cioè I' + esito + '.' : p.c - 2 < 1 ? ', cioè prima dell’inizio del flusso. La pipeline si sta ancora riempiendo.' : ', e il flusso ha soltanto ' + p.n + ' istruzioni: quello stadio si è già svuotato.')); },
+    confronto: (pred, esito, p) => { const T = (v) => (v ? 'I' + v : 'nessuna istruzione'); return 'La previsione indicava ' + T(pred) + '. Lo stadio E ospita ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Lo stadio E sta due passi dopo F, quindi al ciclo ' + p.c + ' vi si trova l’istruzione entrata al ciclo ' + (p.c - 2) + (esito ? ', cioè I' + esito + '.' : p.c - 2 < 1 ? ', cioè prima dell’inizio del flusso. La pipeline si sta ancora riempiendo.' : ', e il flusso ha soltanto ' + p.n + ' istruzioni: quello stadio si è già svuotato.')); },
     costruisci(p) {
       const el = SL.el, passi = [], n = p.n, c0 = p.c, ST = ['F', 'D', 'E', 'M', 'W'], righe = Array.from({ length: n }, (_, i) => ({ n: 'I' + (i + 1), da: i + 1, s: ST })), tot = n + 4;
       const inStadio = (c, j) => { const i = c - j; return i >= 1 && i <= n ? i : 0; };
@@ -90,7 +90,7 @@ SL.registra('3.5.2', {
       ['Dimenticare lo svuotamento.', 'Dopo l’ultimo prelievo servono ancora 4 cicli perché l’ultima istruzione arrivi in W.'],
       ['Mettere due istruzioni nello stesso stadio.', 'In una colonna ogni lettera compare al massimo una volta: uno stadio ospita una sola istruzione per ciclo.']
     ],
-    saFare: ['Seguo un’istruzione lungo la sua riga.', 'Leggo in una colonna il contenuto dei cinque stadi.', 'Riconosco i cicli di riempimento e quelli di svuotamento.'],
+    saFare: ['Seguire un’istruzione lungo la sua riga.', 'Leggere in una colonna il contenuto dei cinque stadi.', 'Riconoscere i cicli di riempimento e quelli di svuotamento.'],
     esercizi: [
       { d: 'In un flusso ideale, quale istruzione occupa lo stadio M al ciclo 7? Rispondi con il numero dell’istruzione.', segnaposto: 'Un numero', giuste: ['4', 'i4', 'quattro'],
         ok: 'Lo stadio M sta tre passi dopo F, quindi al ciclo 7 ospita l’istruzione entrata al ciclo 4.',

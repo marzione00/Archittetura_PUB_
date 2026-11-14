@@ -14,7 +14,7 @@ SL.unita462 = (() => {
 })();
 SL.registra('4.6.2', {
   titolo: 'Scritture di parità, modalità degradata e ricostruzione',
-  obiettivo: 'Alla fine saprai calcolare la parità di una striscia, aggiornarla quando cambia un dato, e usarla per ricavare un blocco perduto.',
+  obiettivo: 'Obiettivo: calcolare la parità di una striscia, aggiornarla quando cambia un dato, e usarla per ricavare un blocco perduto.',
   concetti: [['gate', 'La parità è uno XOR'], ['raid', 'Ogni scrittura la aggiorna'], ['scudo', 'Un blocco perduto si ricalcola']],
   filigrana: ['raid', 'gate', 'bit'],
   richiami: {
@@ -65,7 +65,7 @@ SL.registra('4.6.2', {
       domanda: (p) => { const H = SL.unita462.H; return 'La striscia contiene A = ' + H(p.a) + ' e B = ' + H(p.b) + ', con parità P = ' + H(p.a ^ p.b) + '. Il sistema scrive in A il valore ' + H(p.n) + '. Quanto deve valere la parità dopo la scrittura?'; },
       opzioni: (p) => { const H = SL.unita462.H; return [[p.a ^ p.b, H(p.a ^ p.b) + ', come prima'], [p.n ^ p.b, H(p.n ^ p.b)], [p.n, H(p.n) + ', il nuovo dato']]; }
     },
-    confronto: (pred, esito, p) => { const H = SL.unita462.H; return 'Avevi previsto ' + H(pred) + '. La parità aggiornata vale ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === (p.a ^ p.b) ? 'Una parità rimasta al vecchio valore restituirebbe, dopo un guasto, il vecchio A.' : 'La parità è lo XOR di tutti i dati della striscia, e B continua a farne parte.'); },
+    confronto: (pred, esito, p) => { const H = SL.unita462.H; return 'La previsione indicava ' + H(pred) + '. La parità aggiornata vale ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === (p.a ^ p.b) ? 'Una parità rimasta al vecchio valore restituirebbe, dopo un guasto, il vecchio A.' : 'La parità è lo XOR di tutti i dati della striscia, e B continua a farne parte.'); },
     costruisci(p) {
       const U = SL.unita462, H = U.H, el = SL.el, passi = [], pv = p.a ^ p.b, pn = pv ^ p.a ^ p.n, O = { x: 20, we: 190, passo: 44 };
       // fase: 0 la striscia · 1 la parità · 2 la richiesta · 3 le letture · 4 la nuova parità · 5 le scritture · 6 il guasto
@@ -103,7 +103,7 @@ SL.registra('4.6.2', {
       ['Calcolare la nuova parità con il solo dato nuovo.', 'Prima va tolto il contributo del dato vecchio, con un altro XOR.'],
       ['Usare OR al posto di XOR.', 'OR perde informazione. Soltanto XOR si annulla ripetendolo, e permette di tornare indietro.']
     ],
-    saFare: ['Calcolo la parità di due byte.', 'Aggiorno la parità dopo una scrittura.', 'Ricavo un byte perduto dalla parità e dagli altri.'],
+    saFare: ['Calcolare la parità di due byte.', 'Aggiornare la parità dopo una scrittura.', 'Ricavare un byte perduto dalla parità e dagli altri.'],
     esercizi: [
       { d: 'In una striscia A = 0x3C e B = 0x0F. Quanto vale la parità P = A XOR B? Rispondi in esadecimale.', segnaposto: 'Un byte', giuste: ['33', '0x33', '33h'],
         ok: '0011 1100 XOR 0000 1111 = 0011 0011, cioè 0x33.',
@@ -112,7 +112,7 @@ SL.registra('4.6.2', {
           { se: ['0c', '0x0c', 'c', '0xc'], msg: 'Questo è AND. XOR segnala le colonne in cui i bit sono diversi.' },
           { se: ['4b', '0x4b'], msg: 'Questa è la somma. XOR lavora colonna per colonna, senza riporti.' }
         ],
-        altro: 'Il valore è diverso. Scrivi i due byte in binario e confronta le colonne.',
+        altro: 'Il valore è diverso. Si scrivano i due byte in binario e si confrontino le colonne.',
         indizi: ['0x3C è 0011 1100, 0x0F è 0000 1111.', 'Le colonne con bit diversi sono quelle di peso 5, 4, 1 e 0.', '0011 0011 è 0x33.'],
         svolgimento: ['A = 0011 1100.', 'B = 0000 1111.', 'P = 0011 0011 = 0x33.'] },
       { d: 'Una striscia ha parità P = 0x66. Il blocco A, che valeva 0x55, viene riscritto con 0xF0. Quanto vale la nuova parità? Rispondi in esadecimale.', segnaposto: 'Un byte', giuste: ['c3', '0xc3', 'c3h'],
@@ -122,7 +122,7 @@ SL.registra('4.6.2', {
           { se: ['a5', '0xa5'], msg: 'Questo è lo XOR fra vecchio e nuovo A. Va applicato alla vecchia parità, 0x66.' },
           { se: ['66', '0x66'], msg: 'La parità deve cambiare ogni volta che cambia un dato della striscia.' }
         ],
-        altro: 'Il valore è diverso. Applica alla vecchia parità due XOR: con il vecchio A e con il nuovo A.',
+        altro: 'Il valore è diverso. Si applichi alla vecchia parità due XOR: con il vecchio A e con il nuovo A.',
         indizi: ['P nuova = P vecchia XOR A vecchio XOR A nuovo.', '0x66 XOR 0x55 = 0x33.', '0x33 XOR 0xF0 = 0xC3.'],
         svolgimento: ['0x66 XOR 0x55 = 0x33: è il contributo degli altri dati.', '0x33 XOR 0xF0 = 0xC3.'] },
       { d: 'Il disco che conteneva A si è guastato. Sui superstiti si leggono B = 0x33 e P = 0x99. Quanto valeva A? Rispondi in esadecimale.', segnaposto: 'Un byte', giuste: ['aa', '0xaa', 'aah'],
@@ -132,10 +132,10 @@ SL.registra('4.6.2', {
           { se: ['11', '0x11'], msg: 'Questo è AND. Per ricavare il blocco mancante serve XOR.' },
           { se: ['cc', '0xcc'], msg: 'Questa è la somma. XOR lavora colonna per colonna, senza riporti.' }
         ],
-        altro: 'Il valore è diverso. Calcola B XOR P in binario.',
+        altro: 'Il valore è diverso. Si calcoli B XOR P in binario.',
         indizi: ['A = B XOR P.', '0x33 è 0011 0011, 0x99 è 1001 1001.', '1010 1010 è 0xAA.'],
         svolgimento: ['B = 0011 0011.', 'P = 1001 1001.', 'A = 1010 1010 = 0xAA.'] },
-      { d: 'Quante operazioni su blocchi richiede una piccola scrittura in RAID 5?', guida: 'Scegli la risposta.', o: [
+      { d: 'Quante operazioni su blocchi richiede una piccola scrittura in RAID 5?', guida: 'Si scelga la risposta.', o: [
         { t: 'Due letture e due scritture', ok: true, fb: 'Si leggono il dato vecchio e la parità vecchia, si scrivono il dato nuovo e la parità nuova.' },
         { t: 'Una scrittura', fb: 'Scrivendo soltanto il dato, la parità resterebbe sbagliata.' },
         { t: 'Una lettura e una scrittura', fb: 'Vanno letti due blocchi, dato e parità, e riscritti entrambi.' }] }

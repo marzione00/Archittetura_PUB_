@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.4.2', {
   titolo: 'Il percorso dati a ciclo singolo di SEQ',
-  obiettivo: 'Alla fine saprai dire, per le principali istruzioni, che cosa arriva ai due ingressi dell’ALU di SEQ e dove va il suo risultato, e saprai seguire una `pushq` lungo il percorso dati.',
+  obiettivo: 'Obiettivo: dire, per le principali istruzioni, che cosa arriva ai due ingressi dell’ALU di SEQ e dove va il suo risultato, e saprai seguire una `pushq` lungo il percorso dati.',
   concetti: [['alu', 'Che cosa entra nell’ALU'], ['mux', 'Un multiplexer per ingresso'], ['bus', 'Un risultato, due destinazioni']],
   filigrana: ['alu', 'bus', 'mux'],
   richiami: {
@@ -57,7 +57,7 @@ SL.registra('3.4.2', {
       domanda: (p) => { const H = SL.y86.esa; return 'SEQ esegue `pushq %rax` con %rsp = ' + H(p.sp) + ' e %rax = ' + H(p.v) + '. In quale cella viene scritto ' + H(p.v) + ', e quanto vale %rsp alla fine?'; },
       opzioni: (p) => { const H = SL.y86.esa; return [[p.sp - 8, p.sp - 8], [p.sp, p.sp - 8], [p.sp - 8, p.sp], [p.sp, p.sp + 8]].map((x) => [H(x[0]) + ',' + H(x[1]), 'cella ' + H(x[0]) + ', %rsp = ' + H(x[1])]); }
     },
-    confronto: (pred, esito, p) => { const T = (k) => 'cella ' + k.split(',')[0] + ' e %rsp = ' + k.split(',')[1], H = SL.y86.esa; return 'Avevi previsto ' + T(pred) + '. L’esito è ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'L’ALU calcola una volta sola valE = ' + H(p.sp) + ' − 8 = ' + H(p.sp - 8) + ', e quel valore serve sia da indirizzo per la memoria sia da nuovo contenuto di %rsp.'); },
+    confronto: (pred, esito, p) => { const T = (k) => 'cella ' + k.split(',')[0] + ' e %rsp = ' + k.split(',')[1], H = SL.y86.esa; return 'La previsione indicava ' + T(pred) + '. L’esito è ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'L’ALU calcola una volta sola valE = ' + H(p.sp) + ' − 8 = ' + H(p.sp - 8) + ', e quel valore serve sia da indirizzo per la memoria sia da nuovo contenuto di %rsp.'); },
     costruisci(p) {
       const el = SL.el, H = SL.y86.esa, passi = [], valE = p.sp - 8;
       const st = { a: false, b: false, mux: false, e: false, biv: false, rsp: p.sp, cella: null, ck: 'basso' };
@@ -109,9 +109,9 @@ SL.registra('3.4.2', {
       ['Scrivere alla vecchia cima.', 'L’indirizzo della scrittura è valE = %rsp − 8. La vecchia cima contiene un dato ancora in uso.'],
       ['Calcolare due volte la nuova cima.', 'L’ALU è una sola e calcola una volta. Il suo risultato viene distribuito su due fili.']
     ],
-    saFare: ['Dico che cosa arriva ad aluA e ad aluB per ogni classe di istruzioni.', 'Indico le destinazioni di valE.', 'Seguo una `pushq` dal banco dei registri alla memoria.'],
+    saFare: ['Indicare che cosa arriva ad aluA e ad aluB per ogni classe di istruzioni.', 'Indicare le destinazioni di valE.', 'Seguire una `pushq` dal banco dei registri alla memoria.'],
     esercizi: [
-      { d: 'Per `popq %rax`, che cosa arriva ai due ingressi dell’ALU?', guida: 'Scegli la risposta.', o: [
+      { d: 'Per `popq %rax`, che cosa arriva ai due ingressi dell’ALU?', guida: 'Si scelga la risposta.', o: [
         { t: 'aluA = +8 e aluB = valB', ok: true, fb: 'L’ALU calcola la cima dopo il prelievo: il vecchio %rsp più 8.' },
         { t: 'aluA = −8 e aluB = valB', fb: 'Togliere 8 serve a riservare una cella, come in `pushq`. `popq` ne restituisce una.' },
         { t: 'aluA = valA e aluB = valB', fb: 'Due registri entrano nell’ALU per le operazioni aritmetiche. Qui serve una costante.' }] },
@@ -122,7 +122,7 @@ SL.registra('3.4.2', {
           { se: ['0x308', '308', '308h'], msg: 'La pila cresce verso gli indirizzi bassi: aluA vale −8.' },
           { se: ['0x2b', '2b', '2bh'], msg: 'Questo è il dato. La domanda chiede l’indirizzo della cella in cui viene scritto.' }
         ],
-        altro: 'L’indirizzo è diverso. Togli 8 al vecchio %rsp, in esadecimale.',
+        altro: 'L’indirizzo è diverso. Si tolga 8 al vecchio %rsp, in esadecimale.',
         indizi: ['aluB = valB = 0x300.', 'aluA = −8.', '0x300 − 8.'],
         svolgimento: ['valB = 0x300.', 'valE = 0x300 − 8 = 0x2F8.', 'M8[0x2F8] = 0x2B, e %rsp = 0x2F8.'] }
     ],

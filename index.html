@@ -2,29 +2,33 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0c0b09">
 <meta name="description" content="SistemiLab: la rete interattiva del corso di architettura dei sistemi, con unità guidate ed esperimenti da seguire un passo alla volta.">
 <title>SistemiLab · Architettura dei sistemi</title>
 <link rel="icon" href="assets/icona.svg" type="image/svg+xml">
+<link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">
 <link rel="stylesheet" href="sl/css/sito.css">
 </head>
 <body>
-<a class="salta" href="#contenuto" onclick="event.preventDefault();document.getElementById('contenuto').focus()">Vai al contenuto</a>
+<a class="salta" href="#contenuto">Passaggio al contenuto</a>
 <header class="testa">
   <div class="in">
     <a class="marchio" href="#/" aria-label="SistemiLab, rete del corso"><svg class="sim" width="30" height="30" viewBox="0 0 64 64" aria-hidden="true" style="color:#f2b648"><use href="#sl-cpu"></use></svg><span>Sistemi<b>Lab</b></span></a>
     <nav aria-label="Sezioni del sito">
       <a href="#/" data-vista="rete">Rete del corso</a>
       <a href="#/glossario" data-vista="glossario">Glossario</a>
-      <a href="materiali/dispensa.pdf" target="_blank" rel="noopener">Dispensa</a>
+      <a href="#/guida" data-vista="guida">Guida</a>
+      <a href="materiali/dispensa.pdf" target="_blank" rel="noopener noreferrer">Dispensa</a>
     </nav>
     <a class="lato" href="classico.html">Versione precedente del sito</a>
   </div>
 </header>
 <main id="contenuto" tabindex="-1"></main>
-<footer class="piede"><div class="in"><span style="font:700 16px var(--tit);color:var(--testo)">SistemiLab</span><span>Da <i>Architecture of Computer Systems</i> · Marzio De Corato e Danilo Bruschi</span></div></footer>
-<noscript><p style="padding:24px">Attiva JavaScript per usare la rete del corso e gli esperimenti.</p></noscript>
+<footer class="piede"><div class="in"><span style="font:700 16px var(--tit);color:var(--testo)">SistemiLab</span><span>Da <i>Architecture of Computer Systems</i> · Marzio De Corato e Danilo Bruschi</span><span class="licenza">© 2026 gli autori · contenuti, dispensa e codice distribuiti con licenza <a rel="license noopener noreferrer" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">CC BY-NC-SA 4.0</a></span></div></footer>
+<noscript><p style="padding:24px">La rete del corso e gli esperimenti richiedono JavaScript attivo.</p></noscript>
 <script src="sl/js/nucleo.js"></script>
 <script src="sl/js/simboli.js"></script>
 <script src="sl/dati/corso.js"></script>
@@ -37,5 +41,6 @@
 <script src="sl/js/prova.js"></script>
 <script src="sl/js/rete.js"></script>
 <script src="sl/js/avvio.js"></script>
+<script src="sl/js/sfondo.js"></script>
 </body>
 </html>

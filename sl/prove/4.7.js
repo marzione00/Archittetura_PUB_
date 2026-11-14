@@ -40,7 +40,7 @@
           { se: CI(pio), msg: 'Questo è il costo dell’I/O programmato. Va sottratto il costo del DMA.' },
           { se: CI(pio - s), msg: 'Al DMA vanno addebitati anche i ' + f + ' cicli del completamento.' }
         ]),
-        altro: 'Il numero è diverso. Calcola i due costi e sottrai.',
+        altro: 'Il numero è diverso. Si calcolino i due costi e si sottragga.',
         indizi: ['I/O programmato: ' + c + ' × ' + n + ' = ' + pio + '.', 'DMA: ' + s + ' + ' + f + ' = ' + fisso + '.', pio + ' − ' + fisso + ' = ' + v + '.'],
         svolgimento: ['I/O programmato: ' + pio + ' cicli.', 'DMA: ' + fisso + ' cicli.', 'Risparmio: ' + v + ' cicli.'] };
     },
@@ -54,7 +54,7 @@
           n % w !== 0 ? { se: I(k - 1), msg: (k - 1) + ' transazioni coprono ' + (k - 1) * w + ' byte. Ne restano ' + (n % w) + ', che vanno trasferiti.' } : null,
           { se: I(k + 1), msg: 'Dopo le transazioni piene, i byte rimasti stanno in una sola transazione.' }
         ]),
-        altro: 'Il numero è diverso. Dividi ' + n + ' per ' + w + ' e arrotonda per eccesso.',
+        altro: 'Il numero è diverso. Si divida ' + n + ' per ' + w + ' e arrotonda per eccesso.',
         indizi: [w + ' × ' + Math.floor(n / w) + ' = ' + Math.floor(n / w) * w + '.', n % w === 0 ? 'Non avanza alcun byte.' : 'Restano ' + (n % w) + ' byte.', 'Transazioni: ' + k + '.'],
         svolgimento: ['Transazioni piene: ' + Math.floor(n / w) + ', per ' + Math.floor(n / w) * w + ' byte.', 'Byte rimasti: ' + (n % w) + '.', 'Transazioni: ' + k + '.'] }; }
       if (cosa === 1) { const giuste = EH(fine); return { u: '4.7.2', d: testa + 'Qual è l’indirizzo dell’ultimo byte del buffer? Rispondi in esadecimale.', segnaposto: 'Un indirizzo', giuste,
@@ -100,7 +100,7 @@
           { se: I(rit), msg: 'Questi sono gli slot recuperati dal driver. Al dispositivo restano gli altri.' },
           { se: I(Math.max(0, rich - rit)), msg: 'Al dispositivo appartengono soltanto gli slot pubblicati, che sono ' + pub + '.' }
         ]),
-        altro: 'Il numero è diverso. Calcola prima quante richieste vengono pubblicate: il minore fra slot e richieste.',
+        altro: 'Il numero è diverso. Si calcoli prima quante richieste vengono pubblicate: il minore fra slot e richieste.',
         indizi: ['Pubblicate: il minore fra ' + cap + ' e ' + rich + ', cioè ' + pub + '.', cosa === 0 ? 'Liberi dopo la pubblicazione: ' + (cap - pub) + '. Recuperati: ' + rit + '.' : cosa === 1 ? 'Le richieste sono ' + rich + '.' : 'Recuperati dal driver: ' + rit + '.', cosa === 0 ? (cap - pub) + ' + ' + rit + ' = ' + v + '.' : cosa === 1 ? rich + ' − ' + pub + ' = ' + v + '.' : pub + ' − ' + rit + ' = ' + v + '.'],
         svolgimento: ['Pubblicate: ' + pub + '.', 'In attesa: ' + (rich - pub) + '.', 'Recuperate: ' + rit + '.', 'Ancora del dispositivo: ' + (pub - rit) + '. Liberi: ' + (cap - pub + rit) + '.'] };
     },
@@ -115,12 +115,12 @@
           { se: EH(ram + off), msg: 'Questa è la posizione nella RAM. Il dispositivo deve presentare l’indirizzo DMA, che la IOMMU traduce.' },
           { se: EH(dma), msg: 'Questo è l’inizio della pagina. Va aggiunto lo scostamento ' + H(off) + '.' }
         ]),
-        altro: 'L’indirizzo è un altro. Parti dall’indirizzo DMA della pagina e aggiungi lo scostamento.',
+        altro: 'L’indirizzo è un altro. Si parta dall’indirizzo DMA della pagina e si aggiunga lo scostamento.',
         indizi: ['Il dispositivo usa l’indirizzo DMA.', 'La pagina ha indirizzo DMA ' + H(dma) + '.', H(dma) + ' + ' + H(off) + ' = ' + H(dma + off) + '.'],
         svolgimento: ['Numerazione giusta: indirizzo DMA.', 'Base: ' + H(dma) + '.', 'Indirizzo: ' + H(dma + off) + '.'] }; }
       const vecchio = r.int(10, 99), nuovo = vecchio + r.int(1, 99), op = r.scegli(['ok', 'cache', 'ptr']);
       const fb = op === 'ok' ? 'La RAM è aggiornata e l’indirizzo è quello DMA: le due condizioni sono rispettate.' : op === 'cache' ? 'Il ' + nuovo + ' è rimasto nella cache del processore. Il dispositivo legge la RAM, che contiene ancora ' + vecchio + '.' : 'L’indirizzo del programma non è fra quelli che la IOMMU concede al dispositivo.';
-      return { u: '4.7.4', d: testa + 'Il processore cambia un byte del buffer da ' + vecchio + ' a ' + nuovo + '. Il driver ' + (op === 'ok' ? 'sincronizza il buffer e scrive nel descrittore un indirizzo che comincia da ' + H(dma) : op === 'cache' ? 'scrive nel descrittore un indirizzo che comincia da ' + H(dma) + ', senza sincronizzare il buffer' : 'sincronizza il buffer e scrive nel descrittore un indirizzo che comincia da ' + H(cpu)) + '. Che cosa riceve il dispositivo?', guida: 'Scegli la risposta.', o: r.mescola([
+      return { u: '4.7.4', d: testa + 'Il processore cambia un byte del buffer da ' + vecchio + ' a ' + nuovo + '. Il driver ' + (op === 'ok' ? 'sincronizza il buffer e scrive nel descrittore un indirizzo che comincia da ' + H(dma) : op === 'cache' ? 'scrive nel descrittore un indirizzo che comincia da ' + H(dma) + ', senza sincronizzare il buffer' : 'sincronizza il buffer e scrive nel descrittore un indirizzo che comincia da ' + H(cpu)) + '. Che cosa riceve il dispositivo?', guida: 'Si scelga la risposta.', o: r.mescola([
         { t: 'Il valore nuovo, ' + nuovo, ok: op === 'ok', fb },
         { t: 'Il valore vecchio, ' + vecchio, ok: op === 'cache', fb },
         { t: 'Nulla: l’accesso viene respinto', ok: op === 'ptr', fb }]) };
@@ -146,7 +146,7 @@
           { se: US(irq), msg: 'A ' + irq + ' µs parte l’interrupt. Il gestore impiega altri ' + g + ' µs.' },
           { se: US(b + g), msg: 'Questo è il tempo trascorso dall’ultimo byte. L’istante si conta dall’inizio: va sommato ' + t + '.' }
         ]),
-        altro: 'Il valore è diverso. Metti in fila gli istanti: ultimo byte, interrupt, processo pronto, ripresa.',
+        altro: 'Il valore è diverso. Si ponga in fila gli istanti: ultimo byte, interrupt, processo pronto, ripresa.',
         indizi: ['Interrupt: ' + t + ' + ' + b + ' = ' + irq + ' µs.', 'Processo pronto: ' + irq + ' + ' + g + ' = ' + pronto + ' µs.', 'Ripresa: ' + pronto + ' + ' + s + ' = ' + ripresa + ' µs.'],
         svolgimento: ['Interrupt: ' + irq + ' µs.', 'Processo pronto: ' + pronto + ' µs.', 'Ripresa: ' + ripresa + ' µs.', 'Dall’ultimo byte alla ripresa: ' + (b + g + s) + ' µs.'] };
     }

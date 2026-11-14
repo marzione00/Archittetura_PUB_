@@ -21,7 +21,7 @@ SL.unita413 = (() => {
 })();
 SL.registra('4.1.3', {
   titolo: 'Vettori, privilegi e ingresso protetto',
-  obiettivo: 'Alla fine saprai trovare nella IDT la voce di un vettore, e dire se una richiesta arrivata da un programma oppure da una periferica può raggiungere il gestore.',
+  obiettivo: 'Obiettivo: trovare nella IDT la voce di un vettore, e dire se una richiesta arrivata da un programma oppure da una periferica può raggiungere il gestore.',
   concetti: [['tabella', 'Un numero sceglie il gestore'], ['privilegi', 'Chi può chiedere che cosa'], ['scudo', 'Il rifiuto del processore']],
   filigrana: ['tabella', 'privilegi', 'scudo'],
   richiami: {
@@ -73,7 +73,7 @@ SL.registra('4.1.3', {
       domanda: (p) => 'Gira un programma di livello 3. ' + (p.via === 'int' ? 'Il programma esegue `int ' + p.v + '`.' : 'Una periferica chiede attenzione sul vettore ' + p.v + '.') + ' La voce ' + p.v + ' della IDT ha DPL ' + p.dpl + '. Che cosa fa il processore?',
       opzioni: () => [['ok', 'Entra nel gestore indicato dalla voce'], ['gp', 'Rifiuta, e solleva #GP']]
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + (pred === 'ok' ? 'l’ingresso nel gestore' : 'il rifiuto con #GP') + '. Il processore ' + (esito === 'ok' ? 'entra nel gestore' : 'solleva #GP') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.via === 'hw' ? 'Il DPL limita soltanto l’istruzione `int`. La richiesta di una periferica entra comunque.' : p.dpl === 3 ? 'Con DPL 3 la voce è offerta anche ai programmi di livello 3.' : 'Serve CPL ≤ DPL, e 3 ≤ 0 è falso.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + (pred === 'ok' ? 'l’ingresso nel gestore' : 'il rifiuto con #GP') + '. Il processore ' + (esito === 'ok' ? 'entra nel gestore' : 'solleva #GP') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.via === 'hw' ? 'Il DPL limita soltanto l’istruzione `int`. La richiesta di una periferica entra comunque.' : p.dpl === 3 ? 'Con DPL 3 la voce è offerta anche ai programmi di livello 3.' : 'Serve CPL ≤ DPL, e 3 ≤ 0 è falso.'),
     costruisci(p) {
       const U = SL.unita413, H = U.H, passi = [], sw = p.via === 'int', ok = U.ammesso(p), a = U.voce(p.v), g = U.gestore(p.v);
       const quadro = (f) => [SL.el.nota('t0', 290, 0, 'IDT · INIZIO ' + H(U.BASE), 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w1: 240, w2: 300, gap: 20, h: 62, hc: 44 }));
@@ -100,7 +100,7 @@ SL.registra('4.1.3', {
       ['Leggere i livelli di privilegio al contrario.', 'Al livello 0 tutto è permesso, al livello 3 quasi nulla. La condizione CPL ≤ DPL chiede un livello numericamente basso.'],
       ['Applicare il DPL alle periferiche.', 'Il DPL limita soltanto l’istruzione `int`. Un evento reale raggiunge sempre il proprio gestore.']
     ],
-    saFare: ['Calcolo l’indirizzo di una voce della IDT.', 'Applico la condizione CPL ≤ DPL a una istruzione int.', 'Distinguo una richiesta software da un evento reale.'],
+    saFare: ['Calcolare l’indirizzo di una voce della IDT.', 'Applicare la condizione CPL ≤ DPL a una istruzione int.', 'Distinguere una richiesta software da un evento reale.'],
     esercizi: [
       { d: 'Una IDT comincia all’indirizzo 0x4000, con voci da 16 byte. A quale indirizzo si trova la voce del vettore 14? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['40e0', '0x40e0', '40e0h'],
         ok: 'Il vettore 14 dista 14 × 16 = 224 byte, cioè 0xE0: la voce è a 0x40E0.',
@@ -110,14 +110,14 @@ SL.registra('4.1.3', {
           { se: ['4224', '0x4224', '4224h'], msg: '224 è in base dieci. In esadecimale si scrive 0xE0.' },
           { se: ['4140', '0x4140', '4140h'], msg: 'Moltiplicare per 16 aggiunge uno zero alla scrittura esadecimale del vettore: 14 è 0xE, e diventa 0xE0.' }
         ],
-        altro: 'Il valore è diverso. Moltiplica il vettore per 16, scrivi il prodotto in esadecimale e sommalo a 0x4000.',
+        altro: 'Il valore è diverso. Si moltiplichi il vettore per 16, si scriva il prodotto in esadecimale e lo si sommi a 0x4000.',
         indizi: ['Prima della voce 14 ci sono 14 voci da 16 byte.', '14 × 16 = 224, cioè 0xE0.', '0x4000 + 0xE0.'],
         svolgimento: ['Distanza: 14 × 16 = 224 byte.', '224 = 0xE0.', 'Indirizzo: 0x4000 + 0xE0 = 0x40E0.'] },
-      { d: 'Un programma di livello 3 esegue `int 14`. La voce 14, quella della pagina assente, ha DPL 0. Che cosa accade?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un programma di livello 3 esegue `int 14`. La voce 14, quella della pagina assente, ha DPL 0. Che cosa accade?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il processore solleva #GP', ok: true, fb: 'La condizione 3 ≤ 0 è falsa, e l’ingresso viene rifiutato.' },
         { t: 'Parte il gestore della pagina assente', fb: 'Così accadrebbe per una pagina assente vera. Con `int` il processore controlla il DPL.' },
         { t: 'L’istruzione viene ignorata', fb: 'Il processore segnala il tentativo con una eccezione, che il kernel può punire terminando il programma.' }] },
-      { d: 'Mentre gira un programma di livello 3, una periferica chiede attenzione sul vettore 40, la cui voce ha DPL 0. Che cosa accade?', guida: 'Scegli la risposta.', o: [
+      { d: 'Mentre gira un programma di livello 3, una periferica chiede attenzione sul vettore 40, la cui voce ha DPL 0. Che cosa accade?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il processore entra nel gestore della voce 40', ok: true, fb: 'Il DPL limita soltanto l’istruzione `int`. La richiesta di una periferica entra comunque.' },
         { t: 'Il processore solleva #GP, perché 3 ≤ 0 è falso', fb: 'Il confronto fra CPL e DPL si applica soltanto alle richieste fatte con `int`.' },
         { t: 'La richiesta attende che il programma termini', fb: 'Il processore accetta la richiesta al confine fra due istruzioni, senza attendere la fine del programma.' }] }

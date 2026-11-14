@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.2.5', {
   titolo: 'Dallo stato memorizzato alle macchine a stati',
-  obiettivo: 'Alla fine saprai descrivere un circuito come macchina a stati, con stato, ingresso, stato successivo e uscite, e saprai seguirne il comportamento un ingresso dopo l’altro.',
+  obiettivo: 'Obiettivo: descrivere un circuito come macchina a stati, con stato, ingresso, stato successivo e uscite, e saprai seguirne il comportamento un ingresso dopo l’altro.',
   concetti: [['register', 'Ricordare soltanto ciò che serve'], ['tabella', 'Una regola per ogni caso'], ['riproduci', 'Un passo a ogni fronte']],
   filigrana: ['riproduci', 'register', 'tabella'],
   richiami: {
@@ -60,7 +60,7 @@ SL.registra('3.2.5', {
       domanda: (p) => 'Il prodotto costa 3 unità. Il distributore parte con credito ' + p.q + ' e riceve nell’ordine: ' + [p.m0, p.m1, p.m2].map(SL.unita325.NOME).join(', ') + '. Con quale credito finisce?',
       opzioni: () => [[0, 'Credito 0'], [1, 'Credito 1'], [2, 'Credito 2']]
     },
-    confronto: (pred, esito, p) => { const U = SL.unita325, t = U.traccia(p); return 'Avevi previsto credito ' + pred + '. Il distributore finisce con credito ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'I crediti dopo i tre ingressi sono ' + t.map((x) => x.dopo).join(', ') + '. ' + (t.some((x) => x.rest) ? 'Una moneta che farebbe superare 3 viene restituita, e il credito resta com’era.' : t.some((x) => x.eroga) ? 'Quando il totale arriva a 3 il prodotto esce e il credito torna a 0.' : 'Il totale non ha mai raggiunto 3.')); },
+    confronto: (pred, esito, p) => { const U = SL.unita325, t = U.traccia(p); return 'La previsione indicava credito ' + pred + '. Il distributore finisce con credito ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'I crediti dopo i tre ingressi sono ' + t.map((x) => x.dopo).join(', ') + '. ' + (t.some((x) => x.rest) ? 'Una moneta che farebbe superare 3 viene restituita, e il credito resta com’era.' : t.some((x) => x.eroga) ? 'Quando il totale arriva a 3 il prodotto esce e il credito torna a 0.' : 'Il totale non ha mai raggiunto 3.')); },
     costruisci(p) {
       const el = SL.el, U = SL.unita325, passi = [], M = [p.m0, p.m1, p.m2], T = U.traccia(p), ORD = ['primo', 'secondo', 'terzo'];
       const st = { q: p.q, k: -1, calc: null, erog: 0, rest: 0, ck: 'basso' };
@@ -109,7 +109,7 @@ SL.registra('3.2.5', {
       ['Decidere l’uscita guardando soltanto l’ingresso.', 'Una moneta da 2 fa aumentare il credito, consegnare il prodotto oppure tornare indietro, secondo lo stato in cui la macchina si trova.'],
       ['Cambiare lo stato a metà ciclo.', 'Lo stato cambia soltanto al fronte. Nel resto del ciclo la rete combinatoria prepara lo stato successivo.']
     ],
-    saFare: ['Individuo che cosa una macchina deve ricordare, e quanti stati le servono.', 'Seguo una sequenza di ingressi, una transizione per fronte.', 'Riconosco in una macchina a stati il registro e la rete combinatoria.'],
+    saFare: ['Individuare che cosa una macchina deve ricordare, e quanti stati le servono.', 'Seguire una sequenza di ingressi, una transizione per fronte.', 'Riconoscere in una macchina a stati il registro e la rete combinatoria.'],
     esercizi: [
       { d: 'Il distributore parte con credito 0 e riceve nell’ordine le monete da 2, 2, 1 e 1. Con quale credito finisce?', segnaposto: 'Un numero', giuste: ['1', 'uno'],
         ok: 'I crediti successivi sono 2, ancora 2 perché la seconda moneta viene restituita, 0 dopo la consegna, e infine 1.',
@@ -118,10 +118,10 @@ SL.registra('3.2.5', {
           { se: ['2', 'due'], msg: 'Dopo la terza moneta il totale vale 3: il prodotto esce e il credito torna a 0. Resta da contare la quarta moneta.' },
           { se: ['3', 'tre'], msg: 'Il credito conservato vale al massimo 2. Quando il totale arriva a 3 il prodotto esce e il credito torna a 0.' }
         ],
-        altro: 'Il numero è diverso. Segui una moneta alla volta, applicando la regola al credito del momento.',
+        altro: 'Il numero è diverso. Si segua una moneta alla volta, applicando la regola al credito del momento.',
         indizi: ['Dopo la prima moneta il credito è 2.', 'La seconda moneta porterebbe a 4: viene restituita, e il credito resta 2.', 'La terza porta a 3: consegna, credito 0. Poi entra l’ultima.'],
         svolgimento: ['0 + 2 = 2: credito 2.', '2 + 2 = 4: moneta restituita, credito 2.', '2 + 1 = 3: consegna, credito 0. Poi 0 + 1 = 1: credito 1.'] },
-      { d: 'Una macchina a stati ha tre stati. Quanti flip-flop servono, al minimo, per il suo registro di stato?', guida: 'Scegli la risposta.', o: [
+      { d: 'Una macchina a stati ha tre stati. Quanti flip-flop servono, al minimo, per il suo registro di stato?', guida: 'Si scelga la risposta.', o: [
         { t: '2', ok: true, fb: 'Due bit formano quattro combinazioni, sufficienti per tre stati.' },
         { t: '3', fb: 'Un flip-flop per stato funzionerebbe, ma ne bastano meno: due bit distinguono fino a quattro stati.' },
         { t: '1', fb: 'Un bit solo distingue due stati, e qui sono tre.' }] }

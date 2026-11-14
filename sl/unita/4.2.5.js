@@ -23,7 +23,7 @@ SL.unita425 = (() => {
 })();
 SL.registra('4.2.5', {
   titolo: 'Meccanismo, politica e struttura del sistema operativo',
-  obiettivo: 'Alla fine saprai distinguere il meccanismo con cui si entra nel kernel dalla politica che decide l’esito, e leggere i permessi di un file per dire se una apertura in lettura viene concessa.',
+  obiettivo: 'Obiettivo: distinguere il meccanismo con cui si entra nel kernel dalla politica che decide l’esito, e leggere i permessi di un file per dire se una apertura in lettura viene concessa.',
   concetti: [['gate', 'Lo stesso ingresso per tutti'], ['privilegi', 'La regola che decide'], ['scudo', 'Concesso oppure negato']],
   filigrana: ['privilegi', 'gate', 'scudo'],
   richiami: {
@@ -74,7 +74,7 @@ SL.registra('4.2.5', {
       domanda: (p) => (p.chi === 'owner' ? 'Il proprietario' : 'Un utente diverso dal proprietario, estraneo al suo gruppo,') + ' chiede di aprire in sola lettura un file con i permessi 0' + p.perm + '. Che cosa restituisce open?',
       opzioni: () => [[3, '3, un nuovo descrittore'], [-13, '−13, accesso negato'], [0, '0']]
     },
-    confronto: (pred, esito, p) => { const U = SL.unita425, N = (v) => (v < 0 ? '−13' : String(v)), k = U.classe(p.chi); return 'Avevi previsto ' + N(pred) + '. La open restituisce ' + N(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Per ' + (k === 0 ? 'il proprietario' : 'gli altri utenti') + ' vale la cifra ' + U.cifre(p.perm)[k] + ', che ' + (U.ammesso(p) ? 'contiene' : 'non contiene') + ' il peso 4 della lettura.'); },
+    confronto: (pred, esito, p) => { const U = SL.unita425, N = (v) => (v < 0 ? '−13' : String(v)), k = U.classe(p.chi); return 'La previsione indicava ' + N(pred) + '. La open restituisce ' + N(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Per ' + (k === 0 ? 'il proprietario' : 'gli altri utenti') + ' vale la cifra ' + U.cifre(p.perm)[k] + ', che ' + (U.ammesso(p) ? 'contiene' : 'non contiene') + ' il peso 4 della lettura.'); },
     costruisci(p) {
       const U = SL.unita425, passi = [], c = U.cifre(p.perm), k = U.classe(p.chi), ok = U.ammesso(p), v = ok ? 3 : -13, R = ok ? '3' : '−13';
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 8, w1: 240, w2: 300, gap: 20, h: 62 });
@@ -102,9 +102,9 @@ SL.registra('4.2.5', {
       ['Leggere 0644 come un numero in base dieci.', 'Ogni cifra va letta da sola, come somma dei pesi 4, 2 e 1.'],
       ['Applicare al proprietario la cifra degli altri.', 'Il kernel sceglie una sola cifra: la prima per il proprietario, la seconda per il gruppo, la terza per tutti gli altri.']
     ],
-    saFare: ['Distinguo il meccanismo dalla politica.', 'Leggo le tre cifre dei permessi di un file.', 'Dico se una apertura in lettura viene concessa.'],
+    saFare: ['Distinguere il meccanismo dalla politica.', 'Leggere le tre cifre dei permessi di un file.', 'Indicare se una apertura in lettura viene concessa.'],
     esercizi: [
-      { d: 'Un file ha i permessi 0640. Un utente che non è il proprietario e non appartiene al gruppo chiede di aprirlo in lettura. Che cosa restituisce open?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un file ha i permessi 0640. Un utente che non è il proprietario e non appartiene al gruppo chiede di aprirlo in lettura. Che cosa restituisce open?', guida: 'Si scelga la risposta.', o: [
         { t: '−13', ok: true, fb: 'Per gli altri vale la terza cifra, 0, che non concede nulla.' },
         { t: '3', fb: 'La lettura è concessa al proprietario e al gruppo. Questo utente è fuori da entrambi.' },
         { t: '−9', fb: '−9 è EBADF, l’errore di un descrittore non valido. Un accesso negato è EACCES, −13.' }] },
@@ -118,7 +118,7 @@ SL.registra('4.2.5', {
         altro: 'La cifra è diversa. Somma il peso della lettura e quello dell’esecuzione.',
         indizi: ['La lettura vale 4.', 'L’esecuzione vale 1.', '4 + 1.'],
         svolgimento: ['Lettura: 4.', 'Esecuzione: 1.', 'Cifra: 5.'] },
-      { d: 'Un amministratore cambia i permessi di un file da 0600 a 0644. Che cosa è cambiato nel sistema?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un amministratore cambia i permessi di un file da 0600 a 0644. Che cosa è cambiato nel sistema?', guida: 'Si scelga la risposta.', o: [
         { t: 'La politica: ora anche gli altri utenti possono leggere', ok: true, fb: 'Il meccanismo, cioè SYSCALL, lo smistamento e la routine di open, è rimasto identico.' },
         { t: 'Il meccanismo: ora open entra nel kernel in un altro modo', fb: 'L’ingresso nel kernel è lo stesso di prima. È cambiata la regola che il kernel applica.' },
         { t: 'Nulla, finché il file non viene riaperto dal proprietario', fb: 'I nuovi permessi valgono dalla open successiva, chiunque la faccia.' }] }

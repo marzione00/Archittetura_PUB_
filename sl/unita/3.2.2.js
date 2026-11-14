@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.2.2', {
   titolo: 'Latch, flip-flop e clock',
-  obiettivo: 'Alla fine saprai spiegare come due porte in retroazione conservano un bit, e saprai distinguere un latch, che segue il dato per tutto il livello alto del clock, da un flip-flop, che lo cattura soltanto al fronte.',
+  obiettivo: 'Obiettivo: spiegare come due porte in retroazione conservano un bit, e saprai distinguere un latch, che segue il dato per tutto il livello alto del clock, da un flip-flop, che lo cattura soltanto al fronte.',
   concetti: [['flipflop', 'Due porte che si sostengono'], ['clock', 'Un livello oppure un istante'], ['lente', 'Leggere una traccia nel tempo']],
   filigrana: ['flipflop', 'clock', 'porta'],
   richiami: {
@@ -61,7 +61,7 @@ SL.registra('3.2.2', {
       domanda: (p) => 'Un latch D e un flip-flop D conservano entrambi ' + p.q + '. Al fronte di salita D vale ' + p.d + '. Poi, a clock ancora alto, D ' + (p.e === p.d ? 'resta a ' + p.d : 'passa a ' + p.e) + '. Subito prima che il clock scenda, quanto valgono le due uscite?',
       opzioni: () => [['0,0', 'Latch 0, flip-flop 0'], ['0,1', 'Latch 0, flip-flop 1'], ['1,0', 'Latch 1, flip-flop 0'], ['1,1', 'Latch 1, flip-flop 1']]
     },
-    confronto: (pred, esito, p) => { const T = (k) => 'latch ' + k[0] + ', flip-flop ' + k[2]; return 'Avevi previsto ' + T(pred) + '. Le uscite valgono ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il flip-flop ha catturato D al fronte, quando valeva ' + p.d + ', e da allora lo ignora. Il latch resta aperto per tutto il livello alto, quindi mostra l’ultimo valore di D, che è ' + p.e + '.'); },
+    confronto: (pred, esito, p) => { const T = (k) => 'latch ' + k[0] + ', flip-flop ' + k[2]; return 'La previsione indicava ' + T(pred) + '. Le uscite valgono ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il flip-flop ha catturato D al fronte, quando valeva ' + p.d + ', e da allora lo ignora. Il latch resta aperto per tutto il livello alto, quindi mostra l’ultimo valore di D, che è ' + p.e + '.'); },
     costruisci(p) {
       const el = SL.el, passi = [], q = p.q, d = p.d, e = p.e;
       const CK = [0, 1, 1, 0, 1], D = [d, d, e, d, d], QL = [q, d, e, e, d], QF = [q, d, d, d, d], XC = (k) => 200 + k * 130;
@@ -106,13 +106,13 @@ SL.registra('3.2.2', {
       ['Pensare che il flip-flop segua D mentre il clock è alto.', 'Dopo il fronte il flip-flop ignora D. Lo ascolterà di nuovo soltanto al fronte di salita successivo.'],
       ['Attivare insieme S e R.', 'Con S e R entrambi a 1 le due NOR danno 0. Quando gli ingressi tornano a 0, lo stato finale dipende da quale porta risponde per prima.']
     ],
-    saFare: ['Spiego come due NOR in croce conservano un bit.', 'Distinguo la cella sensibile al livello da quella sensibile al fronte.', 'Seguo nel tempo le uscite di un latch e di un flip-flop, dato l’andamento del clock e di D.'],
+    saFare: ['Spiegare come due NOR in croce conservano un bit.', 'Distinguere la cella sensibile al livello da quella sensibile al fronte.', 'Seguire nel tempo le uscite di un latch e di un flip-flop, dato l’andamento del clock e di D.'],
     esercizi: [
-      { d: 'Un latch SR fatto con due NOR conserva Q = 0. Gli ingressi passano a S = 1 e R = 0, poi tornano entrambi a 0. Quanto vale Q alla fine?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un latch SR fatto con due NOR conserva Q = 0. Gli ingressi passano a S = 1 e R = 0, poi tornano entrambi a 0. Quanto vale Q alla fine?', guida: 'Si scelga la risposta.', o: [
         { t: '1', ok: true, fb: 'S ha portato Q a 1. Con S e R di nuovo a 0, le due porte tengono fermo quel valore.' },
         { t: '0', fb: 'Lo stato iniziale è stato cambiato dall’1 su S. Tornati a 0 gli ingressi, il latch conserva il valore nuovo.' },
         { t: 'Dipende dai ritardi delle porte', fb: 'I ritardi contano soltanto quando S e R valgono 1 insieme. Qui si è attivato il solo S.' }] },
-      { d: 'Un latch D e un flip-flop D ricevono lo stesso dato e lo stesso clock, e conservano entrambi 1. Al fronte di salita D vale 0. Mentre il clock è ancora alto, D sale a 1 e vi resta. Subito prima che il clock scenda, quanto valgono le due uscite?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un latch D e un flip-flop D ricevono lo stesso dato e lo stesso clock, e conservano entrambi 1. Al fronte di salita D vale 0. Mentre il clock è ancora alto, D sale a 1 e vi resta. Subito prima che il clock scenda, quanto valgono le due uscite?', guida: 'Si scelga la risposta.', o: [
         { t: 'Latch 1, flip-flop 0', ok: true, fb: 'Il flip-flop ha catturato 0 al fronte. Il latch, ancora aperto, ha seguito D fino a 1.' },
         { t: 'Latch 0, flip-flop 1', fb: 'I ruoli sono scambiati: è il latch a seguire D durante il livello alto, e il flip-flop a restare sul valore del fronte.' },
         { t: 'Latch 1, flip-flop 1', fb: 'Il flip-flop ha catturato D al fronte, quando valeva 0, e ignora il cambiamento successivo.' },

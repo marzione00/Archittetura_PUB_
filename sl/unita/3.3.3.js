@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.3.3', {
   titolo: 'Semantica delle istruzioni e flusso dei dati',
-  obiettivo: 'Alla fine saprai nominare le sei fasi in cui Y86-64 esegue un’istruzione, e seguire i valori che passano da una fase all’altra durante una lettura dalla memoria.',
+  obiettivo: 'Obiettivo: nominare le sei fasi in cui Y86-64 esegue un’istruzione, e seguire i valori che passano da una fase all’altra durante una lettura dalla memoria.',
   concetti: [['strati', 'Sei fasi, sempre nello stesso ordine'], ['memory', 'Indirizzo e contenuto'], ['byte', 'Otto celle, una parola']],
   filigrana: ['strati', 'memory', 'alu'],
   richiami: {
@@ -56,7 +56,7 @@ SL.registra('3.3.3', {
       domanda: (p) => 'Ogni cella di memoria contiene il triplo del proprio indirizzo, modulo 256. Il registro %rbx vale ' + p.b + '. Si esegue `mrmovq ' + p.d + '(%rbx), %rax`. Quale byte finisce nella posizione meno significativa di %rax?',
       opzioni: (p) => { const U = SL.unita333, a = p.b + p.d; return Array.from(new Set([U.cella(a), U.cella(a + 7), U.cella(p.b), a & 255])).sort((x, y) => x - y).map((v) => [v, '0x' + SL.y86.esa2(v)]); }
     },
-    confronto: (pred, esito, p) => { const H = (v) => '0x' + SL.y86.esa2(v), a = p.b + p.d; return 'Avevi previsto ' + H(pred) + '. Il byte meno significativo di %rax è ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'L’indirizzo è ' + p.b + ' + ' + (p.d < 0 ? '(' + SL.x86.num(p.d) + ')' : p.d) + ' = ' + a + '. In little-endian la prima cella, quella all’indirizzo ' + a + ', dà il byte meno significativo: 3 × ' + a + ' = ' + 3 * a + ', cioè ' + H(esito) + '.'); },
+    confronto: (pred, esito, p) => { const H = (v) => '0x' + SL.y86.esa2(v), a = p.b + p.d; return 'La previsione indicava ' + H(pred) + '. Il byte meno significativo di %rax è ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'L’indirizzo è ' + p.b + ' + ' + (p.d < 0 ? '(' + SL.x86.num(p.d) + ')' : p.d) + ' = ' + a + '. In little-endian la prima cella, quella all’indirizzo ' + a + ', dà il byte meno significativo: 3 × ' + a + ' = ' + 3 * a + ', cioè ' + H(esito) + '.'); },
     costruisci(p) {
       const el = SL.el, Y = SL.y86, U = SL.unita333, N = SL.x86.num, passi = [], ist = { n: 'mrmovq', a: 'rax', b: 'rbx', c: p.d }, byte = Y.byteIst(ist).map(Y.esa2);
       const valE = p.b + p.d, celle = Array.from({ length: 8 }, (_, k) => U.cella(valE + k)), valM = '0x' + celle.slice().reverse().map(Y.esa2).join(''), FASI = ['prelievo', 'decodifica', 'esecuzione', 'memoria', 'scrittura', 'PC'];
@@ -112,7 +112,7 @@ SL.registra('3.3.3', {
       ['Leggere una sola cella.', 'Una parola di 64 bit occupa otto celle, da valE a valE + 7.'],
       ['Ricomporre la parola partendo dal byte sbagliato.', 'In little-endian la cella all’indirizzo valE contiene il byte meno significativo.']
     ],
-    saFare: ['Elenco le sei fasi nell’ordine giusto.', 'Dico quale valore produce ciascuna fase.', 'Seguo una `mrmovq` dal prelievo all’aggiornamento del PC.'],
+    saFare: ['Elencare le sei fasi nell’ordine giusto.', 'Indicare quale valore produce ciascuna fase.', 'Seguire una `mrmovq` dal prelievo all’aggiornamento del PC.'],
     esercizi: [
       { d: 'Si esegue `mrmovq 24(%rbx), %rax` con %rbx = 100. Quanto vale valE?', segnaposto: 'Un numero', giuste: ['124', 'centoventiquattro'],
         ok: 'valE = valB + valC = 100 + 24 = 124.',
@@ -124,7 +124,7 @@ SL.registra('3.3.3', {
         altro: 'Il numero è diverso. Somma il contenuto del registro di base e lo spostamento.',
         indizi: ['valB è il contenuto di %rbx.', 'valC è lo spostamento scritto nell’istruzione.', '100 + 24.'],
         svolgimento: ['valB = 100.', 'valC = 24.', 'valE = 100 + 24 = 124.'] },
-      { d: 'In quale fase `mrmovq` deposita la parola letta nel registro di destinazione?', guida: 'Scegli la risposta.', o: [
+      { d: 'In quale fase `mrmovq` deposita la parola letta nel registro di destinazione?', guida: 'Si scelga la risposta.', o: [
         { t: 'Nella fase di scrittura', ok: true, fb: 'La fase di memoria produce valM, e la fase di scrittura lo deposita nel banco dei registri.' },
         { t: 'Nella fase di memoria', fb: 'La fase di memoria legge la parola e la rende disponibile come valM. Il registro la riceve nella fase successiva.' },
         { t: 'Nella fase di esecuzione', fb: 'Nell’esecuzione l’ALU calcola l’indirizzo valE. Il dato non è ancora stato letto.' }] }

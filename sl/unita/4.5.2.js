@@ -16,7 +16,7 @@ SL.unita452 = (() => {
 })();
 SL.registra('4.5.2', {
   titolo: 'Blocchi logici e prestazioni quantitative',
-  obiettivo: 'Alla fine saprai tradurre una richiesta espressa in blocchi in un intervallo di byte, e calcolare quanto tempo impiega il disco a servirla.',
+  obiettivo: 'Obiettivo: tradurre una richiesta espressa in blocchi in un intervallo di byte, e calcolare quanto tempo impiega il disco a servirla.',
   concetti: [['byte', 'Blocchi numerati da zero'], ['disco', 'Il posizionamento si paga una volta'], ['clock', 'Millisecondi e microsecondi']],
   filigrana: ['disco', 'byte', 'clock'],
   richiami: {
@@ -67,7 +67,7 @@ SL.registra('4.5.2', {
       domanda: (p) => 'Il disco deve leggere ' + p.n + ' blocchi consecutivi da ' + p.b + ' byte. Il seek dura 4 ms, la rotazione 2 ms, e il trasferimento procede a 128 byte per microsecondo. Quanto dura la richiesta?',
       opzioni: (p) => { const U = SL.unita452, c = U.conto(p); return [c.tras, c.tot, p.n * 6000 + c.tras].map((v) => [v, U.N(v) + ' µs']); }
     },
-    confronto: (pred, esito, p) => { const U = SL.unita452, c = U.conto(p); return 'Avevi previsto ' + U.N(pred) + ' µs. Il tempo di servizio è ' + U.N(esito) + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === c.tras ? 'Al trasferimento vanno sommati seek e rotazione: 6000 µs.' : 'I blocchi sono consecutivi, e il posizionamento si paga una volta sola.'); },
+    confronto: (pred, esito, p) => { const U = SL.unita452, c = U.conto(p); return 'La previsione indicava ' + U.N(pred) + ' µs. Il tempo di servizio è ' + U.N(esito) + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === c.tras ? 'Al trasferimento vanno sommati seek e rotazione: 6000 µs.' : 'I blocchi sono consecutivi, e il posizionamento si paga una volta sola.'); },
     costruisci(p) {
       const U = SL.unita452, c = U.conto(p), N = U.N, passi = [];
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, wb: 96, w: 820 });
@@ -94,7 +94,7 @@ SL.registra('4.5.2', {
       ['Sommare millisecondi e microsecondi.', 'Un millisecondo vale 1000 microsecondi. Prima si converte, poi si somma.'],
       ['Moltiplicare il posizionamento per il numero di blocchi.', 'In una lettura sequenziale seek e rotazione si pagano una volta.']
     ],
-    saFare: ['Trovo l’ultimo blocco di una richiesta.', 'Calcolo byte di partenza e byte richiesti.', 'Calcolo il tempo di servizio in microsecondi.'],
+    saFare: ['Determinare l’ultimo blocco di una richiesta.', 'Calcolare byte di partenza e byte richiesti.', 'Calcolare il tempo di servizio in microsecondi.'],
     esercizi: [
       { d: 'I blocchi di un disco contengono 4096 byte e sono numerati da 0. A quale byte comincia il blocco 12?', segnaposto: 'Un numero', giuste: ['49152', '49.152', '49152byte'],
         ok: '12 × 4096 = 49 152.',
@@ -103,7 +103,7 @@ SL.registra('4.5.2', {
           { se: ['45056'], msg: 'Prima del blocco 12 ci sono 12 blocchi interi: la numerazione parte da 0.' },
           { se: ['6144'], msg: 'In questo disco i blocchi sono da 4096 byte.' }
         ],
-        altro: 'Il numero è diverso. Moltiplica il numero del blocco per la dimensione.',
+        altro: 'Il numero è diverso. Si moltiplichi il numero del blocco per la dimensione.',
         indizi: ['Prima del blocco 12 ci sono 12 blocchi.', 'Ognuno occupa 4096 byte.', '12 × 4096 = 49 152.'],
         svolgimento: ['Blocchi precedenti: 12.', 'Byte: 12 × 4096 = 49 152.'] },
       { d: 'Una lettura comincia al blocco 30 e comprende 16 blocchi consecutivi. Qual è il numero dell’ultimo blocco letto?', segnaposto: 'Un numero', giuste: ['45', 'quarantacinque'],
@@ -123,7 +123,7 @@ SL.registra('4.5.2', {
           { se: ['200', '200µs', '200μs', '200us'], msg: 'Questo è il solo trasferimento. Mancano seek e rotazione.' },
           { se: ['8000', '8000µs', '8000μs', '8000us'], msg: 'Questo è il solo posizionamento. Manca il trasferimento.' }
         ],
-        altro: 'Il valore è diverso. Converti il posizionamento in microsecondi e somma il trasferimento.',
+        altro: 'Il valore è diverso. Si converta il posizionamento in microsecondi e si sommi il trasferimento.',
         indizi: ['5 + 3 = 8 ms, cioè 8000 µs.', '25 600 ÷ 128 = 200 µs.', '8000 + 200 = 8200.'],
         svolgimento: ['Posizionamento: 8 ms = 8000 µs.', 'Trasferimento: 25 600 ÷ 128 = 200 µs.', 'Servizio: 8200 µs.'] }
     ],

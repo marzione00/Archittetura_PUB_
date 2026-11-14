@@ -20,7 +20,7 @@ SL.unita434 = (() => {
 })();
 SL.registra('4.3.4', {
   titolo: 'Registri del dispositivo, costo e struttura del driver',
-  obiettivo: 'Alla fine saprai calcolare quanto costa servire una coda di dati con un interrupt ogni tanti campioni, e scrivere il valore giusto in un registro di stato che si cancella scrivendo 1.',
+  obiettivo: 'Obiettivo: calcolare quanto costa servire una coda di dati con un interrupt ogni tanti campioni, e scrivere il valore giusto in un registro di stato che si cancella scrivendo 1.',
   concetti: [['coda', 'Un interrupt per gruppo'], ['bilancio', 'Costo fisso e costo per dato'], ['flag', 'Scrivere 1 per cancellare']],
   filigrana: ['coda', 'flag', 'bilancio'],
   richiami: {
@@ -72,7 +72,7 @@ SL.registra('4.3.4', {
       domanda: (p) => 'Il registro STATUS vale 0x05: READY ed ERROR sono entrambi a 1. Il registro segue la regola W1C. Il driver vi scrive ' + SL.unita434.H2(p.ack) + '. Quanto vale STATUS subito dopo?',
       opzioni: () => [[0, '0x00'], [1, '0x01'], [4, '0x04'], [5, '0x05']]
     },
-    confronto: (pred, esito, p) => { const H2 = SL.unita434.H2; return 'Avevi previsto ' + H2(pred) + '. STATUS vale ' + H2(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.ack ? 'In un registro W1C il valore scritto fa da maschera, e ogni suo 1 cancella il flag corrispondente.' : 'Ogni bit a 1 del valore scritto cancella il proprio flag, e ogni bit a 0 lo lascia com’è.'); },
+    confronto: (pred, esito, p) => { const H2 = SL.unita434.H2; return 'La previsione indicava ' + H2(pred) + '. STATUS vale ' + H2(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === p.ack ? 'In un registro W1C il valore scritto fa da maschera, e ogni suo 1 cancella il flag corrispondente.' : 'Ogni bit a 1 del valore scritto cancella il proprio flag, e ogni bit a 0 lo lascia com’è.'); },
     costruisci(p) {
       const U = SL.unita434, H2 = U.H2, D2 = U.D2, passi = [], c = U.conti(p), resto = p.n % p.b;
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'CODA DEI CAMPIONI', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w: 820, hc: 30, conti: true, h: 58, gap: 12 }));
@@ -100,7 +100,7 @@ SL.registra('4.3.4', {
       ['Riscrivere in STATUS ciò che si vuole lasciare.', 'In un registro W1C si scrive ciò che si vuole cancellare. I bit a 0 restano intatti.'],
       ['Cancellare tutti i flag in blocco.', 'Un flag di errore cancellato senza essere stato trattato è un errore perduto.']
     ],
-    saFare: ['Conto gli interrupt di una coda raggruppata.', 'Calcolo il costo totale e quello per campione.', 'Scelgo il valore da scrivere in un registro W1C.'],
+    saFare: ['Contare gli interrupt di una coda raggruppata.', 'Calcolare il costo totale e quello per campione.', 'Scegliere il valore da scrivere in un registro W1C.'],
     esercizi: [
       { d: 'Un controller riceve 30 campioni e manda un interrupt ogni 8. Un ingresso costa 40 cicli, la lettura di un campione 3. Quanti cicli servono in tutto?', segnaposto: 'Un numero', giuste: ['250', 'duecentocinquanta'],
         ok: 'Gli interrupt sono 4: 4 × 40 + 30 × 3 = 160 + 90 = 250.',
@@ -119,10 +119,10 @@ SL.registra('4.3.4', {
           { se: ['5', '05', '0x5', '0x05'], msg: 'Così si cancellerebbero entrambi i flag.' },
           { se: ['0', '00', '0x0', '0x00'], msg: 'Uno zero non cancella nulla.' }
         ],
-        altro: 'Il valore è diverso. Scrivi 1 soltanto nel bit del flag da cancellare.',
+        altro: 'Il valore è diverso. Si scriva 1 soltanto nel bit del flag da cancellare.',
         indizi: ['Ogni 1 scritto cancella il proprio flag.', 'ERROR è il bit di peso 4.', 'Il valore è 0x04.'],
         svolgimento: ['Flag da cancellare: ERROR.', 'Peso di ERROR: 4.', 'Valore da scrivere: 0x04.'] },
-      { d: 'Con un interrupt ogni 16 campioni al posto di uno ogni 4, che cosa cambia?', guida: 'Scegli la risposta.', o: [
+      { d: 'Con un interrupt ogni 16 campioni al posto di uno ogni 4, che cosa cambia?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il costo per campione scende, e l’attesa dei primi campioni di ogni gruppo cresce', ok: true, fb: 'Il costo fisso si divide fra più campioni. In cambio i primi restano in coda più a lungo.' },
         { t: 'Il costo per campione scende, senza alcuno svantaggio', fb: 'Lo svantaggio è il ritardo: un campione deve attendere che il gruppo si riempia.' },
         { t: 'Il costo delle letture diminuisce', fb: 'Le letture costano 3 cicli per campione in ogni caso. Diminuisce il costo degli ingressi.' }] }

@@ -17,7 +17,7 @@ SL.unita416 = (() => {
 })();
 SL.registra('4.1.6', {
   titolo: 'Stato da preservare all’ingresso',
-  obiettivo: 'Alla fine saprai distinguere ciò che il processore salva da solo da ciò che deve salvare il codice di ingresso, e dire che cosa trova il programma alla ripresa se un registro viene dimenticato.',
+  obiettivo: 'Obiettivo: distinguere ciò che il processore salva da solo da ciò che deve salvare il codice di ingresso, e dire che cosa trova il programma alla ripresa se un registro viene dimenticato.',
   concetti: [['register', 'I dati del programma'], ['pila', 'Salvare e ripristinare'], ['gate', 'Il ritorno con IRETQ']],
   filigrana: ['register', 'pila', 'gate'],
   richiami: {
@@ -67,7 +67,7 @@ SL.registra('4.1.6', {
       domanda: (p) => 'Il programma ha in RAX il valore ' + p.r + ' quando arriva un interrupt. Il gestore scrive 255 in RAX. Lo stub ' + (p.salva === 'si' ? 'salva RAX sulla pila e lo ripristina prima di uscire' : 'dimentica di salvare RAX') + '. Quale valore di RAX trova il programma alla ripresa?',
       opzioni: (p) => [[p.r, String(p.r)], [255, '255'], [0, '0']]
     },
-    confronto: (pred, esito, p) => 'Avevi previsto ' + pred + '. Il programma trova ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.salva === 'si' ? 'La copia sulla pila viene ricaricata in RAX prima di IRETQ.' : 'IRETQ ripristina RIP, i flag e la pila. RAX resta come il gestore lo ha lasciato.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. Il programma trova ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.salva === 'si' ? 'La copia sulla pila viene ricaricata in RAX prima di IRETQ.' : 'IRETQ ripristina RIP, i flag e la pila. RAX resta come il gestore lo ha lasciato.'),
     costruisci(p) {
       const U = SL.unita416, passi = [], salva = p.salva === 'si', fine = salva ? p.r : 255;
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'REGISTRI', 'mono'), SL.el.nota('t1', 300, 0, 'PILA DEL KERNEL', 'mono'), SL.el.nota('t2', 580, 0, 'CODICE', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w: 264, gap: 14, h: 58, ripresa: true }));
@@ -96,7 +96,7 @@ SL.registra('4.1.6', {
       ['Giudicare il ritorno dal solo indirizzo.', 'Un programma può riprendere dall’istruzione giusta con dati alterati. Il contesto comprende anche i registri generali.'],
       ['Salvare un registro senza ripristinarlo.', 'La copia sulla pila serve soltanto se viene ricaricata prima di IRETQ, nell’ordine inverso ai salvataggi.']
     ],
-    saFare: ['Distinguo il frame di interruzione dal resto del contesto.', 'Seguo un registro generale attraverso stub e gestore.', 'Dico che cosa ripristina IRETQ.'],
+    saFare: ['Distinguere il frame di interruzione dal resto del contesto.', 'Seguire un registro generale attraverso stub e gestore.', 'Indicare che cosa ripristina IRETQ.'],
     esercizi: [
       { d: 'Un programma ha RBX = 90 quando arriva un interrupt. Lo stub salva e ripristina soltanto RAX. Il gestore scrive 7 in RBX. Quanto vale RBX alla ripresa?', segnaposto: 'Un numero', giuste: ['7', 'sette'],
         ok: 'RBX non è stato salvato, e resta come il gestore lo ha lasciato.',
@@ -104,14 +104,14 @@ SL.registra('4.1.6', {
           { se: ['90', 'novanta'], msg: 'Lo stub ha salvato soltanto RAX. Nessuna copia di RBX può riportare il valore 90.' },
           { se: ['0', 'zero'], msg: 'Nessuno azzera i registri al ritorno: RBX conserva l’ultimo valore scritto.' }
         ],
-        altro: 'Il numero è diverso. Chiediti se esiste una copia di RBX da ricaricare.',
+        altro: 'Il numero è diverso. Ci si chieda se esiste una copia di RBX da ricaricare.',
         indizi: ['Lo stub salva soltanto RAX.', 'Il gestore scrive 7 in RBX.', 'IRETQ non tocca i registri generali.'],
         svolgimento: ['RBX non viene salvato.', 'Il gestore scrive 7 in RBX.', 'Alla ripresa RBX = 7.'] },
-      { d: 'Quali valori ripristina l’istruzione `iretq`?', guida: 'Scegli la risposta.', o: [
+      { d: 'Quali valori ripristina l’istruzione `iretq`?', guida: 'Si scelga la risposta.', o: [
         { t: 'RIP, CS, RFLAGS, RSP e SS', ok: true, fb: 'Sono i cinque valori del frame di interruzione, quelli che il processore aveva posato all’ingresso.' },
         { t: 'Tutti i registri del programma', fb: 'I registri generali li ripristina lo stub, con una POP per ciascuno.' },
         { t: 'Soltanto RIP', fb: 'Insieme a RIP tornano il livello di privilegio, i flag e la pila del programma.' }] },
-      { d: 'Lo stub esegue `push rax` e poi `push rbx`. In quale ordine deve ripristinarli prima di `iretq`?', guida: 'Scegli la risposta.', o: [
+      { d: 'Lo stub esegue `push rax` e poi `push rbx`. In quale ordine deve ripristinarli prima di `iretq`?', guida: 'Si scelga la risposta.', o: [
         { t: 'Prima `pop rbx`, poi `pop rax`', ok: true, fb: 'L’ultimo dato posato è il primo a essere ripreso.' },
         { t: 'Prima `pop rax`, poi `pop rbx`', fb: 'In cima alla pila c’è RBX, posato per ultimo. Così i due valori finirebbero scambiati.' },
         { t: 'L’ordine è indifferente', fb: 'La pila restituisce i dati in ordine inverso. Un ordine sbagliato scambia i due registri.' }] }

@@ -28,7 +28,7 @@ SL.unita461 = (() => {
 })();
 SL.registra('4.6.1', {
   titolo: 'Ridondanza, modelli di guasto e RAID',
-  obiettivo: 'Alla fine saprai dire, per i principali livelli RAID, quanta capacità resta utilizzabile e quali guasti il volume può sopportare.',
+  obiettivo: 'Obiettivo: dire, per i principali livelli RAID, quanta capacità resta utilizzabile e quali guasti il volume può sopportare.',
   concetti: [['raid', 'Più dischi, un solo volume'], ['disco', 'Copie e parità'], ['scudo', 'Sopravvivere a un guasto']],
   filigrana: ['raid', 'disco', 'scudo'],
   richiami: {
@@ -77,7 +77,7 @@ SL.registra('4.6.1', {
       domanda: (p) => { const U = SL.unita461; return 'Quattro dischi da 2 TB sono organizzati in ' + U.LIV[p.liv].nome + '. Si ' + (U.GUASTI[p.g].length === 1 ? 'guasta il disco 0' : 'guastano i dischi ' + U.GUASTI[p.g].join(' e ')) + '. Il volume resta leggibile per intero?'; },
       opzioni: () => [['si', 'Sì, per intero'], ['no', 'No: mancano dei blocchi']]
     },
-    confronto: (pred, esito, p) => { const U = SL.unita461, L = U.LIV[p.liv]; return 'Avevi previsto che il volume ' + (pred === 'si' ? 'restasse leggibile' : 'perdesse dei blocchi') + '. ' + (esito === 'si' ? 'Il volume resta leggibile per intero. ' : 'Al volume mancano dei blocchi. ') + (pred === esito ? 'La previsione coincide con l’esito.' : p.liv === 'r10' ? 'In RAID 10 conta quali dischi si guastano: serve un superstite in ogni coppia.' : p.liv === 'r5' ? 'RAID 5 ha una sola parità per striscia, e ricava un solo blocco mancante.' : p.liv === 'r6' ? 'RAID 6 ha due parità per striscia, e ricava fino a due blocchi mancanti.' : p.liv === 'r1' ? 'In RAID 1 ogni disco superstite contiene l’intero volume.' : 'RAID 0 conserva ogni blocco in una sola copia.'); },
+    confronto: (pred, esito, p) => { const U = SL.unita461, L = U.LIV[p.liv]; return 'La previsione indicava che il volume ' + (pred === 'si' ? 'restasse leggibile' : 'perdesse dei blocchi') + '. ' + (esito === 'si' ? 'Il volume resta leggibile per intero. ' : 'Al volume mancano dei blocchi. ') + (pred === esito ? 'La previsione coincide con l’esito.' : p.liv === 'r10' ? 'In RAID 10 conta quali dischi si guastano: serve un superstite in ogni coppia.' : p.liv === 'r5' ? 'RAID 5 ha una sola parità per striscia, e ricava un solo blocco mancante.' : p.liv === 'r6' ? 'RAID 6 ha due parità per striscia, e ricava fino a due blocchi mancanti.' : p.liv === 'r1' ? 'In RAID 1 ogni disco superstite contiene l’intero volume.' : 'RAID 0 conserva ogni blocco in una sola copia.'); },
     costruisci(p) {
       const U = SL.unita461, L = U.LIV[p.liv], g = U.GUASTI[p.g], ok = L.ok(g), passi = [], uno = g.length === 1;
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 6, w: 820, gap: 12, h: 58 });
@@ -110,7 +110,7 @@ SL.registra('4.6.1', {
       ['Pensare che RAID 5 dedichi un disco alla parità.', 'La parità cambia disco da una striscia all’altra. Occupa l’equivalente di un disco.'],
       ['Considerare RAID 0 una protezione.', 'RAID 0 aumenta la capacità e basta. Un guasto qualsiasi rovina il volume.']
     ],
-    saFare: ['Calcolo la capacità utile di un livello RAID.', 'Stabilisco se un insieme di guasti lascia leggibile il volume.', 'Spiego perché una parità ricava un solo blocco.'],
+    saFare: ['Calcolare la capacità utile di un livello RAID.', 'Stabilire se un insieme di guasti lascia leggibile il volume.', 'Spiegare perché una parità ricava un solo blocco.'],
     esercizi: [
       { d: 'Sei dischi da 4 TB sono organizzati in RAID 5. Qual è la capacità utile, in terabyte?', segnaposto: 'Un numero', giuste: ['20', '20tb', 'venti'],
         ok: '(6 − 1) × 4 = 20 TB.',
@@ -119,14 +119,14 @@ SL.registra('4.6.1', {
           { se: ['16', '16tb'], msg: 'Due dischi di parità sono quelli di RAID 6. RAID 5 ne usa uno.' },
           { se: ['12', '12tb'], msg: 'La metà è la capacità di RAID 10. In RAID 5 si perde un solo disco.' }
         ],
-        altro: 'Il valore è diverso. Togli un disco al conto e moltiplica per la capacità di ciascuno.',
+        altro: 'Il valore è diverso. Si tolga un disco al conto e si moltiplichi per la capacità di ciascuno.',
         indizi: ['La parità occupa l’equivalente di un disco.', 'Restano 5 dischi di dati.', '5 × 4 = 20.'],
         svolgimento: ['Dischi: 6.', 'Equivalente per la parità: 1.', 'Capacità utile: 5 × 4 = 20 TB.'] },
-      { d: 'In un RAID 10 i dischi 0 e 1 formano una coppia, i dischi 2 e 3 un’altra. Si guastano i dischi 1 e 2. Il volume è ancora leggibile?', guida: 'Scegli la risposta.', o: [
+      { d: 'In un RAID 10 i dischi 0 e 1 formano una coppia, i dischi 2 e 3 un’altra. Si guastano i dischi 1 e 2. Il volume è ancora leggibile?', guida: 'Si scelga la risposta.', o: [
         { t: 'Sì: in ogni coppia resta una copia', ok: true, fb: 'Restano il disco 0 per la prima coppia e il disco 3 per la seconda.' },
         { t: 'No: due guasti sono troppi', fb: 'Conta dove cadono i guasti. Qui ogni coppia conserva un disco.' },
         { t: 'Soltanto per metà', fb: 'Entrambe le coppie hanno ancora una copia completa.' }] },
-      { d: 'In un RAID 5 si guastano due dischi. Perché il volume è perduto?', guida: 'Scegli la risposta.', o: [
+      { d: 'In un RAID 5 si guastano due dischi. Perché il volume è perduto?', guida: 'Si scelga la risposta.', o: [
         { t: 'Ogni striscia ha due blocchi mancanti e una sola relazione di parità', ok: true, fb: 'Una equazione determina una sola incognita.' },
         { t: 'Uno dei due dischi era quello della parità', fb: 'La parità è distribuita su tutti i dischi, striscia per striscia.' },
         { t: 'La capacità utile scende sotto la metà', fb: 'La capacità è estranea al problema. Mancano i dati per ricavare i blocchi.' }] }

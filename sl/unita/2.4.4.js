@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('2.4.4', {
   titolo: 'Derivare le maschere di campo',
-  obiettivo: 'Alla fine saprai ricavare la maschera di un campo dalla sua posizione e dalla sua larghezza, e usarla per leggere il valore del campo.',
+  obiettivo: 'Obiettivo: ricavare la maschera di un campo dalla sua posizione e dalla sua larghezza, e impiegarla per leggere il valore del campo.',
   concetti: [['scudo', 'Posizione e larghezza'], ['bit', 'Una fila di uni'], ['lente', 'Isolare e riportare']],
   filigrana: ['scudo', 'bit', 'lente'],
   richiami: {
@@ -11,28 +11,28 @@ SL.registra('2.4.4', {
       { sim: 'tabella', da: 'Dall’unità 1.3.4', t: 'Campo', d: 'Una parte di un formato, con una posizione e una larghezza stabilite.' }
     ],
     domanda: { d: 'Prima di proseguire: come si scrive in binario il numero 2 elevato a 3, diminuito di 1?', o: [
-      { t: '111', ok: true, fb: 'Due elevato a 3 fa 8, in binario 1000. Togliendo 1 si ottiene 7, cioè tre bit a 1.' },
-      { t: '1000', fb: 'Questo è 2 elevato a 3, cioè 8. Va ancora tolto 1.' },
-      { t: '011', fb: 'Questo è il numero 3. Due elevato a 3 fa 8, e 8 − 1 fa 7.' }
+      { t: '111', ok: true, fb: 'Due elevato a 3 dà 8, in binario 1000. Sottraendo 1 si ottiene 7, cioè tre bit a 1.' },
+      { t: '1000', fb: 'Il valore indicato è 2 elevato a 3, cioè 8. Va ancora sottratto 1.' },
+      { t: '011', fb: 'Il valore indicato è il numero 3. Due elevato a 3 dà 8, e 8 − 1 dà 7.' }
     ] }
   },
   idea: {
-    titolo: 'Due numeri bastano a descrivere un campo',
+    titolo: 'Due numeri descrivono un campo',
     termini: ['maschera di campo'],
     testo: [
-      'I semibyte dell’unità precedente sono un caso particolare. Un formato può assegnare a un’informazione un gruppo di bit di qualunque larghezza, in qualunque punto della parola: tre bit per un numero di canale, cinque per il numero di un registro. Per descrivere un campo bastano due numeri: la posizione k del suo bit più basso e la larghezza w.',
-      'Da questi due numeri si ricava la [[maschera di campo]], che ha w bit a 1 nelle posizioni del campo e zeri altrove. Il calcolo ha due passaggi. Il numero 2 elevato a w, in binario, è un 1 seguito da w zeri. Togliendo 1 si ottengono w bit a 1: con w = 3, da 1000 si passa a 111, cioè 7. Poi la fila di uni scorre a sinistra di k posizioni.',
+      'I semibyte dell’unità precedente sono un caso particolare. Un formato può assegnare a un’informazione un gruppo di bit di qualunque larghezza, in qualunque punto della parola: tre bit per un numero di canale, cinque per il numero di un registro. La descrizione di un campo richiede due numeri: la posizione k del suo bit più basso e la larghezza w.',
+      'Da tali due numeri si ricava la [[maschera di campo]], che ha w bit a 1 nelle posizioni del campo e zeri altrove. Il calcolo ha due passaggi. Il numero 2 elevato a w, in binario, è un 1 seguito da w zeri. Sottraendo 1 si ottengono w bit a 1: con w = 3, da 1000 si passa a 111, cioè 7. La fila di uni scorre poi a sinistra di k posizioni.',
       { fig: 'celle', titolo: 'La maschera di un campo di tre bit che comincia dal bit 4', nota: 'Tre uni, cioè 7, scorsi a sinistra di quattro posizioni: la maschera vale 0x70.', celle: [
         { so: 'bit 7', v: '0', st: '' }, { so: 'bit 6', v: '1', st: 'amb' }, { so: 'bit 5', v: '1', st: 'amb' }, { so: 'bit 4', v: '1', st: 'amb' }, { so: 'bit 3', v: '0', st: '' }, { so: 'bit 2', v: '0', st: '' }, { so: 'bit 1', v: '0', st: '' }, { so: 'bit 0', v: '0', st: '' }] },
-      'Con la maschera il campo si legge in due istruzioni. AND isola i bit del campo e azzera gli altri. SHR li riporta alle unità, scorrendo a destra di k posizioni. Per la parola 0x1234, con k = 4 e w = 3, `and eax, 0x70` lascia 0x0030 e `shr eax, 4` lascia 3.',
-      'Per scrivere nel campo le mosse sono tre. AND con la maschera rovesciata fa posto, azzerando il campo. Il nuovo valore scorre a sinistra di k posizioni. OR lo inserisce.',
-      'Una maschera serve anche ad arrotondare. L’istruzione `and rax, -8` azzera i tre bit più bassi, perché −8 in complemento a due è una fila di uni che termina con 000. Il risultato è il più grande multiplo di 8 che non supera il numero di partenza. È lo stesso calcolo dei multipli incontrato con l’allineamento, nell’unità 2.3.4.'
+      'Con la maschera il campo si legge in due istruzioni. AND isola i bit del campo e azzera gli altri. SHR li riporta alle unità, con uno scorrimento a destra di k posizioni. Per la parola 0x1234, con k = 4 e w = 3, `and eax, 0x70` lascia 0x0030 e `shr eax, 4` lascia 3.',
+      'La scrittura nel campo richiede tre passaggi. AND con la maschera invertita azzera il campo. Il nuovo valore scorre a sinistra di k posizioni, e OR lo inserisce.',
+      'Una maschera consente anche l’arrotondamento. L’istruzione `and rax, -8` azzera i tre bit più bassi, poiché −8 in complemento a due è una fila di uni che termina con 000. Il risultato è il massimo multiplo di 8 che non supera il numero di partenza. È il medesimo calcolo dei multipli incontrato con l’allineamento, nell’unità 2.3.4.'
     ]
   },
   esperimento: {
     faremo: [
-      'EAX contiene una parola di sedici bit. Sceglierai la parola, la posizione k e la larghezza w di un campo.',
-      'Ricaveremo la maschera in due passaggi, isoleremo il campo con AND e lo riporteremo alle unità con SHR. Dopo il caso proposto, sposta il campo al bit 8 senza cambiare la larghezza.'
+      'EAX contiene una parola di sedici bit. I controlli fissano la parola, la posizione k e la larghezza w di un campo.',
+      'La maschera è ricavata in due passaggi, il campo è isolato con AND e riportato alle unità con SHR. Dopo il caso proposto, è istruttivo spostare il campo al bit 8 senza cambiare la larghezza.'
     ],
     vedrai: [
       ['bit', 'Quattro file di sedici bit', 'Al centro, dall’alto: la parola, la maschera, il campo isolato e il campo riportato alle unità.'],
@@ -54,7 +54,7 @@ SL.registra('2.4.4', {
       domanda: (p) => 'EAX contiene ' + SL.unita244.H4(p.v) + ', in binario ' + SL.unita244.B16(p.v) + '. Un campo largo ' + p.w + ' bit comincia dal bit ' + p.k + '. Quale numero contiene?',
       opzioni: (p) => { const m = Math.pow(2, p.w) - 1; return Array.from(new Set([(p.v >> p.k) & m, p.v & (m << p.k), (p.v >> (p.k + 1)) & m, p.v & m, (p.v >> p.k) & (2 * m + 1)])).slice(0, 4).sort((a, b) => a - b).map((x) => [x, String(x)]); }
     },
-    confronto: (pred, esito, p) => { const U = SL.unita244, m = Math.pow(2, p.w) - 1; return 'Avevi previsto ' + pred + '. Il campo contiene ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il campo occupa i bit da ' + p.k + ' a ' + (p.k + p.w - 1) + '. La maschera vale ' + U.H4(m << p.k) + ', l’AND lascia ' + U.H4(p.v & (m << p.k)) + (p.k ? ', e lo scorrimento di ' + p.k + ' posizioni riporta il campo alle unità.' : ', già alle unità.')); },
+    confronto: (pred, esito, p) => { const U = SL.unita244, m = Math.pow(2, p.w) - 1; return 'La previsione indicava ' + pred + '. Il campo contiene ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il campo occupa i bit da ' + p.k + ' a ' + (p.k + p.w - 1) + '. La maschera vale ' + U.H4(m << p.k) + ', l’AND lascia ' + U.H4(p.v & (m << p.k)) + (p.k ? ', e lo scorrimento di ' + p.k + ' posizioni riporta il campo alle unità.' : ', già alle unità.')); },
     costruisci(p) {
       const el = SL.el, X = SL.x86, U = SL.unita244, passi = [], k = p.k, w = p.w, m0 = Math.pow(2, w) - 1, m = m0 << k, iso = p.v & m, val = iso >> k;
       const CAMPO = Array.from({ length: w }, (_, i) => k + i), BASSI = Array.from({ length: w }, (_, i) => i), TUTTI = Array.from({ length: 16 }, (_, i) => i);
@@ -68,7 +68,7 @@ SL.registra('2.4.4', {
         riga('i', st.iso, 158, { att: f === 3 ? CAMPO : [] }).forEach((e) => els.push(e));
         riga('u', st.val, 222, { att: f >= 4 ? BASSI : [] }).forEach((e) => els.push(e));
         els.push(el.box('q1', 20, 290, 196, 60, w + ' bit a 1', f >= 1 ? '2 alla ' + w + ' − 1 = ' + m0 : '·', f === 1 ? 'att' : f > 1 ? 'on' : '', { cls: 'stretta' }),
-          el.box('q2', 228, 290, 210, 60, 'al posto del campo', f >= 2 ? m0 + ' × 2 alla ' + k + ' = ' + U.H4(m) : '·', f === 2 ? 'att' : f > 2 ? 'on' : '', { cls: 'stretta' }),
+          el.box('q2', 228, 290, 210, 60, 'nella posizione del campo', f >= 2 ? m0 + ' × 2 alla ' + k + ' = ' + U.H4(m) : '·', f === 2 ? 'att' : f > 2 ? 'on' : '', { cls: 'stretta' }),
           el.box('q3', 450, 290, 190, 60, 'campo isolato', f >= 3 ? U.H4(iso) : '·', f === 3 ? 'att' : f > 3 ? 'on' : '', { cls: 'stretta' }),
           el.box('q4', 652, 290, 188, 60, 'valore del campo', f >= 4 ? String(val) : '·', f >= 4 ? 'att' : '', { cls: 'stretta' }));
         return els;
@@ -81,47 +81,47 @@ SL.registra('2.4.4', {
         { chiedi: { d: 'Quanti numeri diversi può contenere un campo di ' + w + ' bit?', o: o0.map(String), g: o0.indexOf(Math.pow(2, w)), no: 'Con ' + w + ' bit si formano 2 elevato a ' + w + ' combinazioni, cioè ' + Math.pow(2, w) + ': i numeri da 0 a ' + m0 + '.' } });
       st.m = m0;
       const o1 = Array.from(new Set([m, m0, Math.pow(2, k), m * 2])).sort((a, b) => a - b);
-      P({ fase: 1 }, 1, 'Tanti uni quanti sono i bit', 'Il numero 2 elevato a ' + w + ' fa ' + Math.pow(2, w) + ', in binario un 1 seguito da ' + w + ' zeri. Togliendo 1 restano ' + w + ' bit a 1: il numero ' + m0 + '. Per ora la fila di uni sta alle unità.',
-        { calc: '2 alla ' + w + ' − 1 = ' + m0, chiedi: { d: 'La fila di ' + w + ' uni va spostata a sinistra di ' + k + (k === 1 ? ' posizione' : ' posizioni') + '. Quanto varrà la maschera?', o: o1.map(U.H4), g: o1.indexOf(m), no: k === 0 ? 'Il campo comincia dal bit 0, e la fila di uni è già al suo posto: ' + U.H4(m) + '.' : 'Ogni posizione raddoppia: ' + m0 + ' × ' + Math.pow(2, k) + ' = ' + m + ', in esadecimale ' + U.H4(m) + '.' } });
+      P({ fase: 1 }, 1, 'Tanti uni quanti sono i bit', 'Il numero 2 elevato a ' + w + ' dà ' + Math.pow(2, w) + ', in binario un 1 seguito da ' + w + ' zeri. Sottraendo 1 restano ' + w + ' bit a 1: il numero ' + m0 + '. Per ora la fila di uni si trova alle unità.',
+        { calc: '2 alla ' + w + ' − 1 = ' + m0, chiedi: { d: 'La fila di ' + w + ' uni va spostata a sinistra di ' + k + (k === 1 ? ' posizione' : ' posizioni') + '. Quanto varrà la maschera?', o: o1.map(U.H4), g: o1.indexOf(m), no: k === 0 ? 'Il campo comincia dal bit 0, e la fila di uni è già in posizione: ' + U.H4(m) + '.' : 'Ogni posizione raddoppia: ' + m0 + ' × ' + Math.pow(2, k) + ' = ' + m + ', in esadecimale ' + U.H4(m) + '.' } });
       st.m = m;
-      P({ fase: 2 }, 1, k === 0 ? 'La maschera è già al suo posto' : 'La maschera al posto del campo', (k === 0 ? 'Il campo comincia dal bit 0, e la fila di uni si trova già sotto di esso.' : 'La fila di uni scorre a sinistra di ' + k + ' posizioni e si ferma sotto il campo.') + ' La maschera vale ' + U.H4(m) + ': ' + w + ' bit a 1 nelle posizioni da ' + k + ' a ' + (k + w - 1) + ', zeri altrove.', { calc: m0 + ' × 2 alla ' + k + ' = ' + U.H4(m) });
+      P({ fase: 2 }, 1, k === 0 ? 'La maschera è già in posizione' : 'La maschera nella posizione del campo', (k === 0 ? 'Il campo comincia dal bit 0, e la fila di uni si trova già sotto di esso.' : 'La fila di uni scorre a sinistra di ' + k + ' posizioni e si arresta sotto il campo.') + ' La maschera vale ' + U.H4(m) + ': ' + w + ' bit a 1 nelle posizioni da ' + k + ' a ' + (k + w - 1) + ', zeri altrove.', { calc: m0 + ' × 2 alla ' + k + ' = ' + U.H4(m) });
       st.iso = iso;
       const o3 = Array.from(new Set([k, w, k + w])).sort((a, b) => a - b);
-      P({ fase: 3 }, 2, 'Il campo isolato', 'L’istruzione `and eax, ' + U.H4(m) + '` lascia passare i bit della parola che stanno sotto gli uni della maschera e azzera tutti gli altri. Il risultato, ' + U.H4(iso) + ', conserva il campo nella posizione in cui si trovava.',
-        { calc: U.H4(p.v) + ' AND ' + U.H4(m) + ' = ' + U.H4(iso), chiedi: { d: 'Per leggere il campo come numero, di quante posizioni va fatto scorrere a destra?', o: o3.map(String), g: o3.indexOf(k), no: 'Il bit più basso del campo sta nella posizione ' + k + ' e deve arrivare nella posizione 0.' } });
+      P({ fase: 3 }, 2, 'Il campo isolato', 'L’istruzione `and eax, ' + U.H4(m) + '` lascia passare i bit della parola situati sotto gli uni della maschera e azzera tutti gli altri. Il risultato, ' + U.H4(iso) + ', conserva il campo nella posizione in cui si trovava.',
+        { calc: U.H4(p.v) + ' AND ' + U.H4(m) + ' = ' + U.H4(iso), chiedi: { d: 'Per leggere il campo come numero, di quante posizioni va fatto scorrere a destra?', o: o3.map(String), g: o3.indexOf(k), no: 'Il bit più basso del campo si trova nella posizione ' + k + ' e deve raggiungere la posizione 0.' } });
       st.val = val;
-      P({ fase: 4 }, 3, k === 0 ? 'Già alle unità' : 'Il campo riportato alle unità', (k === 0 ? 'Il campo comincia dal bit 0, e nessuno scorrimento è necessario.' : 'L’istruzione `shr eax, ' + k + '` fa scendere il campo di ' + k + ' posizioni. Il suo bit più basso arriva nella posizione 0.') + ' EAX contiene ' + val + '.', { calc: U.H4(iso) + (k ? ' ÷ 2 alla ' + k : '') + ' = ' + val });
-      P({ fase: 5 }, 4, 'Il valore e il suo massimo', 'Il campo contiene ' + val + ', su un massimo di ' + m0 + '. ' + (iso !== val ? 'Prima dello scorrimento lo stesso gruppo di bit, letto nella sua posizione, valeva ' + iso + ': la posizione dà ai bit un peso che il campo, da solo, ignora.' : 'Il campo stava già alle unità, e il valore isolato coincide con il valore del campo.') + ' Per scrivervi un nuovo numero si userebbe la maschera rovesciata per fare posto, e poi OR.', { calc: 'campo = ' + val, esito: ['campo = ' + val, 'si'] });
+      P({ fase: 4 }, 3, k === 0 ? 'Già alle unità' : 'Il campo riportato alle unità', (k === 0 ? 'Il campo comincia dal bit 0, e nessuno scorrimento è necessario.' : 'L’istruzione `shr eax, ' + k + '` fa scendere il campo di ' + k + ' posizioni. Il suo bit più basso raggiunge la posizione 0.') + ' EAX contiene ' + val + '.', { calc: U.H4(iso) + (k ? ' ÷ 2 alla ' + k : '') + ' = ' + val });
+      P({ fase: 5 }, 4, 'Il valore e il suo massimo', 'Il campo contiene ' + val + ', su un massimo di ' + m0 + '. ' + (iso !== val ? 'Prima dello scorrimento il medesimo gruppo di bit, letto nella propria posizione, valeva ' + iso + ': la posizione attribuisce ai bit un peso estraneo al valore del campo.' : 'Il campo si trovava già alle unità, e il valore isolato coincide con il valore del campo.') + ' La scrittura di un nuovo numero richiederebbe la maschera invertita, per azzerare il campo, e poi OR.', { calc: 'campo = ' + val, esito: ['campo = ' + val, 'si'] });
       return { passi, esito: val };
     }
   },
   bilancio: {
     regola: [
       'La maschera di un campo largo w che comincia dal bit k si ottiene da 2 elevato a w, meno 1, scorso a sinistra di k posizioni.',
-      'Per leggere il campo: AND con la maschera, poi SHR di k posizioni. Per scriverlo: AND con la maschera rovesciata, poi OR con il valore scorso a sinistra di k posizioni.'
+      'Per leggere il campo: AND con la maschera, poi SHR di k posizioni. Per scriverlo: AND con la maschera invertita, poi OR con il valore scorso a sinistra di k posizioni.'
     ],
     errori: [
-      ['Dimenticare lo scorrimento finale.', 'La parola 0x1234, mascherata con 0x0070, dà 0x0030, cioè 48. Il campo vale 3: va riportato alle unità.'],
-      ['Usare 2 elevato a w come maschera.', 'Due elevato a 3 è 1000, un bit solo. Servono tre uni: 2 elevato a 3, meno 1.'],
-      ['Sbagliare l’ultimo bit del campo.', 'Un campo di 3 bit che comincia dal bit 4 occupa i bit 4, 5 e 6. L’ultimo è k + w − 1.']
+      ['Omettere lo scorrimento finale.', 'La parola 0x1234, mascherata con 0x0070, dà 0x0030, cioè 48. Il campo vale 3: va riportato alle unità.'],
+      ['Impiegare 2 elevato a w come maschera.', 'Due elevato a 3 è 1000, un solo bit. Occorrono tre uni: 2 elevato a 3, meno 1.'],
+      ['Individuare in modo errato l’ultimo bit del campo.', 'Un campo di 3 bit che comincia dal bit 4 occupa i bit 4, 5 e 6. L’ultimo è k + w − 1.']
     ],
-    saFare: ['Ricavo la maschera di un campo da posizione e larghezza.', 'Leggo il valore di un campo con AND e SHR.', 'Descrivo le mosse per scrivere un valore in un campo.'],
+    saFare: ['Ricavare la maschera di un campo da posizione e larghezza.', 'Leggere il valore di un campo con AND e SHR.', 'Descrivere i passaggi per scrivere un valore in un campo.'],
     esercizi: [
-      { d: 'Qual è la maschera di un campo largo 5 bit che comincia dal bit 3? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x3C', giuste: ['0xf8', 'f8', 'f8h', '0x00f8', '00f8'],
+      { d: 'Qual è la maschera di un campo largo 5 bit che comincia dal bit 3? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x3C', giuste: ['0xf8', 'f8', 'f8h', '0x00f8', '00f8'],
         ok: 'Cinque bit a 1 valgono 2 elevato a 5, meno 1, cioè 31. Scorsi di tre posizioni: 1111 1000, cioè 0xF8.',
         diagnosi: [
-          { se: ['0x1f', '1f'], msg: 'Questa è la fila di cinque uni, ancora alle unità. Va fatta scorrere a sinistra di tre posizioni.' },
-          { se: ['0x100', '100'], msg: 'Questo è 2 elevato a 5, scorso di tre posizioni: un bit solo. Prima dello scorrimento va tolto 1.' },
-          { se: ['0x7c', '7c'], msg: 'Così la fila di uni comincia dal bit 2. Il campo comincia dal bit 3.' },
-          { se: ['11111000', '1111 1000'], msg: 'I bit sono giusti. Scrivi le due cifre esadecimali: 1111 e 1000.' }
+          { se: ['0x1f', '1f'], msg: 'Il valore indicato è la fila di cinque uni, ancora alle unità. Va fatta scorrere a sinistra di tre posizioni.' },
+          { se: ['0x100', '100'], msg: 'Il valore indicato è 2 elevato a 5, scorso di tre posizioni: un solo bit. Prima dello scorrimento va sottratto 1.' },
+          { se: ['0x7c', '7c'], msg: 'In tal modo la fila di uni comincia dal bit 2. Il campo comincia dal bit 3.' },
+          { se: ['11111000', '1111 1000'], msg: 'I bit sono corretti. Vanno scritte le due cifre esadecimali: 1111 e 1000.' }
         ],
-        altro: 'La maschera è diversa. Scrivi cinque bit a 1 e falli scorrere a sinistra di tre posizioni.',
+        altro: 'La maschera è diversa. Si scrivano cinque bit a 1 e li si faccia scorrere a sinistra di tre posizioni.',
         indizi: ['Cinque bit a 1: 2 elevato a 5, meno 1, cioè 31.', '31 in binario è 1 1111.', 'Scorso di tre posizioni: 1111 1000.'],
         svolgimento: ['2 elevato a 5 = 32. Meno 1: 31, in binario 1 1111.', 'Scorrimento a sinistra di 3: 1111 1000.', '1111 è F, 1000 è 8: la maschera vale 0xF8.'] },
-      { d: 'EAX contiene 0xABCD. Quale coppia di istruzioni lascia in EAX il valore del campo di 4 bit che comincia dal bit 8?', guida: 'Scegli la risposta.', o: [
+      { d: 'EAX contiene 0xABCD. Quale coppia di istruzioni lascia in EAX il valore del campo di 4 bit che comincia dal bit 8?', guida: 'Si scelga la risposta.', o: [
         { t: 'and eax, 0xF00 · shr eax, 8', ok: true, fb: 'La maschera 0xF00 isola i bit da 8 a 11, cioè la cifra B. Lo scorrimento di 8 posizioni la riporta alle unità: EAX vale 0xB.' },
         { t: 'and eax, 0xF0 · shr eax, 4', fb: 'La maschera 0xF0 isola i bit da 4 a 7, cioè la cifra C. Il campo richiesto comincia dal bit 8.' },
-        { t: 'shr eax, 8 · and eax, 0xF00', fb: 'Dopo lo scorrimento il campo sta già alle unità, e la maschera 0xF00 guarda altri bit: il risultato è 0.' }] }
+        { t: 'shr eax, 8 · and eax, 0xF00', fb: 'Dopo lo scorrimento il campo si trova già alle unità, e la maschera 0xF00 riguarda altri bit: il risultato è 0.' }] }
     ],
     sfida: ['cslez2_4_04_random_assembly_04', 'Estrarre, inserire e verificare campi']
   }

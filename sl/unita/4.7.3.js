@@ -19,7 +19,7 @@ SL.unita473 = (() => {
 })();
 SL.registra('4.7.3', {
   titolo: 'Interfacce, descrittori e proprietà dei buffer',
-  obiettivo: 'Alla fine saprai seguire le richieste DMA in un anello di descrittori, e dire in ogni momento quali posti appartengono al driver e quali al dispositivo.',
+  obiettivo: 'Obiettivo: seguire le richieste DMA in un anello di descrittori, e dire in ogni momento quali posti appartengono al driver e quali al dispositivo.',
   concetti: [['coda', 'Un anello di posti riutilizzabili'], ['lucchetto', 'Un posto ha un solo padrone'], ['dispositivo', 'Il completamento lo restituisce']],
   filigrana: ['coda', 'lucchetto', 'dispositivo'],
   richiami: {
@@ -69,7 +69,7 @@ SL.registra('4.7.3', {
       domanda: (p) => 'L’anello ha ' + p.cap + ' slot, tutti liberi. Il driver deve pubblicare ' + p.rich + ' richieste, e poi osserva ' + (p.fin === 0 ? 'nessun completamento' : 'al massimo ' + p.fin + ' completamenti') + '. Quanti slot sono liberi dopo il recupero?',
       opzioni: (p) => { const c = SL.unita473.conto(p); return Array.from(new Set([c.liberi, p.cap - c.pub, c.rit, p.cap])).sort((a, b) => a - b).map((v) => [v, String(v)]); }
     },
-    confronto: (pred, esito, p) => { const c = SL.unita473.conto(p); return 'Avevi previsto ' + pred + ' slot liberi. Dopo il recupero sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Pubblicati ' + c.pub + ', restano ' + (p.cap - c.pub) + ' liberi. I completamenti recuperati sono ' + c.rit + ', e ' + (p.cap - c.pub) + ' + ' + c.rit + ' = ' + c.liberi + '.'); },
+    confronto: (pred, esito, p) => { const c = SL.unita473.conto(p); return 'La previsione indicava ' + pred + ' slot liberi. Dopo il recupero sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Pubblicati ' + c.pub + ', restano ' + (p.cap - c.pub) + ' liberi. I completamenti recuperati sono ' + c.rit + ', e ' + (p.cap - c.pub) + ' + ' + c.rit + ' = ' + c.liberi + '.'); },
     costruisci(p) {
       const U = SL.unita473, c = U.conto(p), passi = [];
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, wc: p.cap === 8 ? 92 : 120, w: 820 });
@@ -94,7 +94,7 @@ SL.registra('4.7.3', {
       ['Confondere una richiesta in attesa con una richiesta attiva.', 'In attesa: non ha ancora uno slot. Attiva: è pubblicata, e il dispositivo ci sta lavorando.'],
       ['Considerare libero uno slot appena completato.', 'Torna libero quando il driver ha osservato il completamento e lo ha recuperato.']
     ],
-    saFare: ['Dico a chi appartiene uno slot in ogni fase.', 'Calcolo richieste pubblicate e richieste in attesa.', 'Calcolo gli slot liberi dopo il recupero.'],
+    saFare: ['Indicare a chi appartiene uno slot in ogni fase.', 'Calcolare richieste pubblicate e richieste in attesa.', 'Calcolare gli slot liberi dopo il recupero.'],
     esercizi: [
       { d: 'Un anello ha 16 slot. Il driver pubblica 10 richieste e poi recupera 4 completamenti. Quanti slot sono liberi?', segnaposto: 'Un numero', giuste: ['10', 'dieci'],
         ok: '16 − 10 = 6 liberi dopo la pubblicazione, più i 4 recuperati.',
@@ -103,7 +103,7 @@ SL.registra('4.7.3', {
           { se: ['4', 'quattro'], msg: 'Quattro sono gli slot recuperati. C’erano già 6 slot mai usati.' },
           { se: ['12', 'dodici'], msg: 'I completamenti liberano slot fra quelli pubblicati: 16 − 10 + 4.' }
         ],
-        altro: 'Il numero è diverso. Parti dagli slot rimasti liberi dopo la pubblicazione e aggiungi quelli recuperati.',
+        altro: 'Il numero è diverso. Si parta dagli slot rimasti liberi dopo la pubblicazione e si aggiunga quelli recuperati.',
         indizi: ['Dopo la pubblicazione: 16 − 10 = 6 liberi.', 'Recuperati: 4.', '6 + 4 = 10.'],
         svolgimento: ['Liberi dopo la pubblicazione: 6.', 'Recuperati: 4.', 'Liberi: 10.'] },
       { d: 'Un anello ha 8 slot, tutti liberi. Arrivano 13 richieste. Quante restano in attesa di un posto?', segnaposto: 'Un numero', giuste: ['5', 'cinque'],
@@ -112,10 +112,10 @@ SL.registra('4.7.3', {
           { se: ['8', 'otto'], msg: 'Otto sono le richieste pubblicate. Quelle in attesa sono le rimanenti.' },
           { se: ['13', 'tredici'], msg: 'Le prime otto trovano subito uno slot.' }
         ],
-        altro: 'Il numero è diverso. Sottrai dalle richieste gli slot disponibili.',
+        altro: 'Il numero è diverso. Si sottragga dalle richieste gli slot disponibili.',
         indizi: ['Gli slot sono 8.', 'Le richieste sono 13.', '13 − 8 = 5.'],
         svolgimento: ['Pubblicate: 8.', 'In attesa: 13 − 8 = 5.'] },
-      { d: 'Perché il driver non deve riscrivere uno slot fra la pubblicazione e il completamento?', guida: 'Scegli la risposta.', o: [
+      { d: 'Perché il driver non deve riscrivere uno slot fra la pubblicazione e il completamento?', guida: 'Si scelga la risposta.', o: [
         { t: 'Il dispositivo potrebbe leggere campi di due richieste diverse', ok: true, fb: 'Per esempio il nuovo indirizzo con la vecchia lunghezza.' },
         { t: 'Lo slot diventa di sola lettura per il processore', fb: 'La memoria resta scrivibile. È la regola di proprietà a vietarlo.' },
         { t: 'La scrittura farebbe partire un secondo interrupt', fb: 'Gli interrupt li genera il dispositivo, al completamento.' }] }

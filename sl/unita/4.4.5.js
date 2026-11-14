@@ -20,7 +20,7 @@ SL.unita445 = (() => {
 })();
 SL.registra('4.4.5', {
   titolo: 'Gerarchie e reti punto a punto',
-  obiettivo: 'Alla fine saprai calcolare il tempo che un pacchetto impiega ad attraversare due collegamenti e un ponte, e riconoscere quando un altro flusso lo rallenta.',
+  obiettivo: 'Obiettivo: calcolare il tempo che un pacchetto impiega ad attraversare due collegamenti e un ponte, e riconoscere quando un altro flusso lo rallenta.',
   concetti: [['bus', 'Collegamenti a due capi'], ['strati', 'Ponti che smistano'], ['coda', 'L’attesa davanti all’uscita']],
   filigrana: ['bus', 'strati', 'coda'],
   richiami: {
@@ -70,7 +70,7 @@ SL.registra('4.4.5', {
       domanda: (p) => 'Un pacchetto di ' + p.b + ' byte entra a 16 byte per microsecondo, il ponte impiega 1 µs, l’uscita porta 8 byte per microsecondo. In coda ci sono già ' + (p.q === 1 ? '1 pacchetto' : p.q + ' pacchetti') + (p.usc === 'solo' ? '.' : p.usc === 'stessa' ? ', e un secondo flusso occupa la stessa uscita prima del nostro.' : ', e un secondo flusso usa un’uscita indipendente.') + ' Qual è la latenza?',
       opzioni: (p) => { const c = SL.unita445.conto(p); return [c.lat(p.q) - 1, c.lat(p.q), c.lat(p.q + 1)].map((v) => [v, v + ' µs']); }
     },
-    confronto: (pred, esito, p) => { const c = SL.unita445.conto(p); return 'Avevi previsto ' + pred + ' µs. La latenza è ' + esito + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === c.lat(p.q) - 1 ? 'Va contato anche il microsecondo speso dal ponte.' : p.usc === 'stessa' ? 'Il secondo flusso passa per la stessa uscita prima del nostro pacchetto, e aggiunge ' + c.tx + ' µs alla coda.' : p.usc === 'distinta' ? 'Il secondo flusso usa un’altra uscita, e la coda del nostro pacchetto resta la stessa.' : 'In coda ci sono soltanto i pacchetti indicati.'); },
+    confronto: (pred, esito, p) => { const c = SL.unita445.conto(p); return 'La previsione indicava ' + pred + ' µs. La latenza è ' + esito + ' µs. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === c.lat(p.q) - 1 ? 'Va contato anche il microsecondo speso dal ponte.' : p.usc === 'stessa' ? 'Il secondo flusso passa per la stessa uscita prima del nostro pacchetto, e aggiunge ' + c.tx + ' µs alla coda.' : p.usc === 'distinta' ? 'Il secondo flusso usa un’altra uscita, e la coda del nostro pacchetto resta la stessa.' : 'In coda ci sono soltanto i pacchetti indicati.'); },
     costruisci(p) {
       const U = SL.unita445, c = U.conto(p), passi = [];
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 6, ws: [112, 150, 160, 236, 122], gap: 10, h: 56 });
@@ -96,7 +96,7 @@ SL.registra('4.4.5', {
       ['Dimenticare il tempo del ponte.', 'Anche la scelta dell’uscita richiede tempo, qui 1 µs.'],
       ['Contare come ostacolo un flusso su un’altra uscita.', 'Le uscite di un ponte lavorano insieme, come i link indipendenti.']
     ],
-    saFare: ['Calcolo il tempo di ricezione e di invio di un pacchetto.', 'Calcolo l’attesa in coda.', 'Stabilisco se un secondo flusso rallenta il pacchetto.'],
+    saFare: ['Calcolare il tempo di ricezione e di invio di un pacchetto.', 'Calcolare l’attesa in coda.', 'Stabilire se un secondo flusso rallenta il pacchetto.'],
     esercizi: [
       { d: 'Un pacchetto di 128 byte entra in un ponte store-and-forward a 16 byte per microsecondo. Il ponte impiega 1 µs. L’uscita è libera e porta 8 byte per microsecondo. Qual è la latenza, in microsecondi?', segnaposto: 'Un numero', giuste: ['25', '25µs', '25μs', '25us', '25microsecondi'],
         ok: '128 ÷ 16 = 8, poi 1, poi 128 ÷ 8 = 16: in tutto 25 µs.',
@@ -116,10 +116,10 @@ SL.registra('4.4.5', {
           { se: ['73', '73µs', '73μs', '73us'], msg: 'Questa è la latenza completa. La domanda riguarda la sola coda.' },
           { se: ['64', '64µs', '64μs', '64us'], msg: 'Hai contato anche l’invio del pacchetto osservato. In coda ci sono i tre che lo precedono.' }
         ],
-        altro: 'Il valore è diverso. Calcola quanto un pacchetto occupa l’uscita, e moltiplica per tre.',
+        altro: 'Il valore è diverso. Si calcoli quanto un pacchetto occupa l’uscita, e si moltiplichi per tre.',
         indizi: ['Un pacchetto: 128 ÷ 8 µs.', '128 ÷ 8 = 16 µs.', '3 × 16 = 48.'],
         svolgimento: ['Un pacchetto sull’uscita: 16 µs.', 'Tre pacchetti: 48 µs.'] },
-      { d: 'Un secondo flusso attraversa lo stesso ponte e chiede un’uscita diversa da quella del pacchetto osservato. Che effetto ha sulla sua latenza?', guida: 'Scegli la risposta.', o: [
+      { d: 'Un secondo flusso attraversa lo stesso ponte e chiede un’uscita diversa da quella del pacchetto osservato. Che effetto ha sulla sua latenza?', guida: 'Si scelga la risposta.', o: [
         { t: 'Nessuno: le due uscite lavorano insieme', ok: true, fb: 'La contesa nasce soltanto su un’uscita condivisa.' },
         { t: 'La allunga del tempo di un invio', fb: 'Questo accadrebbe se il secondo flusso occupasse la stessa uscita.' },
         { t: 'La raddoppia', fb: 'I due flussi usano risorse diverse e procedono in parallelo.' }] }

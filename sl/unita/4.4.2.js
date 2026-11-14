@@ -15,7 +15,7 @@ SL.unita442 = (() => {
 })();
 SL.registra('4.4.2', {
   titolo: 'Larghezza, clock e topologia',
-  obiettivo: 'Alla fine saprai stimare quanti byte al secondo può trasportare un collegamento, e distinguere il contributo della larghezza, del ritmo e del numero di collegamenti.',
+  obiettivo: 'Obiettivo: stimare quanti byte al secondo può trasportare un collegamento, e distinguere il contributo della larghezza, del ritmo e del numero di collegamenti.',
   concetti: [['bus', 'Quanti bit viaggiano insieme'], ['clock', 'Quante volte al secondo'], ['dispositivo', 'Quanti collegamenti lavorano insieme']],
   filigrana: ['bus', 'clock', 'dispositivo'],
   richiami: {
@@ -65,7 +65,7 @@ SL.registra('4.4.2', {
       domanda: (p) => { const c = SL.unita442.conto(p); return 'Con ' + p.w + ' bit e ' + p.f + ' MHz, un solo bus condiviso in modo SDR porta ' + c.base + ' MB/s. Quanta banda aggregata offre la topologia scelta ai due flussi?'; },
       opzioni: (p) => { const c = SL.unita442.conto(p); return [[1, 'La stessa: ' + c.base + ' MB/s'], [2, 'Il doppio: ' + 2 * c.base + ' MB/s'], [4, 'Il quadruplo: ' + 4 * c.base + ' MB/s']]; }
     },
-    confronto: (pred, esito, p) => { const c = SL.unita442.conto(p); return 'Avevi previsto ' + pred * c.base + ' MB/s. La banda aggregata è ' + c.tot + ' MB/s. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t === 'bus' ? 'I due flussi si alternano sull’unico bus, e il totale resta quello di un bus.' : p.t === 'link' ? 'I due link lavorano insieme, e le loro capacità si sommano una sola volta.' : 'Il modo DDR raddoppia la capacità di ogni link, e i link sono due: i raddoppi sono due.'); },
+    confronto: (pred, esito, p) => { const c = SL.unita442.conto(p); return 'La previsione indicava ' + pred * c.base + ' MB/s. La banda aggregata è ' + c.tot + ' MB/s. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t === 'bus' ? 'I due flussi si alternano sull’unico bus, e il totale resta quello di un bus.' : p.t === 'link' ? 'I due link lavorano insieme, e le loro capacità si sommano una sola volta.' : 'Il modo DDR raddoppia la capacità di ogni link, e i link sono due: i raddoppi sono due.'); },
     costruisci(p) {
       const U = SL.unita442, c = U.conto(p), passi = [], ddr = p.t === 'ddr', bus = p.t === 'bus';
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 6, wl: 170, wc: 452, gap: 14, h: 56 });
@@ -90,7 +90,7 @@ SL.registra('4.4.2', {
       ['Contare due volte un bus condiviso da due flussi.', 'I flussi si alternano, e la risorsa resta una.'],
       ['Attribuire al modo DDR il raddoppio dovuto ai link.', 'Sono due fattori distinti: il DDR raddoppia ogni collegamento, i link separati raddoppiano i collegamenti.']
     ],
-    saFare: ['Passo dalla larghezza in bit ai byte per trasferimento.', 'Calcolo i MB/s di un collegamento.', 'Sommo i collegamenti che lavorano insieme.'],
+    saFare: ['Passare dalla larghezza in bit ai byte per trasferimento.', 'Calcolare i MB/s di un collegamento.', 'Sommare i collegamenti che lavorano insieme.'],
     esercizi: [
       { d: 'Un bus largo 64 bit lavora a 200 MHz in modo SDR, senza pause. Quanti MB/s trasporta?', segnaposto: 'Un numero', giuste: ['1600', '1600mb/s', '1600mb'],
         ok: '64 bit sono 8 byte. 8 × 1 × 200 = 1600 MB/s.',
@@ -99,10 +99,10 @@ SL.registra('4.4.2', {
           { se: ['3200', '3200mb/s'], msg: 'In modo SDR ogni ciclo porta un solo trasferimento.' },
           { se: ['800', '800mb/s'], msg: '64 bit sono 8 byte, il doppio di un bus da 32 bit.' }
         ],
-        altro: 'Il valore è diverso. Moltiplica i byte per trasferimento per i milioni di cicli al secondo.',
+        altro: 'Il valore è diverso. Si moltiplichino i byte per trasferimento per i milioni di cicli al secondo.',
         indizi: ['64 bit corrispondono a 8 byte.', 'In SDR c’è un trasferimento per ciclo, e i cicli sono 200 milioni al secondo.', '8 × 200 = 1600.'],
         svolgimento: ['Byte per trasferimento: 64 ÷ 8 = 8.', 'Trasferimenti per ciclo: 1.', 'Banda: 8 × 1 × 200 = 1600 MB/s.'] },
-      { d: 'Due flussi passano da un bus condiviso a due link indipendenti. Larghezza, clock e modo restano gli stessi. Che cosa cambia?', guida: 'Scegli la risposta.', o: [
+      { d: 'Due flussi passano da un bus condiviso a due link indipendenti. Larghezza, clock e modo restano gli stessi. Che cosa cambia?', guida: 'Si scelga la risposta.', o: [
         { t: 'Ogni link ha la capacità che aveva il bus, e il totale raddoppia', ok: true, fb: 'La capacità di un collegamento dipende da larghezza e ritmo, rimasti uguali. Raddoppia il numero di collegamenti attivi insieme.' },
         { t: 'Ogni link ha il doppio della capacità del bus', fb: 'Larghezza e ritmo sono gli stessi, quindi la capacità di un collegamento è la stessa.' },
         { t: 'Nulla: il totale resta quello del bus', fb: 'I due link lavorano nello stesso momento, e le loro capacità si sommano.' }] },

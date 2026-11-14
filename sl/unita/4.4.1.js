@@ -19,7 +19,7 @@ SL.unita441 = (() => {
 })();
 SL.registra('4.4.1', {
   titolo: 'Regole di comunicazione di un’interconnessione',
-  obiettivo: 'Alla fine saprai seguire una transazione su un bus condiviso: chi ottiene il turno, quale componente risponde all’indirizzo, e come si conclude lo scambio.',
+  obiettivo: 'Obiettivo: seguire una transazione su un bus condiviso: chi ottiene il turno, quale componente risponde all’indirizzo, e come si conclude lo scambio.',
   concetti: [['bus', 'Un fascio di fili per tutti'], ['semaforo', 'Uno alla volta'], ['tabella', 'L’indirizzo sceglie chi risponde']],
   filigrana: ['bus', 'tabella', 'semaforo'],
   richiami: {
@@ -70,7 +70,7 @@ SL.registra('4.4.1', {
       domanda: (p) => 'L’iniziatore mette sul bus l’indirizzo ' + SL.unita441.H2(p.a) + '. La RAM occupa gli indirizzi da 0x00 a 0x7F, il controller quelli da 0x80 a 0x8F. Quale componente risponde?',
       opzioni: () => [['ram', 'La RAM'], ['ctl', 'Il controller'], ['no', 'Nessuno: errore di indirizzo']]
     },
-    confronto: (pred, esito, p) => { const U = SL.unita441; return 'Avevi previsto: ' + U.NOMI[pred] + '. Risponde: ' + U.NOMI[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'L’indirizzo ' + U.H2(p.a) + (esito === 'ram' ? ' è minore di 0x80, e appartiene alla RAM.' : esito === 'ctl' ? ' sta fra 0x80 e 0x8F, l’intervallo del controller.' : ' supera 0x8F, l’ultimo indirizzo assegnato.')); },
+    confronto: (pred, esito, p) => { const U = SL.unita441; return 'La previsione indicava: ' + U.NOMI[pred] + '. Risponde: ' + U.NOMI[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'L’indirizzo ' + U.H2(p.a) + (esito === 'ram' ? ' è minore di 0x80, e appartiene alla RAM.' : esito === 'ctl' ? ' sta fra 0x80 e 0x8F, l’intervallo del controller.' : ' supera 0x8F, l’ultimo indirizzo assegnato.')); },
     costruisci(p) {
       const U = SL.unita441, H2 = U.H2, passi = [], d = U.dest(p.a), ok = d !== 'no', lett = p.cmd === 'r', chi = p.master === 'cpu' ? 'il processore' : 'il controller', altro = p.master === 'cpu' ? 'il controller' : 'il processore', off = d === 'ctl' ? p.a - 128 : p.a;
       const quadro = (f) => [SL.el.nota('t0', 20, 0, 'INIZIATORI', 'mono'), SL.el.nota('t1', 300, 0, 'BUS', 'mono'), SL.el.nota('t2', 580, 0, 'MAPPA DEGLI INDIRIZZI', 'mono')].concat(U.quadro('q', p, f, { x: 20, y: 24, w: 264, gap: 14, h: 56 }));
@@ -96,7 +96,7 @@ SL.registra('4.4.1', {
       ['Usare l’indirizzo del bus come numero del registro.', 'Il controller sottrae l’inizio del proprio intervallo: l’indirizzo 0x84 è il suo registro numero 4.'],
       ['Far rispondere due componenti.', 'Gli intervalli della mappa non si sovrappongono, e ogni indirizzo appartiene al più a un componente.']
     ],
-    saFare: ['Descrivo le tappe di una transazione.', 'Trovo il componente che risponde a un indirizzo.', 'Riconosco un errore di indirizzo.'],
+    saFare: ['Descrivere le tappe di una transazione.', 'Determinare il componente che risponde a un indirizzo.', 'Riconoscere un errore di indirizzo.'],
     esercizi: [
       { d: 'In una mappa i registri di un controller occupano gli indirizzi da 0x80 a 0x8F. Quale registro del controller, contando da 0, corrisponde all’indirizzo 0x8B?', segnaposto: 'Un numero', giuste: ['11', 'undici', 'b', '0xb', '0x0b'],
         ok: '0x8B − 0x80 = 0x0B, cioè 11.',
@@ -105,14 +105,14 @@ SL.registra('4.4.1', {
           { se: ['8b', '0x8b'], msg: 'Questo è l’indirizzo sul bus. Il numero del registro si conta dall’inizio dell’intervallo.' },
           { se: ['12', 'dodici'], msg: 'Il primo registro è il numero 0, all’indirizzo 0x80.' }
         ],
-        altro: 'Il numero è diverso. Sottrai dall’indirizzo l’inizio dell’intervallo del controller.',
+        altro: 'Il numero è diverso. Si sottragga dall’indirizzo l’inizio dell’intervallo del controller.',
         indizi: ['L’intervallo comincia a 0x80.', '0x8B − 0x80 = 0x0B.', '0x0B vale 11.'],
         svolgimento: ['Indirizzo: 0x8B.', 'Inizio dell’intervallo: 0x80.', 'Registro: 0x0B = 11.'] },
-      { d: 'Con la stessa mappa, e la RAM da 0x00 a 0x7F, il processore ottiene il bus e chiede di leggere l’indirizzo 0xA0. Che cosa accade?', guida: 'Scegli la risposta.', o: [
+      { d: 'Con la stessa mappa, e la RAM da 0x00 a 0x7F, il processore ottiene il bus e chiede di leggere l’indirizzo 0xA0. Che cosa accade?', guida: 'Si scelga la risposta.', o: [
         { t: 'Nessuno risponde, e la transazione finisce con un errore', ok: true, fb: '0xA0 supera 0x8F, l’ultimo indirizzo assegnato.' },
         { t: 'Risponde il controller', fb: 'L’intervallo del controller termina a 0x8F.' },
         { t: 'L’arbitro nega il turno', fb: 'L’arbitro decide soltanto chi può usare il bus, senza guardare l’indirizzo.' }] },
-      { d: 'Due iniziatori chiedono il bus nello stesso istante. Che cosa fa l’arbitro?', guida: 'Scegli la risposta.', o: [
+      { d: 'Due iniziatori chiedono il bus nello stesso istante. Che cosa fa l’arbitro?', guida: 'Si scelga la risposta.', o: [
         { t: 'Concede il turno a uno, e l’altro attende', ok: true, fb: 'Sul bus condiviso può viaggiare una transazione per volta.' },
         { t: 'Li lascia trasmettere insieme', fb: 'Due indirizzi e due dati sugli stessi fili si confonderebbero.' },
         { t: 'Annulla entrambe le richieste', fb: 'Le richieste restano valide. Vengono soltanto messe in ordine.' }] }

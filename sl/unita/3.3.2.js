@@ -1,7 +1,7 @@
 'use strict';
 SL.registra('3.3.2', {
   titolo: 'Codifica e confini delle istruzioni',
-  obiettivo: 'Alla fine saprai leggere il primo byte di un’istruzione Y86-64, dire quali campi lo seguono e calcolare l’indirizzo dell’istruzione successiva.',
+  obiettivo: 'Obiettivo: leggere il primo byte di un’istruzione Y86-64, dire quali campi lo seguono e calcolare l’indirizzo dell’istruzione successiva.',
   concetti: [['hex', 'Classe e variante in un byte'], ['byte', 'Campi presenti e campi assenti'], ['puntatore', 'Dove comincia la prossima']],
   filigrana: ['hex', 'byte', 'puntatore'],
   richiami: {
@@ -57,7 +57,7 @@ SL.registra('3.3.2', {
       domanda: (p) => { const U = SL.unita332, b = U.celle(p); return 'A partire dall’indirizzo ' + SL.y86.esa(p.pc) + ' la memoria contiene i byte ' + b.slice(0, 10).join(' ') + '. A quale indirizzo comincia l’istruzione successiva?'; },
       opzioni: (p) => [1, 2, 9, 10].map((n) => SL.y86.esa(p.pc + n))
     },
-    confronto: (pred, esito, p) => { const Y = SL.y86, i = SL.unita332.IST[p.op], n = Y.lung(i.n); return 'Avevi previsto ' + pred + '. L’istruzione successiva comincia a ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il primo byte indica la classe ' + Y.ICODE[Y.classe(i.n)].toString(16).toUpperCase() + ', che occupa ' + n + ' byte: un byte di codice' + (Y.conRegistri(i.n) ? ', uno per i registri' : '') + (Y.conCostante(i.n) ? ', otto per la costante' : '') + '.'); },
+    confronto: (pred, esito, p) => { const Y = SL.y86, i = SL.unita332.IST[p.op], n = Y.lung(i.n); return 'La previsione indicava ' + pred + '. L’istruzione successiva comincia a ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il primo byte indica la classe ' + Y.ICODE[Y.classe(i.n)].toString(16).toUpperCase() + ', che occupa ' + n + ' byte: un byte di codice' + (Y.conRegistri(i.n) ? ', uno per i registri' : '') + (Y.conCostante(i.n) ? ', otto per la costante' : '') + '.'); },
     costruisci(p) {
       const el = SL.el, Y = SL.y86, U = SL.unita332, passi = [], i = U.IST[p.op], B = U.celle(p), n = Y.lung(i.n), cl = Y.classe(i.n), cReg = Y.conRegistri(i.n), cCost = Y.conCostante(i.n);
       const ic = Y.ICODE[cl].toString(16).toUpperCase(), fn = B[0][1], valP = p.pc + n, X0 = 30, PS = 80, iniC = cReg ? 2 : 1;
@@ -109,7 +109,7 @@ SL.registra('3.3.2', {
       ['Saltare il byte dei registri quando un registro manca.', 'In `irmovq` il campo rA vale F, e il byte occupa comunque una posizione.'],
       ['Confondere valP con la destinazione di un salto.', 'valP è il successore in memoria. La destinazione del salto è la costante valC.']
     ],
-    saFare: ['Separo icode e ifun nel primo byte.', 'Dico quali campi seguono, data la classe.', 'Calcolo la lunghezza di un’istruzione e il valore di valP.'],
+    saFare: ['Separare icode e ifun nel primo byte.', 'Indicare quali campi seguono, data la classe.', 'Calcolare la lunghezza di un’istruzione e il valore di valP.'],
     esercizi: [
       { d: 'Un’istruzione Y86-64 comincia all’indirizzo 0x200 con il byte 50, il codice di `mrmovq`. Quanti byte occupa?', segnaposto: 'Un numero', giuste: ['10', 'dieci'],
         ok: 'Un byte di codice, uno per i registri e otto per lo spostamento: 1 + 1 + 8 = 10.',

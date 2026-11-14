@@ -6,23 +6,23 @@ SL.registra('3.4.1', {
   filigrana: ['cpu', 'clock', 'strati'],
   richiami: {
     carte: [
-      { sim: 'strati', da: 'Dall’unità 3.3.3', t: 'Le sei fasi', d: 'Prelievo, decodifica, esecuzione, memoria, scrittura, aggiornamento del PC, con i valori che passano dall’una all’altra.' },
+      { sim: 'strati', da: 'Dall’unità 3.3.3', t: 'Le sei fasi', d: 'Prelievo, decodifica, esecuzione, memoria, scrittura, aggiornamento del PC, con i valori trasmessi dall’una all’altra.' },
       { sim: 'clock', da: 'Dall’unità 3.2.4', t: 'Il modello sincrono', d: 'Lo stato cambia soltanto ai fronti. Fra un fronte e il successivo la logica combinatoria si assesta.' },
-      { sim: 'riproduci', da: 'Dall’unità 3.2.5', t: 'Registro e rete combinatoria', d: 'Una macchina a stati è fatta di un registro che conserva lo stato e di una rete che calcola quello successivo.' }
+      { sim: 'riproduci', da: 'Dall’unità 3.2.5', t: 'Registro e rete combinatoria', d: 'Una macchina a stati è composta da un registro che conserva lo stato e da una rete che calcola quello successivo.' }
     ],
     domanda: { d: 'Prima di proseguire: in `subq %rax, %rbx`, con %rax = 9 e %rbx = 4, che cosa calcola l’ALU?', o: [
-      { t: '4 − 9 = −5', ok: true, fb: 'In Y86-64 `subq` toglie la sorgente dalla destinazione: %rbx − %rax.' },
-      { t: '9 − 4 = 5', fb: 'La sorgente, %rax, viene tolta dalla destinazione, %rbx.' },
+      { t: '4 − 9 = −5', ok: true, fb: 'In Y86-64 `subq` sottrae la sorgente dalla destinazione: %rbx − %rax.' },
+      { t: '9 − 4 = 5', fb: 'La sorgente, %rax, è sottratta dalla destinazione, %rbx.' },
       { t: '4 + 9 = 13', fb: '`subq` calcola una differenza.' }
     ] }
   },
   idea: {
-    titolo: 'Tutta l’istruzione fra due fronti',
+    titolo: 'L’intera istruzione fra due fronti',
     termini: ['seq', 'ciclo singolo'],
     testo: [
-      'La tabella delle fasi dice che cosa fa un’istruzione. Resta da decidere quando. La scelta più semplice è fare tutto in un solo ciclo di clock. Il processore che ne risulta si chiama [[seq|SEQ]], dall’inglese sequential, ed è un processore a [[ciclo singolo]].',
-      'SEQ è una macchina a stati, nel senso dell’unità 3.2.5. Il suo stato sta in pochi elementi comandati dal clock: il PC, i codici di condizione, il banco dei registri, la memoria dei dati. Tutto il resto è logica combinatoria: la lettura dell’istruzione, la lettura dei registri, l’ALU, i multiplexer.',
-      { fig: 'scena', w: 720, h: 150, titolo: 'Lo scheletro di SEQ', nota: 'I blocchi in evidenza ricevono il clock. Gli altri sono combinatori.', els: [
+      'La tabella delle fasi stabilisce che cosa compie un’istruzione; resta da stabilire in quali tempi. La soluzione più semplice consiste nell’eseguire tutte le fasi in un solo ciclo di clock. Il processore che ne risulta prende il nome di [[seq|SEQ]], dall’inglese sequential, ed è un processore a [[ciclo singolo]].',
+      'SEQ è una macchina a stati, nel senso dell’unità 3.2.5. Il suo stato risiede in pochi elementi comandati dal clock: il PC, i codici di condizione, il banco dei registri, la memoria dei dati. Tutto il resto è logica combinatoria: la lettura dell’istruzione, la lettura dei registri, l’ALU, i multiplexer.',
+      { fig: 'scena', w: 720, h: 150, titolo: 'La struttura di SEQ', nota: 'I blocchi in evidenza ricevono il clock. Gli altri sono combinatori.', els: [
         SL.el.box('pc', 0, 40, 80, 60, 'PC', 'stato', 'att', { cls: 'stretta' }), SL.el.linea('l1', 80, 70, 110, 70, 'on'),
         SL.el.box('mi', 110, 40, 130, 60, 'istruzioni', 'lettura', '', { cls: 'stretta' }), SL.el.linea('l2', 240, 70, 270, 70, 'on'),
         SL.el.box('rg', 270, 40, 120, 60, 'registri', 'stato', 'att', { cls: 'stretta' }), SL.el.linea('l3', 390, 70, 420, 70, 'on'),
@@ -31,36 +31,36 @@ SL.registra('3.4.1', {
         SL.el.linea('r1', 635, 100, 635, 132, ''), SL.el.linea('r2', 635, 132, 40, 132, ''), SL.el.linea('r3', 40, 132, 40, 100, ''), SL.el.linea('r4', 330, 132, 330, 100, ''),
         SL.el.nota('nr', 360, 112, 'nuovi valori per registri e PC', 'mono minuta'), SL.el.nota('nc', 0, 6, 'clock', 'mono minuta', 'att'), SL.el.linea('c1', 40, 24, 40, 40, 'att')
       ] },
-      'All’inizio del ciclo il PC contiene un indirizzo. Da lì i segnali si propagano attraverso i blocchi nell’ordine delle fasi: escono i byte dell’istruzione, poi valA e valB, poi valE, poi l’eventuale valM. Sono valori presenti sui fili, in attesa. Quando tutti si sono assestati, i valori nuovi stanno davanti agli ingressi degli elementi di stato. Il fronte di salita li cattura tutti insieme.',
-      'Le sei fasi sono quindi sei tratti dello stesso percorso combinatorio, che i segnali attraversano uno dopo l’altro dentro un unico ciclo.',
-      'Una regola rende possibile questa organizzazione: per calcolare, un’istruzione legge soltanto lo stato lasciato dalle istruzioni precedenti. `subq %rax, %rbx` legge il vecchio contenuto di %rbx, e il valore nuovo compare nel registro soltanto dopo il fronte.'
+      'All’inizio del ciclo il PC contiene un indirizzo. A partire da esso i segnali si propagano attraverso i blocchi nell’ordine delle fasi: dapprima i byte dell’istruzione, poi valA e valB, poi valE, poi l’eventuale valM. Si tratta di valori presenti sui fili e non ancora memorizzati. Quando tutti si sono assestati, i valori nuovi sono presenti agli ingressi degli elementi di stato, e il fronte di salita li cattura contemporaneamente.',
+      'Le sei fasi sono quindi sei tratti del medesimo percorso combinatorio, che i segnali attraversano in successione entro un unico ciclo.',
+      'Una regola rende possibile tale organizzazione: per calcolare, un’istruzione legge soltanto lo stato lasciato dalle istruzioni precedenti. `subq %rax, %rbx` legge il contenuto precedente di %rbx, e il valore nuovo compare nel registro soltanto dopo il fronte.'
     ]
   },
   esperimento: {
     faremo: [
-      'SEQ esegue `subq %rax, %rbx`, che si trova all’indirizzo 0x40. Sceglierai i contenuti di %rax e di %rbx.',
-      'Seguiremo i segnali mentre si propagano, guardando che cosa contiene intanto %rbx. Poi arriverà il fronte. Dopo il caso proposto, scegli due valori uguali e osserva i codici di condizione.'
+      'SEQ esegue `subq %rax, %rbx`, che si trova all’indirizzo 0x40. I controlli fissano i contenuti di %rax e di %rbx.',
+      'I segnali sono seguiti durante la propagazione, insieme al contenuto di %rbx nel frattempo; segue il fronte. Dopo il caso proposto, è istruttivo selezionare due valori uguali e osservare i codici di condizione.'
     ],
     vedrai: [
       ['strati', 'Le fasi attraversate', 'In alto: il tratto di percorso raggiunto dai segnali.'],
-      ['bus', 'I segnali', 'Al centro: i valori presenti sui fili, non ancora memorizzati.'],
+      ['bus', 'I segnali', 'Al centro: i valori presenti sui fili e non ancora memorizzati.'],
       ['register', 'Lo stato', 'In basso: PC, registri e codici di condizione, con i valori in attesa del fronte.']
     ]
   },
   lab: {
     titolo: 'Una sottrazione in un solo ciclo',
     scena: { w: 860, h: 300 },
-    atti: ['L’inizio del ciclo', 'I segnali si propagano', 'Tutto è pronto', 'Il fronte', 'Il ciclo successivo'],
+    atti: ['L’inizio del ciclo', 'I segnali si propagano', 'I valori sono disponibili', 'Il fronte', 'Il ciclo successivo'],
     controlli: [
       { id: 'a', tipo: 'scelta', eti: '%rax', opzioni: [[9, '9'], [4, '4'], [-2, '−2']], valore: 9 },
       { id: 'b', tipo: 'scelta', eti: '%rbx', opzioni: [[4, '4'], [9, '9']], valore: 4 }
     ],
     nota: 'I passi sono sempre sette. All’inizio ZF = 0, SF = 0 e OF = 0, e il PC vale 0x40.',
     previsione: {
-      domanda: (p) => 'SEQ sta eseguendo `subq %rax, %rbx` con %rax = ' + SL.x86.num(p.a) + ' e %rbx = ' + p.b + '. L’ALU ha appena prodotto valE, e il fronte del clock deve ancora arrivare. Che cosa contiene %rbx in questo momento?',
+      domanda: (p) => 'SEQ sta eseguendo `subq %rax, %rbx` con %rax = ' + SL.x86.num(p.a) + ' e %rbx = ' + p.b + '. L’ALU ha appena prodotto valE, e il fronte del clock deve ancora giungere. Che cosa contiene %rbx in questo istante?',
       opzioni: (p) => Array.from(new Set([p.b, p.b - p.a, p.a])).sort((x, y) => x - y).map((v) => [v, SL.x86.num(v)])
     },
-    confronto: (pred, esito, p) => 'La previsione indicava ' + SL.x86.num(pred) + '. Prima del fronte %rbx contiene ' + SL.x86.num(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il risultato ' + SL.x86.num(p.b - p.a) + ' è valE, un valore sui fili. Il registro lo cattura soltanto al fronte, e fino ad allora conserva il vecchio contenuto.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + SL.x86.num(pred) + '. Prima del fronte %rbx contiene ' + SL.x86.num(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il risultato ' + SL.x86.num(p.b - p.a) + ' è valE, un valore sui fili. Il registro lo cattura soltanto al fronte, e fino ad allora conserva il contenuto precedente.'),
     costruisci(p) {
       const el = SL.el, N = SL.x86.num, passi = [], FASI = ['prelievo', 'decodifica', 'esecuzione', 'memoria', 'scrittura', 'PC'], r = p.b - p.a, zf = r === 0 ? 1 : 0, sf = r < 0 ? 1 : 0;
       const st = { f: -1, s: {}, rbx: p.b, cc: [0, 0, 0], pc: 0x40, att: false, ck: 'basso' };
@@ -81,34 +81,34 @@ SL.registra('3.4.1', {
       const P = (o, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(), els: quadro(o) }, extra));
       const PA = p.a < 0 ? '(' + N(p.a) + ')' : String(p.a);
 
-      P({}, 0, 'Un fronte è appena passato', 'Il ciclo comincia. Lo stato è quello lasciato dall’istruzione precedente: PC = 0x40, %rax = ' + N(p.a) + ', %rbx = ' + p.b + ', codici di condizione tutti a 0. Da questo momento e fino al prossimo fronte lo stato resterà fermo, mentre i segnali attraversano la logica.',
-        { chiedi: { d: 'Durante il ciclo, quale elemento fornisce l’indirizzo da cui leggere l’istruzione?', o: ['Il PC', 'Il registro %rax', 'L’ALU'], g: 0, no: 'Il PC contiene l’indirizzo dell’istruzione da prelevare, e resta fermo per tutto il ciclo.' } });
+      P({}, 0, 'Un fronte è appena trascorso', 'Il ciclo ha inizio. Lo stato è quello lasciato dall’istruzione precedente: PC = 0x40, %rax = ' + N(p.a) + ', %rbx = ' + p.b + ', codici di condizione tutti a 0. Da questo istante e fino al prossimo fronte lo stato resterà invariato, mentre i segnali attraversano la logica.',
+        { chiedi: { d: 'Durante il ciclo, quale elemento fornisce l’indirizzo dal quale leggere l’istruzione?', o: ['Il PC', 'Il registro %rax', 'L’ALU'], g: 0, no: 'Il PC contiene l’indirizzo dell’istruzione da prelevare, e resta invariato per tutto il ciclo.' } });
       st.f = 0; st.s.byte = '61 03'; st.s.valP = '0x42';
-      P({ nuovi: ['byte', 'valP'] }, 1, 'Prelievo', 'Dall’indirizzo 0x40 escono i byte 61 e 03. Il primo ha icode 6 e ifun 1: `subq`. Il secondo indica rA = %rax e rB = %rbx. Un piccolo sommatore calcola valP = 0x40 + 2 = 0x42.', { calc: 'icode 6 · ifun 1 · valP = 0x42' });
+      P({ nuovi: ['byte', 'valP'] }, 1, 'Prelievo', 'All’indirizzo 0x40 si leggono i byte 61 e 03. Il primo ha icode 6 e ifun 1: `subq`. Il secondo indica rA = %rax e rB = %rbx. Un sommatore dedicato calcola valP = 0x40 + 2 = 0x42.', { calc: 'icode 6 · ifun 1 · valP = 0x42' });
       st.f = 1; st.s.valA = N(p.a); st.s.valB = String(p.b);
-      P({ nuovi: ['valA', 'valB'] }, 1, 'Decodifica', 'I numeri dei due registri arrivano alle porte di lettura del banco, che mostra i contenuti: valA = ' + N(p.a) + ' e valB = ' + p.b + '. La lettura è combinatoria e non attende alcun fronte.', { calc: 'valA = ' + N(p.a) + ' · valB = ' + p.b });
+      P({ nuovi: ['valA', 'valB'] }, 1, 'Decodifica', 'I numeri dei due registri giungono alle porte di lettura del banco, che mostra i contenuti: valA = ' + N(p.a) + ' e valB = ' + p.b + '. La lettura è combinatoria e avviene senza attendere alcun fronte.', { calc: 'valA = ' + N(p.a) + ' · valB = ' + p.b });
       st.f = 2; st.s.valE = N(r); st.s.cc = zf + ' ' + sf + ' 0';
-      P({ nuovi: ['valE', 'cc'] }, 1, 'Esecuzione', 'L’ALU riceve i due valori e il comando «differenza»: valE = valB − valA = ' + p.b + ' − ' + PA + ' = ' + N(r) + '. Accanto al risultato prepara i codici di condizione: ZF = ' + zf + ', SF = ' + sf + ', OF = 0. Sono tutti valori sui fili.',
-        { calc: 'valE = ' + p.b + ' − ' + PA + ' = ' + N(r), chiedi: { d: 'L’ALU ha prodotto valE = ' + N(r) + '. In questo momento il registro %rbx contiene già il valore nuovo?', o: ['Sì', 'No'], g: 1, no: 'Il registro cambia soltanto al fronte. Per ora contiene ancora ' + p.b + '.' } });
+      P({ nuovi: ['valE', 'cc'] }, 1, 'Esecuzione', 'L’ALU riceve i due valori e il comando «differenza»: valE = valB − valA = ' + p.b + ' − ' + PA + ' = ' + N(r) + '. Accanto al risultato essa prepara i codici di condizione: ZF = ' + zf + ', SF = ' + sf + ', OF = 0. Sono tutti valori sui fili.',
+        { calc: 'valE = ' + p.b + ' − ' + PA + ' = ' + N(r), chiedi: { d: 'L’ALU ha prodotto valE = ' + N(r) + '. In questo istante il registro %rbx contiene già il valore nuovo?', o: ['Sì', 'No'], g: 1, no: 'Il registro cambia soltanto al fronte. Per il momento contiene ancora ' + p.b + '.' } });
       st.f = 4; st.att = true;
-      P({ nuovi: ['valE', 'cc', 'valP'] }, 2, 'Memoria e scrittura: tutto è pronto', '`subq` non usa la memoria dei dati, e i segnali la oltrepassano. valE arriva alla porta di scrittura del banco, con l’indirizzo di %rbx. I codici di condizione calcolati stanno davanti al loro registro, e valP davanti al PC. Tre valori attendono lo stesso fronte, e lo stato è ancora quello di inizio ciclo.', { calc: 'in attesa: %rbx, CC, PC' });
+      P({ nuovi: ['valE', 'cc', 'valP'] }, 2, 'Memoria e scrittura: i valori sono disponibili', '`subq` non impiega la memoria dei dati, e i segnali la oltrepassano. valE giunge alla porta di scrittura del banco, con l’indirizzo di %rbx. I codici di condizione calcolati sono presenti all’ingresso del loro registro, e valP all’ingresso del PC. Tre valori attendono il medesimo fronte, e lo stato è ancora quello di inizio ciclo.', { calc: 'in attesa: %rbx, CC, PC' });
       st.f = 5; st.rbx = r; st.cc = [zf, sf, 0]; st.pc = 0x42; st.att = false; st.ck = 'sale ↑';
-      P({ fronte: true }, 3, 'Il fronte di salita', 'Il clock sale, e i tre elementi catturano insieme i valori che avevano davanti. %rbx passa da ' + p.b + ' a ' + N(r) + ', i codici di condizione diventano ' + zf + ' ' + sf + ' 0, il PC passa da 0x40 a 0x42. L’istruzione è compiuta in un solo ciclo.', { calc: '%rbx = ' + N(r) + ' · PC = 0x42' });
+      P({ fronte: true }, 3, 'Il fronte di salita', 'Il clock sale, e i tre elementi catturano contemporaneamente i valori presenti ai rispettivi ingressi. %rbx passa da ' + p.b + ' a ' + N(r) + ', i codici di condizione divengono ' + zf + ' ' + sf + ' 0, il PC passa da 0x40 a 0x42. L’istruzione è completata in un solo ciclo.', { calc: '%rbx = ' + N(r) + ' · PC = 0x42' });
       st.f = -1; st.s = {}; st.ck = 'alto';
-      P({}, 4, 'Ricomincia il ciclo', 'Il PC contiene ora 0x42, e i segnali ripartono da lì: escono i byte dell’istruzione successiva, e tutto si ripete. Se quell’istruzione leggerà %rbx, troverà ' + N(r) + '. Ogni istruzione vede lo stato lasciato da quelle che l’hanno preceduta.',
+      P({}, 4, 'Il ciclo riprende', 'Il PC contiene ora 0x42, e i segnali ripartono da tale indirizzo: si leggono i byte dell’istruzione successiva, e la sequenza si ripete. Se quell’istruzione leggerà %rbx, troverà ' + N(r) + '. Ogni istruzione opera sullo stato lasciato da quelle che l’hanno preceduta.',
         { calc: 'PC = 0x42', esito: ['%rbx = ' + N(r) + ' dopo il fronte', 'si'] });
       return { passi, esito: p.b };
     }
   },
   bilancio: {
     regola: [
-      'SEQ esegue ogni istruzione in un ciclo di clock. Durante il ciclo i segnali si propagano nella logica combinatoria, fase dopo fase. Al fronte gli elementi di stato catturano insieme i valori nuovi.',
+      'SEQ esegue ogni istruzione in un ciclo di clock. Durante il ciclo i segnali si propagano nella logica combinatoria, fase dopo fase. Al fronte gli elementi di stato catturano contemporaneamente i valori nuovi.',
       'Gli elementi di stato sono il PC, i codici di condizione, il banco dei registri e la memoria dei dati. Per calcolare, un’istruzione legge soltanto lo stato lasciato dalle precedenti.'
     ],
     errori: [
-      ['Pensare che le sei fasi occupino sei cicli.', 'In SEQ sono tratti dello stesso percorso combinatorio, attraversati dentro un unico ciclo.'],
-      ['Credere che valE entri subito nel registro.', 'Fino al fronte valE è un valore sui fili, e il registro conserva il vecchio contenuto.'],
-      ['Aspettarsi aggiornamenti in momenti diversi.', 'Registro di destinazione, codici di condizione e PC cambiano tutti allo stesso fronte.']
+      ['Ritenere che le sei fasi occupino sei cicli.', 'In SEQ sono tratti del medesimo percorso combinatorio, attraversati entro un unico ciclo.'],
+      ['Ritenere che valE entri immediatamente nel registro.', 'Fino al fronte valE è un valore sui fili, e il registro conserva il contenuto precedente.'],
+      ['Attendersi aggiornamenti in istanti diversi.', 'Registro di destinazione, codici di condizione e PC cambiano tutti al medesimo fronte.']
     ],
     saFare: ['Elencare gli elementi di stato di SEQ.', 'Distinguere un valore sui fili da un valore memorizzato.', 'Indicare che cosa cambia al fronte per un’operazione aritmetica.'],
     esercizi: [
@@ -119,7 +119,7 @@ SL.registra('3.4.1', {
       { d: 'SEQ esegue `subq %rax, %rbx` con %rax = 3 e %rbx = 10. Quanto vale %rbx dopo il fronte che chiude il ciclo?', segnaposto: 'Un numero', giuste: ['7', 'sette'],
         ok: 'valE = valB − valA = 10 − 3 = 7, e al fronte %rbx lo cattura.',
         diagnosi: [
-          { se: ['-7', '−7'], msg: 'Hai calcolato %rax − %rbx. `subq` toglie la sorgente dalla destinazione.' },
+          { se: ['-7', '−7'], msg: 'È stato calcolato %rax − %rbx. `subq` sottrae la sorgente dalla destinazione.' },
           { se: ['10', 'dieci'], msg: 'Questo è il contenuto prima del fronte. Dopo il fronte il registro contiene valE.' },
           { se: ['13', 'tredici'], msg: 'Questa è la somma. `subq` calcola una differenza.' }
         ],

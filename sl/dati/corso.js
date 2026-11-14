@@ -167,66 +167,66 @@
     ] },
     { k: '3', r: 'III', breve: 'Processore', nome: 'Organizzazione del processore', sim: 'cpu', capitoli: [
       { id: '3.1', breve: 'Logica combinatoria', titolo: 'Logica combinatoria: dalle tabelle di verità all’ALU', sim: 'alu', stato: 'nuovo', prova: true,
-        guida: 'Come una richiesta scritta a parole diventa un circuito, e come selettori e sommatori si compongono fino all’unità che esegue i calcoli del processore.',
+        guida: 'Il capitolo tratta la traduzione di una specifica espressa a parole in un circuito, e la composizione di selettori e sommatori fino all’unità che esegue i calcoli del processore.',
         unita: [
-          { id: '3.1.1', titolo: 'Dalla specifica booleana ai blocchi del percorso dati', sim: 'porta', scopo: 'Tre sensori, una spia e due circuiti diversi che calcolano la stessa funzione.' },
+          { id: '3.1.1', titolo: 'Dalla specifica booleana ai blocchi del percorso dati', sim: 'porta', scopo: 'Tre sensori, una spia e due circuiti diversi che calcolano la medesima funzione.' },
           { id: '3.1.2', titolo: 'Selezionare un ingresso con un multiplexer', sim: 'mux', scopo: 'Quattro parole in ingresso, due bit di comando e una sola uscita.' },
           { id: '3.1.3', titolo: 'Aritmetica e costruzione dell’ALU', sim: 'alu', scopo: 'Un sommatore che, con una fila di XOR e un filo di comando, esegue anche le sottrazioni.' },
-          { id: '3.1.4', titolo: 'Dai blocchi combinatori al controllo del processore', sim: 'mux', scopo: 'Quattro risultati calcolati insieme, e un comando che ne sceglie uno.' },
-          { id: '3.1.5', titolo: 'Tempi, costo e realizzazione fisica', sim: 'clock', scopo: 'Tre barre del tempo per trovare il percorso che decide la velocità di un circuito.' },
-          { id: '3.1.6', titolo: 'Implementazioni alternative e flag di stato', sim: 'flag', scopo: 'Un riporto conosciuto in anticipo, e i quattro flag letti sui fili del sommatore.' }
+          { id: '3.1.4', titolo: 'Dai blocchi combinatori al controllo del processore', sim: 'mux', scopo: 'Quattro risultati calcolati in parallelo e un comando che ne seleziona uno.' },
+          { id: '3.1.5', titolo: 'Tempi, costo e realizzazione fisica', sim: 'clock', scopo: 'Tre barre del tempo per individuare il percorso che determina la velocità di un circuito.' },
+          { id: '3.1.6', titolo: 'Implementazioni alternative e flag di stato', sim: 'flag', scopo: 'Un riporto noto in anticipo e i quattro flag letti sui fili del sommatore.' }
         ],
         sfide: [['cslez3_1_01_random_assembly', 'Funzioni booleane di uno o più ingressi'], ['cslez3_1_02_random_assembly', 'Selezione dei dati con multiplexer'], ['cslez3_1_03_random_assembly', 'Somme, differenze e riporti'], ['cslez3_1_04_random_assembly', 'Operazioni e segnali di uscita dell’ALU'], ['cslez3_1_05_random_assembly', 'Transizioni e stato di un latch SR']] },
       { id: '3.2', breve: 'Logica sequenziale', titolo: 'Logica sequenziale: stato, registri e memoria', sim: 'flipflop', stato: 'nuovo', prova: true,
-        guida: 'Come un circuito riesce a ricordare, quando il ricordo viene scritto e quali tempi vanno rispettati perché la scrittura riesca.',
+        guida: 'Il capitolo tratta il modo in cui un circuito conserva un valore, l’istante in cui il valore è scritto e i tempi da rispettare affinché la scrittura riesca.',
         unita: [
-          { id: '3.2.1', titolo: 'Dalla logica combinatoria allo stato memorizzato', sim: 'register', scopo: 'Due registri sullo stesso bus, e il comando che decide chi carica e chi conserva.' },
-          { id: '3.2.2', titolo: 'Latch, flip-flop e clock', sim: 'flipflop', scopo: 'Lo stesso dato davanti a due celle: una lo segue per un livello, l’altra lo cattura in un istante.' },
+          { id: '3.2.1', titolo: 'Dalla logica combinatoria allo stato memorizzato', sim: 'register', scopo: 'Due registri sul medesimo bus, e il comando che determina quale carica e quale conserva.' },
+          { id: '3.2.2', titolo: 'Latch, flip-flop e clock', sim: 'flipflop', scopo: 'Il medesimo dato presentato a due celle: una lo segue per un livello, l’altra lo cattura in un istante.' },
           { id: '3.2.3', titolo: 'Registri, banchi di registri e memoria', sim: 'memory', scopo: 'Quattro registri, due porte che leggono e una che scrive al fronte.' },
-          { id: '3.2.4', titolo: 'Il modello sincrono e i limiti temporali', sim: 'clock', scopo: 'Il dato più tardivo e quello più precoce, misurati contro le finestre di setup e di hold.' },
-          { id: '3.2.5', titolo: 'Dallo stato memorizzato alle macchine a stati', sim: 'riproduci', scopo: 'Un distributore che ricorda soltanto il credito, seguito moneta dopo moneta.' }
+          { id: '3.2.4', titolo: 'Il modello sincrono e i limiti temporali', sim: 'clock', scopo: 'Il dato più tardivo e quello più precoce, confrontati con le finestre di setup e di hold.' },
+          { id: '3.2.5', titolo: 'Dallo stato memorizzato alle macchine a stati', sim: 'riproduci', scopo: 'Un distributore che conserva soltanto il credito, seguito moneta dopo moneta.' }
         ],
         sfide: [['cslez3_2_01_random_assembly', 'Stati e ingressi di un latch SR'], ['cslez3_2_02_random_assembly', 'Trasparenza e abilitazione del latch D'], ['cslez3_2_03_random_assembly', 'Acquisizione sul fronte di clock'], ['cslez3_2_04_random_assembly', 'Caricamento e modifica di un registro a quattro bit'], ['cslez3_2_05_random_assembly', 'Aggiornamenti paralleli e priorità dei comandi']] },
       { id: '3.3', breve: 'Repertorio Y86-64', titolo: 'Il repertorio Y86-64 e le fasi di esecuzione', sim: 'file', stato: 'nuovo', prova: true,
-        guida: 'Una macchina ridotta, descritta per intero: lo stato, la codifica in byte delle istruzioni e le sei fasi in cui ciascuna viene eseguita.',
+        guida: 'Il capitolo tratta una macchina ridotta, descritta per intero: lo stato, la codifica in byte delle istruzioni e le sei fasi in cui ciascuna è eseguita.',
         unita: [
-          { id: '3.3.1', titolo: 'Dalla logica al contratto dell’ISA', sim: 'cpu', scopo: 'Tre istruzioni sullo stesso stato: che cosa cambia e che cosa resta.' },
-          { id: '3.3.2', titolo: 'Codifica e confini delle istruzioni', sim: 'hex', scopo: 'Dieci byte in memoria, letti come li legge il processore per trovare dove finisce l’istruzione.' },
+          { id: '3.3.1', titolo: 'Dalla logica al contratto dell’ISA', sim: 'cpu', scopo: 'Tre istruzioni sul medesimo stato: le parti modificate e quelle invariate.' },
+          { id: '3.3.2', titolo: 'Codifica e confini delle istruzioni', sim: 'hex', scopo: 'Dieci byte in memoria, letti nell’ordine seguito dal processore per individuare la fine dell’istruzione.' },
           { id: '3.3.3', titolo: 'Semantica delle istruzioni e flusso dei dati', sim: 'strati', scopo: 'Una lettura dalla memoria seguita attraverso le sei fasi, un valore alla volta.' },
-          { id: '3.3.4', titolo: 'Classi di istruzioni, stato e controllo', sim: 'scudo', scopo: 'Quattro codici di stato, e il controllo che tiene un accesso dentro la memoria.' },
-          { id: '3.3.5', titolo: 'Tracce complete delle istruzioni', sim: 'tabella', scopo: 'Una call e il suo ret, dodici fasi in cui lo stesso indirizzo cambia nome tre volte.' },
-          { id: '3.3.6', titolo: 'Assemblaggio manuale come verifica', sim: 'file', scopo: 'Quattro righe di testo tradotte in byte, con un salto verso un’etichetta che viene dopo.' }
+          { id: '3.3.4', titolo: 'Classi di istruzioni, stato e controllo', sim: 'scudo', scopo: 'Quattro codici di stato, e il controllo che mantiene un accesso entro la memoria.' },
+          { id: '3.3.5', titolo: 'Tracce complete delle istruzioni', sim: 'tabella', scopo: 'Una call e il suo ret, dodici fasi in cui il medesimo indirizzo cambia nome tre volte.' },
+          { id: '3.3.6', titolo: 'Assemblaggio manuale come verifica', sim: 'file', scopo: 'Quattro righe di testo tradotte in byte, con un salto verso un’etichetta successiva.' }
         ],
         sfide: [['cslez3_3_01_random_assembly', 'Decodificare icode e ifun'], ['cslez3_3_02_random_assembly', 'Lunghezza e campi di un’istruzione'], ['cslez3_3_03_random_assembly', 'Registri sorgente e destinazione'], ['cslez3_3_04_random_assembly', 'Operazioni Y86-64 e codici di condizione'], ['cslez3_3_05_random_assembly', 'Memoria, scrittura dei risultati e aggiornamento del PC']] },
       { id: '3.4', breve: 'Processore sequenziale', titolo: 'Il processore sequenziale', sim: 'cpu', stato: 'nuovo', prova: true,
-        guida: 'Il primo processore completo: un’istruzione per ciclo, con i blocchi dei capitoli precedenti collegati fra loro e comandati da poche equazioni.',
+        guida: 'Il capitolo tratta il primo processore completo: un’istruzione per ciclo, con i blocchi dei capitoli precedenti collegati fra loro e comandati da poche equazioni.',
         unita: [
-          { id: '3.4.1', titolo: 'Dalle fasi dell’ISA a una macchina sincrona', sim: 'cpu', scopo: 'Una sottrazione seguita dentro un solo ciclo, fino al fronte che la rende definitiva.' },
-          { id: '3.4.2', titolo: 'Il percorso dati a ciclo singolo di SEQ', sim: 'alu', scopo: 'Una pushq sul percorso dati: due multiplexer, un’ALU e un risultato che prende due strade.' },
-          { id: '3.4.3', titolo: 'Temporizzazione e aggiornamento dello stato', sim: 'clock', scopo: 'Due percorsi sullo stesso asse dei tempi, e il periodo che il più lento impone a tutti.' },
-          { id: '3.4.4', titolo: 'Equazioni di controllo, traccia e verifica', sim: 'mux', scopo: 'pushq e popq dallo stesso stato: i segnali che distinguono un deposito da un prelievo.' },
-          { id: '3.4.5', titolo: 'Oltre SEQ a ciclo singolo', sim: 'bilancio', scopo: 'Lo stesso programma su due macchine: pochi cicli lunghi contro molti cicli brevi.' }
+          { id: '3.4.1', titolo: 'Dalle fasi dell’ISA a una macchina sincrona', sim: 'cpu', scopo: 'Una sottrazione seguita entro un solo ciclo, fino al fronte che la rende definitiva.' },
+          { id: '3.4.2', titolo: 'Il percorso dati a ciclo singolo di SEQ', sim: 'alu', scopo: 'Una pushq sul percorso dati: due multiplexer, un’ALU e un risultato con due destinazioni.' },
+          { id: '3.4.3', titolo: 'Temporizzazione e aggiornamento dello stato', sim: 'clock', scopo: 'Due percorsi sul medesimo asse dei tempi, e il periodo che il più lento determina per tutte le istruzioni.' },
+          { id: '3.4.4', titolo: 'Equazioni di controllo, traccia e verifica', sim: 'mux', scopo: 'pushq e popq dal medesimo stato: i segnali che distinguono un deposito da un prelievo.' },
+          { id: '3.4.5', titolo: 'Oltre SEQ a ciclo singolo', sim: 'bilancio', scopo: 'Il medesimo programma su due macchine: pochi cicli lunghi a confronto con molti cicli brevi.' }
         ],
         sfide: [['cslez3_4_01_random_assembly', 'Ingressi dell’ALU e aggiornamento dello stack'], ['cslez3_4_02_random_assembly', 'Indirizzi di memoria e limiti degli accessi'], ['cslez3_4_03_random_assembly', 'Segnali di controllo di SEQ'], ['cslez3_4_04_random_assembly', 'Cammino critico e periodo di clock'], ['cslez3_4_05_random_assembly', 'Selezione del PC e stato successivo']] },
       { id: '3.5', breve: 'Pipeline e conflitti', titolo: 'Pipeline: sovrapposizione, capacità di completamento e conflitti', sim: 'conflitto', stato: 'nuovo', prova: true,
-        guida: 'Che cosa si guadagna facendo avanzare più istruzioni insieme, come si legge il diagramma che lo descrive e quali ostacoli nascono dalla sovrapposizione.',
+        guida: 'Il capitolo tratta il vantaggio ottenuto facendo avanzare più istruzioni contemporaneamente, la lettura del diagramma che lo descrive e i conflitti prodotti dalla sovrapposizione.',
         unita: [
-          { id: '3.5.1', titolo: 'Sovrapposizione, capacità di completamento e latenza', sim: 'pipeline', scopo: 'Un flusso di istruzioni in una pipeline vuota: quanto impiega ciascuna, e ogni quanto ne esce una.' },
-          { id: '3.5.2', titolo: 'Leggere i diagrammi temporali della pipeline', sim: 'tabella', scopo: 'Tre fotografie consecutive della pipeline, lette per righe e per colonne.' },
-          { id: '3.5.3', titolo: 'Conflitti dovuti alla sovrapposizione', sim: 'conflitto', scopo: 'Un dato in ritardo, una porta contesa, un salto previsto male: tre modi di perdere cicli.' },
-          { id: '3.5.4', titolo: 'Dalla portata ideale al CPI misurato', sim: 'bilancio', scopo: 'Il contatore dei cicli e quello delle istruzioni: riempimento, penalità e il loro peso sul CPI.' }
+          { id: '3.5.1', titolo: 'Sovrapposizione, capacità di completamento e latenza', sim: 'pipeline', scopo: 'Un flusso di istruzioni in una pipeline vuota: il tempo di ciascuna e l’intervallo fra un’uscita e la successiva.' },
+          { id: '3.5.2', titolo: 'Leggere i diagrammi temporali della pipeline', sim: 'tabella', scopo: 'Tre istantanee consecutive della pipeline, lette per righe e per colonne.' },
+          { id: '3.5.3', titolo: 'Conflitti dovuti alla sovrapposizione', sim: 'conflitto', scopo: 'Un dato in ritardo, una porta contesa, un salto con previsione errata: tre cause di cicli perduti.' },
+          { id: '3.5.4', titolo: 'Dalla portata ideale al CPI misurato', sim: 'bilancio', scopo: 'Il contatore dei cicli e quello delle istruzioni: riempimento, penalità e la loro incidenza sul CPI.' }
         ],
         sfide: [['cslez3_5_01_random_assembly', 'Riempimento, svuotamento e cicli di pipeline'], ['cslez3_5_02_random_assembly', 'Latenza, produttività e accelerazione'], ['cslez3_5_03_random_assembly', 'Dipendenze di lettura dopo scrittura'], ['cslez3_5_04_random_assembly', 'Conteggio e sovrapposizione degli stalli'], ['cslez3_5_05_random_assembly', 'Distanza tra istruzioni dipendenti']] },
       { id: '3.6', breve: 'Pipeline a cinque stadi', titolo: 'Il processore in pipeline a cinque stadi', sim: 'pipeline', stato: 'nuovo', prova: true,
-        guida: 'Come è fatto il processore PIPE: i registri fra gli stadi, la scelta del prossimo prelievo, l’inoltro dei dati, le bolle e gli stalli, fino alla misura delle prestazioni.',
+        guida: 'Il capitolo tratta la struttura del processore PIPE: i registri fra gli stadi, la scelta del prossimo prelievo, l’inoltro dei dati, le bolle e gli stalli, fino alla misura delle prestazioni.',
         unita: [
-          { id: '3.6.1', titolo: 'Dalla sovrapposizione alla pipeline controllata', sim: 'register', scopo: 'Un fronte del clock visto da vicino: cinque registri che catturano insieme.' },
-          { id: '3.6.2', titolo: 'Stato della pipeline e controllo del prelievo', sim: 'puntatore', scopo: 'Tre indirizzi candidati e un selettore con priorità: da dove si preleva la prossima istruzione.' },
-          { id: '3.6.3', titolo: 'Dipendenze dei dati e inoltro', sim: 'bus', scopo: 'Un registro conteso da tre istruzioni: quale valore arriva allo stadio D, e da dove.' },
-          { id: '3.6.4', titolo: 'Conflitti di controllo, stalli e bolle', sim: 'conflitto', scopo: 'Un salto condizionato nello stadio E: due istruzioni da tenere oppure da trasformare in bolle.' },
-          { id: '3.6.5', titolo: 'Priorità dei conflitti e stato preciso', sim: 'stallo', scopo: 'Carico, ret ed errori nello stesso ciclo: quali registri si fermano, quali si svuotano.' },
-          { id: '3.6.6', titolo: 'Traccia e conteggio delle prestazioni', sim: 'tabella', scopo: 'Un carico, il suo uso e una istruzione indipendente: due ordini, due tracce a confronto.' },
-          { id: '3.6.7', titolo: 'Misurare e spiegare le prestazioni', sim: 'bilancio', scopo: 'Lo stesso programma prima e dopo il riordino: cicli, tempo, CPI e accelerazione.' }
+          { id: '3.6.1', titolo: 'Dalla sovrapposizione alla pipeline controllata', sim: 'register', scopo: 'Un fronte del clock in dettaglio: cinque registri che catturano contemporaneamente.' },
+          { id: '3.6.2', titolo: 'Stato della pipeline e controllo del prelievo', sim: 'puntatore', scopo: 'Tre indirizzi candidati e un selettore con priorità: l’indirizzo del prossimo prelievo.' },
+          { id: '3.6.3', titolo: 'Dipendenze dei dati e inoltro', sim: 'bus', scopo: 'Un registro scritto da tre istruzioni: il valore fornito allo stadio D e la sua sorgente.' },
+          { id: '3.6.4', titolo: 'Conflitti di controllo, stalli e bolle', sim: 'conflitto', scopo: 'Un salto condizionato nello stadio E: due istruzioni da conservare oppure da trasformare in bolle.' },
+          { id: '3.6.5', titolo: 'Priorità dei conflitti e stato preciso', sim: 'stallo', scopo: 'Carico, ret ed errori nel medesimo ciclo: i registri bloccati e quelli che ricevono una bolla.' },
+          { id: '3.6.6', titolo: 'Traccia e conteggio delle prestazioni', sim: 'tabella', scopo: 'Un carico, il suo uso e un’istruzione indipendente: due ordini, due tracce a confronto.' },
+          { id: '3.6.7', titolo: 'Misurare e spiegare le prestazioni', sim: 'bilancio', scopo: 'Il medesimo programma prima e dopo il riordino: cicli, tempo, CPI e accelerazione.' }
         ],
         sfide: [['cslez3_6_01_random_assembly', 'Istruzioni presenti nei cinque stadi'], ['cslez3_6_02_random_assembly', 'Abilitazione e controllo dei registri di pipeline'], ['cslez3_6_03_random_assembly', 'Priorità nella selezione del PC'], ['cslez3_6_04_random_assembly', 'Cronologia degli stadi e completamento'], ['cslez3_6_05_random_assembly', 'Trasferimenti tra stadi e bolle']] }
     ] },

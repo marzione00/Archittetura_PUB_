@@ -1,46 +1,46 @@
 'use strict';
 SL.registra('3.2.1', {
   titolo: 'Dalla logica combinatoria allo stato memorizzato',
-  obiettivo: 'Obiettivo: dire che cosa distingue un circuito con memoria da un circuito combinatorio, e saprai prevedere il contenuto di un registro dopo un fronte del clock, con il comando di caricamento a 0 e a 1.',
-  concetti: [['register', 'Un circuito che ricorda'], ['clock', 'L’istante che decide'], ['riproduci', 'Conservare riscrivendo']],
+  obiettivo: 'Obiettivo: indicare che cosa distingue un circuito con memoria da un circuito combinatorio, e prevedere il contenuto di un registro dopo un fronte del clock, con il comando di caricamento a 0 e a 1.',
+  concetti: [['register', 'Un circuito dotato di memoria'], ['clock', 'L’istante della scrittura'], ['riproduci', 'La conservazione mediante riscrittura']],
   filigrana: ['register', 'clock', 'mux'],
   richiami: {
     carte: [
-      { sim: 'gate', da: 'Dall’unità 3.1.1', t: 'Circuiti senza memoria', d: 'In un circuito combinatorio le uscite seguono gli ingressi. Cambiati gli ingressi, del valore precedente non resta nulla.' },
-      { sim: 'mux', da: 'Dall’unità 3.1.2', t: 'Il multiplexer', d: 'Copia sull’uscita l’ingresso indicato dal comando. Con due ingressi basta un bit di comando.' },
-      { sim: 'clock', da: 'Dall’unità 2.1.4', t: 'Il ciclo di clock', d: 'Un segnale periodico scandisce il lavoro del processore. Fra un battito e il successivo passa un periodo.' }
+      { sim: 'gate', da: 'Dall’unità 3.1.1', t: 'Circuiti senza memoria', d: 'In un circuito combinatorio le uscite seguono gli ingressi. Una volta mutati gli ingressi, del valore precedente non resta traccia.' },
+      { sim: 'mux', da: 'Dall’unità 3.1.2', t: 'Il multiplexer', d: 'Copia sull’uscita l’ingresso indicato dal comando. Con due ingressi è sufficiente un bit di comando.' },
+      { sim: 'clock', da: 'Dall’unità 2.1.4', t: 'Il ciclo di clock', d: 'Un segnale periodico scandisce le operazioni del processore. Fra un impulso e il successivo trascorre un periodo.' }
     ],
-    domanda: { d: 'Prima di proseguire: un multiplexer a due ingressi riceve I0 = 3 e I1 = 7, con il comando S = 0. Quale valore esce?', o: [
+    domanda: { d: 'Prima di proseguire: un multiplexer a due ingressi riceve I0 = 3 e I1 = 7, con il comando S = 0. Quale valore si presenta in uscita?', o: [
       { t: '3', ok: true, fb: 'Con S = 0 il multiplexer copia l’ingresso I0.' },
-      { t: '7', fb: 'L’ingresso I1 passa quando S vale 1. Qui S vale 0.' },
+      { t: '7', fb: 'L’ingresso I1 è selezionato quando S vale 1. In questo caso S vale 0.' },
       { t: '10', fb: 'Il multiplexer copia uno dei due ingressi, senza sommarli.' }
     ] }
   },
   idea: {
-    titolo: 'Ricordare significa riscrivere',
+    titolo: 'La memoria come riscrittura',
     termini: ['circuito sequenziale', 'fronte di salita', 'retroazione'],
     testo: [
-      'Un circuito combinatorio dimentica: appena gli ingressi cambiano, l’uscita li segue. Un processore ha bisogno anche del contrario. Il valore di un registro deve restare lo stesso per milioni di cicli, finché un’istruzione decide di cambiarlo. Serve un circuito la cui uscita dipenda anche da ciò che è accaduto prima. Un circuito di questo tipo si chiama [[circuito sequenziale]], e l’informazione che conserva è il suo stato.',
-      'Il mattone di partenza è il registro: una fila di celle, una per bit, con un ingresso D e un’uscita Q. Il registro obbedisce al clock, il segnale periodico dell’unità 2.1.4, che alterna un livello basso e un livello alto. Per quasi tutto il ciclo il registro ignora il proprio ingresso e tiene ferma l’uscita. Soltanto nell’istante in cui il clock sale dal livello basso a quello alto copia in Q il valore presente su D. Quell’istante è il [[fronte di salita]]. L’unità 3.2.2 mostrerà che cosa c’è dentro una cella.',
-      'Un registro fatto così scriverebbe un valore nuovo a ogni fronte. Per fargli conservare una parola gli si mette davanti un multiplexer, comandato da un segnale di controllo che chiameremo Carica. Con Carica = 1 il multiplexer presenta al registro il dato esterno. Con Carica = 0 gli presenta la sua stessa uscita Q, e al fronte il registro riscrive ciò che già contiene. Un collegamento che riporta un’uscita verso un ingresso si chiama [[retroazione]].',
-      { fig: 'scena', w: 720, h: 170, titolo: 'Un registro con il comando Carica', nota: 'Con Carica = 0 il multiplexer sceglie la retroazione, e il registro riscrive se stesso.', els: [
+      'Un circuito combinatorio è privo di memoria, poiché a ogni variazione degli ingressi l’uscita li segue. Un processore richiede anche il comportamento opposto. Il valore di un registro deve restare invariato per milioni di cicli, finché un’istruzione non lo modifica. Occorre pertanto un circuito la cui uscita dipenda anche dagli eventi precedenti. Un circuito di questo tipo prende il nome di [[circuito sequenziale]], e l’informazione che esso conserva è il suo stato.',
+      'L’elemento di base è il registro: una fila di celle, una per bit, con un ingresso D e un’uscita Q. Il registro è governato dal clock, il segnale periodico dell’unità 2.1.4, che alterna un livello basso e un livello alto. Per quasi tutto il ciclo il registro ignora il proprio ingresso e mantiene costante l’uscita. Soltanto nell’istante in cui il clock sale dal livello basso a quello alto esso copia in Q il valore presente su D. Tale istante è il [[fronte di salita]]. La struttura interna di una cella è descritta nell’unità 3.2.2.',
+      'Un registro così costituito scriverebbe un valore nuovo a ogni fronte. Per consentirgli di conservare una parola lo si fa precedere da un multiplexer, comandato da un segnale di controllo indicato con Carica. Con Carica = 1 il multiplexer presenta al registro il dato esterno. Con Carica = 0 gli presenta la sua stessa uscita Q, e al fronte il registro riscrive il proprio contenuto. Un collegamento che riporta un’uscita verso un ingresso prende il nome di [[retroazione]].',
+      { fig: 'scena', w: 720, h: 170, titolo: 'Un registro con il comando Carica', nota: 'Con Carica = 0 il multiplexer seleziona la retroazione, e il registro riscrive il proprio contenuto.', els: [
         SL.el.box('d', 10, 14, 110, 56, 'dato D', '0111', 'on', { cls: 'stretta' }), SL.el.linea('l1', 120, 42, 230, 60, 'on'),
         SL.el.box('m', 230, 40, 150, 76, 'MUX', 'Carica', 'att', { cls: 'stretta' }), SL.el.linea('l2', 380, 78, 470, 78, 'on'),
         SL.el.box('r', 470, 40, 150, 76, 'registro', 'Q = 0011', 'on', { cls: 'stretta' }),
         SL.el.linea('f1', 620, 78, 680, 78, 'att'), SL.el.linea('f2', 680, 78, 680, 150, 'att'), SL.el.linea('f3', 680, 150, 180, 150, 'att'), SL.el.linea('f4', 180, 150, 180, 100, 'att'), SL.el.linea('f5', 180, 100, 230, 100, 'att'),
         SL.el.nota('n1', 400, 128, 'retroazione', 'mono minuta', 'att'), SL.el.nota('n2', 520, 12, 'clock', 'mono minuta'), SL.el.linea('c', 545, 30, 545, 40, '')
       ] },
-      'Due registri collegati allo stesso filo dei dati possono quindi contenere parole diverse: ciascuno conserva l’ultima che ha caricato. Quando caricano entrambi nello stesso fronte, ricevono la stessa parola e la differenza va perduta.',
-      'Tutto ciò che un processore ricorda sta in elementi di questo genere: i registri, i flag, l’indirizzo della prossima istruzione, la memoria. La logica combinatoria calcola i valori nuovi, e gli elementi di stato li catturano al fronte.'
+      'Due registri collegati al medesimo filo dei dati possono quindi contenere parole diverse: ciascuno conserva l’ultima parola caricata. Quando entrambi caricano nel medesimo fronte, ricevono la stessa parola e la differenza va perduta.',
+      'Tutto ciò che un processore conserva risiede in elementi di questo genere: i registri, i flag, l’indirizzo della prossima istruzione, la memoria. La logica combinatoria calcola i valori nuovi, e gli elementi di stato li acquisiscono al fronte.'
     ]
   },
   esperimento: {
     faremo: [
-      'Due registri di quattro bit, R1 e R2, sono collegati allo stesso bus D. All’inizio R1 contiene 3 e R2 contiene 12. Sceglierai il dato sul bus e il comando Carica di ciascun registro.',
-      'Vedremo che cosa ogni multiplexer presenta al proprio registro, e che cosa accade al fronte di salita. Dopo il caso proposto, metti a 0 entrambi i comandi: poi mettili entrambi a 1.'
+      'Due registri di quattro bit, R1 e R2, sono collegati al medesimo bus D. All’inizio R1 contiene 3 e R2 contiene 12. I controlli fissano il dato sul bus e il comando Carica di ciascun registro.',
+      'Si osserva che cosa ogni multiplexer presenta al proprio registro e che cosa accade al fronte di salita. Dopo il caso proposto, è istruttivo porre a 0 entrambi i comandi e poi porli entrambi a 1.'
     ],
     vedrai: [
-      ['bus', 'Il bus D', 'In alto: il dato esterno, offerto a entrambi i registri.'],
+      ['bus', 'Il bus D', 'In alto: il dato esterno, presentato a entrambi i registri.'],
       ['mux', 'I multiplexer', 'Al centro: per ogni registro, la scelta fra il dato esterno e la retroazione.'],
       ['register', 'I registri', 'In basso: le parole conservate, con la linea di retroazione sulla destra.']
     ]
@@ -56,10 +56,10 @@ SL.registra('3.2.1', {
     ],
     nota: 'I passi sono sempre cinque. All’inizio R1 contiene 3 e R2 contiene 12.',
     previsione: {
-      domanda: (p) => 'R1 contiene 3 e R2 contiene 12. Sul bus D c’è ' + p.d + '. Il comando Carica vale ' + p.e1 + ' per R1 e ' + p.e2 + ' per R2. Che cosa contengono i registri dopo il fronte di salita?',
+      domanda: (p) => 'R1 contiene 3 e R2 contiene 12. Sul bus D è presente ' + p.d + '. Il comando Carica vale ' + p.e1 + ' per R1 e ' + p.e2 + ' per R2. Che cosa contengono i registri dopo il fronte di salita?',
       opzioni: (p) => Array.from(new Set(['3,12', p.d + ',12', '3,' + p.d, p.d + ',' + p.d])).map((k) => [k, 'R1 = ' + k.split(',')[0] + ' e R2 = ' + k.split(',')[1]])
     },
-    confronto: (pred, esito, p) => { const T = (k) => 'R1 = ' + k.split(',')[0] + ' e R2 = ' + k.split(',')[1]; return 'La previsione indicava ' + T(pred) + '. Dopo il fronte: ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Un registro con Carica = 1 copia il bus, uno con Carica = 0 riscrive il proprio contenuto. Qui Carica vale ' + p.e1 + ' per R1 e ' + p.e2 + ' per R2.'); },
+    confronto: (pred, esito, p) => { const T = (k) => 'R1 = ' + k.split(',')[0] + ' e R2 = ' + k.split(',')[1]; return 'La previsione indicava ' + T(pred) + '. Dopo il fronte: ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Un registro con Carica = 1 copia il bus, uno con Carica = 0 riscrive il proprio contenuto. In questo caso Carica vale ' + p.e1 + ' per R1 e ' + p.e2 + ' per R2.'); },
     costruisci(p) {
       const el = SL.el, passi = [], B4 = (v) => v.toString(2).padStart(4, '0'), E = [p.e1, p.e2], X = [250, 560];
       const st = { q: [3, 12], in: [null, null], ck: 'basso' };
@@ -81,47 +81,47 @@ SL.registra('3.2.1', {
       const P = (o, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(), els: quadro(o) }, extra));
       const scelta = (k) => (E[k] ? p.d : st.q[k]);
 
-      P({}, 0, 'Lo stato prima del fronte', 'R1 contiene 3 e R2 contiene 12. Sul bus D il resto del circuito offre il valore ' + p.d + ', che arriva a entrambi i registri. Il clock è al livello basso, e i registri tengono ferme le loro uscite.',
-        { chiedi: { d: 'Il comando Carica di R1 vale ' + p.e1 + '. Quale valore presenta il multiplexer all’ingresso di R1?', o: ['3', String(p.d)], g: p.e1, no: 'Con Carica = 0 passa la retroazione, cioè il contenuto del registro. Con Carica = 1 passa il bus.' } });
+      P({}, 0, 'Lo stato prima del fronte', 'R1 contiene 3 e R2 contiene 12. Sul bus D il resto del circuito presenta il valore ' + p.d + ', che giunge a entrambi i registri. Il clock è al livello basso, e i registri mantengono costanti le rispettive uscite.',
+        { chiedi: { d: 'Il comando Carica di R1 vale ' + p.e1 + '. Quale valore presenta il multiplexer all’ingresso di R1?', o: ['3', String(p.d)], g: p.e1, no: 'Con Carica = 0 è selezionata la retroazione, cioè il contenuto del registro. Con Carica = 1 è selezionato il bus.' } });
       st.in[0] = scelta(0);
-      P({ mux: 0 }, 1, 'Il multiplexer di R1', p.e1 ? 'Carica vale 1, e il multiplexer lascia passare il bus D. All’ingresso di R1 si presenta ' + p.d + '. Il registro, per ora, contiene ancora 3.' : 'Carica vale 0, e il multiplexer lascia passare la retroazione. All’ingresso di R1 si presenta 3, cioè la parola che il registro già contiene.', { calc: 'ingresso di R1 = ' + st.in[0] });
+      P({ mux: 0 }, 1, 'Il multiplexer di R1', p.e1 ? 'Carica vale 1, e il multiplexer seleziona il bus D. All’ingresso di R1 si presenta ' + p.d + '. Il registro, per il momento, contiene ancora 3.' : 'Carica vale 0, e il multiplexer seleziona la retroazione. All’ingresso di R1 si presenta 3, cioè la parola che il registro già contiene.', { calc: 'ingresso di R1 = ' + st.in[0] });
       st.in[1] = scelta(1);
-      P({ mux: 1 }, 1, 'Il multiplexer di R2', p.e2 ? 'Per R2 Carica vale 1, e il multiplexer lascia passare il bus D. All’ingresso di R2 si presenta ' + p.d + '. Il registro contiene ancora 12.' : 'Per R2 Carica vale 0, e il multiplexer lascia passare la retroazione. All’ingresso di R2 si presenta 12, la parola che il registro già contiene.',
-        { calc: 'ingresso di R2 = ' + st.in[1], chiedi: { d: 'Sta per arrivare il fronte di salita. Quali registri eseguiranno una scrittura?', o: ['Soltanto quelli con Carica = 1', 'Tutti e due'], g: 1, no: 'Ogni registro copia il proprio ingresso a ogni fronte. Con Carica = 0 ciò che copia è il suo stesso contenuto.' } });
+      P({ mux: 1 }, 1, 'Il multiplexer di R2', p.e2 ? 'Per R2 Carica vale 1, e il multiplexer seleziona il bus D. All’ingresso di R2 si presenta ' + p.d + '. Il registro contiene ancora 12.' : 'Per R2 Carica vale 0, e il multiplexer seleziona la retroazione. All’ingresso di R2 si presenta 12, la parola che il registro già contiene.',
+        { calc: 'ingresso di R2 = ' + st.in[1], chiedi: { d: 'Il fronte di salita è imminente. Quali registri eseguiranno una scrittura?', o: ['Soltanto quelli con Carica = 1', 'Tutti e due'], g: 1, no: 'Ogni registro copia il proprio ingresso a ogni fronte. Con Carica = 0 il valore copiato è il suo stesso contenuto.' } });
       st.q = [st.in[0], st.in[1]]; st.ck = 'sale ↑';
-      P({ fronte: true }, 2, 'Il fronte di salita', 'Il clock sale. In questo istante ciascun registro copia in Q il valore presente al proprio ingresso. R1 ' + (p.e1 ? 'passa da 3 a ' + p.d : 'riscrive 3') + ', R2 ' + (p.e2 ? (p.d === 12 ? 'riceve 12 dal bus, lo stesso valore che conteneva' : 'passa da 12 a ' + p.d) : 'riscrive 12') + '.', { calc: 'R1 = ' + st.q[0] + ' · R2 = ' + st.q[1] });
+      P({ fronte: true }, 2, 'Il fronte di salita', 'Il clock sale. In questo istante ciascun registro copia in Q il valore presente al proprio ingresso. R1 ' + (p.e1 ? 'passa da 3 a ' + p.d : 'riscrive 3') + ', R2 ' + (p.e2 ? (p.d === 12 ? 'riceve 12 dal bus, il medesimo valore che conteneva' : 'passa da 12 a ' + p.d) : 'riscrive 12') + '.', { calc: 'R1 = ' + st.q[0] + ' · R2 = ' + st.q[1] });
       st.ck = 'alto';
-      P({ fine: true }, 3, 'Fino al prossimo fronte', 'Ora R1 contiene ' + st.q[0] + ' e R2 contiene ' + st.q[1] + '. Le due uscite resteranno ferme per tutto il ciclo, qualunque cosa accada sul bus. ' + (p.e1 && p.e2 ? 'I due registri hanno caricato la stessa parola, e la differenza iniziale è andata perduta.' : !p.e1 && !p.e2 ? 'Nessuno dei due ha caricato: entrambi hanno riscritto il proprio contenuto, e il dato sul bus è stato ignorato.' : 'Un registro ha caricato il bus e l’altro ha riscritto se stesso: lo stesso filo dei dati, due destini diversi.'),
+      P({ fine: true }, 3, 'Fino al prossimo fronte', 'Ora R1 contiene ' + st.q[0] + ' e R2 contiene ' + st.q[1] + '. Le due uscite resteranno costanti per tutto il ciclo, qualunque valore assuma il bus. ' + (p.e1 && p.e2 ? 'I due registri hanno caricato la stessa parola, e la differenza iniziale è andata perduta.' : !p.e1 && !p.e2 ? 'Nessuno dei due ha caricato: entrambi hanno riscritto il proprio contenuto, e il dato sul bus è stato ignorato.' : 'Un registro ha caricato il bus e l’altro ha riscritto il proprio contenuto: il medesimo filo dei dati ha prodotto due esiti diversi.'),
         { calc: 'R1 = ' + st.q[0] + ' · R2 = ' + st.q[1], esito: ['R1 = ' + st.q[0] + ' · R2 = ' + st.q[1], 'si'] });
       return { passi, esito: st.q[0] + ',' + st.q[1] };
     }
   },
   bilancio: {
     regola: [
-      'Un circuito sequenziale conserva uno stato. Un registro copia l’ingresso D nell’uscita Q al fronte di salita del clock, e per il resto del ciclo tiene ferma l’uscita.',
-      'Con un multiplexer e una retroazione il registro diventa comandabile: Carica = 1 scrive il dato esterno, Carica = 0 riscrive il contenuto e così lo conserva.'
+      'Un circuito sequenziale conserva uno stato. Un registro copia l’ingresso D nell’uscita Q al fronte di salita del clock, e per il resto del ciclo mantiene costante l’uscita.',
+      'Con un multiplexer e una retroazione il registro diviene comandabile: Carica = 1 scrive il dato esterno, Carica = 0 riscrive il contenuto e in tal modo lo conserva.'
     ],
     errori: [
-      ['Pensare che un registro cambi appena cambia il suo ingresso.', 'Fra un fronte e il successivo il registro ignora D. Conta soltanto il valore presente al fronte.'],
-      ['Credere che conservare significhi restare inattivi.', 'A ogni fronte il registro scrive comunque. Con Carica = 0 ciò che scrive è il proprio contenuto.'],
-      ['Aspettarsi lo stesso valore in due registri sullo stesso bus.', 'Ciascuno ha il proprio comando Carica, e conserva l’ultima parola che ha caricato.']
+      ['Ritenere che un registro cambi non appena cambia il suo ingresso.', 'Fra un fronte e il successivo il registro ignora D. È rilevante soltanto il valore presente al fronte.'],
+      ['Ritenere che la conservazione equivalga all’inattività.', 'A ogni fronte il registro esegue comunque una scrittura. Con Carica = 0 il valore scritto è il proprio contenuto.'],
+      ['Attendersi il medesimo valore in due registri collegati allo stesso bus.', 'Ciascuno ha il proprio comando Carica, e conserva l’ultima parola caricata.']
     ],
-    saFare: ['Distinguere un circuito combinatorio da uno sequenziale.', 'Prevedere il contenuto di un registro dopo un fronte, dato il comando Carica.', 'Spiegare come la retroazione permette a un registro di conservare una parola.'],
+    saFare: ['Distinguere un circuito combinatorio da uno sequenziale.', 'Prevedere il contenuto di un registro dopo un fronte, dato il comando Carica.', 'Spiegare come la retroazione consenta a un registro di conservare una parola.'],
     esercizi: [
       { d: 'Un registro contiene 9. Per tre fronti consecutivi il bus D porta 4, 6 e 2, e il comando Carica vale 0, 1 e 0. Che cosa contiene il registro dopo il terzo fronte?', segnaposto: 'Un numero', giuste: ['6', 'sei'],
         ok: 'Al primo fronte il registro riscrive 9, al secondo carica 6, al terzo riscrive 6.',
         diagnosi: [
           { se: ['2', 'due'], msg: 'Al terzo fronte Carica vale 0: il registro riscrive il proprio contenuto e ignora il bus.' },
           { se: ['9', 'nove'], msg: 'Al secondo fronte Carica vale 1, e il registro copia il bus, che porta 6.' },
-          { se: ['4', 'quattro'], msg: 'Al primo fronte Carica vale 0, quindi il 4 sul bus viene ignorato.' }
+          { se: ['4', 'quattro'], msg: 'Al primo fronte Carica vale 0, quindi il 4 sul bus è ignorato.' }
         ],
-        altro: 'Il numero è diverso. Si segua un fronte alla volta: con Carica = 1 il registro copia il bus, con Carica = 0 riscrive se stesso.',
+        altro: 'Il numero è diverso. Si segua un fronte alla volta: con Carica = 1 il registro copia il bus, con Carica = 0 riscrive il proprio contenuto.',
         indizi: ['Primo fronte, Carica = 0: il registro resta a 9.', 'Secondo fronte, Carica = 1: il registro copia il bus.', 'Terzo fronte, Carica = 0: il registro conserva.'],
         svolgimento: ['Dopo il primo fronte: 9.', 'Dopo il secondo fronte: 6.', 'Dopo il terzo fronte: 6.'] },
       { d: 'In un registro con il comando Carica, che cosa presenta il multiplexer all’ingresso del registro quando Carica vale 0?', guida: 'Si scelga la risposta.', o: [
-        { t: 'L’uscita Q del registro stesso', ok: true, fb: 'È la retroazione: riscrivendo ciò che contiene, il registro lo conserva.' },
-        { t: 'Il dato sul bus D', fb: 'Il bus passa quando Carica vale 1.' },
-        { t: 'Una parola di tutti zeri', fb: 'Con una parola di zeri il registro si azzererebbe a ogni fronte, e perderebbe il contenuto.' }] }
+        { t: 'L’uscita Q del registro stesso', ok: true, fb: 'Si tratta della retroazione: riscrivendo il proprio contenuto, il registro lo conserva.' },
+        { t: 'Il dato sul bus D', fb: 'Il bus è selezionato quando Carica vale 1.' },
+        { t: 'Una parola di tutti zeri', fb: 'Con una parola di zeri il registro sarebbe azzerato a ogni fronte e perderebbe il contenuto.' }] }
     ],
     sfida: ['cslez3_2_04_random_assembly', 'Caricamento e modifica di un registro a quattro bit']
   }

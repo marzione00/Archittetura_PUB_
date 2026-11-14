@@ -1,42 +1,42 @@
 'use strict';
 SL.registra('3.1.6', {
   titolo: 'Implementazioni alternative e flag di stato',
-  obiettivo: 'Obiettivo: spiegare come un sommatore può conoscere il riporto di un gruppo di bit senza attendere la propagazione, e saprai ricavare i quattro flag dai fili del sommatore.',
-  concetti: [['alu', 'Generare oppure propagare'], ['clock', 'Un riporto pronto in anticipo'], ['flag', 'I flag come fili']],
+  obiettivo: 'Obiettivo: spiegare come un sommatore possa conoscere il riporto di un gruppo di bit senza attendere la propagazione, e ricavare i quattro flag dai fili del sommatore.',
+  concetti: [['alu', 'Generare oppure propagare'], ['clock', 'Un riporto disponibile in anticipo'], ['flag', 'I flag come fili']],
   filigrana: ['alu', 'flag', 'clock'],
   richiami: {
     carte: [
       { sim: 'clock', da: 'Dall’unità 3.1.5', t: 'Il cammino critico del sommatore', d: 'Nel sommatore a propagazione il riporto attraversa le celle una dopo l’altra, e il ritardo cresce con la larghezza.' },
-      { sim: 'alu', da: 'Dall’unità 3.1.3', t: 'Il riporto di un gruppo', d: 'Da quattro colonne esce un riporto, C4, quando la loro somma supera 15.' },
-      { sim: 'flag', da: 'Dall’unità 2.2.1', t: 'CF e OF', d: 'CF segnala che il totale senza segno esce dalla parola. OF segnala che il totale con segno esce dal proprio intervallo.' }
+      { sim: 'alu', da: 'Dall’unità 3.1.3', t: 'Il riporto di un gruppo', d: 'Quattro colonne producono un riporto in uscita, C4, quando la loro somma supera 15.' },
+      { sim: 'flag', da: 'Dall’unità 2.2.1', t: 'CF e OF', d: 'CF segnala che il totale senza segno eccede la parola. OF segnala che il totale con segno è esterno al proprio intervallo.' }
     ],
-    domanda: { d: 'Prima di proseguire: un gruppo di quattro bit somma 1111 e 0001, senza alcun riporto in arrivo. Dal gruppo esce un riporto?', o: [
-      { t: 'Sì, perché la somma vale 16', ok: true, fb: 'Quindici più uno fa sedici, che supera il massimo di quattro bit.' },
+    domanda: { d: 'Prima di proseguire: un gruppo di quattro bit somma 1111 e 0001, senza alcun riporto entrante. Il gruppo produce un riporto in uscita?', o: [
+      { t: 'Sì, perché la somma vale 16', ok: true, fb: 'Quindici più uno dà sedici, che supera il massimo rappresentabile in quattro bit.' },
       { t: 'No, perché una sola colonna contiene due 1', fb: 'Il riporto della colonna 0 trova un 1 in ciascuna delle colonne successive e le attraversa tutte.' },
-      { t: 'Soltanto se arriva un riporto da destra', fb: 'La somma vale già 16 senza riporto in arrivo, quindi il riporto esce comunque.' }
+      { t: 'Soltanto in presenza di un riporto entrante', fb: 'La somma vale già 16 senza riporto entrante, quindi il riporto in uscita è prodotto in ogni caso.' }
     ] }
   },
   idea: {
-    titolo: 'Conoscere il riporto prima che arrivi',
+    titolo: 'Il riporto noto prima della propagazione',
     termini: ['segnale di generazione', 'segnale di propagazione', 'anticipo del riporto'],
     testo: [
-      'Nel sommatore a propagazione i bit alti restano in attesa. Finché il riporto dei bit bassi è in viaggio, le loro celle hanno davanti dati provvisori. È il cammino critico dell’unità 3.1.5.',
-      'L’attesa si accorcia con un’osservazione. Dividiamo un byte in due gruppi di quattro bit e guardiamo il gruppo alto. I suoi due pezzi, uno per addendo, sono noti fin dall’inizio, e la loro somma dice in anticipo come il gruppo tratterà un riporto in arrivo. I casi sono tre.',
-      'Se la somma dei due pezzi supera 15, dal gruppo esce un riporto in ogni caso. Il gruppo lo genera, e il suo [[segnale di generazione]], G, vale 1. Se la somma vale esattamente 15, dal gruppo esce un riporto soltanto quando ne arriva uno: il gruppo lo propaga, e il suo [[segnale di propagazione]], P, vale 1. Se la somma è minore di 15, un riporto in arrivo viene assorbito, e G e P valgono entrambi 0.',
-      { fig: 'scena', w: 720, h: 104, titolo: 'Tre gruppi alti davanti a un riporto in arrivo', nota: 'In alto la somma dei due pezzi del gruppo, al centro ciò che il gruppo fa, sotto i suoi segnali.', els: [
+      'Nel sommatore a propagazione i bit alti restano in attesa. Finché il riporto dei bit bassi si propaga, le loro celle operano su dati provvisori: è il cammino critico dell’unità 3.1.5.',
+      'L’attesa si riduce grazie a un’osservazione. Si divida un byte in due gruppi di quattro bit e si consideri il gruppo alto. I suoi due operandi, uno per addendo, sono noti fin dall’inizio, e la loro somma indica in anticipo come il gruppo tratterà un riporto entrante. I casi sono tre.',
+      'Se la somma dei due operandi supera 15, il gruppo produce un riporto in uscita in ogni caso. Il gruppo lo genera, e il suo [[segnale di generazione]], G, vale 1. Se la somma vale esattamente 15, il gruppo produce un riporto in uscita soltanto quando ne riceve uno: il gruppo lo propaga, e il suo [[segnale di propagazione]], P, vale 1. Se la somma è minore di 15, un riporto entrante è assorbito, e G e P valgono entrambi 0.',
+      { fig: 'scena', w: 720, h: 104, titolo: 'Tre gruppi alti e un riporto entrante', nota: 'In alto la somma dei due operandi del gruppo, al centro il comportamento del gruppo, in basso i suoi segnali.', els: [
         SL.el.box('f1', 10, 4, 220, 64, '7 + 0 = 7', 'assorbe', '', { cls: 'stretta' }), SL.el.nota('g1', 18, 78, 'G = 0 · P = 0', 'mono minuta'),
         SL.el.box('f2', 250, 4, 220, 64, '3 + 12 = 15', 'propaga', 'att', { cls: 'stretta' }), SL.el.nota('g2', 258, 78, 'G = 0 · P = 1', 'mono minuta', 'att'),
         SL.el.box('f3', 490, 4, 220, 64, '9 + 7 = 16', 'genera', 'on', { cls: 'stretta' }), SL.el.nota('g3', 498, 78, 'G = 1 · P = 0', 'mono minuta', 'on')
       ] },
-      'Il riporto che esce dal gruppo alto vale quindi G OR (P AND C4), dove C4 è il riporto del gruppo basso. I segnali G e P si calcolano mentre il gruppo basso sta ancora lavorando. Quando C4 arriva, bastano una AND e una OR per avere il riporto finale. La tecnica si chiama [[anticipo del riporto]]: costa porte in più e accorcia il cammino critico, secondo lo scambio fra superficie e tempo dell’unità 3.1.5.',
-      'Dai fili del sommatore si ricavano anche i quattro flag del Modulo II, ciascuno con poche porte. ZF è la NOT di una OR su tutti i bit del risultato. SF è una copia del bit più a sinistra. CF, nella somma, è il riporto che esce dall’ultima colonna. OF confronta gli ultimi due riporti, e vale 1 quando il riporto che entra nella colonna più a sinistra è diverso da quello che ne esce.',
-      'CF e OF rispondono a domande diverse. CF dice se il totale senza segno ha bisogno di un nono bit. OF dice se il totale con segno esce dall’intervallo da −128 a 127. Il circuito li produce sempre entrambi, e sta al programma leggere quello che gli serve.'
+      'Il riporto in uscita dal gruppo alto vale quindi G OR (P AND C4), dove C4 è il riporto del gruppo basso. I segnali G e P si calcolano mentre il gruppo basso è ancora in fase di calcolo. All’arrivo di C4 sono sufficienti una AND e una OR per ottenere il riporto finale. La tecnica prende il nome di [[anticipo del riporto]]: richiede porte aggiuntive e riduce il cammino critico, secondo il compromesso fra superficie e tempo dell’unità 3.1.5.',
+      'Dai fili del sommatore si ricavano anche i quattro flag del Modulo II, ciascuno con poche porte. ZF è la NOT di una OR su tutti i bit del risultato, mentre SF è una copia del bit più a sinistra. CF, nella somma, è il riporto in uscita dall’ultima colonna. OF confronta gli ultimi due riporti, e vale 1 quando il riporto che entra nella colonna più a sinistra è diverso da quello che ne esce.',
+      'CF e OF rispondono a domande diverse. CF indica se il totale senza segno richiede un nono bit, OF se il totale con segno è esterno all’intervallo da −128 a 127. Il circuito li produce sempre entrambi, e spetta al programma considerare il flag pertinente.'
     ]
   },
   esperimento: {
     faremo: [
-      'Un sommatore a otto bit è diviso in due gruppi di quattro. Sceglierai i due byte da sommare.',
-      'Vedremo il gruppo basso produrre il riporto C4, il gruppo alto dichiarare G e P, e il riporto finale nascere da quei tre fili. Alla fine leggeremo i quattro flag. Dopo il caso proposto, prova 0x3C + 0xC4 e poi 0x9A + 0x76.'
+      'Un sommatore a otto bit è diviso in due gruppi di quattro. I controlli fissano i due byte da sommare.',
+      'Il gruppo basso produce il riporto C4, il gruppo alto dichiara G e P, e il riporto finale si ottiene da questi tre fili; al termine si leggono i quattro flag. Dopo il caso proposto, è istruttivo esaminare 0x3C + 0xC4 e poi 0x9A + 0x76.'
     ],
     vedrai: [
       ['bit', 'I due byte', 'In alto: i bit di A e di B, separati in gruppo alto e gruppo basso.'],
@@ -52,12 +52,12 @@ SL.registra('3.1.6', {
       { id: 'a', tipo: 'scelta', eti: 'A', opzioni: [[0x7F, '0x7F'], [0x3C, '0x3C'], [0xF8, '0xF8'], [0x9A, '0x9A']], valore: 0x7F },
       { id: 'b', tipo: 'scelta', eti: 'B', opzioni: [[0x01, '0x01'], [0xC4, '0xC4'], [0x08, '0x08'], [0x76, '0x76']], valore: 0x01 }
     ],
-    nota: 'I passi sono sempre sei. I due byte decidono se il riporto finale viene generato, propagato oppure manca.',
+    nota: 'I passi sono sempre sei. I due byte determinano se il riporto finale è generato, propagato oppure assente.',
     previsione: {
-      domanda: (p) => 'Si sommano i byte A = ' + SL.unita316.H(p.a) + ' e B = ' + SL.unita316.H(p.b) + ', divisi in due gruppi di quattro bit. Dal gruppo alto esce un riporto?',
+      domanda: (p) => 'Si sommano i byte A = ' + SL.unita316.H(p.a) + ' e B = ' + SL.unita316.H(p.b) + ', divisi in due gruppi di quattro bit. Il gruppo alto produce un riporto in uscita?',
       opzioni: () => [['no', 'No'], ['gen', 'Sì, generato dal gruppo alto'], ['prop', 'Sì, propagato dal gruppo basso']]
     },
-    confronto: (pred, esito, p) => { const c = SL.unita316.conto(p), N = { no: 'nessun riporto', gen: 'un riporto generato dal gruppo alto', prop: 'un riporto propagato dal gruppo basso' }; return 'La previsione indicava ' + N[pred] + '. L’esito è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'I pezzi del gruppo alto valgono ' + c.ha + ' e ' + c.hb + ', e la loro somma è ' + (c.ha + c.hb) + (c.g ? ', oltre 15: il gruppo genera il riporto da solo.' : c.p ? ', esattamente 15: il gruppo propaga il riporto in arrivo, che vale ' + c.c4 + '.' : ', sotto 15: un riporto in arrivo viene assorbito.')); },
+    confronto: (pred, esito, p) => { const c = SL.unita316.conto(p), N = { no: 'nessun riporto', gen: 'un riporto generato dal gruppo alto', prop: 'un riporto propagato dal gruppo basso' }; return 'La previsione indicava ' + N[pred] + '. L’esito è ' + N[esito] + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Gli operandi del gruppo alto valgono ' + c.ha + ' e ' + c.hb + ', e la loro somma è ' + (c.ha + c.hb) + (c.g ? ', oltre 15: il gruppo genera il riporto autonomamente.' : c.p ? ', esattamente 15: il gruppo propaga il riporto entrante, che vale ' + c.c4 + '.' : ', sotto 15: un riporto entrante è assorbito.')); },
     costruisci(p) {
       const el = SL.el, X = SL.x86, U = SL.unita316, H = U.H, passi = [], c = U.conto(p), B4 = (v) => v.toString(2).padStart(4, '0');
       const FO = { x: 230, passo: 54, tagli: [4], gap: 70, h: 42, indici: false };
@@ -80,46 +80,46 @@ SL.registra('3.1.6', {
       const hud = () => [['A + B', H(p.a) + ' + ' + H(p.b), 'a'], ['G · P', st.gp ? c.g + ' · ' + c.p : '·'], ['Riporto finale', st.fine ? String(c.c8) : '·', 'c']];
       const P = (o, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(), els: quadro(o) }, extra));
 
-      P({}, 0, 'Un byte, due gruppi', 'A vale ' + H(p.a) + ' e B vale ' + H(p.b) + '. Ogni byte è diviso in un gruppo alto e un gruppo basso di quattro bit. Per A i pezzi sono ' + B4(c.ha) + ' e ' + B4(c.la) + ', per B sono ' + B4(c.hb) + ' e ' + B4(c.lb) + '.',
-        { chiedi: { d: 'Il gruppo basso somma ' + c.la + ' e ' + c.lb + ', e il totale è ' + (c.la + c.lb) + '. Esce un riporto verso il gruppo alto?', o: ['Sì', 'No'], g: c.c4 ? 0 : 1, no: 'Da quattro bit esce un riporto quando la somma supera 15. Qui vale ' + (c.la + c.lb) + '.' } });
+      P({}, 0, 'Un byte, due gruppi', 'A vale ' + H(p.a) + ' e B vale ' + H(p.b) + '. Ogni byte è diviso in un gruppo alto e un gruppo basso di quattro bit. Per A i due gruppi valgono ' + B4(c.ha) + ' e ' + B4(c.la) + ', per B valgono ' + B4(c.hb) + ' e ' + B4(c.lb) + '.',
+        { chiedi: { d: 'Il gruppo basso somma ' + c.la + ' e ' + c.lb + ', e il totale è ' + (c.la + c.lb) + '. Il gruppo basso produce un riporto verso il gruppo alto?', o: ['Sì', 'No'], g: c.c4 ? 0 : 1, no: 'Quattro bit producono un riporto in uscita quando la somma supera 15. In questo caso vale ' + (c.la + c.lb) + '.' } });
       st.basso = true;
-      P({ basso: true, c4: true, somma: [3, 2, 1, 0] }, 1, 'Il gruppo basso', 'Il gruppo basso somma ' + B4(c.la) + ' e ' + B4(c.lb) + ', cioè ' + c.la + ' + ' + c.lb + ' = ' + (c.la + c.lb) + '. ' + (c.c4 ? 'Il totale supera 15: nei quattro bit resta ' + (c.s & 15) + ' e il riporto C4 vale 1.' : 'Il totale sta in quattro bit, e il riporto C4 vale 0.') + ' In un sommatore a propagazione questo riporto arriva dopo avere attraversato quattro celle.',
-        { calc: c.la + ' + ' + c.lb + ' = ' + (c.la + c.lb) + ' → C4 = ' + c.c4, chiedi: { d: 'I pezzi del gruppo alto valgono ' + c.ha + ' e ' + c.hb + ', e la loro somma è ' + (c.ha + c.hb) + '. Che cosa fa il gruppo alto di un riporto in arrivo?', o: ['Lo assorbe', 'Lo propaga', 'Ne produce uno in ogni caso'], g: c.g ? 2 : c.p ? 1 : 0, no: 'Sotto 15 il gruppo assorbe, a 15 esatti propaga, sopra 15 genera. Qui la somma vale ' + (c.ha + c.hb) + '.' } });
+      P({ basso: true, c4: true, somma: [3, 2, 1, 0] }, 1, 'Il gruppo basso', 'Il gruppo basso somma ' + B4(c.la) + ' e ' + B4(c.lb) + ', cioè ' + c.la + ' + ' + c.lb + ' = ' + (c.la + c.lb) + '. ' + (c.c4 ? 'Il totale supera 15: nei quattro bit resta ' + (c.s & 15) + ' e il riporto C4 vale 1.' : 'Il totale è rappresentabile in quattro bit, e il riporto C4 vale 0.') + ' In un sommatore a propagazione questo riporto è disponibile dopo avere attraversato quattro celle.',
+        { calc: c.la + ' + ' + c.lb + ' = ' + (c.la + c.lb) + ' → C4 = ' + c.c4, chiedi: { d: 'Gli operandi del gruppo alto valgono ' + c.ha + ' e ' + c.hb + ', e la loro somma è ' + (c.ha + c.hb) + '. Come tratta il gruppo alto un riporto entrante?', o: ['Lo assorbe', 'Lo propaga', 'Ne produce uno in ogni caso'], g: c.g ? 2 : c.p ? 1 : 0, no: 'Sotto 15 il gruppo assorbe, con 15 esatti propaga, sopra 15 genera. In questo caso la somma vale ' + (c.ha + c.hb) + '.' } });
       st.gp = true;
-      P({ alto: true, gp: true }, 2, 'Il gruppo alto dichiara G e P', 'Mentre il gruppo basso lavorava, il gruppo alto ha guardato i propri pezzi: ' + c.ha + ' + ' + c.hb + ' = ' + (c.ha + c.hb) + '. ' + (c.g ? 'La somma supera 15, quindi il gruppo genera un riporto qualunque cosa arrivi da destra: G = 1.' : c.p ? 'La somma vale esattamente 15: in ogni colonna i due bit sono diversi, e un riporto in arrivo le attraverserebbe tutte. P = 1.' : 'La somma è minore di 15: anche aggiungendo un riporto in arrivo, il gruppo resta entro i quattro bit. G = 0 e P = 0.') + ' Per saperlo è bastato leggere i bit del gruppo.',
+      P({ alto: true, gp: true }, 2, 'Il gruppo alto dichiara G e P', 'Durante il calcolo del gruppo basso, il gruppo alto ha esaminato i propri operandi: ' + c.ha + ' + ' + c.hb + ' = ' + (c.ha + c.hb) + '. ' + (c.g ? 'La somma supera 15, quindi il gruppo genera un riporto qualunque sia il riporto entrante: G = 1.' : c.p ? 'La somma vale esattamente 15: in ogni colonna i due bit sono diversi, e un riporto entrante le attraverserebbe tutte. P = 1.' : 'La somma è minore di 15: anche con l’aggiunta di un riporto entrante, il gruppo resta entro i quattro bit. G = 0 e P = 0.') + ' Per stabilirlo è stata sufficiente la lettura dei bit del gruppo.',
         { calc: 'G = ' + c.g + ' · P = ' + c.p, chiedi: { d: 'Con G = ' + c.g + ', P = ' + c.p + ' e C4 = ' + c.c4 + ', quanto vale G OR (P AND C4)?', o: ['0', '1'], g: c.c8, no: 'P AND C4 vale ' + (c.p & c.c4) + ', e la OR con G = ' + c.g + ' dà ' + c.c8 + '.' } });
       st.fine = true;
-      P({ c8: true, somma: [7, 6, 5, 4] }, 3, 'Il riporto finale', 'Il riporto che esce dal byte vale G OR (P AND C4) = ' + c.g + ' OR (' + c.p + ' AND ' + c.c4 + ') = ' + c.c8 + '. ' + (c.g ? 'Lo ha generato il gruppo alto.' : c.c8 ? 'È il riporto del gruppo basso, che il gruppo alto ha lasciato passare.' : c.c4 ? 'Il riporto del gruppo basso si è fermato dentro il gruppo alto.' : 'Nessun riporto esce dal byte.') + ' Intanto il gruppo alto completa i propri bit: ' + c.ha + ' + ' + c.hb + ' + ' + c.c4 + ' lascia ' + B4(c.s >> 4) + '. Il risultato è ' + H(c.s) + '.',
+      P({ c8: true, somma: [7, 6, 5, 4] }, 3, 'Il riporto finale', 'Il riporto in uscita dal byte vale G OR (P AND C4) = ' + c.g + ' OR (' + c.p + ' AND ' + c.c4 + ') = ' + c.c8 + '. ' + (c.g ? 'Esso è stato generato dal gruppo alto.' : c.c8 ? 'Si tratta del riporto del gruppo basso, propagato dal gruppo alto.' : c.c4 ? 'Il riporto del gruppo basso è stato assorbito dal gruppo alto.' : 'Nessun riporto esce dal byte.') + ' Nel frattempo il gruppo alto completa i propri bit: ' + c.ha + ' + ' + c.hb + ' + ' + c.c4 + ' lascia ' + B4(c.s >> 4) + '. Il risultato è ' + H(c.s) + '.',
         { calc: c.g + ' OR (' + c.p + ' AND ' + c.c4 + ') = ' + c.c8 });
       st.flag = true;
-      P({ flag: true }, 4, 'I quattro flag', 'ZF vale ' + c.zf + (c.zf ? ', perché tutti i bit del risultato valgono 0.' : ', perché almeno un bit del risultato vale 1.') + ' SF copia il bit più a sinistra, ' + c.sf + '. CF copia il riporto finale, ' + c.c8 + '. Per OF servono gli ultimi due riporti: nella colonna 7 ne entra ' + c.c7 + ' e ne esce ' + c.c8 + (c.of ? '. Sono diversi, quindi OF vale 1.' : '. Sono uguali, quindi OF vale 0.'),
+      P({ flag: true }, 4, 'I quattro flag', 'ZF vale ' + c.zf + (c.zf ? ', poiché tutti i bit del risultato valgono 0.' : ', poiché almeno un bit del risultato vale 1.') + ' SF copia il bit più a sinistra, ' + c.sf + '. CF copia il riporto finale, ' + c.c8 + '. Per OF occorrono gli ultimi due riporti: nella colonna 7 ne entra ' + c.c7 + ' e ne esce ' + c.c8 + (c.of ? '. Sono diversi, quindi OF vale 1.' : '. Sono uguali, quindi OF vale 0.'),
         { calc: 'ZF = ' + c.zf + ' · SF = ' + c.sf + ' · CF = ' + c.c8 + ' · OF = ' + c.of });
-      P({ flag: true, c8: true }, 4, 'Due letture dello stesso byte', 'Senza segno la somma vera è ' + p.a + ' + ' + p.b + ' = ' + (p.a + p.b) + (c.c8 ? ', che chiede un nono bit: CF = 1.' : ', che sta in otto bit: CF = 0.') + ' Con segno è ' + X.num(c.sa) + ' + ' + (c.sb < 0 ? '(' + X.num(c.sb) + ')' : X.num(c.sb)) + ' = ' + X.num(c.sa + c.sb) + (c.of ? ', fuori dall’intervallo da −128 a 127: OF = 1.' : ', dentro l’intervallo da −128 a 127: OF = 0.') + ' Il circuito ha prodotto i due flag con le stesse porte, senza sapere quale lettura interessa al programma.',
+      P({ flag: true, c8: true }, 4, 'Due letture del medesimo byte', 'Senza segno la somma esatta è ' + p.a + ' + ' + p.b + ' = ' + (p.a + p.b) + (c.c8 ? ', che richiede un nono bit: CF = 1.' : ', rappresentabile in otto bit: CF = 0.') + ' Con segno è ' + X.num(c.sa) + ' + ' + (c.sb < 0 ? '(' + X.num(c.sb) + ')' : X.num(c.sb)) + ' = ' + X.num(c.sa + c.sb) + (c.of ? ', esterna all’intervallo da −128 a 127: OF = 1.' : ', interna all’intervallo da −128 a 127: OF = 0.') + ' Il circuito ha prodotto i due flag con le medesime porte, senza alcuna informazione sulla lettura che interessa al programma.',
         { calc: 'CF = ' + c.c8 + ' · OF = ' + c.of, esito: [H(c.s) + ' · CF = ' + c.c8 + ' · OF = ' + c.of, 'si'] });
       return { passi, esito: c.g ? 'gen' : c.c8 ? 'prop' : 'no' };
     }
   },
   bilancio: {
     regola: [
-      'Un gruppo di quattro bit genera un riporto quando la somma dei suoi due pezzi supera 15, e lo propaga quando vale esattamente 15. Il riporto in uscita vale G OR (P AND riporto in arrivo).',
+      'Un gruppo di quattro bit genera un riporto quando la somma dei suoi due operandi supera 15, e lo propaga quando vale esattamente 15. Il riporto in uscita vale G OR (P AND riporto entrante).',
       'I flag sono fili del sommatore: ZF dalla OR di tutti i bit, SF dal bit più a sinistra, CF dal riporto finale, OF dal confronto fra gli ultimi due riporti.'
     ],
     errori: [
-      ['Credere che G e P dipendano dal riporto in arrivo.', 'Si calcolano dai soli bit del gruppo, ed è per questo che sono pronti in anticipo.'],
-      ['Chiamare propagazione ogni somma grande.', 'Il gruppo propaga soltanto con una somma di 15 esatti. Con 14 assorbe il riporto in arrivo, con 16 ne genera uno comunque.'],
-      ['Confondere CF e OF.', 'La somma 127 + 1 lascia CF = 0 e OF = 1: il totale 128 sta in otto bit senza segno ed esce dall’intervallo con segno.']
+      ['Ritenere che G e P dipendano dal riporto entrante.', 'Essi si calcolano dai soli bit del gruppo, e per tale ragione sono disponibili in anticipo.'],
+      ['Considerare propagazione ogni somma elevata.', 'Il gruppo propaga soltanto con una somma di 15 esatti. Con 14 assorbe il riporto entrante, con 16 ne genera uno in ogni caso.'],
+      ['Confondere CF e OF.', 'La somma 127 + 1 lascia CF = 0 e OF = 1: il totale 128 è rappresentabile in otto bit senza segno ed è esterno all’intervallo con segno.']
     ],
-    saFare: ['Calcolare G e P di un gruppo dai suoi bit.', 'Ricavare il riporto in uscita da G, P e dal riporto in arrivo.', 'Indicare da quali fili del sommatore nasce ciascun flag.'],
+    saFare: ['Calcolare G e P di un gruppo dai suoi bit.', 'Ricavare il riporto in uscita da G, P e dal riporto entrante.', 'Indicare da quali fili del sommatore si ricava ciascun flag.'],
     esercizi: [
-      { d: 'Il gruppo alto di un sommatore riceve i pezzi 1010 e 0101. Quanto valgono i suoi segnali G e P?', guida: 'Si scelga la risposta.', o: [
-        { t: 'G = 0 e P = 1', ok: true, fb: 'Dieci più cinque fa 15 esatti: in ogni colonna i due bit sono diversi, e il gruppo propaga.' },
-        { t: 'G = 1 e P = 0', fb: 'Il gruppo genera quando la somma supera 15. Qui vale 15 esatti.' },
-        { t: 'G = 0 e P = 0', fb: 'Sarebbe così con una somma minore di 15. Qui la somma vale 15.' }] },
+      { d: 'Il gruppo alto di un sommatore riceve gli operandi 1010 e 0101. Quanto valgono i suoi segnali G e P?', guida: 'Si scelga la risposta.', o: [
+        { t: 'G = 0 e P = 1', ok: true, fb: 'Dieci più cinque dà 15 esatti: in ogni colonna i due bit sono diversi, e il gruppo propaga.' },
+        { t: 'G = 1 e P = 0', fb: 'Il gruppo genera quando la somma supera 15. In questo caso vale 15 esatti.' },
+        { t: 'G = 0 e P = 0', fb: 'Tale esito richiederebbe una somma minore di 15. In questo caso la somma vale 15.' }] },
       { d: 'Su otto bit si calcola 0x50 + 0x30, cioè 80 + 48. Quali flag valgono 1 fra CF e OF?', guida: 'Si scelga la risposta.', o: [
-        { t: 'Soltanto OF', ok: true, fb: 'Il totale 128 sta in otto bit, quindi CF = 0. Con segno, 128 supera 127, quindi OF = 1.' },
-        { t: 'Soltanto CF', fb: 'CF chiede un totale senza segno oltre 255. Qui il totale è 128.' },
+        { t: 'Soltanto OF', ok: true, fb: 'Il totale 128 è rappresentabile in otto bit, quindi CF = 0. Con segno, 128 supera 127, quindi OF = 1.' },
+        { t: 'Soltanto CF', fb: 'CF richiede un totale senza segno oltre 255. In questo caso il totale è 128.' },
         { t: 'Nessuno dei due', fb: 'Con segno il massimo è 127, e il totale 128 lo supera di uno.' },
-        { t: 'CF e OF', fb: 'Il totale senza segno, 128, sta in otto bit: CF vale 0.' }] }
+        { t: 'CF e OF', fb: 'Il totale senza segno, 128, è rappresentabile in otto bit: CF vale 0.' }] }
     ]
   }
 });

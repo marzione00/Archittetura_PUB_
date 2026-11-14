@@ -1,45 +1,45 @@
 'use strict';
 SL.registra('3.3.3', {
   titolo: 'Semantica delle istruzioni e flusso dei dati',
-  obiettivo: 'Obiettivo: nominare le sei fasi in cui Y86-64 esegue un’istruzione, e seguire i valori che passano da una fase all’altra durante una lettura dalla memoria.',
-  concetti: [['strati', 'Sei fasi, sempre nello stesso ordine'], ['memory', 'Indirizzo e contenuto'], ['byte', 'Otto celle, una parola']],
+  obiettivo: 'Obiettivo: nominare le sei fasi in cui Y86-64 esegue un’istruzione, e seguire i valori trasmessi da una fase all’altra durante una lettura dalla memoria.',
+  concetti: [['strati', 'Sei fasi in ordine fisso'], ['memory', 'Indirizzo e contenuto'], ['byte', 'Otto celle, una parola']],
   filigrana: ['strati', 'memory', 'alu'],
   richiami: {
     carte: [
-      { sim: 'hex', da: 'Dall’unità 3.3.2', t: 'valC e valP', d: 'La costante contenuta nell’istruzione si chiama valC. L’indirizzo dell’istruzione che segue in memoria si chiama valP.' },
+      { sim: 'hex', da: 'Dall’unità 3.3.2', t: 'valC e valP', d: 'La costante contenuta nell’istruzione prende il nome di valC. L’indirizzo dell’istruzione che segue in memoria prende il nome di valP.' },
       { sim: 'memory', da: 'Dall’unità 2.1.2', t: 'Base più spostamento', d: 'L’indirizzo di una cella si ottiene sommando al contenuto di un registro di base uno spostamento scritto nell’istruzione.' },
       { sim: 'byte', da: 'Dall’unità 1.2.3', t: 'Una parola, otto celle', d: 'Una parola di 64 bit occupa otto celle consecutive. In little-endian la prima contiene il byte meno significativo.' }
     ],
     domanda: { d: 'Prima di proseguire: il registro di base vale 16 e lo spostamento vale 4. A quale indirizzo si trova la cella?', o: [
       { t: '20', ok: true, fb: 'L’indirizzo è la somma di base e spostamento: 16 + 4.' },
       { t: '64', fb: 'Base e spostamento si sommano, senza moltiplicarsi.' },
-      { t: '12', fb: 'Lo spostamento, qui positivo, va sommato alla base.' }
+      { t: '12', fb: 'Lo spostamento, in questo caso positivo, va sommato alla base.' }
     ] }
   },
   idea: {
     titolo: 'Sei fasi, e i valori che le attraversano',
     termini: ['fase di prelievo', 'fase di decodifica', 'fase di esecuzione', 'fase di memoria', 'fase di scrittura', 'aggiornamento del pc'],
     testo: [
-      'Ogni istruzione Y86-64 viene eseguita in sei fasi, sempre nello stesso ordine. Alcune istruzioni attraversano certe fasi senza compiervi nulla, e l’ordine resta fisso. Questa regolarità permetterà di costruire un solo circuito per tutte le istruzioni.',
-      'La [[fase di prelievo]] legge dalla memoria i byte dell’istruzione, a partire dal PC, e ne ricava icode, ifun, i registri, la costante valC e il successore valP. La [[fase di decodifica]] legge dal banco fino a due registri, e i valori letti si chiamano valA e valB. La [[fase di esecuzione]] fa lavorare l’ALU, e il risultato si chiama valE: per un’operazione aritmetica è il risultato, per un accesso alla memoria è l’indirizzo.',
-      'La [[fase di memoria]] legge una parola dalla memoria dei dati, oppure ne scrive una, e la parola letta si chiama valM. La [[fase di scrittura]] deposita i risultati nel banco dei registri. L’[[aggiornamento del pc|aggiornamento del PC]] sceglie l’indirizzo della prossima istruzione, che di solito è valP.',
-      { fig: 'scena', w: 720, h: 96, titolo: 'Le sei fasi e i valori che producono', nota: 'Ogni fase usa i valori preparati da quelle che la precedono.', els: [
+      'Ogni istruzione Y86-64 è eseguita in sei fasi, sempre nel medesimo ordine. Alcune istruzioni attraversano certe fasi senza compiervi alcuna operazione, e l’ordine resta fisso. Tale regolarità consentirà di costruire un solo circuito per tutte le istruzioni.',
+      'La [[fase di prelievo]] legge dalla memoria i byte dell’istruzione, a partire dal PC, e ne ricava icode, ifun, i registri, la costante valC e il successore valP. La [[fase di decodifica]] legge dal banco fino a due registri, e i valori letti prendono il nome di valA e valB. La [[fase di esecuzione]] impiega l’ALU, e il risultato prende il nome di valE: per un’operazione aritmetica è il risultato, per un accesso alla memoria è l’indirizzo.',
+      'La [[fase di memoria]] legge una parola dalla memoria dei dati, oppure ne scrive una, e la parola letta prende il nome di valM. La [[fase di scrittura]] deposita i risultati nel banco dei registri. L’[[aggiornamento del pc|aggiornamento del PC]] seleziona l’indirizzo della prossima istruzione, che di norma è valP.',
+      { fig: 'scena', w: 720, h: 96, titolo: 'Le sei fasi e i valori che producono', nota: 'Ogni fase impiega i valori preparati dalle fasi precedenti.', els: [
         SL.el.box('f1', 0, 6, 112, 64, 'prelievo', 'valC valP', 'att', { cls: 'stretta' }), SL.el.box('f2', 122, 6, 112, 64, 'decodifica', 'valA valB', 'on', { cls: 'stretta' }),
         SL.el.box('f3', 244, 6, 112, 64, 'esecuzione', 'valE', 'on', { cls: 'stretta' }), SL.el.box('f4', 366, 6, 112, 64, 'memoria', 'valM', 'on', { cls: 'stretta' }),
         SL.el.box('f5', 488, 6, 112, 64, 'scrittura', 'registri', 'on', { cls: 'stretta' }), SL.el.box('f6', 610, 6, 110, 64, 'PC', 'nuovo PC', '', { cls: 'stretta' })
       ] },
-      'Seguiamo `mrmovq 4(%rbx), %rax`, che legge una parola dalla memoria e la mette in %rax. Il prelievo ricava valC = 4 e valP. La decodifica legge la base: valB è il contenuto di %rbx. Nell’esecuzione l’ALU somma i due e ottiene l’indirizzo, valE = valB + valC. La fase di memoria legge le otto celle che cominciano a valE e le ricompone in little-endian nella parola valM. La scrittura deposita valM in %rax. Infine il PC riceve valP.',
-      'Conviene tenere distinte due grandezze che si scambiano facilmente. valE è un indirizzo, cioè una posizione. valM è il contenuto trovato in quella posizione.'
+      'Si consideri `mrmovq 4(%rbx), %rax`, che legge una parola dalla memoria e la scrive in %rax. Il prelievo ricava valC = 4 e valP. La decodifica legge la base: valB è il contenuto di %rbx. Nell’esecuzione l’ALU somma i due valori e ottiene l’indirizzo, valE = valB + valC. La fase di memoria legge le otto celle a partire da valE e le ricompone in little-endian nella parola valM. La scrittura deposita valM in %rax, e infine il PC riceve valP.',
+      'È opportuno mantenere distinte due grandezze facilmente confuse: valE è un indirizzo, cioè una posizione, mentre valM è il contenuto presente in quella posizione.'
     ]
   },
   esperimento: {
     faremo: [
-      'Eseguiremo una `mrmovq` che comincia all’indirizzo 0x40, una fase alla volta. La memoria dei dati è preparata in modo che ogni cella contenga il triplo del proprio indirizzo, ridotto a un byte. Sceglierai il valore della base %rbx e lo spostamento.',
-      'Vedremo nascere valC e valP, poi valB, valE e valM, fino alla scrittura in %rax e al nuovo PC. Dopo il caso proposto, scegli uno spostamento negativo.'
+      'L’esperimento esegue, una fase alla volta, una `mrmovq` che ha inizio all’indirizzo 0x40. La memoria dei dati è predisposta in modo che ogni cella contenga il triplo del proprio indirizzo, ridotto a un byte. I controlli fissano il valore della base %rbx e lo spostamento.',
+      'Si osserva la formazione di valC e valP, poi di valB, valE e valM, fino alla scrittura in %rax e al nuovo PC. Dopo il caso proposto, è istruttivo selezionare uno spostamento negativo.'
     ],
     vedrai: [
       ['strati', 'Le sei fasi', 'In alto: la fase in corso, in evidenza.'],
-      ['alu', 'I valori', 'Sotto: valC, valP, valB, valE e valM, man mano che vengono prodotti.'],
+      ['alu', 'I valori', 'Più in basso: valC, valP, valB, valE e valM, nell’ordine in cui sono prodotti.'],
       ['memory', 'Memoria e registri', 'In basso: le otto celle lette, poi %rbx, %rax e il PC.']
     ]
   },
@@ -53,7 +53,7 @@ SL.registra('3.3.3', {
     ],
     nota: 'I passi sono sempre sei, uno per fase. Ogni cella di memoria contiene il triplo del proprio indirizzo, modulo 256.',
     previsione: {
-      domanda: (p) => 'Ogni cella di memoria contiene il triplo del proprio indirizzo, modulo 256. Il registro %rbx vale ' + p.b + '. Si esegue `mrmovq ' + p.d + '(%rbx), %rax`. Quale byte finisce nella posizione meno significativa di %rax?',
+      domanda: (p) => 'Ogni cella di memoria contiene il triplo del proprio indirizzo, modulo 256. Il registro %rbx vale ' + p.b + '. Si esegue `mrmovq ' + p.d + '(%rbx), %rax`. Quale byte occupa la posizione meno significativa di %rax?',
       opzioni: (p) => { const U = SL.unita333, a = p.b + p.d; return Array.from(new Set([U.cella(a), U.cella(a + 7), U.cella(p.b), a & 255])).sort((x, y) => x - y).map((v) => [v, '0x' + SL.y86.esa2(v)]); }
     },
     confronto: (pred, esito, p) => { const H = (v) => '0x' + SL.y86.esa2(v), a = p.b + p.d; return 'La previsione indicava ' + H(pred) + '. Il byte meno significativo di %rax è ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'L’indirizzo è ' + p.b + ' + ' + (p.d < 0 ? '(' + SL.x86.num(p.d) + ')' : p.d) + ' = ' + a + '. In little-endian la prima cella, quella all’indirizzo ' + a + ', dà il byte meno significativo: 3 × ' + a + ' = ' + 3 * a + ', cioè ' + H(esito) + '.'); },
@@ -83,36 +83,36 @@ SL.registra('3.3.3', {
 
       st.valC = true;
       P({ nuovo: 'valC' }, 0, 'Prelievo', 'Il PC vale 0x40. Il processore legge il primo byte, 50: icode 5, la classe di `mrmovq`. Il byte dei registri, 03, indica rA = %rax e rB = %rbx. Seguono gli otto byte della costante: valC = ' + N(p.d) + '. L’istruzione occupa dieci byte, quindi valP = 0x4A.',
-        { calc: 'valC = ' + N(p.d) + ' · valP = 0x4A', chiedi: { d: 'Nella decodifica servirà il contenuto di un registro. Quale?', o: ['%rax', '%rbx'], g: 1, no: '%rbx è la base dell’indirizzo, e va letto. %rax è la destinazione: verrà scritto, e il suo vecchio contenuto non serve.' } });
+        { calc: 'valC = ' + N(p.d) + ' · valP = 0x4A', chiedi: { d: 'La decodifica richiede il contenuto di un registro. Quale?', o: ['%rax', '%rbx'], g: 1, no: '%rbx è la base dell’indirizzo, e va letto. %rax è la destinazione: sarà scritto, e il suo contenuto precedente è irrilevante.' } });
       st.f = 1; st.valB = true;
-      P({ nuovo: 'valB' }, 1, 'Decodifica', 'Il banco dei registri riceve l’indirizzo di %rbx e ne mostra il contenuto: valB = ' + p.b + '. È la base da cui partire per trovare il dato.',
+      P({ nuovo: 'valB' }, 1, 'Decodifica', 'Il banco dei registri riceve l’indirizzo di %rbx e ne mostra il contenuto: valB = ' + p.b + '. È la base a partire dalla quale si individua il dato.',
         { calc: 'valB = ' + p.b, chiedi: { d: 'Con valB = ' + p.b + ' e valC = ' + N(p.d) + ', quale indirizzo calcolerà l’ALU?', o: opzE.map(N), g: opzE.indexOf(valE), no: 'L’ALU somma base e spostamento: ' + p.b + ' + ' + PD + ' = ' + valE + '.' } });
       st.f = 2; st.valE = true;
-      P({ nuovo: 'valE' }, 2, 'Esecuzione', 'L’ALU somma la base e lo spostamento: valE = valB + valC = ' + p.b + ' + ' + PD + ' = ' + valE + '. Questo numero è un indirizzo: dice dove comincia il dato, e nulla sul suo contenuto.',
+      P({ nuovo: 'valE' }, 2, 'Esecuzione', 'L’ALU somma la base e lo spostamento: valE = valB + valC = ' + p.b + ' + ' + PD + ' = ' + valE + '. Questo numero è un indirizzo: indica dove ha inizio il dato, senza alcuna informazione sul suo contenuto.',
         { calc: 'valE = ' + p.b + ' + ' + PD + ' = ' + valE, chiedi: { d: 'La parola da leggere occupa otto celle a partire dall’indirizzo ' + valE + '. Qual è l’indirizzo dell’ultima?', o: [valE + 1, valE + 7, valE + 8].map(String), g: 1, no: 'Otto celle a partire da ' + valE + ': la prima è ' + valE + ', l’ultima è ' + valE + ' + 7 = ' + (valE + 7) + '.' } });
       st.f = 3; st.valM = true;
-      P({ nuovo: 'valM' }, 3, 'Memoria', 'La memoria riceve l’indirizzo valE e consegna le otto celle da ' + valE + ' a ' + (valE + 7) + '. Ciascuna contiene il triplo del proprio indirizzo: la prima ' + Y.esa2(celle[0]) + ', l’ultima ' + Y.esa2(celle[7]) + '. In little-endian la prima cella è il byte meno significativo, quindi nella parola valM compare all’estrema destra.',
+      P({ nuovo: 'valM' }, 3, 'Memoria', 'La memoria riceve l’indirizzo valE e fornisce le otto celle da ' + valE + ' a ' + (valE + 7) + '. Ciascuna contiene il triplo del proprio indirizzo: la prima ' + Y.esa2(celle[0]) + ', l’ultima ' + Y.esa2(celle[7]) + '. In little-endian la prima cella è il byte meno significativo, quindi nella parola valM compare all’estrema destra.',
         { calc: 'valM = ' + valM });
       st.f = 4; st.rax = true;
       P({ nuovo: 'rax' }, 4, 'Scrittura', 'Il banco dei registri riceve valM sulla porta di scrittura, con l’indirizzo di %rax. Al fronte del clock %rax assume il valore ' + valM + '. Il registro %rbx è stato soltanto letto, e resta ' + p.b + '.',
         { calc: '%rax = valM' });
       st.f = 5; st.pc = 0x4A;
-      P({ nuovo: 'pc' }, 5, 'Aggiornamento del PC', '`mrmovq` non è un salto, quindi la prossima istruzione è quella che segue in memoria. Il PC riceve valP e passa da 0x40 a 0x4A. Due numeri hanno fatto da indirizzo in questa istruzione, e riguardano zone diverse: ' + valE + ' per il dato, 0x4A per il programma.',
+      P({ nuovo: 'pc' }, 5, 'Aggiornamento del PC', '`mrmovq` è un’istruzione priva di salto, quindi la prossima istruzione è quella che segue in memoria. Il PC riceve valP e passa da 0x40 a 0x4A. In questa istruzione due numeri hanno avuto il ruolo di indirizzo, e riguardano zone diverse: ' + valE + ' per il dato, 0x4A per il programma.',
         { calc: 'PC = valP = 0x4A', esito: ['byte basso di %rax: ' + Y.esa2(celle[0]), 'si'] });
       return { passi, esito: celle[0] };
     }
   },
   bilancio: {
     regola: [
-      'Ogni istruzione attraversa sei fasi nello stesso ordine: prelievo, decodifica, esecuzione, memoria, scrittura, aggiornamento del PC. I valori che passano da una fase all’altra hanno nomi fissi: valC e valP, valA e valB, valE, valM.',
-      'In `mrmovq D(rB), rA` l’ALU calcola l’indirizzo valE = valB + valC, la memoria fornisce la parola valM che comincia a quell’indirizzo, e la scrittura la deposita in rA.'
+      'Ogni istruzione attraversa sei fasi nel medesimo ordine: prelievo, decodifica, esecuzione, memoria, scrittura, aggiornamento del PC. I valori trasmessi da una fase all’altra hanno nomi fissi: valC e valP, valA e valB, valE, valM.',
+      'In `mrmovq D(rB), rA` l’ALU calcola l’indirizzo valE = valB + valC, la memoria fornisce la parola valM che ha inizio a quell’indirizzo, e la scrittura la deposita in rA.'
     ],
     errori: [
       ['Scambiare valE con valM.', 'valE è l’indirizzo calcolato dall’ALU. valM è la parola che la memoria contiene a quell’indirizzo.'],
       ['Leggere una sola cella.', 'Una parola di 64 bit occupa otto celle, da valE a valE + 7.'],
-      ['Ricomporre la parola partendo dal byte sbagliato.', 'In little-endian la cella all’indirizzo valE contiene il byte meno significativo.']
+      ['Ricomporre la parola a partire dal byte errato.', 'In little-endian la cella all’indirizzo valE contiene il byte meno significativo.']
     ],
-    saFare: ['Elencare le sei fasi nell’ordine giusto.', 'Indicare quale valore produce ciascuna fase.', 'Seguire una `mrmovq` dal prelievo all’aggiornamento del PC.'],
+    saFare: ['Elencare le sei fasi nell’ordine corretto.', 'Indicare quale valore produce ciascuna fase.', 'Seguire una `mrmovq` dal prelievo all’aggiornamento del PC.'],
     esercizi: [
       { d: 'Si esegue `mrmovq 24(%rbx), %rax` con %rbx = 100. Quanto vale valE?', segnaposto: 'Un numero', giuste: ['124', 'centoventiquattro'],
         ok: 'valE = valB + valC = 100 + 24 = 124.',
@@ -121,13 +121,13 @@ SL.registra('3.3.3', {
           { se: ['24', 'ventiquattro'], msg: 'Questo è valC, lo spostamento. Va sommato alla base valB.' },
           { se: ['131'], msg: 'Questo è l’indirizzo dell’ultima cella letta. valE è l’indirizzo della prima.' }
         ],
-        altro: 'Il numero è diverso. Somma il contenuto del registro di base e lo spostamento.',
+        altro: 'Il numero è diverso. Si sommino il contenuto del registro di base e lo spostamento.',
         indizi: ['valB è il contenuto di %rbx.', 'valC è lo spostamento scritto nell’istruzione.', '100 + 24.'],
         svolgimento: ['valB = 100.', 'valC = 24.', 'valE = 100 + 24 = 124.'] },
       { d: 'In quale fase `mrmovq` deposita la parola letta nel registro di destinazione?', guida: 'Si scelga la risposta.', o: [
         { t: 'Nella fase di scrittura', ok: true, fb: 'La fase di memoria produce valM, e la fase di scrittura lo deposita nel banco dei registri.' },
         { t: 'Nella fase di memoria', fb: 'La fase di memoria legge la parola e la rende disponibile come valM. Il registro la riceve nella fase successiva.' },
-        { t: 'Nella fase di esecuzione', fb: 'Nell’esecuzione l’ALU calcola l’indirizzo valE. Il dato non è ancora stato letto.' }] }
+        { t: 'Nella fase di esecuzione', fb: 'Nell’esecuzione l’ALU calcola l’indirizzo valE. Il dato sarà letto soltanto nella fase successiva.' }] }
     ],
     sfida: ['cslez3_3_05_random_assembly', 'Memoria, scrittura dei risultati e aggiornamento del PC']
   }

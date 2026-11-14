@@ -14,40 +14,40 @@ SL.unita556 = (() => {
 })();
 SL.registra('5.5.6', {
   titolo: 'Permessi dei semafori e ordine degli eventi',
-  obiettivo: 'Obiettivo: seguire lo stato di un semaforo attraverso una sequenza di wait e signal, tenendo d’occhio insieme il contatore dei permessi e la coda dei thread bloccati.',
-  concetti: [['semaforo', 'Un contatore di permessi'], ['coda', 'Chi non ne trova aspetta in coda'], ['thread', 'Un permesso può passare di mano']],
+  obiettivo: 'Obiettivo: seguire lo stato di un semaforo attraverso una sequenza di wait e signal, con l’osservazione congiunta del contatore dei permessi e della coda dei thread bloccati.',
+  concetti: [['semaforo', 'Un contatore di permessi'], ['coda', 'In assenza di permessi il thread attende in coda'], ['thread', 'Un permesso può essere trasferito']],
   filigrana: ['semaforo', 'coda', 'thread'],
   richiami: {
     carte: [
-      { sim: 'lucchetto', da: 'Dall’unità 5.5.5', t: 'Il lock', d: 'Un diritto esclusivo: un proprietario per volta, e soltanto lui lo rilascia.' },
-      { sim: 'coda', da: 'Dall’unità 5.1.4', t: 'La coda di attesa', d: 'L’elenco dei thread che aspettano lo stesso evento.' },
-      { sim: 'coda', da: 'Dall’unità 4.5.3', t: 'L’ordine di arrivo', d: 'Servire per primo chi è arrivato per primo.' }
+      { sim: 'lucchetto', da: 'Dall’unità 5.5.5', t: 'Il lock', d: 'Un diritto esclusivo: un proprietario per volta, il solo a poterlo rilasciare.' },
+      { sim: 'coda', da: 'Dall’unità 5.1.4', t: 'La coda di attesa', d: 'L’elenco dei thread in attesa del medesimo evento.' },
+      { sim: 'coda', da: 'Dall’unità 4.5.3', t: 'L’ordine di arrivo', d: 'Il servizio secondo l’ordine di arrivo delle richieste.' }
     ],
-    domanda: { d: 'Prima di proseguire: un servizio ha 3 posti. Sono entrati 3 clienti. Arriva un quarto. Che cosa fa?', o: [
-      { t: 'Aspetta che un posto si liberi', ok: true, fb: 'I posti sono finiti, e il quarto si mette in attesa.' },
-      { t: 'Entra comunque', fb: 'I posti sono 3, e sono tutti occupati.' },
-      { t: 'Fa uscire il primo cliente', fb: 'Chi è dentro esce quando ha finito. Il nuovo arrivato aspetta.' }
+    domanda: { d: 'Prima di proseguire: una risorsa ammette 3 thread per volta, e 3 thread vi sono entrati. Giunge un quarto thread. Quale comportamento è corretto?', o: [
+      { t: 'Attende che un accesso si liberi', ok: true, fb: 'Gli accessi sono esauriti, e il quarto thread si pone in attesa.' },
+      { t: 'Accede comunque', fb: 'Gli accessi sono 3, e sono tutti occupati.' },
+      { t: 'Impone l’uscita del primo thread', fb: 'Un thread interno esce al termine del proprio lavoro. Il nuovo thread attende.' }
     ] }
   },
   idea: {
-    titolo: 'Un mutex con più di un posto',
+    titolo: 'Un meccanismo con più permessi',
     termini: ['semaforo', 'wait e signal'],
     testo: [
-      'Un mutex ammette un thread per volta. Molte risorse però ne ammettono più d’uno: tre stampanti, dieci connessioni, cinque posti in un buffer. Lo strumento adatto è il [[semaforo]]: un contatore di permessi, accompagnato da una coda di thread in attesa. Il contatore dice quanti permessi sono liberi in questo momento.',
-      'Le operazioni sono due, e formano la coppia [[wait e signal]]. Con wait un thread chiede un permesso. Se il contatore è maggiore di zero lo decrementa, e il thread prosegue. Se è zero, il thread viene bloccato e messo in coda. Con signal un thread restituisce un permesso, oppure ne crea uno nuovo: a differenza del mutex, chi esegue signal può essere un thread diverso da quello che aveva eseguito wait.',
-      { fig: 'scena', w: 720, h: 62, titolo: 'Un permesso iniziale: A lo ha preso, e B si è bloccato', nota: 'I permessi liberi sono 0, e B è in coda. La prossima signal consegnerà il permesso a B.', els: SL.unita556.scena('g', SL.unita556.esegui({ s: 1, ord: 'ww' })[2], { x: 10, y: 4, w: 700, h: 54 }) },
-      'Il punto delicato è che cosa accade a una signal quando qualcuno aspetta. Il permesso salta il contatore e passa direttamente al primo thread in coda, che viene risvegliato. Il contatore resta a zero, perché quel permesso ha già un destinatario. Soltanto se la coda è vuota la signal fa salire il contatore.',
-      'Seguiamo un caso, con un permesso iniziale. A esegue wait: il contatore scende da 1 a 0. B esegue wait: trova 0, e si blocca in coda. P esegue signal: la coda contiene B, che riceve il permesso e torna pronto, e il contatore resta 0. Q esegue signal: la coda è vuota, e il contatore sale a 1. Per leggere un semaforo servono sempre entrambi i dati, contatore e coda. Un contatore a zero con la coda vuota e un contatore a zero con tre thread in coda sono situazioni molto diverse.'
+      'Un mutex ammette un thread per volta. Molte risorse ne ammettono tuttavia più d’uno: tre stampanti, dieci connessioni, cinque posizioni in un buffer. Lo strumento adatto è il [[semaforo]]: un contatore di permessi, accompagnato da una coda di thread in attesa. Il contatore indica il numero dei permessi liberi in un dato momento.',
+      'Le operazioni sono due, e formano la coppia [[wait e signal]]. Con wait un thread richiede un permesso. Se il contatore è maggiore di zero lo decrementa, e il thread prosegue. Se è zero, il thread è bloccato e posto in coda. Con signal un thread restituisce un permesso, oppure ne crea uno nuovo: a differenza del mutex, la signal può essere eseguita da un thread diverso da quello che aveva eseguito wait.',
+      { fig: 'scena', w: 720, h: 62, titolo: 'Un permesso iniziale: A lo ha acquisito, e B si è bloccato', nota: 'I permessi liberi sono 0, e B è in coda. La prossima signal consegnerà il permesso a B.', els: SL.unita556.scena('g', SL.unita556.esegui({ s: 1, ord: 'ww' })[2], { x: 10, y: 4, w: 700, h: 54 }) },
+      'L’aspetto critico è l’effetto di una signal in presenza di thread in attesa. Il permesso non transita dal contatore e passa direttamente al primo thread in coda, che è risvegliato. Il contatore resta a zero, poiché quel permesso ha già un destinatario. Soltanto se la coda è vuota la signal incrementa il contatore.',
+      'Si consideri un caso, con un permesso iniziale. A esegue wait, e il contatore scende da 1 a 0. B esegue wait, trova 0, e si blocca in coda. P esegue signal: la coda contiene B, che riceve il permesso e torna pronto, mentre il contatore resta 0. Q esegue signal con la coda vuota, e il contatore sale a 1. La lettura di un semaforo richiede sempre entrambi i dati, contatore e coda: un contatore a zero con la coda vuota e un contatore a zero con tre thread in coda sono stati diversi.'
     ]
   },
   esperimento: {
     faremo: [
-      'Due thread, A e B, eseguono una wait ciascuno. Altri due, P e Q, eseguono una signal ciascuno. Sceglierai quanti permessi ha il semaforo all’inizio, e in quale ordine avvengono le quattro operazioni.',
-      'Dopo ogni operazione guarderemo il contatore e la coda. Fai attenzione alle signal: alcune fanno salire il contatore, altre no.'
+      'Due thread, A e B, eseguono una wait ciascuno, e altri due, P e Q, eseguono una signal ciascuno. I controlli fissano il numero iniziale dei permessi del semaforo, e l’ordine delle quattro operazioni.',
+      'Dopo ogni operazione l’esperimento mostra il contatore e la coda. Vanno osservate in particolare le signal: soltanto alcune incrementano il contatore.'
     ],
     vedrai: [
       ['semaforo', 'Il semaforo', 'In alto: il contatore dei permessi liberi e la coda dei thread bloccati, insieme all’operazione appena eseguita.'],
-      ['coda', 'La sequenza', 'In basso: le quattro operazioni nell’ordine scelto. Quella appena eseguita è accesa.']
+      ['coda', 'La sequenza', 'In basso: le quattro operazioni nell’ordine selezionato. Quella appena eseguita è evidenziata.']
     ]
   },
   lab: {
@@ -60,58 +60,58 @@ SL.registra('5.5.6', {
     ],
     nota: 'I passi sono sempre sei. La coda serve i thread nell’ordine in cui si sono bloccati.',
     previsione: {
-      domanda: (p) => 'Un semaforo ha ' + (p.s === 1 ? '1 permesso libero' : p.s + ' permessi liberi') + ' e la coda vuota. Avvengono nell’ordine: ' + (p.ord === 'ww' ? 'A wait, B wait, P signal, Q signal' : 'A wait, P signal, B wait, Q signal') + '. Quanti permessi liberi ci sono alla fine?',
+      domanda: (p) => 'Un semaforo ha ' + (p.s === 1 ? '1 permesso libero' : p.s + ' permessi liberi') + ' e la coda vuota. Le operazioni avvengono nell’ordine: ' + (p.ord === 'ww' ? 'A wait, B wait, P signal, Q signal' : 'A wait, P signal, B wait, Q signal') + '. Quanti permessi liberi sono presenti al termine?',
       opzioni: () => [0, 1, 2].map((v) => [v, String(v)])
     },
-    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. Alla fine i permessi liberi sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Due wait e due signal si compensano: il semaforo torna al numero iniziale, ' + p.s + '. I permessi passati direttamente a un thread in coda non compaiono mai nel contatore.'),
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. Al termine i permessi liberi sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Due wait e due signal si compensano: il semaforo torna al numero iniziale, ' + p.s + '. I permessi passati direttamente a un thread in coda non compaiono mai nel contatore.'),
     costruisci(p) {
       const U = SL.unita556, S = U.esegui(p), passi = [], fin = S[4].n;
       const P = (k, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: [['Permessi liberi', String(S[k].n), 'a'], ['In coda', S[k].coda.length ? S[k].coda.join(', ') : 'nessuno'], ['Operazione', S[k].op ? S[k].op[0] + ' ' + S[k].op[1] : '·', 'c']], els: U.scena('q', S[k], { x: 20, y: 6, w: 820, h: 56 }).concat(U.striscia('t', p, atto === 2 ? 5 : k, { x: 20, y: 74, w: 820, h: 56 })) }, extra));
-      const D = (s, prec) => { const chi = s.op[0]; return s.nota === 'prende' ? chi + ' chiede un permesso. Il contatore vale ' + prec.n + ', maggiore di zero: scende a ' + s.n + ', e ' + chi + ' prosegue.' : s.nota === 'blocca' ? chi + ' chiede un permesso. Il contatore vale 0: ' + chi + ' viene bloccato e messo in coda.' : s.nota === 'libera' ? chi + ' restituisce un permesso. La coda è vuota, e il contatore sale da ' + prec.n + ' a ' + s.n + '.' : chi + ' restituisce un permesso. In coda c’è ' + s.nota.slice(6) + ', che lo riceve direttamente e torna pronto. Il contatore resta a ' + s.n + '.'; };
+      const D = (s, prec) => { const chi = s.op[0]; return s.nota === 'prende' ? chi + ' richiede un permesso. Il contatore vale ' + prec.n + ', maggiore di zero: scende a ' + s.n + ', e ' + chi + ' prosegue.' : s.nota === 'blocca' ? chi + ' richiede un permesso. Il contatore vale 0: ' + chi + ' è bloccato e posto in coda.' : s.nota === 'libera' ? chi + ' restituisce un permesso. La coda è vuota, e il contatore sale da ' + prec.n + ' a ' + s.n + '.' : chi + ' restituisce un permesso. In coda è presente ' + s.nota.slice(6) + ', che lo riceve direttamente e torna pronto. Il contatore resta a ' + s.n + '.'; };
 
-      P(0, 0, 'Il semaforo all’inizio', 'Il semaforo ha ' + (p.s === 0 ? 'il contatore a 0: nessun permesso libero.' : p.s === 1 ? '1 permesso libero.' : p.s + ' permessi liberi.') + ' La coda dei bloccati è vuota.', {});
+      P(0, 0, 'Lo stato iniziale del semaforo', 'Il semaforo ha ' + (p.s === 0 ? 'il contatore a 0: nessun permesso libero.' : p.s === 1 ? '1 permesso libero.' : p.s + ' permessi liberi.') + ' La coda dei bloccati è vuota.', {});
       let chiesto = false;
       for (let k = 1; k <= 4; k++) { const s = S[k], extra = { calc: s.op[0] + ' ' + s.op[1] + ' · permessi ' + s.n };
-        if (!chiesto && s.op[1] === 'signal') { chiesto = true; extra.chiedi = { d: 'Dopo questa signal, il contatore dei permessi liberi è salito?', o: ['Sì', 'No: il permesso è andato a un thread in coda'], g: s.nota === 'libera' ? 0 : 1, no: s.nota === 'libera' ? 'La coda era vuota, e il permesso è rimasto libero.' : 'In coda c’era un thread, che ha ricevuto il permesso.' }; }
+        if (!chiesto && s.op[1] === 'signal') { chiesto = true; extra.chiedi = { d: 'Dopo questa signal, il contatore dei permessi liberi è salito?', o: ['Sì', 'No, il permesso è passato a un thread in coda'], g: s.nota === 'libera' ? 0 : 1, no: s.nota === 'libera' ? 'La coda era vuota, e il permesso è rimasto libero.' : 'In coda era presente un thread, che ha ricevuto il permesso.' }; }
         P(k, 1, s.op[0] + ' · ' + s.op[1], D(s, S[k - 1]), extra); }
-      P(4, 2, 'Lo stato finale', 'Alla fine i permessi liberi sono ' + fin + ' e la coda è vuota. Due wait hanno tolto due permessi e due signal ne hanno restituiti due: il semaforo è tornato al valore iniziale. A e B hanno entrambi ottenuto il proprio permesso, subito oppure dopo un’attesa.', { esito: [fin + (fin === 1 ? ' permesso libero' : ' permessi liberi'), ''] });
+      P(4, 2, 'Lo stato finale', 'Al termine i permessi liberi sono ' + fin + ' e la coda è vuota. Due wait hanno sottratto due permessi e due signal ne hanno restituiti due: il semaforo è tornato al valore iniziale. A e B hanno entrambi ottenuto il proprio permesso, immediatamente oppure dopo un’attesa.', { esito: [fin + (fin === 1 ? ' permesso libero' : ' permessi liberi'), ''] });
       return { passi, esito: fin };
     }
   },
   bilancio: {
     regola: [
       'wait: se il contatore è maggiore di zero lo decrementa, altrimenti blocca il thread in coda.',
-      'signal: se la coda contiene qualcuno, gli consegna il permesso e lo risveglia, senza toccare il contatore. Se la coda è vuota, incrementa il contatore.'
+      'signal: se la coda contiene un thread, gli consegna il permesso e lo risveglia, senza modificare il contatore. Se la coda è vuota, incrementa il contatore.'
     ],
     errori: [
-      ['Incrementare il contatore a ogni signal.', 'Se un thread è in coda, il permesso va a lui e il contatore resta com’è.'],
+      ['Incrementare il contatore a ogni signal.', 'Se un thread è in coda, il permesso passa a esso e il contatore resta invariato.'],
       ['Leggere soltanto il contatore.', 'Uno zero con la coda vuota e uno zero con thread in attesa sono stati diversi.'],
-      ['Trattare il semaforo come un mutex.', 'Un semaforo è privo di proprietario: la signal può venire da un thread che non ha mai fatto wait.']
+      ['Trattare il semaforo come un mutex.', 'Un semaforo è privo di proprietario: la signal può provenire da un thread che non ha mai eseguito wait.']
     ],
     saFare: ['Aggiornare contatore e coda dopo una wait.', 'Aggiornare contatore e coda dopo una signal.', 'Distinguere un permesso libero da uno già assegnato.'],
     esercizi: [
-      { d: 'Un semaforo ha 2 permessi liberi e la coda vuota. Cinque thread eseguono wait, uno dopo l’altro. Quanti restano bloccati in coda?', segnaposto: 'Un numero', giuste: ['3', 'tre'],
-        ok: 'I primi due prendono i permessi, gli altri tre si bloccano.',
+      { d: 'Un semaforo ha 2 permessi liberi e la coda vuota. Cinque thread eseguono wait, in successione. Quanti restano bloccati in coda?', segnaposto: 'Un numero', giuste: ['3', 'tre'],
+        ok: 'I primi due acquisiscono i permessi, gli altri tre si bloccano.',
         diagnosi: [
           { se: ['5', 'cinque'], msg: 'I primi due trovano un permesso libero e proseguono.' },
           { se: ['2', 'due'], msg: 'Due sono i thread che ottengono il permesso. Gli altri si bloccano.' }
         ],
-        altro: 'Il numero è diverso. Si sottragga dai thread i permessi disponibili.',
+        altro: 'Il numero è diverso. Si sottraggano dai thread i permessi disponibili.',
         indizi: ['I permessi sono 2.', 'I thread sono 5.', '5 − 2 = 3.'],
         svolgimento: ['Proseguono: 2.', 'Si bloccano: 3.'] },
-      { d: 'Nella stessa situazione, con 3 thread in coda e il contatore a 0, un altro thread esegue una signal. Quanto vale il contatore subito dopo?', segnaposto: 'Un numero', giuste: ['0', 'zero'],
+      { d: 'Nella medesima situazione, con 3 thread in coda e il contatore a 0, un altro thread esegue una signal. Quanto vale il contatore immediatamente dopo?', segnaposto: 'Un numero', giuste: ['0', 'zero'],
         ok: 'Il permesso passa al primo thread in coda, e il contatore resta a 0.',
         diagnosi: [
-          { se: ['1', 'uno'], msg: 'Il contatore sale soltanto se la coda è vuota. Qui il permesso va al primo thread in attesa.' },
-          { se: ['2', 'due'], msg: 'Due è il numero dei thread rimasti in coda dopo la signal.' }
+          { se: ['1', 'uno'], msg: 'Il contatore sale soltanto se la coda è vuota. In questo caso il permesso passa al primo thread in attesa.' },
+          { se: ['2', 'due'], msg: 'Due è il numero dei thread residui in coda dopo la signal.' }
         ],
-        altro: 'Il valore è diverso. Ci si chieda a chi va il permesso restituito.',
-        indizi: ['La coda non è vuota.', 'Il permesso va al primo thread in coda.', 'Il contatore resta 0.'],
+        altro: 'Il valore è diverso. Si determini il destinatario del permesso restituito.',
+        indizi: ['La coda non è vuota.', 'Il permesso passa al primo thread in coda.', 'Il contatore resta 0.'],
         svolgimento: ['Coda prima: 3 thread.', 'La signal risveglia il primo.', 'Contatore: 0. Coda: 2 thread.'] },
       { d: 'In che cosa un semaforo differisce da un mutex?', guida: 'Si scelga la risposta.', o: [
-        { t: 'Ammette più permessi, e la signal può venire da un thread diverso', ok: true, fb: 'Il mutex ha un solo permesso e un proprietario, che è il solo a poterlo rilasciare.' },
+        { t: 'Ammette più permessi, e la signal può provenire da un thread diverso', ok: true, fb: 'Il mutex ha un solo permesso e un proprietario, che è il solo a poterlo rilasciare.' },
         { t: 'Non blocca mai i thread', fb: 'Una wait con il contatore a zero blocca il thread.' },
-        { t: 'Funziona soltanto su più core', fb: 'Semafori e mutex funzionano con qualunque numero di core.' }] }
+        { t: 'È utilizzabile soltanto su più core', fb: 'Semafori e mutex funzionano con qualunque numero di core.' }] }
     ],
     sfida: ['cslez5_5_03_semaphores', 'Stato del semaforo durante wait e signal']
   }

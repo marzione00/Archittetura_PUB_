@@ -10,15 +10,15 @@
     // 6.5.1 · contatore dei collegamenti dopo creazioni e rimozioni
     (r) => {
       const n = r.int(1, 3), k = r.int(0, 3), rim = r.int(1, n + k), v = n + k - rim, giuste = I(v);
-      return { u: '6.5.1', d: 'Un inode ha ' + (n === 1 ? '1 collegamento' : n + ' collegamenti') + '. ' + (k === 0 ? 'Nessun altro hard link viene creato.' : k === 1 ? 'Viene creato 1 altro hard link.' : 'Vengono creati altri ' + k + ' hard link.') + ' Poi ' + (rim === 1 ? 'viene rimosso 1 nome' : 'vengono rimossi ' + rim + ' nomi') + ' con unlink. Quanto vale il contatore dei collegamenti?', segnaposto: 'Un numero', giuste,
-        ok: n + ' + ' + k + ' − ' + rim + ' = ' + v + '.' + (v === 0 ? ' A zero, il sistema libera inode e blocchi.' : ''),
+      return { u: '6.5.1', d: 'Un inode ha ' + (n === 1 ? '1 collegamento' : n + ' collegamenti') + '. ' + (k === 0 ? 'Nessun altro hard link è creato.' : k === 1 ? 'È creato 1 altro hard link.' : 'Sono creati altri ' + k + ' hard link.') + ' In seguito ' + (rim === 1 ? 'è rimosso 1 nome' : 'sono rimossi ' + rim + ' nomi') + ' con unlink. Quanto vale il contatore dei collegamenti?', segnaposto: 'Un numero', giuste,
+        ok: n + ' + ' + k + ' − ' + rim + ' = ' + v + '.' + (v === 0 ? ' Con il contatore a zero, il sistema libera inode e blocchi.' : ''),
         diagnosi: DIAG(giuste, [
-          { se: I(n + k), msg: 'Questo è il valore prima delle rimozioni. Ogni unlink toglie un collegamento.' },
+          { se: I(n + k), msg: 'Questo è il valore prima delle rimozioni. Ogni unlink rimuove un collegamento.' },
           k > 0 ? { se: I(Math.max(0, n - rim)), msg: 'Vanno contati anche gli hard link creati: ciascuno aggiunge 1 al contatore.' } : null,
-          { se: I(rim), msg: 'Questo è il numero dei nomi rimossi. La domanda riguarda i collegamenti rimasti.' }
+          { se: I(rim), msg: 'Questo è il numero dei nomi rimossi. La domanda riguarda i collegamenti residui.' }
         ]),
-        altro: 'Il numero è diverso. Si aggiunga 1 per ogni hard link creato e si tolga 1 per ogni nome rimosso.',
-        indizi: ['All’inizio: ' + n + '.', 'Dopo le creazioni: ' + (n + k) + '.', 'Dopo le rimozioni: ' + v + '.'],
+        altro: 'Il numero è diverso. Si aggiunga 1 per ogni hard link creato e si sottragga 1 per ogni nome rimosso.',
+        indizi: ['Valore iniziale: ' + n + '.', 'Dopo le creazioni: ' + (n + k) + '.', 'Dopo le rimozioni: ' + v + '.'],
         svolgimento: [n + ' + ' + k + ' = ' + (n + k) + '.', (n + k) + ' − ' + rim + ' = ' + v + '.'] };
     },
     // 6.5.2 · inode raggiunto da un percorso in un albero dato
@@ -28,33 +28,33 @@
       return { u: '6.5.2', d: 'La radice contiene «a», con inode 5, e «b», con inode 9. La directory /a contiene «x» (inode 20), «y» (inode 21) e la directory «sub» (inode 6). La directory /a/sub contiene «x» (inode 30). La directory /b contiene «x» (inode 40). La directory corrente è ' + ALBERO[q[0]].nome + '. Quale inode raggiunge il percorso ' + q[1] + '?', segnaposto: 'Un numero', giuste,
         ok: R.righe.join(' '),
         diagnosi: DIAG(giuste, [
-          altra && q[1][0] !== '/' ? { se: I(altra.inode), msg: 'Questo sarebbe il risultato da un’altra directory corrente. Qui si parte da ' + ALBERO[q[0]].nome + '.' } : null,
+          altra && q[1][0] !== '/' ? { se: I(altra.inode), msg: 'Questo sarebbe il risultato da un’altra directory corrente. In questo caso la ricerca ha inizio da ' + ALBERO[q[0]].nome + '.' } : null,
           { se: I(q[0]), msg: 'Questo è l’inode della directory corrente. Il percorso va risolto fino all’ultimo componente.' },
-          { se: I(20), msg: 'Venti è «x» in /a. Controlla in quale directory viene cercato l’ultimo componente.' },
-          { se: I(30), msg: 'Trenta è «x» in /a/sub. Controlla in quale directory viene cercato l’ultimo componente.' },
-          { se: I(40), msg: 'Quaranta è «x» in /b. Controlla in quale directory viene cercato l’ultimo componente.' }
+          { se: I(20), msg: 'Venti è «x» in /a. Va verificata la directory in cui è cercato l’ultimo componente.' },
+          { se: I(30), msg: 'Trenta è «x» in /a/sub. Va verificata la directory in cui è cercato l’ultimo componente.' },
+          { se: I(40), msg: 'Quaranta è «x» in /b. Va verificata la directory in cui è cercato l’ultimo componente.' }
         ]),
-        altro: 'Il numero è diverso. Risolvi un componente alla volta, annotando la directory in cui lo cerchi.',
-        indizi: [q[1][0] === '/' ? 'Il percorso comincia con una barra: si parte dalla radice.' : 'Il percorso è relativo: si parte da ' + ALBERO[q[0]].nome + '.', R.righe[0], R.righe.slice(1).join(' ') || 'L’inode raggiunto è ' + R.inode + '.'],
+        altro: 'Il numero è diverso. Si risolva un componente per volta, annotando la directory in cui è cercato.',
+        indizi: [q[1][0] === '/' ? 'Il percorso ha inizio con una barra: la ricerca ha inizio dalla radice.' : 'Il percorso è relativo: la ricerca ha inizio da ' + ALBERO[q[0]].nome + '.', R.righe[0], R.righe.slice(1).join(' ') || 'L’inode raggiunto è ' + R.inode + '.'],
         svolgimento: R.righe.concat(['Inode: ' + R.inode + '.']) };
     },
     // 6.5.3 · blocchi necessari, spazio inutilizzato, oppure posizione logica dell'ultimo byte
     (r) => {
       const bl = r.scegli([1024, 4096]), nb = r.int(1, 5), usati = r.int(1, bl), s = (nb - 1) * bl + usati, spreco = nb * bl - s, cosa = r.int(0, 2), v = cosa === 0 ? nb : cosa === 1 ? spreco : nb - 1, giuste = I(v);
       return { u: '6.5.3', d: 'I blocchi sono da ' + bl + ' byte. Un file è lungo ' + s + ' byte. ' + (cosa === 0 ? 'Quanti blocchi occupa?' : cosa === 1 ? 'Quanti byte restano inutilizzati nel suo ultimo blocco?' : 'In quale blocco logico, contando da 0, si trova il suo ultimo byte?'), segnaposto: 'Un numero', giuste,
-        ok: 'Servono ' + nb + (nb === 1 ? ' blocco' : ' blocchi') + ', cioè ' + nb * bl + ' byte riservati. Inutilizzati: ' + spreco + '. L’ultimo byte, in posizione ' + (s - 1) + ', sta nel blocco logico ' + (nb - 1) + '.',
+        ok: 'Occorrono ' + nb + (nb === 1 ? ' blocco' : ' blocchi') + ', cioè ' + nb * bl + ' byte riservati. Inutilizzati: ' + spreco + '. L’ultimo byte, in posizione ' + (s - 1) + ', si trova nel blocco logico ' + (nb - 1) + '.',
         diagnosi: DIAG(giuste, cosa === 0 ? [
           { se: I(nb - 1), msg: (nb - 1) + (nb - 1 === 1 ? ' blocco contiene ' : ' blocchi contengono ') + (nb - 1) * bl + ' byte, meno della lunghezza del file. La divisione va arrotondata all’intero superiore.' },
-          { se: I(nb + 1), msg: nb + (nb === 1 ? ' blocco contiene ' : ' blocchi contengono ') + nb * bl + ' byte, che bastano.' }
+          { se: I(nb + 1), msg: nb + (nb === 1 ? ' blocco contiene ' : ' blocchi contengono ') + nb * bl + ' byte, che sono sufficienti.' }
         ] : cosa === 1 ? [
-          { se: I(usati), msg: 'Questi sono i byte usati nell’ultimo blocco. La domanda riguarda quelli rimasti vuoti.' },
+          { se: I(usati), msg: 'Questi sono i byte impiegati nell’ultimo blocco. La domanda riguarda quelli inutilizzati.' },
           { se: I(bl), msg: 'L’ultimo blocco contiene ' + usati + ' byte del file.' }
         ] : [
           { se: I(nb), msg: 'I blocchi logici si contano da 0: l’ultimo dei ' + nb + ' ha numero ' + (nb - 1) + '.' },
-          { se: I(usati - 1), msg: 'Questo è l’offset dell’ultimo byte dentro il blocco. La domanda riguarda il numero del blocco.' }
+          { se: I(usati - 1), msg: 'Questo è l’offset dell’ultimo byte all’interno del blocco. La domanda riguarda il numero del blocco.' }
         ]),
-        altro: 'Il numero è diverso. Si divida la lunghezza per ' + bl + ', e ragiona su quoziente e resto.',
-        indizi: [(nb - 1) + ' × ' + bl + ' = ' + (nb - 1) * bl + ', e ' + nb + ' × ' + bl + ' = ' + nb * bl + '.', 'Il file, di ' + s + ' byte, sta fra questi due valori: servono ' + nb + (nb === 1 ? ' blocco.' : ' blocchi.'), cosa === 0 ? 'Blocchi: ' + nb + '.' : cosa === 1 ? nb * bl + ' − ' + s + ' = ' + spreco + '.' : 'Ultimo byte in posizione ' + (s - 1) + ': blocco logico ' + (nb - 1) + '.'],
+        altro: 'Il numero è diverso. Si divida la lunghezza per ' + bl + ', e si considerino quoziente e resto.',
+        indizi: [(nb - 1) + ' × ' + bl + ' = ' + (nb - 1) * bl + ', e ' + nb + ' × ' + bl + ' = ' + nb * bl + '.', 'Il file, di ' + s + ' byte, è compreso fra questi due valori: occorrono ' + nb + (nb === 1 ? ' blocco.' : ' blocchi.'), cosa === 0 ? 'Blocchi: ' + nb + '.' : cosa === 1 ? nb * bl + ' − ' + s + ' = ' + spreco + '.' : 'Ultimo byte in posizione ' + (s - 1) + ': blocco logico ' + (nb - 1) + '.'],
         svolgimento: ['Blocchi: ' + nb + '.', 'Riservati: ' + nb * bl + ' byte.', 'Inutilizzati: ' + spreco + ' byte.', 'Ultimo byte: blocco logico ' + (nb - 1) + '.'] };
     },
     // 6.5.4 · blocco raggiunto seguendo una catena, oppure blocchi liberi di una bitmap
@@ -64,21 +64,21 @@
           ok: 'I bit a 0 sono ' + zeri + '.',
           diagnosi: DIAG(giuste, [
             { se: I(n - zeri), msg: 'Questi sono i bit a 1, cioè i blocchi occupati. I liberi sono gli zeri.' },
-            { se: I(n), msg: 'Questi sono i blocchi in tutto.' }
+            { se: I(n), msg: 'Questi sono i blocchi complessivi.' }
           ]),
-          altro: 'Il numero è diverso. Conta i bit a 0.',
+          altro: 'Il numero è diverso. Si contino i bit a 0.',
           indizi: ['Un bit a 0 indica un blocco libero.', 'I bit a 1 sono ' + (n - zeri) + '.', n + ' − ' + (n - zeri) + ' = ' + zeri + '.'],
           svolgimento: ['Occupati: ' + (n - zeri) + '.', 'Liberi: ' + zeri + '.'] }; }
       const len = r.int(4, 5), cat = r.mescola([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]).slice(0, len), ind = r.int(1, len - 1), off = r.int(0, 1023), pos = ind * 1024 + off, giuste = I(cat[ind]);
-      return { u: '6.5.4', d: 'I blocchi sono da 1024 byte. Un file comincia nel blocco ' + cat[0] + ', e la FAT dice: ' + cat.slice(1).map((b, k) => 'dopo il ' + cat[k] + ' viene il ' + b).join(', ') + '. In quale blocco del volume si trova il byte di posizione ' + pos + '?', segnaposto: 'Un numero', giuste,
+      return { u: '6.5.4', d: 'I blocchi sono da 1024 byte. Un file ha inizio nel blocco ' + cat[0] + ', e la FAT indica i successori ' + cat.slice(1).map((b, k) => cat[k] + ' → ' + b).join(', ') + '. In quale blocco del volume si trova il byte di posizione ' + pos + '?', segnaposto: 'Un numero', giuste,
         ok: pos + ' = ' + ind + ' × 1024 + ' + off + ': blocco logico ' + ind + '. Catena: ' + cat.slice(0, ind + 1).join(', ') + '.',
         diagnosi: DIAG(giuste, [
-          { se: I(ind), msg: 'Questo è il numero del blocco logico. Il blocco del volume si trova seguendo la catena per ' + ind + (ind === 1 ? ' anello.' : ' anelli.') },
-          ind + 1 < len ? { se: I(cat[ind + 1]), msg: 'Hai seguito un anello di troppo: il primo blocco è già il blocco logico 0.' } : null,
+          { se: I(ind), msg: 'Questo è il numero del blocco logico. Il blocco del volume si determina seguendo la catena per ' + ind + (ind === 1 ? ' anello.' : ' anelli.') },
+          ind + 1 < len ? { se: I(cat[ind + 1]), msg: 'È stato seguito un anello in eccesso: il primo blocco è già il blocco logico 0.' } : null,
           { se: I(cat[ind - 1]), msg: 'Manca un anello: per il blocco logico ' + ind + ' se ne seguono ' + ind + '.' },
-          { se: I(cat[0] + ind), msg: 'I blocchi del file sono sparsi: vanno letti nella FAT.' }
+          { se: I(cat[0] + ind), msg: 'I blocchi del file sono distribuiti nel volume: vanno letti nella FAT.' }
         ]),
-        altro: 'Il numero è diverso. Si calcoli il blocco logico, poi si segua la catena dal primo blocco.',
+        altro: 'Il numero è diverso. Si calcoli il blocco logico, e quindi si segua la catena dal primo blocco.',
         indizi: [pos + ' / 1024 = ' + ind + ', con resto ' + off + '.', 'Blocco logico 0: il ' + cat[0] + '.', 'Seguendo ' + ind + (ind === 1 ? ' anello' : ' anelli') + ': ' + cat.slice(0, ind + 1).join(' → ') + '.'],
         svolgimento: ['Blocco logico: ' + ind + '.', 'Catena: ' + cat.slice(0, ind + 1).join(' → ') + '.', 'Blocco del volume: ' + cat[ind] + '.'] };
     }

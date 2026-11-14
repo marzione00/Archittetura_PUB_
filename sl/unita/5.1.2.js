@@ -21,105 +21,105 @@ SL.unita512 = (() => {
 })();
 SL.registra('5.1.2', {
   titolo: 'Dall’esecuzione agli stati di pronto e bloccato',
-  obiettivo: 'Obiettivo: dire in quale stato si trova un processo dopo un evento, e che cosa gli manca per tornare a eseguire.',
-  concetti: [['process', 'Uno esegue, gli altri no'], ['coda', 'Pronto: manca soltanto il turno'], ['disco', 'Bloccato: manca un evento']],
+  obiettivo: 'Obiettivo: indicare lo stato in cui si trova un processo dopo un evento, e la condizione che gli manca per riprendere l’esecuzione.',
+  concetti: [['process', 'Un processo in esecuzione, gli altri in attesa'], ['coda', 'Pronto, in attesa del solo turno'], ['disco', 'Bloccato, in attesa di un evento']],
   filigrana: ['process', 'coda', 'clock'],
   richiami: {
     carte: [
-      { sim: 'process', da: 'Dall’unità 4.2.4', t: 'La chiamata bloccante', d: 'Un processo che chiede dati non ancora disponibili viene sospeso.' },
-      { sim: 'process', da: 'Dall’unità 4.2.4', t: 'Lo scheduler', d: 'La parte del kernel che decide a chi tocca il processore.' },
+      { sim: 'process', da: 'Dall’unità 4.2.4', t: 'La chiamata bloccante', d: 'Un processo che richiede dati non ancora disponibili è sospeso.' },
+      { sim: 'process', da: 'Dall’unità 4.2.4', t: 'Lo scheduler', d: 'La parte del kernel che stabilisce quale processo riceve il processore.' },
       { sim: 'interrupt', da: 'Dall’unità 4.1.1', t: 'L’interrupt del timer', d: 'Un segnale periodico che riporta il controllo al kernel.' }
     ],
-    domanda: { d: 'Prima di proseguire: un processo attende dati dal disco. Dargli il processore gli servirebbe?', o: [
-      { t: 'No: finché i dati mancano non ha istruzioni da eseguire', ok: true, fb: 'Gli manca un evento, e il processore non può procurarglielo.' },
-      { t: 'Sì: finirebbe prima', fb: 'Senza i dati il processo non può proseguire, con o senza processore.' },
-      { t: 'Sì, ma soltanto in modo kernel', fb: 'Il modo di esecuzione non cambia il fatto che i dati manchino.' }
+    domanda: { d: 'Prima di proseguire: un processo attende dati dal disco. L’assegnazione del processore gli sarebbe utile?', o: [
+      { t: 'No, finché i dati mancano non ha istruzioni da eseguire', ok: true, fb: 'Al processo manca un evento, che il processore non può fornire.' },
+      { t: 'Sì, terminerebbe prima', fb: 'Senza i dati il processo non può proseguire, con o senza processore.' },
+      { t: 'Sì, soltanto in modo kernel', fb: 'Il modo di esecuzione lascia invariata l’assenza dei dati.' }
     ] }
   },
   idea: {
-    titolo: 'Che cosa manca a un processo per eseguire',
+    titolo: 'La condizione che manca a un processo per eseguire',
     termini: ['in esecuzione (stato)', 'pronto (stato)', 'coda dei pronti', 'bloccato (stato)', 'quanto di tempo', 'dispatcher'],
     testo: [
-      'Un processore esegue un processo per volta, e i processi sono molti. In ogni istante, quindi, quasi tutti sono fermi. Il kernel distingue con cura perché sono fermi, e a ogni processo assegna uno stato. Il processo che in questo momento usa il processore è [[in esecuzione (stato)|in esecuzione]].',
-      'Un processo [[pronto (stato)|pronto]] ha tutto ciò che gli serve per eseguire la prossima istruzione, e aspetta soltanto il proprio turno. I processi pronti stanno in un elenco ordinato, la [[coda dei pronti]]. Un processo [[bloccato (stato)|bloccato]] aspetta invece un evento esterno, per esempio la risposta di un disco. Dargli il processore sarebbe inutile, e per questo il kernel lo tiene fuori dalla coda dei pronti finché l’evento non arriva.',
-      { fig: 'scena', w: 720, h: 138, titolo: 'A ha chiesto una lettura dal disco', nota: 'A è bloccato. Il processore è passato a B, il primo della coda dei pronti.', els: SL.unita512.scena('g', SL.unita512.quadri({ ev: 'io', pronti: 2 })[2], true, { x: 10, y: 0, w: 700, wr: 110, wc: 80, gap: 30 }) },
-      'Un processo lascia il processore in tre modi. Può chiedere qualcosa che richiede tempo, come una lettura dal disco, e diventa bloccato. Può esaurire il [[quanto di tempo]], cioè la durata massima di un turno, misurata da un timer: allora torna pronto, in fondo alla coda, perché avrebbe ancora lavoro da fare. Oppure può terminare. In tutti i casi il processore resta libero, e il [[dispatcher]], il meccanismo del kernel che consegna il processore al processo scelto, lo assegna al primo della coda.',
-      'Quando il disco risponde, il processo bloccato non riprende subito a eseguire. Torna pronto, e si mette in coda come gli altri. La disponibilità del dato e la disponibilità del processore sono due condizioni distinte: la prima toglie il processo dallo stato bloccato, la seconda dipende dalla scelta del dispatcher.'
+      'Un processore esegue un processo per volta, e i processi sono numerosi. In ogni istante, pertanto, quasi tutti sono inattivi. Il kernel distingue le ragioni dell’inattività, e assegna a ogni processo uno stato. Il processo che in un dato istante impiega il processore è [[in esecuzione (stato)|in esecuzione]].',
+      'Un processo [[pronto (stato)|pronto]] dispone di tutto quanto occorre per eseguire l’istruzione successiva, e attende soltanto il proprio turno. I processi pronti sono raccolti in un elenco ordinato, la [[coda dei pronti]]. Un processo [[bloccato (stato)|bloccato]] attende invece un evento esterno, per esempio la risposta di un disco. L’assegnazione del processore gli sarebbe inutile, e per tale ragione il kernel lo esclude dalla coda dei pronti finché l’evento non si verifica.',
+      { fig: 'scena', w: 720, h: 138, titolo: 'A ha richiesto una lettura dal disco', nota: 'A è bloccato. Il processore è passato a B, il primo della coda dei pronti.', els: SL.unita512.scena('g', SL.unita512.quadri({ ev: 'io', pronti: 2 })[2], true, { x: 10, y: 0, w: 700, wr: 110, wc: 80, gap: 30 }) },
+      'Un processo lascia il processore in tre modi. Può richiedere un’operazione di lunga durata, come una lettura dal disco, e diviene bloccato. Può esaurire il [[quanto di tempo]], cioè la durata massima di un turno, misurata da un timer: in tal caso torna pronto, all’ultima posizione della coda, poiché ha ancora istruzioni da eseguire. Può infine terminare. In tutti i casi il processore resta libero, e il [[dispatcher]], il meccanismo del kernel che consegna il processore al processo selezionato, lo assegna al primo della coda.',
+      'Quando il disco risponde, il processo bloccato torna pronto, ed entra nella coda al pari degli altri: la ripresa dell’esecuzione avviene soltanto in seguito. La disponibilità del dato e la disponibilità del processore sono due condizioni distinte: la prima fa uscire il processo dallo stato bloccato, la seconda dipende dalla scelta del dispatcher.'
     ]
   },
   esperimento: {
     faremo: [
-      'Il processo A è in esecuzione, e altri processi sono pronti. Sceglierai che cosa accade ad A: chiede una lettura dal disco, esaurisce il quanto, oppure termina.',
-      'Seguiremo A da uno stato all’altro, e vedremo a chi passa il processore. Confronta la lettura dal disco con la scadenza del quanto: in entrambi i casi il processore va a B, ma A finisce in posti diversi.'
+      'Il processo A è in esecuzione, e altri processi sono pronti. I controlli fissano l’evento che riguarda A: la richiesta di una lettura dal disco, l’esaurimento del quanto, oppure la terminazione.',
+      'L’esperimento segue A da uno stato all’altro, e mostra il processo che riceve il processore. È istruttivo confrontare la lettura dal disco con la scadenza del quanto: in entrambi i casi il processore passa a B, mentre A giunge a stati diversi.'
     ],
     vedrai: [
-      ['process', 'In esecuzione', 'A sinistra: il processo che usa il processore.'],
-      ['coda', 'I pronti', 'Al centro: la coda dei processi che aspettano il turno. Il primo a sinistra è il prossimo.'],
-      ['disco', 'I bloccati', 'A destra: i processi che aspettano la risposta del disco.']
+      ['process', 'In esecuzione', 'A sinistra: il processo che impiega il processore.'],
+      ['coda', 'I pronti', 'Al centro: la coda dei processi in attesa del turno. Il primo a sinistra è il successivo.'],
+      ['disco', 'I bloccati', 'A destra: i processi in attesa della risposta del disco.']
     ]
   },
   lab: {
-    titolo: 'Che cosa succede ad A',
+    titolo: 'L’evento che riguarda A',
     scena: { w: 860, h: 140 },
     atti: ['L’inizio', 'L’evento', 'Il nuovo turno', 'Il seguito'],
     controlli: [
-      { id: 'ev', tipo: 'scelta', eti: 'Evento', opzioni: [['io', 'A chiede una lettura dal disco'], ['timer', 'scade il quanto di A'], ['fine', 'A termina']], valore: 'io' },
+      { id: 'ev', tipo: 'scelta', eti: 'Evento', opzioni: [['io', 'A richiede una lettura dal disco'], ['timer', 'scade il quanto di A'], ['fine', 'A termina']], valore: 'io' },
       { id: 'pronti', tipo: 'scelta', eti: 'Processi pronti', opzioni: [[1, 'B'], [2, 'B e C']], valore: 2 }
     ],
     nota: 'I passi sono quattro con la lettura dal disco, tre negli altri casi.',
     previsione: {
-      domanda: (p) => 'Il processo A è in esecuzione. ' + (p.ev === 'io' ? 'Chiede al kernel una lettura dal disco, che richiederà tempo.' : p.ev === 'timer' ? 'Il timer segnala che il suo quanto di tempo è scaduto.' : 'Esegue la sua ultima istruzione e termina.') + ' In quale stato passa A?',
+      domanda: (p) => 'Il processo A è in esecuzione. ' + (p.ev === 'io' ? 'Richiede al kernel una lettura dal disco, un’operazione di lunga durata.' : p.ev === 'timer' ? 'Il timer segnala che il suo quanto di tempo è scaduto.' : 'Esegue la sua ultima istruzione e termina.') + ' In quale stato passa A?',
       opzioni: () => [['pronto', 'Pronto'], ['bloccato', 'Bloccato'], ['terminato', 'Terminato']]
     },
-    confronto: (pred, esito, p) => 'La previsione indicava: ' + pred + '. A diventa ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.ev === 'io' ? 'Ad A manca un evento, la risposta del disco: avere il processore non gli servirebbe.' : p.ev === 'timer' ? 'A potrebbe proseguire subito. Gli manca soltanto il turno, e torna in coda.' : 'A non ha più istruzioni da eseguire, e lascia il sistema.'),
+    confronto: (pred, esito, p) => 'La previsione indicava: ' + pred + '. A diviene ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.ev === 'io' ? 'Ad A manca un evento, la risposta del disco: il processore gli sarebbe inutile.' : p.ev === 'timer' ? 'A potrebbe proseguire immediatamente. Gli manca soltanto il turno, e torna in coda.' : 'A non ha più istruzioni da eseguire, e lascia il sistema.'),
     costruisci(p) {
       const U = SL.unita512, Q = U.quadri(p), passi = [], altri = p.pronti === 1 ? 'B' : 'B e C';
       const hud = (q) => [['In esecuzione', q.run || 'nessuno', 'a'], ['Pronti', q.pronti.join(', ') || 'nessuno'], ['Stato di A', q.run === 'A' ? 'in esecuzione' : q.disco.includes('A') ? 'bloccato' : q.usciti.includes('A') ? 'terminato' : 'pronto', 'c']];
       const P = (k, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(Q[k]), els: U.scena('q', Q[k], true, { x: 20, y: 0, w: 820, wr: 130, wc: 96, gap: 40 }) }, extra));
 
-      P(0, 0, 'A è in esecuzione', 'Il processore sta eseguendo A. ' + (p.pronti === 1 ? 'Il processo B è pronto' : 'I processi B e C sono pronti') + ', in coda per il prossimo turno. Nessuno attende il disco.', {});
+      P(0, 0, 'A è in esecuzione', 'Il processore sta eseguendo A. ' + (p.pronti === 1 ? 'Il processo B è pronto' : 'I processi B e C sono pronti') + ', in coda per il turno successivo. Nessun processo attende il disco.', {});
       if (p.ev === 'io') {
-        P(1, 1, 'A chiede una lettura dal disco', 'A ha bisogno di dati che stanno sul disco, e li chiede al kernel. La risposta richiederà millisecondi, un tempo lunghissimo per il processore. Il kernel segna A come bloccato e lo mette fra chi attende il disco.', { esito: ['A bloccato', ''] });
-        P(2, 2, 'Il dispatcher sceglie B', 'Il processore è libero. Il dispatcher prende il primo della coda dei pronti, B, e gli consegna il processore.' + (p.pronti === 2 ? ' C avanza di un posto.' : ' La coda dei pronti resta vuota.'), { chiedi: { d: 'Se il disco rispondesse adesso, A riprenderebbe subito a eseguire?', o: ['Sì: i dati sono arrivati', 'No: tornerebbe pronto, in coda'], g: 1, no: 'Il processore è occupato da B. A deve attendere il proprio turno fra i pronti.' } });
-        P(3, 3, 'Il disco risponde', 'Il disco segnala di avere finito. Ad A non manca più nulla, e il kernel lo sposta fra i pronti, in fondo alla coda. B continua il proprio turno: la risposta del disco non gli toglie il processore.', { esito: ['A bloccato, poi pronto', ''] });
+        P(1, 1, 'A richiede una lettura dal disco', 'A necessita di dati che si trovano sul disco, e li richiede al kernel. La risposta richiederà millisecondi, un tempo molto lungo per il processore. Il kernel contrassegna A come bloccato e lo colloca fra i processi che attendono il disco.', { esito: ['A bloccato', ''] });
+        P(2, 2, 'Il dispatcher seleziona B', 'Il processore è libero. Il dispatcher preleva il primo della coda dei pronti, B, e gli consegna il processore.' + (p.pronti === 2 ? ' C avanza di una posizione.' : ' La coda dei pronti resta vuota.'), { chiedi: { d: 'Se il disco rispondesse in questo istante, A riprenderebbe immediatamente l’esecuzione?', o: ['Sì, i dati sono disponibili', 'No, tornerebbe pronto, in coda'], g: 1, no: 'Il processore è occupato da B. A deve attendere il proprio turno fra i pronti.' } });
+        P(3, 3, 'Il disco risponde', 'Il disco segnala il termine dell’operazione. Ad A non manca più alcuna condizione, e il kernel lo sposta fra i pronti, all’ultima posizione della coda. B prosegue il proprio turno: la risposta del disco gli lascia il processore.', { esito: ['A bloccato, poi pronto', ''] });
       } else if (p.ev === 'timer') {
-        P(1, 1, 'Il quanto è scaduto', 'Il timer interrompe A: ha usato tutto il tempo del suo turno. A avrebbe ancora istruzioni da eseguire, e non aspetta alcun evento. Il kernel lo rimette fra i pronti, in fondo alla coda, dietro a ' + altri + '.', { esito: ['A pronto', ''] });
-        P(2, 2, 'Il dispatcher sceglie B', 'Il dispatcher prende il primo della coda, B, e gli consegna il processore. A eseguirà di nuovo quando arriverà in testa alla coda.', { esito: ['A pronto', ''], chiedi: { d: 'Che cosa manca ad A per tornare a eseguire?', o: ['La risposta di un dispositivo', 'Soltanto il proprio turno'], g: 1, no: 'A non ha chiesto nulla a nessun dispositivo. È stato interrotto dal timer.' } });
+        P(1, 1, 'Il quanto è scaduto', 'Il timer interrompe A, che ha impiegato l’intero tempo del proprio turno. A ha ancora istruzioni da eseguire, senza alcun evento da attendere. Il kernel lo ricolloca fra i pronti, all’ultima posizione della coda, dopo ' + altri + '.', { esito: ['A pronto', ''] });
+        P(2, 2, 'Il dispatcher seleziona B', 'Il dispatcher preleva il primo della coda, B, e gli consegna il processore. A sarà eseguito di nuovo quando avrà raggiunto la prima posizione della coda.', { esito: ['A pronto', ''], chiedi: { d: 'Quale condizione manca ad A per riprendere l’esecuzione?', o: ['La risposta di un dispositivo', 'Soltanto il proprio turno'], g: 1, no: 'A è stato interrotto dal timer, senza avere rivolto richieste ad alcun dispositivo.' } });
       } else {
-        P(1, 1, 'A termina', 'A ha eseguito la sua ultima istruzione. Resta fuori sia dai pronti sia dai bloccati: il kernel lo toglie dalle code e recupera le sue risorse.', { esito: ['A terminato', ''] });
-        P(2, 2, 'Il dispatcher sceglie B', 'Il processore è libero, e il dispatcher lo consegna a B, il primo della coda dei pronti.' + (p.pronti === 2 ? ' C avanza di un posto.' : ''), { esito: ['A terminato', ''] });
+        P(1, 1, 'A termina', 'A ha eseguito la sua ultima istruzione. Esso è escluso sia dai pronti sia dai bloccati: il kernel lo rimuove dalle code e ne recupera le risorse.', { esito: ['A terminato', ''] });
+        P(2, 2, 'Il dispatcher seleziona B', 'Il processore è libero, e il dispatcher lo consegna a B, il primo della coda dei pronti.' + (p.pronti === 2 ? ' C avanza di una posizione.' : ''), { esito: ['A terminato', ''] });
       }
       return { passi, esito: U.ESITO[p.ev] };
     }
   },
   bilancio: {
     regola: [
-      'In esecuzione: usa il processore. Pronto: gli manca soltanto il turno. Bloccato: gli manca un evento esterno.',
-      'Un processo bloccato, quando l’evento arriva, torna pronto. A metterlo in esecuzione è una scelta successiva del dispatcher.'
+      'Un processo in esecuzione impiega il processore. A un processo pronto manca soltanto il turno, a un processo bloccato manca un evento esterno.',
+      'Un processo bloccato, quando l’evento si verifica, torna pronto. Il passaggio all’esecuzione dipende da una scelta successiva del dispatcher.'
     ],
     errori: [
-      ['Considerare bloccato un processo a cui è scaduto il quanto.', 'Quel processo potrebbe proseguire subito: è pronto.'],
-      ['Far ripartire un processo appena arriva il dato che aspettava.', 'Il dato lo rende pronto. Per eseguire gli serve anche il processore.'],
-      ['Mettere un processo bloccato nella coda dei pronti.', 'Il dispatcher sceglierebbe un processo che non può fare nulla.']
+      ['Considerare bloccato un processo a cui è scaduto il quanto.', 'Tale processo potrebbe proseguire immediatamente: è pronto.'],
+      ['Considerare in esecuzione un processo all’arrivo del dato che attendeva.', 'Il dato lo rende pronto. Per eseguire gli occorre anche il processore.'],
+      ['Collocare un processo bloccato nella coda dei pronti.', 'Il dispatcher selezionerebbe un processo privo di istruzioni eseguibili.']
     ],
     saFare: ['Riconoscere lo stato di un processo.', 'Indicare in quale stato lo porta un evento.', 'Separare l’arrivo del dato dall’assegnazione del processore.'],
     esercizi: [
-      { d: 'Un processo è in esecuzione quando il timer segnala la fine del suo quanto. Il processo ha ancora calcoli da fare. In quale stato passa?', guida: 'Si scelga la risposta.', o: [
+      { d: 'Un processo è in esecuzione quando il timer segnala la fine del suo quanto. Il processo ha ancora calcoli da svolgere. In quale stato passa?', guida: 'Si scelga la risposta.', o: [
         { t: 'Pronto', ok: true, fb: 'Gli manca soltanto un nuovo turno.' },
-        { t: 'Bloccato', fb: 'Bloccato è chi aspetta un evento. Questo processo potrebbe proseguire subito.' },
-        { t: 'Terminato', fb: 'Il processo ha ancora lavoro da fare.' }] },
-      { d: 'Un processo bloccato aspettava dati dalla rete. I dati arrivano mentre un altro processo sta eseguendo. Che cosa accade al primo?', guida: 'Si scelga la risposta.', o: [
-        { t: 'Diventa pronto e attende il proprio turno', ok: true, fb: 'L’evento è arrivato, e ora gli manca soltanto il processore.' },
-        { t: 'Riprende subito a eseguire', fb: 'Il processore è occupato. Serve una scelta del dispatcher.' },
-        { t: 'Resta bloccato fino al prossimo quanto', fb: 'L’evento che aspettava è arrivato: non ha più motivo di restare bloccato.' }] },
-      { d: 'La coda dei pronti contiene, nell’ordine, B, C e D. Il processo A, in esecuzione, esaurisce il quanto. Il dispatcher sceglie sempre il primo della coda. Dopo quanti altri turni toccherà di nuovo ad A?', segnaposto: 'Un numero', giuste: ['3', 'tre'],
-        ok: 'A va in fondo alla coda: B, C, D, A. Prima di lui eseguono tre processi.',
+        { t: 'Bloccato', fb: 'È bloccato un processo che attende un evento. Questo processo potrebbe proseguire immediatamente.' },
+        { t: 'Terminato', fb: 'Il processo ha ancora calcoli da svolgere.' }] },
+      { d: 'Un processo bloccato attendeva dati dalla rete. I dati giungono mentre un altro processo è in esecuzione. Che cosa accade al primo?', guida: 'Si scelga la risposta.', o: [
+        { t: 'Diviene pronto e attende il proprio turno', ok: true, fb: 'L’evento si è verificato, e ora gli manca soltanto il processore.' },
+        { t: 'Riprende immediatamente l’esecuzione', fb: 'Il processore è occupato, e occorre una scelta del dispatcher.' },
+        { t: 'Resta bloccato fino al quanto successivo', fb: 'L’evento che attendeva si è verificato, e viene meno la ragione dello stato bloccato.' }] },
+      { d: 'La coda dei pronti contiene, nell’ordine, B, C e D. Il processo A, in esecuzione, esaurisce il quanto. Il dispatcher seleziona sempre il primo della coda. Dopo quanti altri turni A riceverà di nuovo il processore?', segnaposto: 'Un numero', giuste: ['3', 'tre'],
+        ok: 'A passa all’ultima posizione della coda: B, C, D, A. Prima di A sono eseguiti tre processi.',
         diagnosi: [
-          { se: ['4', 'quattro'], msg: 'I processi davanti ad A sono tre: B, C e D.' },
-          { se: ['0', 'zero', '1', 'uno'], msg: 'A torna in fondo alla coda, dietro a B, C e D.' }
+          { se: ['4', 'quattro'], msg: 'I processi che precedono A sono tre: B, C e D.' },
+          { se: ['0', 'zero', '1', 'uno'], msg: 'A torna all’ultima posizione della coda, dopo B, C e D.' }
         ],
-        altro: 'Il numero è diverso. Si scriva la coda dopo il ritorno di A e si conti chi lo precede.',
-        indizi: ['A torna pronto, in fondo.', 'La coda diventa B, C, D, A.', 'Davanti ad A ci sono tre processi.'],
+        altro: 'Il numero è diverso. Si scriva la coda dopo il ritorno di A e si contino i processi che lo precedono.',
+        indizi: ['A torna pronto, all’ultima posizione.', 'La coda diviene B, C, D, A.', 'A è preceduto da tre processi.'],
         svolgimento: ['Coda dopo la scadenza: B, C, D, A.', 'Turni prima di A: 3.'] }
     ],
     sfida: ['cslez5_1_02_processes', 'Transizioni fra gli stati di un processo']

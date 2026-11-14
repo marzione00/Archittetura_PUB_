@@ -21,44 +21,44 @@ SL.unita624 = (() => {
 SL.registra('6.2.4', {
   titolo: 'Valutare il costo dei page fault',
   obiettivo: 'Obiettivo: calcolare il tempo medio di una richiesta di memoria in presenza di page fault, convertendo la penalità da millisecondi a nanosecondi.',
-  concetti: [['clock', 'Un evento raro, e lunghissimo'], ['bilancio', 'Distribuire il costo su tutte le richieste'], ['disco', 'Milioni di volte più lento della RAM']],
+  concetti: [['clock', 'Un evento raro, e di lunga durata'], ['bilancio', 'Distribuire il costo su tutte le richieste'], ['disco', 'Milioni di volte più lento della RAM']],
   filigrana: ['clock', 'disco', 'bilancio'],
   richiami: {
     carte: [
-      { sim: 'clock', da: 'Dall’unità 6.1.3', t: 'Il tempo medio di accesso', d: 'Tempo pagato da tutti, più frazione degli eventi rari per la loro penalità.' },
+      { sim: 'clock', da: 'Dall’unità 6.1.3', t: 'Il tempo medio di accesso', d: 'Tempo dovuto da tutti gli accessi, più frazione degli eventi rari per la loro penalità.' },
       { sim: 'disco', da: 'Dall’unità 4.5.1', t: 'Il tempo di un disco', d: 'Un accesso a un disco magnetico si misura in millisecondi.' },
-      { sim: 'memory', da: 'Dall’unità 6.2.3', t: 'Il rimpiazzo', d: 'Con pochi frame, le pagine che servono vengono scacciate e ricaricate di continuo.' }
+      { sim: 'memory', da: 'Dall’unità 6.2.3', t: 'Il rimpiazzo', d: 'Con pochi frame, le pagine ancora richieste sono sostituite e ricaricate di continuo.' }
     ],
-    domanda: { d: 'Prima di proseguire: quanti nanosecondi ci sono in un millisecondo?', o: [
+    domanda: { d: 'Prima di proseguire: quanti nanosecondi contiene un millisecondo?', o: [
       { t: 'Un milione', ok: true, fb: 'Un millisecondo è un millesimo di secondo, un nanosecondo un miliardesimo: il rapporto è un milione.' },
-      { t: 'Mille', fb: 'Mille nanosecondi fanno un microsecondo. Per un millisecondo serve un altro fattore mille.' },
-      { t: 'Un miliardo', fb: 'Un miliardo di nanosecondi fa un secondo intero.' }
+      { t: 'Mille', fb: 'Mille nanosecondi equivalgono a un microsecondo. Per un millisecondo occorre un ulteriore fattore mille.' },
+      { t: 'Un miliardo', fb: 'Un miliardo di nanosecondi equivale a un secondo intero.' }
     ] }
   },
   idea: {
-    titolo: 'Pochi page fault bastano a rallentare tutto',
+    titolo: 'Pochi page fault sono sufficienti a rallentare l’intero programma',
     termini: ['frequenza di page fault', 'thrashing'],
     testo: [
-      'Nel capitolo 6.1 un miss della cache costava 50 ns, venticinque volte una consultazione. Un page fault appartiene a un’altra scala. La pagina mancante va presa da un disco, e un disco risponde in millisecondi. Fra una richiesta servita dalla RAM e una che aspetta il disco passa un fattore di decine di migliaia, o di milioni.',
-      'Usiamo lo stesso metodo dell’unità 6.1.3, con un milione di richieste al posto di cento. Ogni richiesta riceve un servizio ordinario di 100 ns. Alcune, in più, subiscono un page fault e aspettano la penalità. Il numero di page fault per milione di richieste è la [[frequenza di page fault]]. Per sommare tempi così diversi bisogna portarli alla stessa unità: un millisecondo vale un milione di nanosecondi.',
-      'Con mille page fault da 1 ms, le attese durano in tutto 1000 × 1 000 000 ns, cioè un miliardo di nanosecondi. Distribuito su un milione di richieste, quel miliardo pesa 1000 ns su ciascuna. Il tempo medio diventa 100 + 1000 = 1100 ns. Una richiesta su mille ha subito un page fault, e tutte, in media, vanno undici volte più piano.',
-      { fig: 'scena', w: 720, h: 130, titolo: 'Mille page fault su un milione di richieste', nota: 'Della media di 1100 ns, il servizio ordinario è la parte piccola. Il resto è l’attesa dei page fault, distribuita su tutte le richieste.', els: SL.unita624.quadro('g', { fault: 1000, ms: 1 }, 5, { x: 10, y: 4, w: 700 }) },
-      'C’è una scorciatoia utile. Poiché le richieste sono un milione e un millisecondo vale un milione di nanosecondi, i due milioni si semplificano: la quota media in nanosecondi è il numero di page fault per milione moltiplicato per la penalità in millisecondi. Dieci page fault da 1 ms aggiungono 10 ns, e la media scende a 110 ns. Il singolo page fault costa sempre 1 ms: è cambiata la frequenza con cui lo si paga.',
-      'Questo conto spiega un fenomeno temuto. Quando i frame sono meno dell’insieme di lavoro, come nell’unità precedente, i page fault diventano frequentissimi. Il sistema passa quasi tutto il tempo a caricare e scaricare pagine, e quasi nessuno a eseguire i programmi. La situazione si chiama [[thrashing]], e si riconosce da un disco sempre al lavoro e da un processore quasi fermo. Il rimedio è dare più frame al programma, oppure farne girare meno insieme.'
+      'Nel capitolo 6.1 un miss della cache costava 50 ns, venticinque volte una consultazione. Un page fault appartiene a un’altra scala: la pagina assente va letta da un disco, e un disco risponde in millisecondi. Fra una richiesta servita dalla RAM e una in attesa del disco intercorre un fattore di decine di migliaia, o di milioni.',
+      'Si applica il medesimo metodo dell’unità 6.1.3, con un milione di richieste in luogo di cento. Ogni richiesta riceve un servizio ordinario di 100 ns. Alcune subiscono inoltre un page fault, e attendono per la durata della penalità. Il numero di page fault per milione di richieste è la [[frequenza di page fault]]. La somma di tempi tanto diversi richiede la conversione alla medesima unità: un millisecondo vale un milione di nanosecondi.',
+      'Con mille page fault da 1 ms, le attese durano complessivamente 1000 × 1 000 000 ns, cioè un miliardo di nanosecondi. Distribuito su un milione di richieste, tale miliardo incide per 1000 ns su ciascuna. Il tempo medio diviene 100 + 1000 = 1100 ns. Una richiesta su mille ha subito un page fault, e la durata media di tutte le richieste risulta undici volte maggiore.',
+      { fig: 'scena', w: 720, h: 130, titolo: 'Mille page fault su un milione di richieste', nota: 'Della media di 1100 ns, il servizio ordinario è la parte minore. Il resto è l’attesa dei page fault, distribuita su tutte le richieste.', els: SL.unita624.quadro('g', { fault: 1000, ms: 1 }, 5, { x: 10, y: 4, w: 700 }) },
+      'Il calcolo ammette una semplificazione. Poiché le richieste sono un milione e un millisecondo vale un milione di nanosecondi, i due milioni si semplificano: la quota media in nanosecondi è il numero di page fault per milione moltiplicato per la penalità in millisecondi. Dieci page fault da 1 ms aggiungono 10 ns, e la media scende a 110 ns. Il singolo page fault costa sempre 1 ms: è variata la frequenza con cui si verifica.',
+      'Il calcolo spiega un fenomeno di grande rilievo pratico. Quando i frame sono meno dell’insieme di lavoro, come nell’unità precedente, la frequenza di page fault cresce di ordini di grandezza. Il sistema dedica quasi tutto il tempo al caricamento e alla rimozione di pagine, e una parte minima all’esecuzione dei programmi. La situazione prende il nome di [[thrashing]], e si riconosce da un disco costantemente attivo e da un processore quasi inattivo. Il rimedio consiste nell’assegnare più frame al programma, oppure nel ridurre il numero dei programmi in esecuzione.'
     ]
   },
   esperimento: {
     faremo: [
-      'Un milione di richieste di memoria, ciascuna con 100 ns di servizio ordinario. Sceglierai quanti page fault avvengono, e quanto dura la penalità di ciascuno.',
-      'Convertiremo la penalità in nanosecondi, sommeremo le attese, e le distribuiremo su tutte le richieste. Guarda come cambia la media passando da mille page fault a dieci.'
+      'Un milione di richieste di memoria, ciascuna con 100 ns di servizio ordinario. I controlli fissano il numero dei page fault, e la durata della penalità di ciascuno.',
+      'L’esperimento converte la penalità in nanosecondi, somma le attese, e le distribuisce su tutte le richieste. È istruttivo confrontare la media con mille page fault e con dieci.'
     ],
     vedrai: [
       ['bilancio', 'Il conto', 'In alto: i page fault, la penalità, la quota per richiesta e il tempo medio.'],
-      ['clock', 'Le due parti della media', 'In basso: quanta parte del tempo medio viene dal servizio ordinario, e quanta dai page fault.']
+      ['clock', 'Le due parti della media', 'In basso: la parte del tempo medio dovuta al servizio ordinario, e quella dovuta ai page fault.']
     ]
   },
   lab: {
-    titolo: 'Il peso dei page fault su un milione di richieste',
+    titolo: 'L’incidenza dei page fault su un milione di richieste',
     scena: { w: 860, h: 132 },
     atti: ['Il milione di richieste', 'Il costo dei page fault', 'La media'],
     controlli: [
@@ -68,56 +68,56 @@ SL.registra('6.2.4', {
     nota: 'I passi sono sempre sei. Le richieste sono servite una per volta, e il servizio ordinario costa 100 ns.',
     previsione: {
       domanda: (p) => 'Un milione di richieste, ciascuna con 100 ns di servizio ordinario. ' + SL.num(p.fault) + ' richieste subiscono un page fault, che aggiunge ' + p.ms + ' ms. Qual è il tempo medio di una richiesta?',
-      opzioni: (p) => { const c = SL.unita624.conto(p), N = SL.num; return [[100, '100 ns: i page fault sono troppo pochi per contare'], [c.media, N(c.media) + ' ns'], [c.penNs, N(c.penNs) + ' ns: quanto un page fault']]; }
+      opzioni: (p) => { const c = SL.unita624.conto(p), N = SL.num; return [[100, '100 ns, poiché i page fault sono troppo pochi per incidere'], [c.media, N(c.media) + ' ns'], [c.penNs, N(c.penNs) + ' ns, quanto un page fault']]; }
     },
-    confronto: (pred, esito, p) => { const N = SL.num; return 'La previsione indicava ' + N(pred) + ' ns. Il tempo medio è ' + N(esito) + ' ns. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 100 ? 'I page fault sono rari, e ciascuno dura quanto ' + N(p.ms * 10000) + ' richieste ordinarie: sulla media lasciano il segno.' : 'Quello è il tempo di un singolo page fault. Lo subisce una richiesta su ' + N(1000000 / p.fault) + ', e le altre durano 100 ns.'); },
+    confronto: (pred, esito, p) => { const N = SL.num; return 'La previsione indicava ' + N(pred) + ' ns. Il tempo medio è ' + N(esito) + ' ns. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 100 ? 'I page fault sono rari, e ciascuno dura quanto ' + N(p.ms * 10000) + ' richieste ordinarie: l’effetto sulla media è rilevante.' : 'Il valore indicato è il tempo di un singolo page fault. Lo subisce una richiesta su ' + N(1000000 / p.fault) + ', e le altre durano 100 ns.'); },
     costruisci(p) {
       const U = SL.unita624, c = U.conto(p), passi = [], N = SL.num;
       const P = (f, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: [['Page fault', N(p.fault), 'a'], ['Quota', f >= 4 ? N(c.quota) + ' ns' : '·'], ['Media', f >= 5 ? N(c.media) + ' ns' : '·', 'c']], els: U.quadro('b', p, f, { x: 20, y: 4, w: 820 }) }, extra));
       P(0, 0, 'Un milione di richieste', 'Un programma compie un milione di richieste di memoria. Di queste, ' + N(p.fault) + ' trovano la pagina assente: una ogni ' + N(1000000 / p.fault) + '.', {});
-      P(1, 0, 'Il servizio ordinario', 'Ogni richiesta, con o senza page fault, riceve 100 ns di servizio ordinario. Se non ci fossero page fault, la media sarebbe 100 ns.', { calc: 'servizio ordinario: 100 ns' });
-      P(2, 1, 'La conversione', 'La penalità di un page fault è ' + p.ms + ' ms. Per sommarla ai nanosecondi la convertiamo: ' + p.ms + ' × 1 000 000 = ' + N(c.penNs) + ' ns.', { calc: p.ms + ' ms = ' + N(c.penNs) + ' ns', chiedi: { d: 'Un page fault dura ' + N(c.penNs) + ' ns. A quante richieste ordinarie da 100 ns equivale?', o: [N(c.penNs / 100), N(c.penNs / 100000), '100'], g: 0, no: N(c.penNs) + ' diviso 100 fa ' + N(c.penNs / 100) + '.' } });
-      P(3, 1, 'Il tempo di tutti i page fault', 'I page fault sono ' + N(p.fault) + ', e ciascuno aggiunge ' + N(c.penNs) + ' ns: in tutto ' + N(p.fault) + ' × ' + N(c.penNs) + ' = ' + N(c.totFault) + ' ns.', { calc: N(p.fault) + ' × ' + N(c.penNs) + ' = ' + N(c.totFault) + ' ns' });
-      P(4, 1, 'La quota per richiesta', 'Distribuiamo queste attese su tutte le richieste: ' + N(c.totFault) + ' diviso un milione fa ' + N(c.quota) + ' ns a testa. È lo stesso numero che si ottiene moltiplicando i page fault per milione per i millisecondi: ' + N(p.fault) + ' × ' + p.ms + '.', { calc: N(c.totFault) + ' / 1 000 000 = ' + N(c.quota) + ' ns' });
-      P(5, 2, 'La media', 'Il tempo medio è 100 + ' + N(c.quota) + ' = ' + N(c.media) + ' ns. ' + (c.volte >= 2 ? 'Rispetto a un programma senza page fault, ogni richiesta dura in media ' + String(c.volte).replace('.', ',') + ' volte tanto.' : 'I page fault allungano la media del ' + Math.round((c.volte - 1) * 100) + ' per cento.') + ' Un singolo page fault dura sempre ' + p.ms + ' ms: la media dipende da quanto spesso capita.', { calc: '100 + ' + N(c.quota) + ' = ' + N(c.media) + ' ns', esito: [N(c.media) + ' ns di media', ''] });
+      P(1, 0, 'Il servizio ordinario', 'Ogni richiesta, con o senza page fault, riceve 100 ns di servizio ordinario. In assenza di page fault, la media sarebbe 100 ns.', { calc: 'servizio ordinario: 100 ns' });
+      P(2, 1, 'La conversione', 'La penalità di un page fault è ' + p.ms + ' ms. La somma con i nanosecondi richiede la conversione: ' + p.ms + ' × 1 000 000 = ' + N(c.penNs) + ' ns.', { calc: p.ms + ' ms = ' + N(c.penNs) + ' ns', chiedi: { d: 'Un page fault dura ' + N(c.penNs) + ' ns. A quante richieste ordinarie da 100 ns equivale?', o: [N(c.penNs / 100), N(c.penNs / 100000), '100'], g: 0, no: N(c.penNs) + ' diviso 100 è pari a ' + N(c.penNs / 100) + '.' } });
+      P(3, 1, 'Il tempo di tutti i page fault', 'I page fault sono ' + N(p.fault) + ', e ciascuno aggiunge ' + N(c.penNs) + ' ns: complessivamente ' + N(p.fault) + ' × ' + N(c.penNs) + ' = ' + N(c.totFault) + ' ns.', { calc: N(p.fault) + ' × ' + N(c.penNs) + ' = ' + N(c.totFault) + ' ns' });
+      P(4, 1, 'La quota per richiesta', 'Le attese sono distribuite su tutte le richieste: ' + N(c.totFault) + ' diviso un milione è pari a ' + N(c.quota) + ' ns per richiesta. Il medesimo numero si ottiene moltiplicando i page fault per milione per i millisecondi: ' + N(p.fault) + ' × ' + p.ms + '.', { calc: N(c.totFault) + ' / 1 000 000 = ' + N(c.quota) + ' ns' });
+      P(5, 2, 'La media', 'Il tempo medio è 100 + ' + N(c.quota) + ' = ' + N(c.media) + ' ns. ' + (c.volte >= 2 ? 'Rispetto a un programma senza page fault, ogni richiesta dura in media ' + String(c.volte).replace('.', ',') + ' volte tanto.' : 'I page fault allungano la media del ' + Math.round((c.volte - 1) * 100) + ' per cento.') + ' Un singolo page fault dura sempre ' + p.ms + ' ms: la media dipende dalla frequenza con cui si verifica.', { calc: '100 + ' + N(c.quota) + ' = ' + N(c.media) + ' ns', esito: [N(c.media) + ' ns di media', ''] });
       return { passi, esito: c.media };
     }
   },
   bilancio: {
     regola: [
-      'Tempo medio = servizio ordinario + frazione di page fault × penalità, con tutti i tempi nella stessa unità.',
+      'Tempo medio = servizio ordinario + frazione di page fault × penalità, con tutti i tempi nella medesima unità.',
       'Con le richieste contate a milioni e la penalità in millisecondi: quota in ns = page fault per milione × millisecondi.'
     ],
     errori: [
       ['Sommare millisecondi e nanosecondi senza convertire.', 'Un millisecondo vale un milione di nanosecondi.'],
-      ['Trascurare un evento perché è raro.', 'Un page fault ogni mille richieste può moltiplicare per undici il tempo medio.'],
+      ['Trascurare un evento in ragione della sua rarità.', 'Un page fault ogni mille richieste può moltiplicare per undici il tempo medio.'],
       ['Attribuire la media a ogni richiesta.', 'Quasi tutte le richieste durano 100 ns, e poche durano millisecondi.']
     ],
     saFare: ['Convertire millisecondi in nanosecondi.', 'Calcolare la quota media dei page fault.', 'Riconoscere quando i page fault dominano il tempo.'],
     esercizi: [
-      { d: 'Su un milione di richieste da 100 ns avvengono 200 page fault, ciascuno con una penalità di 2 ms. Qual è il tempo medio di una richiesta, in nanosecondi?', segnaposto: 'Un numero', giuste: ['500', '500 ns', '500ns'],
+      { d: 'Su un milione di richieste da 100 ns si verificano 200 page fault, ciascuno con una penalità di 2 ms. Qual è il tempo medio di una richiesta, in nanosecondi?', segnaposto: 'Un numero', giuste: ['500', '500 ns', '500ns'],
         ok: 'Quota: 200 × 2 = 400 ns. Media: 100 + 400 = 500 ns.',
         diagnosi: [
-          { se: ['400', '400 ns'], msg: 'Questa è la quota dei page fault. Aggiungi i 100 ns del servizio ordinario.' },
+          { se: ['400', '400 ns'], msg: 'Questa è la quota dei page fault. Vanno aggiunti i 100 ns del servizio ordinario.' },
           { se: ['300', '300 ns'], msg: 'La penalità è di 2 ms per page fault: 200 × 2 = 400 ns di quota.' },
           { se: ['2000100', '2 000 100'], msg: 'Questo è il tempo di una singola richiesta con page fault. La media lo distribuisce su un milione di richieste.' }
         ],
         altro: 'Il valore è diverso. Si moltiplichino i page fault per milione per i millisecondi, e si aggiunga 100.',
         indizi: ['2 ms = 2 000 000 ns.', 'Quota: 200 × 2 000 000 / 1 000 000 = 400 ns.', '100 + 400 = 500 ns.'],
         svolgimento: ['Attese totali: 400 000 000 ns.', 'Quota per richiesta: 400 ns.', 'Media: 500 ns.'] },
-      { d: 'Il servizio ordinario dura 100 ns, e un page fault aggiunge 1 ms. Quanti page fault per milione di richieste portano il tempo medio a 150 ns?', segnaposto: 'Un numero', giuste: ['50', 'cinquanta'],
-        ok: 'La quota deve essere 50 ns, e con 1 ms ogni page fault per milione vale 1 ns: servono 50 page fault.',
+      { d: 'Il servizio ordinario dura 100 ns, e un page fault aggiunge 1 ms. Quanti page fault per milione di richieste determinano un tempo medio di 150 ns?', segnaposto: 'Un numero', giuste: ['50', 'cinquanta'],
+        ok: 'La quota deve essere 50 ns, e con 1 ms ogni page fault per milione vale 1 ns: occorrono 50 page fault.',
         diagnosi: [
           { se: ['150'], msg: 'La media comprende i 100 ns ordinari. Ai page fault spettano i 50 ns restanti.' },
           { se: ['5', 'cinque'], msg: 'Con una penalità di 1 ms, ogni page fault per milione aggiunge 1 ns alla media.' }
         ],
-        altro: 'Il numero è diverso. Si calcoli la quota che manca per arrivare a 150 ns.',
+        altro: 'Il numero è diverso. Si calcoli la quota mancante per raggiungere 150 ns.',
         indizi: ['150 − 100 = 50 ns di quota.', 'Quota = page fault per milione × millisecondi.', '50 / 1 = 50.'],
         svolgimento: ['Quota richiesta: 50 ns.', 'Penalità: 1 ms.', 'Page fault per milione: 50.'] },
-      { d: 'Un sistema ha il disco sempre al lavoro e il processore quasi fermo, e ogni programma avanza lentissimo. Qual è la spiegazione più plausibile?', guida: 'Si scelga la risposta.', o: [
-        { t: 'Thrashing: i frame sono meno delle pagine che servono', ok: true, fb: 'Il sistema passa il tempo a caricare e scaricare pagine.' },
+      { d: 'Un sistema ha il disco costantemente attivo e il processore quasi inattivo, e ogni programma avanza con estrema lentezza. Qual è la spiegazione più plausibile?', guida: 'Si scelga la risposta.', o: [
+        { t: 'Thrashing, poiché i frame sono meno delle pagine richieste', ok: true, fb: 'Il sistema dedica il tempo al caricamento e alla rimozione di pagine.' },
         { t: 'La cache del processore è troppo piccola', fb: 'I miss della cache non coinvolgono il disco.' },
-        { t: 'I programmi sono in deadlock', fb: 'In un deadlock i thread sono fermi, e il disco resterebbe inattivo.' }] }
+        { t: 'I programmi sono in deadlock', fb: 'In un deadlock i thread sono bloccati, e il disco resterebbe inattivo.' }] }
     ]
   }
 });

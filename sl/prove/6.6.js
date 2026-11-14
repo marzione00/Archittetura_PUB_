@@ -10,11 +10,11 @@
       const N = { d: 'dati', b: 'bitmap', i: 'inode' }, ord = r.scegli(['dbi', 'dib', 'bdi', 'bid', 'idb', 'ibd']), k = r.int(0, 3), fatte = ord.slice(0, k);
       const s = { d: fatte.indexOf('d') >= 0, b: fatte.indexOf('b') >= 0, i: fatte.indexOf('i') >= 0 }, e = s.i && !(s.b && s.d) ? 'esposto' : !s.i && s.b ? 'perso' : 'coerente';
       const durevoli = k === 0 ? 'nessuna' : fatte.split('').map((c) => N[c]).join(' e ');
-      const fb = 'Scritture durevoli: ' + durevoli + '. ' + (e === 'coerente' ? (k === 0 ? 'Il volume è rimasto com’era.' : k === 3 ? 'L’operazione è completa.' : 'I byte nuovi stanno in un blocco ancora libero e fuori da ogni file: per il file system nulla è accaduto.') : e === 'perso' ? 'La bitmap segna occupato il blocco, e l’inode è rimasto senza riferimento.' : s.b ? 'L’inode indica un blocco in cui i byte nuovi sono mai arrivati.' : 'L’inode indica un blocco che la bitmap considera ancora libero.');
-      return { u: '6.6.1', d: 'Per aggiungere un blocco a un file servono tre scritture, che diventano durevoli in quest’ordine: ' + ord.split('').map((c) => N[c]).join(', ') + '. Il crash avviene quando ' + ['nessuna scrittura è durevole', 'soltanto la prima è durevole', 'le prime due sono durevoli', 'tutte e tre sono durevoli'][k] + '. In che stato si trova il volume al riavvio?', guida: 'Si scelga la risposta.', o: r.mescola([
-        { t: 'Coerente: file come prima, oppure esteso per intero', ok: e === 'coerente', fb },
+      const fb = 'Scritture durevoli: ' + durevoli + '. ' + (e === 'coerente' ? (k === 0 ? 'Il volume è invariato.' : k === 3 ? 'L’operazione è completa.' : 'I byte nuovi si trovano in un blocco ancora libero ed esterno a ogni file: per il file system lo stato equivale a quello iniziale.') : e === 'perso' ? 'La bitmap segna occupato il blocco, e l’inode è privo del riferimento.' : s.b ? 'L’inode indica un blocco in cui i byte nuovi non sono mai stati scritti.' : 'L’inode indica un blocco che la bitmap considera ancora libero.');
+      return { u: '6.6.1', d: 'Per aggiungere un blocco a un file occorrono tre scritture, che divengono durevoli in quest’ordine: ' + ord.split('').map((c) => N[c]).join(', ') + '. Il crash avviene quando ' + ['nessuna scrittura è durevole', 'soltanto la prima è durevole', 'le prime due sono durevoli', 'tutte e tre sono durevoli'][k] + '. In quale stato si trova il volume al riavvio?', guida: 'Si scelga la risposta.', o: r.mescola([
+        { t: 'Coerente, con il file invariato oppure esteso per intero', ok: e === 'coerente', fb },
         { t: 'Un blocco segnato occupato, che nessun file raggiunge', ok: e === 'perso', fb },
-        { t: 'Il file raggiunge un blocco con byte vecchi, oppure segnato libero', ok: e === 'esposto', fb }]) };
+        { t: 'Il file raggiunge un blocco con byte precedenti, oppure segnato libero', ok: e === 'esposto', fb }]) };
     },
     // 6.6.2 · bit da modificare, oppure blocchi orfani, da inode e bitmap
     (r) => {
@@ -26,7 +26,7 @@
         ok: 'Blocchi in uso segnati liberi: ' + el(scoperti) + '. Blocchi orfani: ' + el(orfani) + '.' + (cosa === 0 ? ' Bit da modificare: ' + v + '.' : ''),
         diagnosi: DIAG(giuste, cosa === 0 ? [
           { se: I(orfani.length), msg: 'Questi sono soltanto i blocchi orfani. Vanno corretti anche i bit a 0 dei blocchi che hanno un proprietario.' },
-          { se: I(scoperti.length), msg: 'Questi sono soltanto i blocchi in uso segnati liberi. Vanno corretti anche i bit a 1 dei blocchi senza proprietario.' },
+          { se: I(scoperti.length), msg: 'Questi sono soltanto i blocchi in uso segnati liberi. Vanno corretti anche i bit a 1 dei blocchi privi di proprietario.' },
           { se: I(bit.filter((x) => x === 1).length), msg: 'Questi sono i bit a 1. La domanda riguarda i bit in disaccordo con gli inode.' }
         ] : [
           { se: I(scoperti.length), msg: 'Questi sono i blocchi in uso segnati liberi. Un blocco orfano ha il bit a 1 e nessun proprietario.' },
@@ -41,15 +41,15 @@
     (r) => {
       const c = r.mescola([1, 2, 3, 4, 5, 6, 7, 8, 9]), a0 = c[0], a1 = c[1], b0 = c[2], b1 = c[3], st = r.int(0, 4), chi = r.int(0, 1), nome = chi === 0 ? 'X' : 'Y', vecchio = chi === 0 ? a0 : b0, nuovo = chi === 0 ? a1 : b1, v = st >= 2 ? nuovo : vecchio, giuste = I(v);
       const sede = chi === 0 ? (st >= 3 ? a1 : a0) : (st >= 4 ? b1 : b0);
-      return { u: '6.6.3', d: 'Una transazione deve portare X da ' + a0 + ' a ' + a1 + ' e Y da ' + b0 + ' a ' + b1 + '. I passi sono, nell’ordine: record nel journal, commit, copia di X, copia di Y. Il crash cade ' + ['prima del primo passo', 'subito dopo la scrittura dei record', 'subito dopo il commit', 'subito dopo la copia di X', 'subito dopo la copia di Y'][st] + '. Dopo il recupero, quanto vale ' + nome + '?', segnaposto: 'Un numero', giuste,
-        ok: st >= 2 ? 'Il commit è durevole: il recupero riapplica i due record, e ' + nome + ' vale ' + nuovo + '.' : 'Il commit manca: la transazione viene scartata, e ' + nome + ' resta ' + vecchio + '.',
+      return { u: '6.6.3', d: 'Una transazione deve portare X da ' + a0 + ' a ' + a1 + ' e Y da ' + b0 + ' a ' + b1 + '. I passi sono, nell’ordine: record nel journal, commit, copia di X, copia di Y. Il crash avviene ' + ['prima del primo passo', 'immediatamente dopo la scrittura dei record', 'immediatamente dopo il commit', 'immediatamente dopo la copia di X', 'immediatamente dopo la copia di Y'][st] + '. Dopo il recupero, quanto vale ' + nome + '?', segnaposto: 'Un numero', giuste,
+        ok: st >= 2 ? 'Il commit è durevole: il recupero riapplica i due record, e ' + nome + ' vale ' + nuovo + '.' : 'Il commit è assente: la transazione è scartata, e ' + nome + ' resta ' + vecchio + '.',
         diagnosi: DIAG(giuste, [
-          st >= 2 ? { se: I(vecchio), msg: (sede === vecchio ? 'Questo è il valore sul disco al momento del crash. ' : '') + 'Il commit era durevole: il recupero riapplica tutti i record del journal.' } : { se: I(nuovo), msg: 'Senza commit la transazione viene scartata' + (st === 1 ? ', anche se i record erano già nel journal.' : '.') },
+          st >= 2 ? { se: I(vecchio), msg: (sede === vecchio ? 'Questo è il valore sul disco al momento del crash. ' : '') + 'Il commit era durevole: il recupero riapplica tutti i record del journal.' } : { se: I(nuovo), msg: 'Senza commit la transazione è scartata' + (st === 1 ? ', anche se i record erano già nel journal.' : '.') },
           { se: I(chi === 0 ? (st >= 2 ? b1 : b0) : (st >= 2 ? a1 : a0)), msg: 'Questo è il valore dell’altro blocco. La domanda riguarda ' + nome + '.' }
         ]),
-        altro: 'Il numero è diverso. Guarda se il commit era durevole al momento del crash.',
-        indizi: ['Il commit è il secondo passo.', st >= 2 ? 'Al momento del crash il commit era durevole.' : 'Al momento del crash il commit mancava.', st >= 2 ? 'Il recupero riapplica i record: ' + nome + ' = ' + nuovo + '.' : 'La transazione viene scartata: ' + nome + ' = ' + vecchio + '.'],
-        svolgimento: [st >= 2 ? 'Commit presente: si riapplicano i record.' : 'Commit assente: la transazione si scarta.', nome + ' = ' + v + '.'] };
+        altro: 'Il numero è diverso. Si verifichi se il commit era durevole al momento del crash.',
+        indizi: ['Il commit è il secondo passo.', st >= 2 ? 'Al momento del crash il commit era durevole.' : 'Al momento del crash il commit era assente.', st >= 2 ? 'Il recupero riapplica i record: ' + nome + ' = ' + nuovo + '.' : 'La transazione è scartata: ' + nome + ' = ' + vecchio + '.'],
+        svolgimento: [st >= 2 ? 'Commit presente: si riapplicano i record.' : 'Commit assente: la transazione è scartata.', nome + ' = ' + v + '.'] };
     },
     // 6.6.4 · scritture del journaling completo, di quello ordinato, oppure la differenza
     (r) => {
@@ -58,19 +58,19 @@
       return { u: '6.6.4', d: 'Un aggiornamento comprende ' + d + ' blocchi di dati e ' + m + ' blocchi di metadati. ' + (cosa === 0 ? 'Quante scritture di blocco richiede il journaling completo, senza contare il commit?' : cosa === 1 ? 'Quante scritture di blocco richiede il journaling ordinato, senza contare il commit?' : 'Quante scritture di blocco risparmia il journaling ordinato rispetto a quello completo?'), segnaposto: 'Un numero', giuste,
         ok: 'Completo: 2 × (' + d + ' + ' + m + ') = ' + completo + '. Ordinato: ' + d + ' + 2 × ' + m + ' = ' + ordinato + '.' + (cosa === 2 ? ' Risparmio: ' + v + ', quanti i blocchi di dati.' : ''),
         diagnosi: DIAG(giuste, cosa === 0 ? [
-          { se: I(d + m), msg: 'Questi sono i blocchi. Nel journaling completo ciascuno viene scritto due volte.' },
-          { se: I(ordinato), msg: 'Questo è il conto del journaling ordinato. In quello completo anche i dati passano dal journal.' },
-          { se: I(2 * d + m), msg: 'A essere scritti due volte sono tutti i blocchi, metadati compresi.' }
+          { se: I(d + m), msg: 'Questi sono i blocchi. Nel journaling completo ciascuno è scritto due volte.' },
+          { se: I(ordinato), msg: 'Questo è il totale del journaling ordinato. In quello completo anche i dati transitano dal journal.' },
+          { se: I(2 * d + m), msg: 'Sono scritti due volte tutti i blocchi, metadati compresi.' }
         ] : cosa === 1 ? [
-          { se: I(d + m), msg: 'Questi sono i blocchi. I metadati passano dal journal, e vengono scritti due volte.' },
-          { se: I(completo), msg: 'Questo è il conto del journaling completo. In quello ordinato i dati vengono scritti una volta sola.' },
-          { se: I(2 * d + m), msg: 'A passare dal journal sono i metadati. I dati vengono scritti una volta sola.' }
+          { se: I(d + m), msg: 'Questi sono i blocchi. I metadati transitano dal journal, e sono scritti due volte.' },
+          { se: I(completo), msg: 'Questo è il totale del journaling completo. In quello ordinato i dati sono scritti una volta sola.' },
+          { se: I(2 * d + m), msg: 'Dal journal transitano i soli metadati. I dati sono scritti una volta sola.' }
         ] : [
-          { se: I(m), msg: 'I metadati vengono scritti due volte in entrambe le modalità. A cambiare è il trattamento dei dati.' },
+          { se: I(m), msg: 'I metadati sono scritti due volte in entrambe le modalità. Varia il trattamento dei dati.' },
           { se: I(ordinato), msg: 'Queste sono le scritture del journaling ordinato. La domanda riguarda la differenza.' },
           { se: I(completo), msg: 'Queste sono le scritture del journaling completo. La domanda riguarda la differenza.' }
         ]),
-        altro: 'Il numero è diverso. Conta quante volte viene scritto ogni blocco di dati, e quante ogni blocco di metadati.',
+        altro: 'Il numero è diverso. Si contino le scritture di ogni blocco di dati, e quelle di ogni blocco di metadati.',
         indizi: ['Completo: ogni blocco due volte. Ordinato: i dati una volta, i metadati due.', 'Completo: 2 × ' + (d + m) + ' = ' + completo + '.', 'Ordinato: ' + d + ' + ' + 2 * m + ' = ' + ordinato + '.'],
         svolgimento: ['Completo: ' + completo + '.', 'Ordinato: ' + ordinato + '.'].concat(cosa === 2 ? ['Differenza: ' + v + '.'] : []) };
     }

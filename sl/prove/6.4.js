@@ -13,15 +13,15 @@
       const cap = r.int(1, 2), n = r.int(4, 5), rich = []; for (let k = 0; k < n; k++) rich.push([r.scegli(['A', 'B']), r.scegli([3, 3, 4])]);
       const voci = []; let miss = 0; const righe = rich.map((q, t) => { const chiave = q[0] + q[1], i = voci.findIndex((x) => x.k === chiave); if (i >= 0) { voci[i].t = t; return q[0] + ' pagina ' + q[1] + ': hit.'; } miss++; let fuori = ''; if (voci.length === cap) { let v = 0; voci.forEach((x, j) => { if (x.t < voci[v].t) v = j; }); fuori = voci[v].k; voci.splice(v, 1); } voci.push({ k: chiave, t }); return q[0] + ' pagina ' + q[1] + ': miss' + (fuori ? ', esce la voce di ' + fuori[0] + ' pagina ' + fuori[1] + '.' : '.'); });
       const giuste = I(miss), distinte = new Set(rich.map((q) => q[0] + q[1])).size, soloPagine = new Set(rich.map((q) => q[1])).size;
-      return { u: '6.4.1', d: 'Una TLB ha ' + (cap === 1 ? 'una voce' : 'due voci') + ' con ASID, ed è vuota. Quando è piena esce la voce usata meno di recente. Le richieste sono, nell’ordine: ' + rich.map((q) => q[0] + ' pagina ' + q[1]).join(', ') + '. Quanti miss avvengono?', segnaposto: 'Un numero', giuste,
+      return { u: '6.4.1', d: 'Una TLB ha ' + (cap === 1 ? 'una voce' : 'due voci') + ' con ASID, ed è vuota. Quando è piena esce la voce con l’accesso meno recente. Le richieste sono, nell’ordine: ' + rich.map((q) => q[0] + ' pagina ' + q[1]).join(', ') + '. Quanti miss si verificano?', segnaposto: 'Un numero', giuste,
         ok: 'Confrontando ogni volta processo e pagina con le voci presenti, i miss sono ' + miss + '.',
         diagnosi: DIAG(giuste, [
-          { se: I(soloPagine), msg: 'Hai confrontato soltanto il numero di pagina. La stessa pagina, in due processi, richiede due voci distinte.' },
-          { se: I(distinte), msg: 'Questo è il numero delle coppie diverse. Una voce scacciata e richiesta di nuovo provoca un altro miss.' },
+          { se: I(soloPagine), msg: 'È stato confrontato soltanto il numero di pagina. La medesima pagina, in due processi, richiede due voci distinte.' },
+          { se: I(distinte), msg: 'Questo è il numero delle coppie distinte. Una voce sostituita e richiesta di nuovo provoca un altro miss.' },
           { se: I(n - miss), msg: 'Questo è il numero degli hit. La domanda riguarda i miss.' },
           { se: I(n), msg: 'Una richiesta che ritrova la propria voce nella TLB è un hit.' }
         ]),
-        altro: 'Il numero è diverso. Si tenga l’elenco delle voci presenti, ciascuna con processo, pagina e ultimo uso.',
+        altro: 'Il numero è diverso. Si mantenga l’elenco delle voci presenti, ciascuna con processo, pagina e ultimo accesso.',
         indizi: ['Un hit richiede che coincidano sia il processo sia la pagina.', 'La TLB contiene al massimo ' + (cap === 1 ? 'una voce.' : 'due voci.'), righe.join(' ')],
         svolgimento: righe.concat(['Miss: ' + miss + '.']) };
     },
@@ -39,15 +39,15 @@
           indizi: ['Bit del numero di pagina: ' + bit + ' − 12 = ' + vpn + '.', '2 alla ' + vpn + ' = ' + Math.pow(2, vpn) + ' voci.', Math.pow(2, vpn) + ' × 8 = ' + lin + '.'],
           svolgimento: ['Voci: ' + Math.pow(2, vpn) + '.', 'Byte: ' + lin + '.'] }; }
       const giuste = I(due);
-      return { u: '6.4.2', d: 'Una tabella a due livelli ha una radice di ' + nr + ' voci e tabelle figlie di ' + nf + ' voci, con voci da 8 byte. Il programma usa ' + (reg === 1 ? 'una sola regione' : reg + ' regioni') + '. Quanti byte occupano in tutto le tabelle?', segnaposto: 'Un numero', giuste,
+      return { u: '6.4.2', d: 'Una tabella a due livelli ha una radice di ' + nr + ' voci e tabelle figlie di ' + nf + ' voci, con voci da 8 byte. Il programma impiega ' + (reg === 1 ? 'una sola regione' : reg + ' regioni') + '. Quanti byte occupano complessivamente le tabelle?', segnaposto: 'Un numero', giuste,
         ok: '(' + nr + ' + ' + reg + ' × ' + nf + ') × 8 = ' + due + ' byte.',
         diagnosi: DIAG(giuste, [
           { se: I(reg * nf * 8), msg: 'Manca la radice: ' + nr + ' voci, cioè ' + nr * 8 + ' byte.' },
           { se: I(nr + reg * nf), msg: 'Queste sono le voci. Ogni voce occupa 8 byte.' },
           { se: I(lin), msg: 'Questo è lo spazio della tabella lineare, con una voce per ogni pagina possibile.' },
-          { se: I((nr + nf) * 8), msg: 'Le figlie sono ' + reg + ', una per ogni regione usata.' }
+          { se: I((nr + nf) * 8), msg: 'Le figlie sono ' + reg + ', una per ogni regione in uso.' }
         ]),
-        altro: 'Il numero è diverso. Somma le voci della radice e delle figlie, e moltiplica per 8.',
+        altro: 'Il numero è diverso. Si sommino le voci della radice e delle figlie, e si moltiplichi per 8.',
         indizi: ['Radice: ' + nr + ' voci.', 'Figlie: ' + reg + ' × ' + nf + ' = ' + reg * nf + ' voci.', (nr + reg * nf) + ' × 8 = ' + due + '.'],
         svolgimento: ['Voci: ' + nr + ' + ' + reg * nf + ' = ' + (nr + reg * nf) + '.', 'Byte: ' + due + '.'] };
     },
@@ -55,25 +55,25 @@
     (r) => {
       const i = r.int(1, 15), j = r.int(1, 15), off = r.int(1, 4095), fig = r.scegli([0x200000, 0x306000, 0x40A000, 0x518000]), pfn = r.int(2, 60), va = i * 4194304 + j * 4096 + off, cosa = r.int(0, 2);
       if (cosa === 0) { const a2 = fig + 8 * j, giuste = HEX(a2);
-        return { u: '6.4.3', d: 'In una traduzione a due livelli, con voci da 8 byte, la voce della radice contiene ' + H(fig) + ': è la base della tabella figlia. L’indice L2 vale ' + j + '. A quale indirizzo si legge la voce foglia? Rispondi in esadecimale.', segnaposto: 'Per esempio 0x1000', giuste,
-          ok: j + ' × 8 = ' + 8 * j + ' = ' + H(8 * j) + ': la foglia sta a ' + H(a2) + '.',
+        return { u: '6.4.3', d: 'In una traduzione a due livelli, con voci da 8 byte, la voce della radice contiene ' + H(fig) + ': è la base della tabella figlia. L’indice L2 vale ' + j + '. A quale indirizzo si legge la voce foglia? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1000', giuste,
+          ok: j + ' × 8 = ' + 8 * j + ' = ' + H(8 * j) + ': la foglia si trova a ' + H(a2) + '.',
           diagnosi: DIAG(giuste, [
             { se: HEX(fig + j), msg: 'Ogni voce occupa 8 byte: l’indice va moltiplicato per 8.' },
-            { se: HEX(0x100000 + 8 * j), msg: 'La seconda lettura parte dalla base della figlia, ' + H(fig) + '.' },
-            { se: HEX(fig + 8 * i), msg: 'Nella figlia si usa l’indice L2, ' + j + '.' }
+            { se: HEX(0x100000 + 8 * j), msg: 'La seconda lettura ha come base quella della figlia, ' + H(fig) + '.' },
+            { se: HEX(fig + 8 * i), msg: 'Nella figlia si impiega l’indice L2, ' + j + '.' }
           ]),
-          altro: 'L’indirizzo è diverso. Somma alla base della figlia 8 volte l’indice L2.',
+          altro: 'L’indirizzo è diverso. Si sommi alla base della figlia 8 volte l’indice L2.',
           indizi: [j + ' × 8 = ' + 8 * j + '.', 8 * j + ' in esadecimale è ' + H(8 * j) + '.', H(fig) + ' + ' + H(8 * j) + ' = ' + H(a2) + '.'],
           svolgimento: ['Spostamento: ' + H(8 * j) + '.', 'Indirizzo della foglia: ' + H(a2) + '.'] }; }
       if (cosa === 1) { const foglia = 2 * pfn + 1, pa = pfn * 4096 + off, giuste = I(pa).concat(HEX(pa));
         return { u: '6.4.3', d: 'Al termine di un cammino a due livelli la voce foglia contiene ' + foglia + ', nel formato 2 × PFN + valid. Le pagine sono da 4096 byte, e l’offset dell’indirizzo virtuale è ' + off + '. Qual è, in decimale, l’indirizzo fisico?', segnaposto: 'Un numero', giuste,
           ok: 'Frame: (' + foglia + ' − 1) / 2 = ' + pfn + '. Indirizzo fisico: ' + pfn + ' × 4096 + ' + off + ' = ' + pa + '.',
           diagnosi: DIAG(giuste, [
-            { se: I(foglia * 4096 + off), msg: 'Hai usato il valore della foglia come frame. Il frame è la metà intera: ' + pfn + '.' },
-            { se: I(pfn * 4096), msg: 'Questo è l’inizio del frame ' + pfn + '. Aggiungi l’offset, ' + off + '.' },
-            { se: I(pfn * 1024 + off), msg: 'Qui le pagine sono da 4096 byte.' }
+            { se: I(foglia * 4096 + off), msg: 'Il valore della foglia è stato impiegato come frame. Il frame è la metà intera: ' + pfn + '.' },
+            { se: I(pfn * 4096), msg: 'Questo è l’inizio del frame ' + pfn + '. Va aggiunto l’offset, ' + off + '.' },
+            { se: I(pfn * 1024 + off), msg: 'In questo caso le pagine sono da 4096 byte.' }
           ]),
-          altro: 'Il numero è diverso. Si ricavi il frame dalla foglia, poi si applichi frame × 4096 + offset.',
+          altro: 'Il numero è diverso. Si ricavi il frame dalla foglia, e quindi si applichi frame × 4096 + offset.',
           indizi: ['Frame: (' + foglia + ' − 1) / 2 = ' + pfn + '.', pfn + ' × 4096 = ' + pfn * 4096 + '.', pfn * 4096 + ' + ' + off + ' = ' + pa + '.'],
           svolgimento: ['Frame: ' + pfn + '.', 'Indirizzo fisico: ' + pa + '.'] }; }
       const quale = r.int(0, 1), v = quale === 0 ? i : j, giuste = I(v);
@@ -81,9 +81,9 @@
         ok: 'L1 moltiplica 2 alla 22, L2 moltiplica 4096, e il resto è l’offset: L1 = ' + i + ', L2 = ' + j + '.',
         diagnosi: DIAG(giuste, [
           { se: I(quale === 0 ? j : i), msg: quale === 0 ? 'Questo è l’indice L2, che moltiplica 4096. L1 moltiplica 4194304.' : 'Questo è l’indice L1, che moltiplica 4194304. L2 moltiplica 4096.' },
-          { se: I(off), msg: 'Questo è l’offset, cioè ciò che resta dopo avere tolto i contributi dei due indici.' }
+          { se: I(off), msg: 'Questo è l’offset, cioè il valore residuo dopo la sottrazione dei contributi dei due indici.' }
         ]),
-        altro: 'Il numero è diverso. Guarda quale fattore moltiplica 2 alla 22 e quale moltiplica 4096.',
+        altro: 'Il numero è diverso. Si individui il fattore che moltiplica 2 alla 22 e quello che moltiplica 4096.',
         indizi: ['2 alla 22 vale 4194304.', 'L1 è il fattore di 4194304: ' + i + '.', 'L2 è il fattore di 4096: ' + j + '.'],
         svolgimento: ['L1: ' + i + '.', 'L2: ' + j + '.', 'Offset: ' + off + '.'] };
     },
@@ -95,22 +95,22 @@
           ok: t + ' + ' + liv + ' × ' + ram + ' + ' + ram + ' = ' + cMiss + ' ns.',
           diagnosi: DIAG(giuste, [
             { se: NS(t + liv * ram), msg: 'Manca la lettura del dato: dopo avere trovato il frame, il dato va ancora letto.' },
-            { se: NS(liv * ram + ram), msg: 'Anche in un miss la TLB viene consultata per prima: ' + t + ' ns.' },
+            { se: NS(liv * ram + ram), msg: 'Anche in un miss la TLB è consultata per prima: ' + t + ' ns.' },
             { se: NS(cHit), msg: 'Questo è il tempo di un hit. In un miss vanno lette le tabelle, una voce per livello.' }
           ]),
-          altro: 'Il valore è diverso. Somma la TLB, una lettura per livello e la lettura del dato.',
+          altro: 'Il valore è diverso. Si sommino la TLB, una lettura per livello e la lettura del dato.',
           indizi: ['TLB: ' + t + ' ns.', 'Tabelle: ' + liv + ' × ' + ram + ' = ' + liv * ram + ' ns.', 'Dato: ' + ram + ' ns. Totale ' + cMiss + ' ns.'],
           svolgimento: ['TLB: ' + t + ' ns.', 'Tabelle: ' + liv * ram + ' ns.', 'Dato: ' + ram + ' ns.', 'Totale: ' + cMiss + ' ns.'] }; }
       const giuste = NS(media);
       return { u: '6.4.4', d: 'La TLB si consulta in ' + t + ' ns, e ogni lettura di memoria costa ' + ram + ' ns. La tabella delle pagine ha ' + liv + ' livelli. Su cento accessi, ' + (100 - miss) + ' trovano la traduzione nella TLB. Qual è il tempo medio di un accesso, in nanosecondi?', segnaposto: 'Un numero', giuste,
-        ok: 'Hit: ' + cHit + ' ns. Costo in più di un miss: ' + liv + ' × ' + ram + ' = ' + liv * ram + ' ns. Media: ' + cHit + ' + ' + String(miss / 100).replace('.', ',') + ' × ' + liv * ram + ' = ' + media + ' ns.',
+        ok: 'Hit: ' + cHit + ' ns. Costo aggiuntivo di un miss: ' + liv + ' × ' + ram + ' = ' + liv * ram + ' ns. Media: ' + cHit + ' + ' + String(miss / 100).replace('.', ',') + ' × ' + liv * ram + ' = ' + media + ' ns.',
         diagnosi: DIAG(giuste, [
-          { se: NS(cHit), msg: 'Questo è il tempo di un hit. I ' + miss + ' miss su cento alzano la media.' },
+          { se: NS(cHit), msg: 'Questo è il tempo di un hit. I ' + miss + ' miss su cento aumentano la media.' },
           { se: NS(cMiss), msg: 'Questo è il tempo di un miss. I miss sono soltanto ' + miss + ' su cento.' },
-          { se: NS(cHit + miss * cMiss / 100), msg: 'Il costo in più di un miss sono le sole letture delle tabelle: TLB e dato sono già contati nell’hit.' }
+          { se: NS(cHit + miss * cMiss / 100), msg: 'Il costo aggiuntivo di un miss è dato dalle sole letture delle tabelle: TLB e dato sono già contati nell’hit.' }
         ]),
         altro: 'Il valore è diverso. Si applichi costo di un hit + frazione di miss × livelli × tempo di una lettura.',
-        indizi: ['Costo di un hit: ' + t + ' + ' + ram + ' = ' + cHit + ' ns.', 'Frazione di miss: ' + String(miss / 100).replace('.', ',') + '. Costo in più: ' + liv * ram + ' ns.', cHit + ' + ' + miss * liv * ram / 100 + ' = ' + media + ' ns.'],
+        indizi: ['Costo di un hit: ' + t + ' + ' + ram + ' = ' + cHit + ' ns.', 'Frazione di miss: ' + String(miss / 100).replace('.', ',') + '. Costo aggiuntivo: ' + liv * ram + ' ns.', cHit + ' + ' + miss * liv * ram / 100 + ' = ' + media + ' ns.'],
         svolgimento: ['Hit: ' + (100 - miss) + ' × ' + cHit + ' = ' + (100 - miss) * cHit + ' ns.', 'Miss: ' + miss + ' × ' + cMiss + ' = ' + miss * cMiss + ' ns.', 'Media: ' + media + ' ns.'] };
     }
   ] });

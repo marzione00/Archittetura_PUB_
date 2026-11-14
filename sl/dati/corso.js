@@ -302,80 +302,80 @@
     ] },
     { k: '5', r: 'V', breve: 'Processi', nome: 'Processi e concorrenza', sim: 'process', capitoli: [
       { id: '5.1', breve: 'Processi e stati', titolo: 'Processi, stati e cambi di contesto', sim: 'process', stato: 'nuovo', prova: true,
-        guida: 'Il Modulo V comincia dal processo: una esecuzione di un programma, isolata dalle altre. Il capitolo mostra gli stati in cui un processo può trovarsi, come il kernel lo sospende e lo fa ripartire dal punto giusto, e quali dati conserva per riuscirci.',
+        guida: 'Il Modulo V ha inizio dal processo: una esecuzione di un programma, isolata dalle altre. Il capitolo tratta gli stati in cui un processo può trovarsi, il modo in cui il kernel lo sospende e ne riprende l’esecuzione dal punto corretto, e i dati che conserva a tale scopo.',
         unita: [
-          { id: '5.1.1', titolo: 'Il processo come astrazione di esecuzione e protezione', sim: 'process', scopo: 'Lo stesso indirizzo, in due processi, conduce a celle diverse.' },
-          { id: '5.1.2', titolo: 'Dall’esecuzione agli stati di pronto e bloccato', sim: 'coda', scopo: 'Che cosa manca a un processo per eseguire.' },
-          { id: '5.1.3', titolo: 'Il cambio di contesto e la continuità dell’esecuzione', sim: 'register', scopo: 'Il contatore salvato, e la ripresa dal punto giusto.' },
+          { id: '5.1.1', titolo: 'Il processo come astrazione di esecuzione e protezione', sim: 'process', scopo: 'Il medesimo indirizzo, in due processi, conduce a celle diverse.' },
+          { id: '5.1.2', titolo: 'Dall’esecuzione agli stati di pronto e bloccato', sim: 'coda', scopo: 'La condizione che manca a un processo per eseguire.' },
+          { id: '5.1.3', titolo: 'Il cambio di contesto e la continuità dell’esecuzione', sim: 'register', scopo: 'Il contatore salvato, e la ripresa dal punto corretto.' },
           { id: '5.1.4', titolo: 'Quali dati conserva il kernel', sim: 'tabella', scopo: 'La scheda di ogni processo, e le code che la contengono.' }
         ],
         sfide: [['cslez5_1_01_processes', 'Programmi, processi e parallelismo'], ['cslez5_1_02_processes', 'Transizioni fra gli stati di un processo'], ['cslez5_1_03_processes', 'Contesto salvato e PCB'], ['cslez5_1_04_processes', 'Costo dei cambi e tempi di risposta'], ['cslez5_1_05_processes', 'Ordine di esecuzione e assegnazione ai core']] },
       { id: '5.2', breve: 'Creazione e terminazione', titolo: 'Creazione dei processi, sostituzione del programma e terminazione', sim: 'fork', stato: 'nuovo', prova: true,
-        guida: 'La vita di un processo Unix in quattro chiamate: fork lo crea per duplicazione, execve gli cambia programma, _exit lo termina, waitpid ne raccoglie l’esito. Il capitolo le segue una per una, mostra come la shell le combina per eseguire un comando, e chiude con un caso delicato.',
+        guida: 'Il capitolo tratta il ciclo di un processo Unix attraverso quattro chiamate: fork lo crea per duplicazione, execve ne sostituisce il programma, _exit lo termina, waitpid ne raccoglie l’esito. Ciascuna è esaminata separatamente, insieme al modo in cui la shell le combina per eseguire un comando, e a un caso critico conclusivo.',
         unita: [
           { id: '5.2.1', titolo: 'Creazione per duplicazione', sim: 'fork', scopo: 'Due ritorni da una chiamata, e la copia su scrittura.' },
-          { id: '5.2.2', titolo: 'Avvio di un comando e redirezione dell’uscita', sim: 'terminale', scopo: 'Che cosa fa la shell fra fork e l’avvio del programma.' },
-          { id: '5.2.3', titolo: 'Sostituire il programma di un processo', sim: 'process', scopo: 'Che cosa cambia e che cosa resta dopo execve.' },
+          { id: '5.2.2', titolo: 'Avvio di un comando e redirezione dell’uscita', sim: 'terminale', scopo: 'Le operazioni della shell fra fork e l’avvio del programma.' },
+          { id: '5.2.3', titolo: 'Sostituire il programma di un processo', sim: 'process', scopo: 'Che cosa cambia e che cosa resta invariato dopo execve.' },
           { id: '5.2.4', titolo: 'Attesa, terminazione e registrazione finale del processo', sim: 'tabella', scopo: 'Il codice di uscita, la raccolta e i processi zombie.' },
-          { id: '5.2.5', titolo: 'Fork in un processo multithread', sim: 'thread', scopo: 'Un lucchetto ereditato chiuso, senza chi lo apra.' }
+          { id: '5.2.5', titolo: 'Fork in un processo multithread', sim: 'thread', scopo: 'Un mutex ereditato come occupato, senza un thread che lo rilasci.' }
         ],
         sfide: [['cslez5_2_01_process_control', 'Valori restituiti da fork'], ['cslez5_2_02_process_control', 'Risorse ereditate e copia su scrittura'], ['cslez5_2_03_process_control', 'Sostituzione del programma con exec'], ['cslez5_2_04_process_control', 'Terminazione, wait e processi zombie'], ['cslez5_2_05_process_control', 'Fork condizionali e sequenze della shell']] },
       { id: '5.3', breve: 'Scheduling', titolo: 'Scheduling della CPU e condivisione del tempo', sim: 'coda', stato: 'nuovo', prova: true,
-        guida: 'Molti processi pronti, pochi processori: qualcuno deve scegliere. Il capitolo mostra quando lo scheduler decide, confronta le politiche FCFS, SJF e round-robin sulle attese che producono, esamina le priorità con i loro inconvenienti, e passa infine a più core.',
+        guida: 'Il capitolo tratta la scelta del processo da eseguire quando i processi pronti superano i processori: individua gli eventi che attivano lo scheduler, confronta le politiche FCFS, SJF e round-robin sulle attese prodotte, esamina le priorità con i relativi inconvenienti, e considera infine il caso di più core.',
         unita: [
-          { id: '5.3.1', titolo: 'Eventi che attivano lo scheduler', sim: 'interrupt', scopo: 'Quando si decide, e quanto aspetta chi si è appena risvegliato.' },
-          { id: '5.3.2', titolo: 'Ordine di servizio e attesa media in FCFS e SJF', sim: 'coda', scopo: 'Lo stesso lavoro, attese diverse secondo l’ordine.' },
-          { id: '5.3.3', titolo: 'Round-robin e costo della prelazione', sim: 'clock', scopo: 'La rotazione turno per turno, e il prezzo dei cambi.' },
-          { id: '5.3.4', titolo: 'Priorità, retroazione e inversione', sim: 'lucchetto', scopo: 'Un mutex che fa aspettare il processo più urgente.' },
-          { id: '5.3.5', titolo: 'Scheduling su più processori logici', sim: 'cpu', scopo: 'Due code, e i lavori da spostare per bilanciarle.' }
+          { id: '5.3.1', titolo: 'Eventi che attivano lo scheduler', sim: 'interrupt', scopo: 'Gli istanti della decisione, e l’attesa di un processo appena risvegliato.' },
+          { id: '5.3.2', titolo: 'Ordine di servizio e attesa media in FCFS e SJF', sim: 'coda', scopo: 'Il medesimo lavoro, con attese diverse secondo l’ordine.' },
+          { id: '5.3.3', titolo: 'Round-robin e costo della prelazione', sim: 'clock', scopo: 'La rotazione turno per turno, e il costo dei cambi.' },
+          { id: '5.3.4', titolo: 'Priorità, retroazione e inversione', sim: 'lucchetto', scopo: 'Un mutex che impone l’attesa al processo più urgente.' },
+          { id: '5.3.5', titolo: 'Scheduling su più processori logici', sim: 'cpu', scopo: 'Due code, e i lavori da trasferire per bilanciarle.' }
         ],
         sfide: [['cslez5_3_01_scheduling', 'Tempi di attesa, risposta e completamento'], ['cslez5_3_02_scheduling', 'Ordinamento FCFS e prestazioni'], ['cslez5_3_03_scheduling', 'SJF e SRTF su una traccia di arrivi'], ['cslez5_3_04_scheduling', 'Round-robin con quanto di tempo'], ['cslez5_3_05_scheduling', 'Priorità, attese e invecchiamento']] },
       { id: '5.4', breve: 'Thread', titolo: 'Thread, concorrenza ed esecuzione parallela', sim: 'thread', stato: 'nuovo', prova: true,
-        guida: 'Un processo può contenere più flussi di istruzioni che condividono la memoria. Il capitolo mostra che cosa i thread hanno in comune e che cosa no, distingue la concorrenza dal parallelismo, spiega chi li mette in esecuzione, come si creano e si attendono, e che cosa si rischia a tenerli nello stesso processo.',
+        guida: 'Il capitolo tratta i thread, cioè più flussi di istruzioni che condividono la memoria di un processo. Distingue gli elementi comuni da quelli privati e la concorrenza dal parallelismo, individua il componente che li pone in esecuzione, descrive la loro creazione e la loro attesa, ed esamina il rischio della coesistenza nel medesimo processo.',
         unita: [
           { id: '5.4.1', titolo: 'Memoria condivisa e registri dei thread', sim: 'thread', scopo: 'Una cella comune, e i registri che restano privati.' },
-          { id: '5.4.2', titolo: 'Concorrenza ed esecuzione simultanea', sim: 'cpu', scopo: 'Vite che si sovrappongono, e core che lavorano insieme.' },
-          { id: '5.4.3', titolo: 'Chi decide quale thread eseguire?', sim: 'strati', scopo: 'Thread del programma e thread del kernel, e come si associano.' },
-          { id: '5.4.4', titolo: 'Argomenti e raccolta dei thread POSIX', sim: 'puntatore', scopo: 'Che cosa legge un thread attraverso il puntatore ricevuto.' },
-          { id: '5.4.5', titolo: 'Isolamento dei guasti in processi e thread', sim: 'scudo', scopo: 'Chi cade quando un lavoratore sbaglia.' }
+          { id: '5.4.2', titolo: 'Concorrenza ed esecuzione simultanea', sim: 'cpu', scopo: 'Intervalli di vita sovrapposti, e core che operano insieme.' },
+          { id: '5.4.3', titolo: 'Chi decide quale thread eseguire?', sim: 'strati', scopo: 'Thread del programma e thread del kernel, e la loro associazione.' },
+          { id: '5.4.4', titolo: 'Argomenti e raccolta dei thread POSIX', sim: 'puntatore', scopo: 'Il valore letto da un thread attraverso il puntatore ricevuto.' },
+          { id: '5.4.5', titolo: 'Isolamento dei guasti in processi e thread', sim: 'scudo', scopo: 'I lavoratori che terminano in seguito all’errore di uno.' }
         ],
         sfide: [['cslez5_4_01_threads', 'Risorse condivise e stato privato'], ['cslez5_4_02_threads', 'Concorrenza, parallelismo e isolamento'], ['cslez5_4_03_threads', 'Modelli di associazione tra thread'], ['cslez5_4_04_threads', 'Creazione, join e durata degli argomenti'], ['cslez5_4_05_threads', 'Stack, cambi di thread e isolamento dei guasti']] },
       { id: '5.5', breve: 'Sezioni critiche', titolo: 'Stato condiviso, sezioni critiche e semafori', sim: 'lucchetto', stato: 'nuovo', prova: true,
-        guida: 'Quando più thread toccano gli stessi dati, l’esito può dipendere da chi arriva prima. Il capitolo parte dall’incremento perso, costruisce la sezione critica e il mutex, distingue atomicità e visibilità, confronta i modi di aspettare un lock, e arriva ai semafori e al confronto e scambio.',
+        guida: 'Il capitolo tratta l’accesso di più thread ai medesimi dati, il cui esito può dipendere dall’ordine di esecuzione. Muove dall’incremento perso, costruisce la sezione critica e il mutex, distingue atomicità e visibilità, confronta le modalità di attesa di un lock, e giunge ai semafori e al confronto e scambio.',
         unita: [
-          { id: '5.5.1', titolo: 'Intercalazioni e aggiornamenti persi', sim: 'conflitto', scopo: 'Due incrementi, e uno che sparisce.' },
-          { id: '5.5.2', titolo: 'Scegliere i confini della sezione critica', sim: 'lucchetto', scopo: 'Proteggere la sola scrittura non basta.' },
-          { id: '5.5.3', titolo: 'Un contatore completo protetto da mutex', sim: 'bilancio', scopo: 'Nessun incremento perso, e un totale letto a lavori finiti.' },
-          { id: '5.5.4', titolo: 'Atomicità, visibilità e ordinamento', sim: 'lente', scopo: 'Quando una scrittura è sicuramente visibile a un altro thread.' },
-          { id: '5.5.5', titolo: 'Attesa attiva, sospensione e proprietà del lock', sim: 'cpu', scopo: 'Aspettare girando, oppure dormendo.' },
+          { id: '5.5.1', titolo: 'Intercalazioni e aggiornamenti persi', sim: 'conflitto', scopo: 'Due incrementi, di cui uno perduto.' },
+          { id: '5.5.2', titolo: 'Scegliere i confini della sezione critica', sim: 'lucchetto', scopo: 'L’insufficienza della protezione della sola scrittura.' },
+          { id: '5.5.3', titolo: 'Un contatore completo protetto da mutex', sim: 'bilancio', scopo: 'Nessun incremento perso, e un totale letto al termine dei lavori.' },
+          { id: '5.5.4', titolo: 'Atomicità, visibilità e ordinamento', sim: 'lente', scopo: 'Le condizioni in cui una scrittura è certamente visibile a un altro thread.' },
+          { id: '5.5.5', titolo: 'Attesa attiva, sospensione e proprietà del lock', sim: 'cpu', scopo: 'L’attesa con ciclo di controllo, oppure con sospensione.' },
           { id: '5.5.6', titolo: 'Permessi dei semafori e ordine degli eventi', sim: 'semaforo', scopo: 'Contatore e coda, dopo ogni wait e ogni signal.' },
-          { id: '5.5.7', titolo: 'Aggiornamenti condizionati e granularità dei lock', sim: 'conflitto', scopo: 'L’ultima poltrona, e due clienti che la vogliono.' }
+          { id: '5.5.7', titolo: 'Aggiornamenti condizionati e granularità dei lock', sim: 'conflitto', scopo: 'L’ultimo posto disponibile, richiesto da due clienti.' }
         ],
         sfide: [['cslez5_5_01_semaphores', 'Corse sui dati e aggiornamenti persi'], ['cslez5_5_02_semaphores', 'Proprietà di una sezione critica'], ['cslez5_5_03_semaphores', 'Stato del semaforo durante wait e signal'], ['cslez5_5_04_semaphores', 'Semafori per precedenze e risorse'], ['cslez5_5_05_semaphores', 'Errori di sincronizzazione']] },
       { id: '5.6', breve: 'Problemi classici', titolo: 'Semafori contatori e problemi classici di sincronizzazione', sim: 'semaforo', stato: 'nuovo', prova: true,
-        guida: 'Tre schemi tornano in ogni sistema concorrente: il buffer limitato fra produttore e consumatore, l’attesa di una condizione, lettori e scrittori. Il capitolo li ricava dalle loro proprietà, e in ciascuno mostra l’errore tipico: un ordine di acquisizione sbagliato, un controllo saltato, un’attesa senza limite. Si chiude con la regola che impedisce a due lock di bloccarsi a vicenda.',
+        guida: 'Il capitolo tratta tre schemi ricorrenti nei sistemi concorrenti: il buffer limitato fra produttore e consumatore, l’attesa di una condizione, lettori e scrittori. Ciascuno è ricavato dalle proprie proprietà, insieme all’errore tipico: un ordine di acquisizione errato, un controllo omesso, un’attesa senza limite. Il capitolo si conclude con la regola che impedisce il blocco reciproco di due lock.',
         unita: [
-          { id: '5.6.1', titolo: 'Derivare il buffer limitato dai suoi invarianti', sim: 'semaforo', scopo: 'Vuoti, pieni, e un permesso in viaggio fra i due.' },
+          { id: '5.6.1', titolo: 'Derivare il buffer limitato dai suoi invarianti', sim: 'semaforo', scopo: 'Vuoti, pieni, e un permesso in transito fra i due.' },
           { id: '5.6.2', titolo: 'L’ordine di acquisizione nella dimostrazione di correttezza', sim: 'stallo', scopo: 'Prima il semaforo, poi il mutex.' },
-          { id: '5.6.3', titolo: 'Attendere una condizione sotto mutex', sim: 'lente', scopo: 'Dopo il risveglio si controlla di nuovo.' },
-          { id: '5.6.4', titolo: 'Lettori e scrittori: sicurezza e politica di ammissione', sim: 'tabella', scopo: 'Chi entra, quando uno scrittore aspetta.' },
+          { id: '5.6.3', titolo: 'Attendere una condizione sotto mutex', sim: 'lente', scopo: 'Dopo il risveglio il controllo si ripete.' },
+          { id: '5.6.4', titolo: 'Lettori e scrittori: sicurezza e politica di ammissione', sim: 'tabella', scopo: 'L’ammissione in presenza di uno scrittore in attesa.' },
           { id: '5.6.5', titolo: 'Dagli invarianti locali all’ordinamento globale delle risorse', sim: 'lucchetto', scopo: 'Un rango per ogni lock.' }
         ],
         sfide: [['cslez5_6_01_classical_sync', 'Condizioni e risorse nel produttore-consumatore'], ['cslez5_6_02_classical_sync', 'Sequenza delle operazioni sul buffer'], ['cslez5_6_03_classical_sync', 'Posti occupati, prenotazioni e blocchi'], ['cslez5_6_04_classical_sync', 'Accesso di lettori e scrittori'], ['cslez5_6_05_classical_sync', 'Uscita dei lettori e accesso equo']] },
       { id: '5.7', breve: 'Deadlock', titolo: 'Deadlock, starvation e livelock', sim: 'stallo', stato: 'nuovo', prova: true,
-        guida: 'Il capitolo affronta il deadlock con metodo. Lo descrive con un grafo, ne elenca le quattro condizioni necessarie, e presenta le tre strategie per trattarlo: prevenirlo con una regola, evitarlo controllando ogni concessione, oppure rilevarlo e rimediare. Si chiude distinguendolo dai suoi due parenti, la starvation e il livelock.',
+        guida: 'Il capitolo tratta il deadlock in modo sistematico. Lo descrive con un grafo, ne elenca le quattro condizioni necessarie, e presenta le tre strategie per affrontarlo: la prevenzione con una regola, l’evitamento con il controllo di ogni concessione, oppure il rilevamento seguito dal recupero. Si conclude con la distinzione dalle due situazioni affini, la starvation e il livelock.',
         unita: [
-          { id: '5.7.1', titolo: 'Il deadlock come struttura di dipendenze', sim: 'stallo', scopo: 'Un grafo, un ciclo, e chi può scioglierlo.' },
-          { id: '5.7.2', titolo: 'Le condizioni di Coffman e la prevenzione', sim: 'scudo', scopo: 'Quattro condizioni: basta toglierne una.' },
-          { id: '5.7.3', titolo: 'Evitamento e sequenze sicure di completamento', sim: 'bilancio', scopo: 'Concedere soltanto se resta una via d’uscita.' },
-          { id: '5.7.4', titolo: 'Rilevamento e recupero', sim: 'journal', scopo: 'Trovare il ciclo, e annullare una transazione.' },
+          { id: '5.7.1', titolo: 'Il deadlock come struttura di dipendenze', sim: 'stallo', scopo: 'Un grafo, un ciclo, e il processo che può risolverlo.' },
+          { id: '5.7.2', titolo: 'Le condizioni di Coffman e la prevenzione', sim: 'scudo', scopo: 'Quattro condizioni, di cui è sufficiente escluderne una.' },
+          { id: '5.7.3', titolo: 'Evitamento e sequenze sicure di completamento', sim: 'bilancio', scopo: 'La concessione condizionata a una sequenza di completamento.' },
+          { id: '5.7.4', titolo: 'Rilevamento e recupero', sim: 'journal', scopo: 'La ricerca del ciclo, e l’annullamento di una transazione.' },
           { id: '5.7.5', titolo: 'Distinguere starvation e livelock nelle tracce', sim: 'lente', scopo: 'Due contatori per una diagnosi.' }
         ],
         sfide: [['cslez5_7_01_deadlock', 'Stallo, attesa indefinita e livelock'], ['cslez5_7_02_deadlock', 'Condizioni di Coffman'], ['cslez5_7_03_deadlock', 'Cicli nel grafo delle risorse'], ['cslez5_7_04_deadlock', 'Prevenzione e ordine di acquisizione'], ['cslez5_7_05_deadlock', 'Stati sicuri, rilevamento e recupero']] }
     ] },
     { k: '6', r: 'VI', breve: 'Memoria e file', nome: 'Memoria, file e protezione', sim: 'memory', capitoli: [
       { id: '6.1', breve: 'Gerarchie di memoria', titolo: 'Gerarchie di memoria e località', sim: 'cache', stato: 'nuovo', prova: true,
-        guida: 'Il modulo comincia dalla memoria vista dal processore. Nessuna memoria è insieme grande e veloce, e i calcolatori ne usano diverse, disposte a livelli. Il capitolo spiega perché lo schema funziona, segue lo stato di una piccola cache lettura dopo lettura, e arriva a un numero solo per giudicarla: il tempo medio di accesso.',
+        guida: 'Il capitolo tratta la memoria dal punto di vista del processore. Nessuna memoria è insieme grande e veloce, e i calcolatori ne impiegano diverse, disposte a livelli. Il capitolo spiega la ragione dell’efficacia dello schema, segue lo stato di una piccola cache lettura dopo lettura, e giunge a un solo valore per valutarla: il tempo medio di accesso.',
         unita: [
           { id: '6.1.1', titolo: 'Perché le memorie formano una gerarchia', sim: 'strati', scopo: 'Due letture: una dalla cache, una dalla RAM.' },
           { id: '6.1.2', titolo: 'Località e stato di una cache', sim: 'cache', scopo: 'Blocco, indice e tag, lettura dopo lettura.' },
@@ -383,59 +383,59 @@
         ],
         sfide: [['cslez6_1_01_memory_technologies', 'Tecnologie di memoria'], ['cslez6_1_02_locality', 'Località'], ['cslez6_1_03_cache_behavior', 'Comportamento della cache'], ['cslez6_1_04_cache_performance', 'Prestazioni della cache'], ['cslez6_1_05_hierarchy_design', 'Progetto della gerarchia di memoria']] },
       { id: '6.2', breve: 'Memoria virtuale', titolo: 'Memoria virtuale e paginazione su richiesta', sim: 'strati', stato: 'nuovo', prova: true,
-        guida: 'Ogni processo crede di avere la memoria tutta per sé. Il capitolo apre la tabella che rende possibile l’illusione: come un indirizzo virtuale diventa fisico, che cosa accade quando una pagina manca dalla RAM, chi esce quando i frame finiscono, e quanto costa, in media, ogni page fault.',
+        guida: 'Il capitolo tratta la memoria virtuale, che presenta a ogni processo uno spazio di indirizzamento proprio. Sono esaminati la traduzione di un indirizzo virtuale in fisico mediante la tabella delle pagine, gli effetti dell’assenza di una pagina dalla RAM, la scelta della pagina in uscita all’esaurimento dei frame, e il costo medio di un page fault.',
         unita: [
-          { id: '6.2.1', titolo: 'Spazi di indirizzamento, pagine e frame', sim: 'tabella', scopo: 'Lo stesso indirizzo, in due processi.' },
-          { id: '6.2.2', titolo: 'Residenza, eccezioni e paginazione su richiesta', sim: 'interrupt', scopo: 'La pagina manca: caricarla, oppure rifiutare.' },
-          { id: '6.2.3', titolo: 'Insieme di lavoro e rimpiazzo', sim: 'memory', scopo: 'Sette richieste, pochi frame.' },
-          { id: '6.2.4', titolo: 'Valutare il costo dei page fault', sim: 'clock', scopo: 'Un evento raro che pesa su tutte le richieste.' }
+          { id: '6.2.1', titolo: 'Spazi di indirizzamento, pagine e frame', sim: 'tabella', scopo: 'Il medesimo indirizzo virtuale in due processi.' },
+          { id: '6.2.2', titolo: 'Residenza, eccezioni e paginazione su richiesta', sim: 'interrupt', scopo: 'Una pagina assente: caricamento oppure violazione.' },
+          { id: '6.2.3', titolo: 'Insieme di lavoro e rimpiazzo', sim: 'memory', scopo: 'Sette richieste con un numero limitato di frame.' },
+          { id: '6.2.4', titolo: 'Valutare il costo dei page fault', sim: 'clock', scopo: 'Un evento raro che incide su tutte le richieste.' }
         ],
         sfide: [['cslez6_2_01_address_spaces', 'Spazi di indirizzi'], ['cslez6_2_02_paging', 'Paginazione'], ['cslez6_2_03_page_tables', 'Tabelle delle pagine'], ['cslez6_2_04_page_faults', 'Errori di pagina'], ['cslez6_2_05_working_set', 'Insieme di lavoro']] },
       { id: '6.3', breve: 'Traduzione in codice', titolo: 'Traduzione degli indirizzi in codice', sim: 'hex', stato: 'nuovo', prova: true,
-        guida: 'La tabella delle pagine smette di essere un disegno e diventa un array in memoria, letto da un programma. Il capitolo ne segue la traduzione numero per numero, decodifica le voci secondo il loro formato, esegue riga per riga una routine in assembly, e controlla le richieste che attraversano un confine di pagina.',
+        guida: 'Il capitolo tratta la tabella delle pagine come array in memoria, letto da un programma. Sono esaminati il calcolo dell’indirizzo di una voce, la decodifica delle voci secondo il loro formato, l’esecuzione riga per riga di una routine di traduzione in assembly, e il controllo delle richieste che attraversano un confine di pagina.',
         unita: [
           { id: '6.3.1', titolo: 'Rappresentare una mappatura in un programma', sim: 'tabella', scopo: 'Indice, indirizzo della voce, valore letto.' },
-          { id: '6.3.2', titolo: 'Formato e validità delle voci', sim: 'bit', scopo: 'La stessa parola, letta in due modi.' },
+          { id: '6.3.2', titolo: 'Formato e validità delle voci', sim: 'bit', scopo: 'La medesima parola, letta in due formati.' },
           { id: '6.3.3', titolo: 'Implementare il calcolo dell’indirizzo', sim: 'terminale', scopo: 'Una routine in assembly, riga per riga.' },
-          { id: '6.3.4', titolo: 'Valori di errore, limiti e funzioni eseguibili', sim: 'scudo', scopo: 'Otto byte a cavallo di due pagine.' }
+          { id: '6.3.4', titolo: 'Valori di errore, limiti e funzioni eseguibili', sim: 'scudo', scopo: 'Otto byte attraverso un confine di pagina.' }
         ],
         sfide: [['cslez6_3_01_vpn_offset', 'VPN e offset'], ['cslez6_3_02_compose_pa_assembly', 'Composizione dell’indirizzo fisico in assembly'], ['cslez6_3_03_page_table_lookup_assembly', 'Lettura di una voce della tabella in assembly'], ['cslez6_3_04_page_table_control', 'Controllo della traduzione'], ['cslez6_3_05_address_translation_assembly', 'Traduzione completa in assembly']] },
       { id: '6.4', breve: 'TLB e tabelle', titolo: 'TLB e tabelle delle pagine multilivello', sim: 'tabella', stato: 'nuovo', prova: true,
-        guida: 'Tradurre ogni indirizzo leggendo una tabella sarebbe lento, e una tabella completa sarebbe enorme. Il capitolo presenta i due rimedi e il loro prezzo: la TLB, che ricorda le traduzioni recenti, e le tabelle a più livelli, che occupano poco spazio e richiedono più letture. Alla fine mette i conti insieme nel tempo medio di un accesso.',
+        guida: 'Il capitolo tratta i due limiti della traduzione mediante tabella: la lentezza di una lettura per ogni indirizzo, e le dimensioni di una tabella completa. Sono esaminati i due rimedi e il loro costo: la TLB, che conserva le traduzioni recenti, e le tabelle a più livelli, che occupano poco spazio e richiedono più letture. I risultati sono infine combinati nel tempo medio di un accesso.',
         unita: [
-          { id: '6.4.1', titolo: 'Memorizzare le traduzioni nella TLB', sim: 'cache', scopo: 'Tre richieste, due processi, pochi posti.' },
+          { id: '6.4.1', titolo: 'Memorizzare le traduzioni nella TLB', sim: 'cache', scopo: 'Tre richieste, due processi, una TLB di poche voci.' },
           { id: '6.4.2', titolo: 'Perché una tabella lineare diventa grande', sim: 'tabella', scopo: 'Otto milioni di byte, oppure ventiquattromila.' },
-          { id: '6.4.3', titolo: 'Una traduzione simulata a due livelli', sim: 'strati', scopo: 'Due letture in catena, e poi il dato.' },
-          { id: '6.4.4', titolo: 'Costo della traduzione e ipotesi sui tempi', sim: 'clock', scopo: 'Quanto pesa un miss della TLB.' }
+          { id: '6.4.3', titolo: 'Una traduzione simulata a due livelli', sim: 'strati', scopo: 'Due letture concatenate, e quindi il dato.' },
+          { id: '6.4.4', titolo: 'Costo della traduzione e ipotesi sui tempi', sim: 'clock', scopo: 'L’incidenza di un miss della TLB sul tempo medio.' }
         ],
         sfide: [['cslez6_4_01_tlb_behavior', 'Comportamento della TLB'], ['cslez6_4_02_tlb_lookup_assembly', 'Ricerca nella TLB in assembly'], ['cslez6_4_03_multilevel_indexes', 'Indici delle tabelle multilivello'], ['cslez6_4_04_two_level_walk_assembly', 'Percorso nelle tabelle a due livelli in assembly'], ['cslez6_4_05_translation_cost', 'Costo della traduzione']] },
       { id: '6.5', breve: 'File e nomi', titolo: 'File, nomi e allocazione', sim: 'folder', stato: 'nuovo', prova: true,
-        guida: 'Dalla memoria si passa al disco. Un file system trasforma una fila di blocchi numerati in file con un nome. Il capitolo separa le tre cose che compongono un file, cioè nome, inode e dati, risolve i percorsi un componente alla volta, e mostra come i blocchi vengono assegnati ai file e come si tiene il conto di quelli liberi.',
+        guida: 'Il capitolo tratta il file system, che organizza una sequenza di blocchi numerati del disco in file dotati di nome. Sono esaminati i tre elementi che compongono un file, cioè nome, inode e dati, la risoluzione dei percorsi un componente per volta, l’assegnazione dei blocchi ai file, e la registrazione dei blocchi liberi.',
         unita: [
-          { id: '6.5.1', titolo: 'File, metadati e nomi nelle directory', sim: 'inode', scopo: 'Due nomi, un inode, gli stessi dati.' },
-          { id: '6.5.2', titolo: 'Risolvere un percorso', sim: 'folder', scopo: 'Lo stesso percorso da due directory.' },
-          { id: '6.5.3', titolo: 'Allocare i blocchi', sim: 'storage', scopo: 'Un byte in più, un blocco in più.' },
+          { id: '6.5.1', titolo: 'File, metadati e nomi nelle directory', sim: 'inode', scopo: 'Due nomi, un inode, i medesimi dati.' },
+          { id: '6.5.2', titolo: 'Risolvere un percorso', sim: 'folder', scopo: 'Il medesimo percorso da due directory.' },
+          { id: '6.5.3', titolo: 'Allocare i blocchi', sim: 'storage', scopo: 'Un byte aggiuntivo, un blocco aggiuntivo.' },
           { id: '6.5.4', titolo: 'Spazio libero e contabilità dell’allocazione', sim: 'bit', scopo: 'Una bitmap e due catene.' }
         ],
         sfide: [['cslez6_5_01_files_metadata', 'File e metadati'], ['cslez6_5_02_path_resolution', 'Risoluzione dei percorsi'], ['cslez6_5_03_links', 'Collegamenti ai file'], ['cslez6_5_04_space_allocation', 'Allocazione dello spazio'], ['cslez6_5_05_inode_fat', 'Inode e FAT']] },
       { id: '6.6', breve: 'Consistenza e recupero', titolo: 'Consistenza e recupero dopo un arresto', sim: 'journal', stato: 'nuovo', prova: true,
-        guida: 'Un file system vive su un dispositivo che può perdere la corrente in qualunque istante. Il capitolo guarda che cosa resta sul disco quando un’operazione viene interrotta a metà, come un verificatore ricostruisce e ripara le strutture, e come un journal rende ogni aggiornamento tutto compiuto oppure mai cominciato. Si chiude con il conto delle scritture che questa garanzia richiede.',
+        guida: 'Il capitolo tratta la consistenza di un file system, il cui dispositivo può perdere l’alimentazione in qualunque istante. Sono esaminati lo stato del disco dopo l’interruzione di un’operazione, la ricostruzione e la riparazione delle strutture da parte di un verificatore, e il journal, con cui ogni aggiornamento risulta interamente eseguito oppure mai iniziato. Il capitolo termina con il conteggio delle scritture richieste da tale garanzia.',
         unita: [
-          { id: '6.6.1', titolo: 'Perché la persistenza richiede un modello di consistenza', sim: 'storage', scopo: 'Tre scritture, e un crash a metà.' },
+          { id: '6.6.1', titolo: 'Perché la persistenza richiede un modello di consistenza', sim: 'storage', scopo: 'Tre scritture, e un crash fra due di esse.' },
           { id: '6.6.2', titolo: 'Ricostruzione e riparazione', sim: 'lente', scopo: 'Un bit e un proprietario in disaccordo.' },
           { id: '6.6.3', titolo: 'Journal redo e soglia del commit durevole', sim: 'journal', scopo: 'Due blocchi, un commit, cinque punti di arresto.' },
-          { id: '6.6.4', titolo: 'Journaling di dati e metadati: garanzie e costi', sim: 'bilancio', scopo: 'Due modalità, due conti.' }
+          { id: '6.6.4', titolo: 'Journaling di dati e metadati: garanzie e costi', sim: 'bilancio', scopo: 'Due modalità, due totali.' }
         ],
         sfide: [['cslez6_6_01_consistency', 'Consistenza del file system'], ['cslez6_6_02_fsck', 'Controllo con fsck'], ['cslez6_6_03_write_order', 'Ordine delle scritture'], ['cslez6_6_04_journaling', 'Registro delle modifiche e commit'], ['cslez6_6_05_crash_recovery', 'Recupero dopo un arresto']] },
       { id: '6.7', breve: 'Protezione e audit', titolo: 'Protezione, cifratura e audit', sim: 'chiave', stato: 'nuovo', prova: true,
-        guida: 'L’ultimo capitolo riguarda chi può fare che cosa sui dati, e come lo si accerta. Si separano l’identità di chi chiede e i diritti che le spettano, si seguono i controlli di permesso lungo un percorso, si guarda che cosa protegge la cifratura quando il disco esce dalla macchina, e si impara a leggere un registro delle richieste senza attribuirgli più di quanto contenga.',
+        guida: 'Il capitolo tratta la protezione dei dati, cioè la determinazione delle operazioni consentite a ciascun richiedente, e il loro accertamento. Sono esaminati la distinzione fra l’identità del richiedente e i diritti che le spettano, i controlli di permesso lungo un percorso, la protezione offerta dalla cifratura quando il disco è rimosso dalla macchina, e l’interpretazione di un registro delle richieste entro i limiti dei dati che contiene.',
         unita: [
-          { id: '6.7.1', titolo: 'Autenticazione e autorizzazione sul fascicolo', sim: 'chiave', scopo: 'Riconosciuto, e respinto.' },
-          { id: '6.7.2', titolo: 'Controlli sulle directory e sugli oggetti', sim: 'folder', scopo: 'Un nome noto, un elenco chiuso.' },
-          { id: '6.7.3', titolo: 'Cifratura e posizione dell’avversario', sim: 'disco', scopo: 'Lo stesso documento, da tre posizioni.' },
+          { id: '6.7.1', titolo: 'Autenticazione e autorizzazione sul fascicolo', sim: 'chiave', scopo: 'Identità riconosciuta, richiesta respinta.' },
+          { id: '6.7.2', titolo: 'Controlli sulle directory e sugli oggetti', sim: 'folder', scopo: 'Un nome noto, un elenco negato.' },
+          { id: '6.7.3', titolo: 'Cifratura e posizione dell’avversario', sim: 'disco', scopo: 'Il medesimo documento, da tre posizioni.' },
           { id: '6.7.4', titolo: 'Evidenze di audit e loro interpretazione', sim: 'tabella', scopo: 'Cinque righe, tre criteri.' }
         ],
-        sfide: [['cslez6_7_01_protection_goals', 'Obiettivi di protezione'], ['cslez6_7_02_acl', 'Liste di controllo degli accessi'], ['cslez6_7_03_directory_access', 'Accesso alle directory'], ['cslez6_7_04_cryptofs', 'Cifratura del file system'], ['cslez6_7_05_auditing', 'Verifica del registro degli accessi']] }
+        sfide: [['cslez6_7_01_protection_goals', 'Obiettivi di protezione'], ['cslez6_7_02_acl', 'Liste di controllo degli accessi'], ['cslez6_7_03_directory_access', 'Accesso alle directory'], ['cslez6_7_04_cryptofs', 'Cifratura del file system'], ['cslez6_7_05_auditing', 'Esame del registro degli accessi']] }
     ] }
   ];
 

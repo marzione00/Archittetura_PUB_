@@ -17,13 +17,13 @@ SL.unita513 = (() => {
 })();
 SL.registra('5.1.3', {
   titolo: 'Il cambio di contesto e la continuità dell’esecuzione',
-  obiettivo: 'Obiettivo: spiegare come un processo interrotto riprende esattamente da dove era arrivato, e calcolare l’indirizzo che il kernel conserva per lui.',
-  concetti: [['register', 'I registri sono uno solo per tutti'], ['process', 'Ogni processo ha la sua copia'], ['puntatore', 'Si riparte dal punto giusto']],
+  obiettivo: 'Obiettivo: spiegare il modo in cui un processo interrotto riprende dal punto esatto raggiunto, e calcolare l’indirizzo che il kernel conserva a tale scopo.',
+  concetti: [['register', 'Un solo insieme di registri per tutti i processi'], ['process', 'Ogni processo ha la propria copia'], ['puntatore', 'La ripresa dal punto corretto']],
   filigrana: ['register', 'process', 'puntatore'],
   richiami: {
     carte: [
-      { sim: 'register', da: 'Dall’unità 4.1.6', t: 'Il contesto', d: 'I valori dei registri che descrivono a che punto è un programma.' },
-      { sim: 'puntatore', da: 'Dall’unità 3.3.1', t: 'Il contatore di programma', d: 'Il registro, abbreviato PC, con l’indirizzo della prossima istruzione.' },
+      { sim: 'register', da: 'Dall’unità 4.1.6', t: 'Il contesto', d: 'I valori dei registri che descrivono il punto raggiunto da un programma.' },
+      { sim: 'puntatore', da: 'Dall’unità 3.3.1', t: 'Il contatore di programma', d: 'Il registro, abbreviato PC, con l’indirizzo dell’istruzione successiva.' },
       { sim: 'coda', da: 'Dall’unità 5.1.2', t: 'Il quanto di tempo', d: 'La durata massima di un turno sul processore.' }
     ],
     domanda: { d: 'Prima di proseguire: ogni istruzione occupa 4 byte. Dopo tre istruzioni, di quanti byte è avanzato il contatore di programma?', o: [
@@ -33,54 +33,54 @@ SL.registra('5.1.3', {
     ] }
   },
   idea: {
-    titolo: 'Il segnalibro di un processo',
+    titolo: 'Il punto di ripresa di un processo',
     termini: ['cambio di contesto'],
     testo: [
-      'Chi interrompe la lettura di un libro mette un segnalibro. Un processo che lascia il processore ha lo stesso bisogno: al ritorno deve ritrovare il punto esatto in cui era arrivato, e tutti i valori su cui stava lavorando. Il processore ha però un solo contatore di programma e un solo insieme di registri, e il processo che subentra li userà per sé.',
-      'Il kernel risolve il problema con il [[cambio di contesto]]. Prima di consegnare il processore a un altro processo, copia i registri di quello uscente in una scheda che gli appartiene, conservata nella memoria del kernel. Poi carica nei registri i valori che aveva salvato, tempo prima, nella scheda del processo che entra. Fra i registri salvati il più importante è il contatore di programma, il segnalibro vero e proprio.',
-      { fig: 'scena', w: 720, h: 156, titolo: 'A è stato interrotto dopo tre istruzioni, e ora esegue B', nota: 'Il processore contiene un indirizzo di B. Il punto di ripresa di A, 0x100C, è al sicuro nella sua scheda.', els: SL.unita513.quadro('g', { n: 3, m: 2 }, 4, { x: 10, y: 0, w: 700, wc: 72 }) },
-      'Nella macchina di questa unità ogni istruzione occupa quattro byte. Il processo A parte dall’indirizzo 0x1000, e quando il timer lo interrompe ha completato tre istruzioni. Il suo contatore è avanzato di 12 byte e vale 0x100C: il kernel salva questo numero. Durante il turno di B il contatore del processore contiene indirizzi di B, che parte da 0x2400. Quando tocca di nuovo ad A, il kernel ricarica 0x100C, e A prosegue dalla quarta istruzione.',
-      'Per il processo, l’interruzione è invisibile. Non ha modo di accorgersi che fra un’istruzione e la successiva è passato il turno di qualcun altro. È la stessa garanzia vista per gli interrupt nell’unità 4.1.6, estesa da un gestore di pochi microsecondi a un altro processo intero.'
+      'Un processo che lascia il processore deve ritrovare, al ritorno, il punto esatto raggiunto e tutti i valori su cui operava. Il processore dispone tuttavia di un solo contatore di programma e di un solo insieme di registri, che il processo subentrante impiegherà per sé.',
+      'Il kernel risolve il problema con il [[cambio di contesto]]. Prima di consegnare il processore a un altro processo, copia i registri di quello uscente in una scheda che gli appartiene, conservata nella memoria del kernel. Carica quindi nei registri i valori che aveva salvato, in precedenza, nella scheda del processo entrante. Fra i registri salvati il più rilevante è il contatore di programma, che individua il punto di ripresa.',
+      { fig: 'scena', w: 720, h: 156, titolo: 'A è stato interrotto dopo tre istruzioni, e ora esegue B', nota: 'Il processore contiene un indirizzo di B. Il punto di ripresa di A, 0x100C, è conservato nella sua scheda.', els: SL.unita513.quadro('g', { n: 3, m: 2 }, 4, { x: 10, y: 0, w: 700, wc: 72 }) },
+      'Nella macchina di questa unità ogni istruzione occupa quattro byte. Il processo A ha inizio all’indirizzo 0x1000, e quando il timer lo interrompe ha completato tre istruzioni. Il suo contatore è avanzato di 12 byte e vale 0x100C: il kernel salva questo numero. Durante il turno di B il contatore del processore contiene indirizzi di B, che ha inizio a 0x2400. Quando A riceve di nuovo il processore, il kernel ricarica 0x100C, e A prosegue dalla quarta istruzione.',
+      'Per il processo l’interruzione è invisibile: esso non può rilevare che fra un’istruzione e la successiva si è svolto il turno di un altro processo. Si tratta della medesima garanzia descritta per gli interrupt nell’unità 4.1.6, estesa da un gestore di pochi microsecondi a un intero processo.'
     ]
   },
   esperimento: {
     faremo: [
-      'Il processo A parte dall’indirizzo 0x1000. Sceglierai quante istruzioni completa prima che scada il quanto, e quante ne esegue B nel proprio turno.',
-      'Seguiremo il contatore di programma del processore e le due copie salvate nelle schede. Cambia il numero di istruzioni di B e controlla se il punto di ripresa di A si sposta.'
+      'Il processo A ha inizio all’indirizzo 0x1000. I controlli fissano il numero di istruzioni che A completa prima della scadenza del quanto, e il numero di quelle che B esegue nel proprio turno.',
+      'L’esperimento segue il contatore di programma del processore e le due copie salvate nelle schede. È istruttivo modificare il numero di istruzioni di B e verificare se il punto di ripresa di A varia.'
     ],
     vedrai: [
-      ['puntatore', 'Le istruzioni di A', 'In alto: le istruzioni, con l’indirizzo. La scritta PC segna la prossima da eseguire.'],
-      ['register', 'Il processore', 'In basso a sinistra: il contatore di programma in uso, e a chi appartiene.'],
+      ['puntatore', 'Le istruzioni di A', 'In alto: le istruzioni, con l’indirizzo. La scritta PC indica la successiva da eseguire.'],
+      ['register', 'Il processore', 'In basso a sinistra: il contatore di programma attivo, e il processo a cui appartiene.'],
       ['process', 'Le schede', 'In basso a destra: il contatore salvato per A e per B.']
     ]
   },
   lab: {
-    titolo: 'Salvare e ripristinare',
+    titolo: 'Salvataggio e ripristino',
     scena: { w: 860, h: 156 },
     atti: ['Il turno di A', 'Il cambio', 'Il turno di B', 'Il ritorno'],
     controlli: [
       { id: 'n', tipo: 'scelta', eti: 'Istruzioni completate da A', opzioni: [[3, '3'], [5, '5'], [8, '8']], valore: 3 },
       { id: 'm', tipo: 'scelta', eti: 'Istruzioni eseguite da B', opzioni: [[2, '2'], [6, '6']], valore: 2 }
     ],
-    nota: 'I passi sono sempre sette. Ogni istruzione occupa quattro byte. B parte dall’indirizzo 0x2400.',
+    nota: 'I passi sono sempre sette. Ogni istruzione occupa quattro byte, e B ha inizio all’indirizzo 0x2400.',
     previsione: {
-      domanda: (p) => 'Il processo A parte da 0x1000 e completa ' + p.n + ' istruzioni da quattro byte prima di essere interrotto. Poi B esegue ' + p.m + ' istruzioni. Da quale indirizzo riprende A quando torna il suo turno?',
+      domanda: (p) => 'Il processo A ha inizio a 0x1000 e completa ' + p.n + ' istruzioni da quattro byte prima di essere interrotto. In seguito B esegue ' + p.m + ' istruzioni. Da quale indirizzo riprende A al turno successivo?',
       opzioni: (p) => { const H = SL.unita513.H; return [[0x1000, '0x1000, dall’inizio'], [0x1000 + p.n, H(0x1000 + p.n)], [0x1000 + 4 * p.n, H(0x1000 + 4 * p.n)]]; }
     },
-    confronto: (pred, esito, p) => { const H = SL.unita513.H; return 'La previsione indicava ' + H(pred) + '. A riprende da ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 0x1000 ? 'Il kernel aveva salvato il contatore di A, che riparte dal punto raggiunto.' : 'Ogni istruzione occupa quattro byte: ' + p.n + ' × 4 = ' + 4 * p.n + ', cioè ' + H(4 * p.n) + '.'); },
+    confronto: (pred, esito, p) => { const H = SL.unita513.H; return 'La previsione indicava ' + H(pred) + '. A riprende da ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 0x1000 ? 'Il kernel aveva salvato il contatore di A, che riprende dal punto raggiunto.' : 'Ogni istruzione occupa quattro byte: ' + p.n + ' × 4 = ' + 4 * p.n + ', cioè ' + H(4 * p.n) + '.'); },
     costruisci(p) {
       const U = SL.unita513, H = U.H, passi = [], pcA = U.A0 + 4 * p.n, pcB = U.B0 + 4 * p.m;
       const quadro = (f) => U.quadro('q', p, f, { x: 20, y: 0, w: 820, wc: 84 });
       const hud = (f) => [['PC', H(f === 0 ? U.A0 : f <= 2 ? pcA : f === 3 ? U.B0 : f === 4 ? pcB : pcA), 'a'], ['In esecuzione', f <= 2 || f >= 5 ? 'A' : 'B'], ['Salvato per A', f >= 2 ? H(pcA) : '·', 'c']];
       const P = (f, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(f), els: quadro(f) }, extra));
 
-      P(0, 0, 'A comincia', 'Il processore esegue A. Il contatore di programma vale 0x1000, l’indirizzo della sua prima istruzione, i0.', {});
-      P(1, 0, 'A esegue ' + p.n + ' istruzioni', 'A completa le istruzioni da i0 a i' + (p.n - 1) + '. A ogni istruzione il contatore avanza di 4 byte: dopo ' + p.n + ' istruzioni vale 0x1000 + ' + H(4 * p.n) + ' = ' + H(pcA) + ', l’indirizzo di i' + p.n + '.', { calc: '0x1000 + ' + p.n + ' × 4 = ' + H(pcA), chiedi: { d: 'Quale istruzione di A verrebbe eseguita adesso?', o: ['i' + (p.n - 1), 'i' + p.n, 'i0'], g: 1, no: 'Il contatore contiene l’indirizzo della prossima istruzione, la numero ' + p.n + '.' } });
+      P(0, 0, 'A ha inizio', 'Il processore esegue A. Il contatore di programma vale 0x1000, l’indirizzo della sua prima istruzione, i0.', {});
+      P(1, 0, 'A esegue ' + p.n + ' istruzioni', 'A completa le istruzioni da i0 a i' + (p.n - 1) + '. A ogni istruzione il contatore avanza di 4 byte: dopo ' + p.n + ' istruzioni vale 0x1000 + ' + H(4 * p.n) + ' = ' + H(pcA) + ', l’indirizzo di i' + p.n + '.', { calc: '0x1000 + ' + p.n + ' × 4 = ' + H(pcA), chiedi: { d: 'Quale istruzione di A sarebbe eseguita in questo istante?', o: ['i' + (p.n - 1), 'i' + p.n, 'i0'], g: 1, no: 'Il contatore contiene l’indirizzo dell’istruzione successiva, la numero ' + p.n + '.' } });
       P(2, 1, 'Il salvataggio', 'Il timer segnala la fine del quanto. Il kernel copia nella scheda di A i registri, e fra questi il contatore di programma: ' + H(pcA) + '.', { calc: 'scheda di A ← ' + H(pcA) });
-      P(3, 1, 'Il ripristino di B', 'Il kernel carica nei registri i valori conservati nella scheda di B. Il contatore del processore diventa 0x2400. Dell’indirizzo di A, nel processore, non resta traccia.', { calc: 'PC ← 0x2400' });
-      P(4, 2, 'B esegue ' + p.m + ' istruzioni', 'B esegue per il proprio turno, e il contatore avanza fino a ' + H(pcB) + '. La scheda di A non viene toccata.', { calc: '0x2400 + ' + p.m + ' × 4 = ' + H(pcB) });
+      P(3, 1, 'Il ripristino di B', 'Il kernel carica nei registri i valori conservati nella scheda di B. Il contatore del processore diviene 0x2400, e nel processore l’indirizzo di A non è più presente.', { calc: 'PC ← 0x2400' });
+      P(4, 2, 'B esegue ' + p.m + ' istruzioni', 'B esegue per il proprio turno, e il contatore avanza fino a ' + H(pcB) + '. La scheda di A resta invariata.', { calc: '0x2400 + ' + p.m + ' × 4 = ' + H(pcB) });
       P(5, 3, 'Il ritorno', 'Scade il quanto di B. Il kernel salva ' + H(pcB) + ' nella scheda di B, e ricarica dalla scheda di A il valore ' + H(pcA) + '.', { calc: 'PC ← ' + H(pcA) });
-      P(6, 3, 'A riprende', 'A prosegue dall’istruzione i' + p.n + ', come se non si fosse mai fermato. Il numero di istruzioni eseguite da B non ha avuto alcun effetto sul punto di ripresa.', { calc: 'A riprende da ' + H(pcA), esito: ['riprende da ' + H(pcA), ''] });
+      P(6, 3, 'A riprende', 'A prosegue dall’istruzione i' + p.n + ', come se l’esecuzione non fosse mai stata interrotta. Il numero di istruzioni eseguite da B è stato privo di effetto sul punto di ripresa.', { calc: 'A riprende da ' + H(pcA), esito: ['riprende da ' + H(pcA), ''] });
       return { passi, esito: pcA };
     }
   },
@@ -90,30 +90,30 @@ SL.registra('5.1.3', {
       'Con istruzioni di quattro byte, dopo n istruzioni il contatore salvato vale indirizzo iniziale + 4 × n.'
     ],
     errori: [
-      ['Far ripartire il processo dall’inizio.', 'Il contatore salvato indica la prima istruzione non ancora eseguita.'],
+      ['Collocare la ripresa del processo all’inizio.', 'Il contatore salvato indica la prima istruzione non ancora eseguita.'],
       ['Sommare il numero di istruzioni all’indirizzo.', 'Gli indirizzi contano i byte: ogni istruzione ne occupa quattro.'],
-      ['Cercare il punto di ripresa di A nel processore durante il turno di B.', 'In quel momento i registri contengono i valori di B. Quelli di A stanno nella sua scheda.']
+      ['Cercare il punto di ripresa di A nel processore durante il turno di B.', 'In tale intervallo i registri contengono i valori di B. Quelli di A si trovano nella sua scheda.']
     ],
-    saFare: ['Descrivere le due metà di un cambio di contesto.', 'Calcolare il contatore salvato.', 'Spiegare perché il processo non si accorge dell’interruzione.'],
+    saFare: ['Descrivere le due metà di un cambio di contesto.', 'Calcolare il contatore salvato.', 'Spiegare per quale ragione il processo non rileva l’interruzione.'],
     esercizi: [
-      { d: 'Un processo parte dall’indirizzo 0x3000. Ogni istruzione occupa 4 byte. Viene interrotto dopo avere completato 6 istruzioni. Quale valore salva il kernel come contatore di programma? Rispondi in esadecimale.', segnaposto: 'Un indirizzo', giuste: ['3018', '0x3018', '3018h'],
+      { d: 'Un processo ha inizio all’indirizzo 0x3000. Ogni istruzione occupa 4 byte. Il processo è interrotto dopo avere completato 6 istruzioni. Quale valore salva il kernel come contatore di programma? Si risponda in esadecimale.', segnaposto: 'Un indirizzo', giuste: ['3018', '0x3018', '3018h'],
         ok: '6 × 4 = 24, che si scrive 0x18. 0x3000 + 0x18 = 0x3018.',
         diagnosi: [
-          { se: ['3006', '0x3006'], msg: 'Hai sommato il numero di istruzioni. Ognuna occupa 4 byte: lo spostamento è 24.' },
+          { se: ['3006', '0x3006'], msg: 'È stato sommato il numero di istruzioni. Ognuna occupa 4 byte: lo spostamento è 24.' },
           { se: ['3024', '0x3024'], msg: 'Lo spostamento 24 è in base dieci. In esadecimale si scrive 0x18.' },
-          { se: ['3014', '0x3014'], msg: '0x3014 è l’indirizzo della sesta istruzione, già completata. La prossima sta 4 byte più avanti.' }
+          { se: ['3014', '0x3014'], msg: '0x3014 è l’indirizzo della sesta istruzione, già completata. La successiva si trova 4 byte più avanti.' }
         ],
-        altro: 'L’indirizzo è un altro. Si moltiplichino le istruzioni per 4 e si sommi il risultato, in esadecimale, a 0x3000.',
+        altro: 'L’indirizzo è diverso. Si moltiplichino le istruzioni per 4 e si sommi il risultato, in esadecimale, a 0x3000.',
         indizi: ['6 istruzioni occupano 24 byte.', '24 = 16 + 8, cioè 0x18.', '0x3000 + 0x18 = 0x3018.'],
         svolgimento: ['Byte percorsi: 6 × 4 = 24.', '24 = 0x18.', 'Contatore salvato: 0x3018.'] },
       { d: 'Durante il turno di un altro processo, dove si trova il contatore di programma del processo sospeso?', guida: 'Si scelga la risposta.', o: [
         { t: 'Nella sua scheda, nella memoria del kernel', ok: true, fb: 'Il registro del processore è occupato dai valori del processo in esecuzione.' },
-        { t: 'Nel registro del processore', fb: 'Il registro contiene l’indirizzo del processo che sta eseguendo.' },
-        { t: 'In cima alla pila del processo in esecuzione', fb: 'Un processo non conserva nulla per conto di un altro. Ci pensa il kernel.' }] },
-      { d: 'Il processo A viene interrotto, B esegue 200 istruzioni, poi A riprende. Il punto di ripresa di A dipende da quante istruzioni ha eseguito B?', guida: 'Si scelga la risposta.', o: [
-        { t: 'No: dipende soltanto dal contatore salvato per A', ok: true, fb: 'Le istruzioni di B fanno avanzare il contatore di B.' },
-        { t: 'Sì: avanza di 200 istruzioni', fb: 'Le 200 istruzioni appartengono a B, e non spostano il segnalibro di A.' },
-        { t: 'Sì: A riparte dall’inizio', fb: 'Il kernel aveva salvato il punto raggiunto da A.' }] }
+        { t: 'Nel registro del processore', fb: 'Il registro contiene l’indirizzo del processo in esecuzione.' },
+        { t: 'In cima alla pila del processo in esecuzione', fb: 'I dati di un processo sospeso sono conservati dal kernel, e mai da un altro processo.' }] },
+      { d: 'Il processo A è interrotto, B esegue 200 istruzioni, e in seguito A riprende. Il punto di ripresa di A dipende dal numero di istruzioni eseguite da B?', guida: 'Si scelga la risposta.', o: [
+        { t: 'No, dipende soltanto dal contatore salvato per A', ok: true, fb: 'Le istruzioni di B fanno avanzare il contatore di B.' },
+        { t: 'Sì, avanza di 200 istruzioni', fb: 'Le 200 istruzioni appartengono a B, e lasciano invariato il punto di ripresa di A.' },
+        { t: 'Sì, A riprende dall’inizio', fb: 'Il kernel aveva salvato il punto raggiunto da A.' }] }
     ],
     sfida: ['cslez5_1_04_processes', 'Costo dei cambi e tempi di risposta']
   }

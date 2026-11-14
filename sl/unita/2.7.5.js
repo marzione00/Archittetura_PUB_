@@ -90,7 +90,6 @@ SL.registra('2.7.5', {
         P({ riga: 3, fine: true }, 4, 'Due istruzioni risparmiate', 'RET trova in cima l’indirizzo di ritorno, poiché RSP è rimasto invariato. La funzione ha impiegato ' + n + ' byte di pila senza eseguire né una sottrazione né una somma su RSP.', { calc: 'abbassamento: 0 byte', esito: ['0 byte', 'si'] });
         return { passi, esito: 0 };
       }
-      const o2 = Array.from(new Set([n, N, n + 16])).sort((a, b) => a - b);
       st.rsp = 0x9FF8 - N; st.ris = true;
       P({ riga: 0, rsp: true, resto: true }, 2, N === n ? 'La riserva' : 'Una riserva superiore al necessario', 'La funzione sottrae ' + N + ' a RSP, che scende a ' + HA(st.rsp) + '. ' + (N === n ? 'Sono esattamente i ' + n + ' byte necessari, sufficienti anche per l’allineamento: 8 + ' + n + ' = ' + (8 + n) + ' è un multiplo di 16.' : 'Ne occorrevano ' + n + ', e tuttavia con ' + n + ' RSP sarebbe sceso a ' + HA(0x9FF8 - n) + ', che diviso 16 dà resto 8. Con ' + N + ' si ottiene un multiplo di 16, come la convenzione richiede prima di una CALL. Gli 8 byte aggiuntivi restano inutilizzati.'),
         { calc: '0x9FF8 − ' + N + ' = ' + HA(st.rsp), chiedi: { d: 'La funzione eseguirà ora `call altra`. Dove sarà depositato l’indirizzo di ritorno di tale chiamata?', o: [HA(st.rsp - 8), HA(st.rsp), HA(st.rsp + 8)].sort(), g: [HA(st.rsp - 8), HA(st.rsp), HA(st.rsp + 8)].sort().indexOf(HA(st.rsp - 8)), no: 'CALL sottrae 8 a RSP e scrive nella nuova cima: ' + HA(st.rsp) + ' − 8 = ' + HA(st.rsp - 8) + '.' } });

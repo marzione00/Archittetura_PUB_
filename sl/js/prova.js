@@ -80,6 +80,8 @@
       return null;
     }
     const cap = t.cap, mod = t.mod, variante = Number(r.b);
+    const nCap = mod.capitoli.indexOf(cap), nMod = SL.corso.indexOf(mod);
+    const dopoCap = mod.capitoli[nCap + 1] || (SL.corso[nMod + 1] ? SL.corso[nMod + 1].capitoli[0] : null);
     if (!(Number.isInteger(variante) && variante >= 1 && variante <= 999)) { location.replace('#/p/' + cap.id + '/' + altraVariante(0)); return null; }
     let vivo = true;
     const pulizie = [];
@@ -90,16 +92,17 @@
       // Stato di ogni domanda: aperta, tentata, piena (giusta al primo colpo, senza indizi), aiutata.
       const stati = domande.map(() => 'aperta');
       main.innerHTML = '<div class="pagina">' +
-        '<div class="nota" style="font-family:var(--mono)"><a href="#/m/' + mod.k + '">Rete del corso</a> / <a href="#/c/' + E(cap.id) + '">Capitolo ' + E(cap.id) + '</a> / Prova</div>' +
+        '<div class="nota briciole"><a href="#/">Rete del corso</a> / <a href="#/m/' + mod.k + '">Modulo ' + E(mod.r) + '</a> / <a href="#/c/' + E(cap.id) + '">Capitolo ' + E(cap.id) + '</a> / Prova</div>' +
         '<header class="testata"><span class="filigrana" style="right:-30px;top:-46px">' + SL.sim('bilancio', 230) + '</span><span class="filigrana" style="right:170px;bottom:-70px">' + SL.sim(cap.sim, 190) + '</span>' +
         '<div class="podio">' + SL.sim('bilancio', 104) + '</div><div class="dx"><div class="occhiello">Capitolo ' + E(cap.id) + ' · Prova di fine capitolo</div><h1>Prova · ' + E(cap.breve) + '</h1>' +
         '<p style="color:var(--testo2);max-width:640px">' + n + ' domande sugli argomenti del capitolo. Ogni risposta riceve immediatamente un commento, e per le domande a risposta scritta restano disponibili gli indizi e lo svolgimento.</p>' +
         '<div class="piste"><span class="pista">' + SL.sim('riproduci', 28) + 'Variante ' + variante + '</span><span class="pista">' + SL.sim('tabella', 28) + n + ' domande</span></div></div></header>' +
-        '<section class="pannello colonna" style="gap:8px"><div class="occhiello">Funzionamento della prova</div><p style="color:#d6ccb5">Questa è la variante ' + variante + '. Con lo stesso numero la prova si ripresenta identica, e può quindi essere ripetuta oppure assegnata ad altri. Il pulsante «Un’altra variante» cambia i dati delle domande e lascia uguali gli argomenti.</p>' +
-        '<p style="color:#d6ccb5">Il riepilogo in fondo alla pagina si aggiorna a ogni risposta. Ha valore soltanto per chi svolge la prova: alla chiusura della pagina viene eliminato.</p></section>' +
+        '<section class="pannello colonna" style="gap:8px"><h2 class="occhiello">Funzionamento della prova</h2><p style="color:#d6ccb5">Questa è la variante ' + variante + '. Con il medesimo numero la prova si ripresenta identica, e può quindi essere ripetuta oppure assegnata ad altri. Il pulsante «Un’altra variante» cambia i dati delle domande e lascia invariati gli argomenti.</p>' +
+        '<p style="color:#d6ccb5">Il riepilogo in fondo alla pagina si aggiorna a ogni risposta. Ha valore soltanto per chi svolge la prova: alla chiusura della pagina è eliminato.</p></section>' +
+        '<h2 class="occhiello c">Domande · variante ' + variante + '</h2>' +
         domande.map((x, k) => '<section class="banco esercizio" data-q="' + k + '"></section>').join('') +
         '<section class="pannello esito colonna" data-r="riepilogo" role="status" aria-live="polite"></section>' +
-        '<div class="passi-fase"><a class="bottone" href="#/c/' + E(cap.id) + '">Pagina del capitolo</a><button type="button" class="bottone primo" data-b="altra">Un’altra variante</button></div></div>';
+        '<div class="passi-fase"><a class="bottone" href="#/c/' + E(cap.id) + '">Pagina del capitolo</a>' + (dopoCap ? '<a class="bottone" href="' + SL.apriCapitolo(dopoCap) + '">Capitolo successivo · ' + E(dopoCap.id) + '</a>' : '') + '<button type="button" class="bottone primo" data-b="altra">Un’altra variante</button></div></div>';
 
       const riepilogo = main.querySelector('[data-r="riepilogo"]');
       const disegnaRiepilogo = () => {

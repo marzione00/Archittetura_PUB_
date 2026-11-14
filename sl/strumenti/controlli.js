@@ -2,12 +2,12 @@
 'use strict';
 /* Controlli sui contenuti del sito. Si avvia dalla radice del repository:
 
-     node sl/strumenti/controlli.js            riepilogo, errori e avvisi
+     node sl/strumenti/controlli.js            riepilogo ed errori
      node sl/strumenti/controlli.js --tutto    anche gli usi anticipati già accettati
 
    Che cosa verifica:
    1. struttura delle unità, simboli e glossario;
-   2. esperimenti: per ogni combinazione dei comandi genera i passi e controlla esito, previsioni e domande;
+   2. esperimenti: per ogni combinazione dei controlli genera i passi e controlla esito, previsioni e domande;
    3. ordine dei termini: nessun termine del glossario prima dell'unità che lo introduce;
    4. costrutti da evitare nella prosa.
    5. sicurezza del codice: risorse esterne, codice costruito da stringhe, archivi e rete, gestori in linea, politica dei contenuti.
@@ -22,12 +22,12 @@ const ambiente = vm.createContext({ SL, console });
 const carica = (f) => vm.runInContext(leggi(f), ambiente, { filename: f });
 ['sl/js/scena.js', 'sl/dati/corso.js', 'sl/dati/glossario.js', 'sl/dati/telemetria.js', 'sl/dati/macchina.js'].forEach(carica);
 const SIMBOLI = new Set((leggi('sl/js/simboli.js').match(/id=\\?"sl-[a-z0-9-]+/g) || []).map((s) => s.replace(/^.*sl-/, '')));
-const ORDINE = SL.unitaNuove.map((u) => u.id);
+const ORDINE = SL.unitaInOrdine.map((u) => u.id);
 fs.readdirSync(path.join(radice, 'sl/unita')).filter((f) => f.endsWith('.js')).sort().forEach((f) => carica('sl/unita/' + f));
 carica('sl/js/prova.js');
 if (fs.existsSync(path.join(radice, 'sl/prove'))) fs.readdirSync(path.join(radice, 'sl/prove')).filter((f) => f.endsWith('.js')).sort().forEach((f) => carica('sl/prove/' + f));
 
-const errori = [], avvisi = [], note = [];
+const errori = [];
 // Lo stesso difetto ripetuto su molti casi dello stesso esperimento viene riportato una volta sola, con il conteggio.
 const contati = new Map();
 const err = (dove, msg) => {
@@ -35,7 +35,6 @@ const err = (dove, msg) => {
   if (contati.has(chiave)) { contati.get(chiave).n++; return; }
   const voce = { n: 1, testo: dove + ' · ' + msg }; contati.set(chiave, voce); errori.push(voce);
 };
-const avv = (dove, msg) => avvisi.push(dove + ' · ' + msg);
 
 /* ---------- raccolta dei testi ---------- */
 // Ogni testo raccolto ha una provenienza e un genere: 'prosa' (testo continuo), 'domanda', 'breve' (etichette).
@@ -202,7 +201,29 @@ for (const c of capitoli.filter((x) => x.prova)) {
   statProve.push([c.id, def.domande.length, Math.min.apply(null, distinte.map((x) => x.size)), distinte.reduce((a, x) => a + x.size, 0)]);
 }
 
+// Struttura dei capitoli: guida, almeno due unità, prova e sfide sono obbligatorie, poiché la pagina del capitolo le presenta tutte.
+SL.corso.forEach((m) => m.capitoli.forEach((c) => {
+  if (c.diretta) { if (!c.scopo) err('corso', c.id + ': unità diretta priva di scopo'); return; }
+  if (!c.guida) err('corso', c.id + ': capitolo privo di guida');
+  if (!Array.isArray(c.unita) || c.unita.length < 2) err('corso', c.id + ': un capitolo richiede almeno due unità');
+  if (c.prova !== true) err('corso', c.id + ': capitolo privo di prova');
+  if (!Array.isArray(c.sfide)) err('corso', c.id + ': elenco delle sfide assente');
+  (c.unita || []).forEach((x) => { const s = SL.unita[x.id] && SL.unita[x.id].bilancio.sfida; if (s && !(c.sfide || []).some((y) => y[0] === s[0] && y[1] === s[1])) err('corso', x.id + ': la sfida collegata non coincide con alcuna voce dell’elenco del capitolo'); });
+}));
+
 // Testi della mappa del corso.
+// Presentazione di ogni modulo: tre campi obbligatori. I capitoli citati fra i prerequisiti devono comparire
+// fra i richiami delle unità del modulo («Dall’unità …»), così che il testo resti aderente ai dati.
+SL.corso.forEach((m) => {
+  const dove = 'modulo ' + m.r, x = m.intro;
+  if (!x || !x.tema || !x.premesse || !Array.isArray(x.esiti) || x.esiti.length < 3) { err('corso', dove + ': presentazione del modulo assente o incompleta'); return; }
+  metti('corso', 'prosa', dove, x.tema); metti('corso', 'prosa', dove, x.premesse); x.esiti.forEach((e) => metti('corso', 'breve', dove, e));
+  const richiamati = new Set();
+  m.capitoli.forEach((c) => (c.diretta ? [c] : c.unita || []).forEach((u) => ((SL.unita[u.id] && SL.unita[u.id].richiami && SL.unita[u.id].richiami.carte) || []).forEach((r) => {
+    (String(r.da).match(/\d+(\.\d+)+/g) || []).forEach((id) => { const p = id.split('.'); if (p[0] !== m.k) richiamati.add(p[0] === '0' ? id : p[0] + '.' + p[1]); });
+  })));
+  (x.premesse.match(/\d\.\d/g) || []).forEach((id) => { if (!richiamati.has(id)) err('corso', dove + ': fra i prerequisiti è citato ' + id + ', che nessuna unità del modulo richiama'); });
+});
 SL.corso.forEach((m) => { metti('corso', 'breve', 'modulo ' + m.r, m.nome); simboliUsati('corso', 'modulo ' + m.r, m.sim); m.capitoli.forEach((c) => {
   simboliUsati('corso', c.id, c.sim); metti('corso', 'breve', c.id, c.titolo); metti('corso', 'prosa', c.id, c.scopo); metti('corso', 'prosa', c.id, c.guida);
   (c.unita || []).forEach((x) => { simboliUsati('corso', x.id, x.sim); metti('corso', 'prosa', x.id, x.scopo); if (SL.unita[x.id] && SL.unita[x.id].titolo !== x.titolo) err('corso', x.id + ': titolo diverso da quello dell’unità'); });
@@ -331,7 +352,7 @@ for (const id of Object.keys(testi)) {
 // Il sito adotta la forma impersonale in ogni testo: teoria, laboratori ed esercizi. Lo strumento segnala la seconda persona,
 // la prima plurale, il lessico colloquiale, i superlativi, le formule a effetto e le serie di frasi brevissime.
 // Le unità già riscritte sono elencate in REGISTRO_FATTO: per loro ogni segnalazione è riportata; per le altre si dà il conto.
-const REGISTRO_FATTO = ['0.', '1.', '2.', '3.', '4.', '5.', '6.'];
+const REGISTRO_FATTO = ['0.', '1.', '2.', '3.', '4.', '5.', '6.', 'corso', 'glossario'];
 const IMPERATIVI = 'Prova|Guarda|Osserva|Scegli|Pensa|Immagina|Nota|Ricorda|Calcola|Scrivi|Leggi|Confronta|Aumenta|Riduci|Cambia|Ripeti|Conta|Cerca|Usa|Parti|Segui|Considera|Controlla|Verifica|Rispondi|Indica|Completa|Sposta|Premi|Apri|Torna|Dividi|Moltiplica|Somma|Sottrai|Aggiungi|Togli|Converti|Applica|Trova|Elenca|Tieni|Ragiona|Annota|Chiediti|Fermati|Lascia|Metti|Prendi|Porta|Ripassa|Rileggi|Riparti|Separa|Traduci|Individua|Stabilisci|Descrivi|Spiega|Fai|Vai|Scorri|Ricava|Ordina|Estrai|Isola|Esegui|Sostituisci|Riscrivi';
 const REGISTRO = [
   ['seconda persona', /(?<![\p{L}’])(saprai|vedrai|sceglierai|potrai|dovrai|troverai|userai|avrai|farai|seguirai|leggerai|scriverai|otterrai|noterai|imparerai|capirai|sarai|vorrai|dirai|conterai|calcolerai|confronterai|proverai|guarderai|osserverai|incontrerai|riconoscerai|hai|avevi|puoi|devi|vuoi|sai|stai|eri|tu|ti|te|tuo|tua|tuoi|tue|fall[oiae]|scrivil[oiae]|contal[oiae]|leggil[oiae]|sommal[oiae]|dividil[oiae]|spostal[oiae]|mettil[oiae]|prendil[oiae]|chiediti|fermati|ricordati|confrontal[oiae]|calcolal[oiae]|trovali|trovalo|cercal[oiae]|usal[oiae]|tienil[oiae]|lascial[oiae]|guardal[oiae]|osserval[oiae]|scorril[oiae])(?![\p{L}’])/iu],
@@ -347,7 +368,7 @@ const REGISTRO = [
 const registro = [], vistoReg = new Set();
 for (const id of Object.keys(testi)) testi[id].forEach((t) => {
   const s = piano(t.s);
-  REGISTRO.forEach((r) => { if (r[0] === 'imperativo' && /^(titolo|concetti|sfida)$/.test(t.dove)) return; /* titoli, etichette dei concetti e titoli delle sfide sono sintagmi nominali */ const m = s.match(r[1]); if (!m) return; const chiave = id + '|' + r[0] + '|' + s.slice(Math.max(0, m.index - 20), m.index + 40); if (vistoReg.has(chiave)) return; vistoReg.add(chiave); registro.push({ id, nome: r[0], dove: t.dove, s: s.slice(Math.max(0, m.index - 50), m.index + 70) }); });
+  REGISTRO.forEach((r) => { if (r[0] === 'imperativo' && (/^(titolo|concetti|sfida)$/.test(t.dove) || (id === 'glossario' && t.genere === 'breve'))) return; /* titoli, etichette dei concetti, titoli delle sfide e nomi dei termini del glossario sono sintagmi nominali */ const m = s.match(r[1]); if (!m) return; const chiave = id + '|' + r[0] + '|' + s.slice(Math.max(0, m.index - 20), m.index + 40); if (vistoReg.has(chiave)) return; vistoReg.add(chiave); registro.push({ id, nome: r[0], dove: t.dove, s: s.slice(Math.max(0, m.index - 50), m.index + 70) }); });
   if (t.genere === 'prosa' && /idea|racconto/.test(t.dove)) { const frasi = s.split(/(?<=[.!?])\s+/).map((f) => (f.match(/[\p{L}\p{N}]+/gu) || []).length); let serie = 0, peggio = 0; frasi.forEach((n) => { serie = n > 0 && n <= 7 ? serie + 1 : 0; peggio = Math.max(peggio, serie); }); if (peggio >= 3) { const chiave = id + '|brevi|' + s.slice(0, 60); if (!vistoReg.has(chiave)) { vistoReg.add(chiave); registro.push({ id, nome: 'frasi brevi in serie', dove: t.dove, s: s.slice(0, 120) }); } } }
 });
 
@@ -426,5 +447,4 @@ unici.forEach((x) => console.log('  ' + x.id + ' · ' + x.nome + ' · ' + x.dove
   console.log('REGISTRO DA CORREGGERE nelle parti già riscritte ' + registro.filter((x) => fatto(x.id)).length);
   daCorreggere.slice(0, process.argv.includes('--registro') ? 400 : 200).forEach((x) => console.log('  ' + x.id + ' · ' + x.nome + ' · ' + x.dove + ' · …' + x.s.replace(/\s+/g, ' ') + '…'));
 }
-console.log('\nAVVISI ' + avvisi.length); avvisi.forEach((x) => console.log('  ' + x));
 process.exit(errori.length ? 1 : 0);

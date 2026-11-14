@@ -21,7 +21,7 @@
         '<p style="color:#d6ccb5">' + SL.T(lab.previsione.domanda(ctx.p)) + '</p>' +
         '<div class="riga-bottoni" role="group" aria-label="Valori possibili">' +
         opz.map((o, k) => '<button type="button" class="tessera" data-k="' + k + '" aria-pressed="' + (ctx.pred === o.v) + '">' + E(o.t) + '</button>').join('') + '</div>' +
-        '<div class="nota" role="status">' + (ctx.pred == null ? 'Si selezioni un valore: al termine sarà confrontato con l’esito.' : 'Previsione registrata: ' + E((opz.find((o) => o.v === ctx.pred) || { t: ctx.pred }).t) + '.') + '</div>';
+        '<div class="nota" role="status">' + (ctx.pred == null ? (alCambio ? 'Si selezioni un valore: l’esecuzione ha inizio dopo la previsione, e al termine il valore è confrontato con l’esito.' : 'Si selezioni un valore: al termine sarà confrontato con l’esito.') : 'Previsione registrata: ' + E((opz.find((o) => o.v === ctx.pred) || { t: ctx.pred }).t) + '.' + (alCambio ? '' : ' L’esecuzione si trova nella fase 4.')) + '</div>';
       ospite.querySelectorAll('[data-k]').forEach((b) => b.addEventListener('click', () => {
         ctx.pred = opz[Number(b.dataset.k)].v; disegna(); if (alCambio) alCambio();
       }));
@@ -38,7 +38,7 @@
     ospite.innerHTML =
       '<div class="comandi" data-r="comandi"></div>' +
       (haDomande ? '<div class="riga-bottoni" role="group" aria-label="Modo d’uso"><button type="button" class="bottone" data-modo="osserva">Osserva</button><button type="button" class="bottone" data-modo="guidato">Guidato</button><span class="nota" data-r="notamodo" style="flex:1 1 320px"></span></div>' : '') +
-      '<div class="banco" tabindex="0" aria-label="Banco dell’esperimento. Usa le frecce sinistra e destra per muoverti fra i passi.">' +
+      '<div class="banco" tabindex="0" aria-label="Banco dell’esperimento. Le frecce sinistra e destra spostano la posizione fra i passi.">' +
         '<div class="hud" data-r="hud"></div>' +
         '<div data-r="scena"></div>' +
         '<div class="calcolo" data-r="calcolo"></div>' +
@@ -66,9 +66,9 @@
         let h = '<div class="gruppo"><span class="eti">' + E(c.eti) + '</span>';
         if (c.tipo === 'num') {
           const salti = c.salti || [1];
-          h += salti.slice().reverse().map((s) => '<button type="button" class="tessera" data-c="' + c.id + '" data-d="' + (-s) + '" aria-label="Diminuisci di ' + s + '">−' + s + '</button>').join('') +
+          h += salti.slice().reverse().map((s) => '<button type="button" class="tessera" data-c="' + c.id + '" data-d="' + (-s) + '" aria-label="Diminuzione di ' + s + '">−' + s + '</button>').join('') +
             '<span class="valore">' + E(ctx.p[c.id]) + (c.unita ? ' ' + E(c.unita) : '') + '</span>' +
-            salti.map((s) => '<button type="button" class="tessera" data-c="' + c.id + '" data-d="' + s + '" aria-label="Aumenta di ' + s + '">+' + s + '</button>').join('');
+            salti.map((s) => '<button type="button" class="tessera" data-c="' + c.id + '" data-d="' + s + '" aria-label="Aumento di ' + s + '">+' + s + '</button>').join('');
           if (c.pronti) h += '<span class="nota" style="margin-left:8px">Casi predefiniti</span>' + c.pronti.map((v) => '<button type="button" class="tessera" data-c="' + c.id + '" data-v="' + v + '">' + v + '</button>').join('');
         } else if (c.tipo === 'scelta') {
           h += c.opzioni.map(voce).map((o) => '<button type="button" class="tessera" data-c="' + c.id + '" data-s="' + E(o.v) + '" aria-pressed="' + (String(ctx.p[c.id]) === String(o.v)) + '">' + E(o.t) + '</button>').join('');
@@ -114,7 +114,7 @@
     function aggiorna() {
       const s = costr.passi[i], fine = i === ultimo();
       ospite.querySelectorAll('[data-modo]').forEach((b) => { b.classList.toggle('attivo', b.dataset.modo === modo); b.setAttribute('aria-pressed', String(b.dataset.modo === modo)); });
-      if (R('notamodo')) R('notamodo').textContent = modo === 'guidato' ? 'Alcuni passi richiedono una risposta. In caso di errore viene fornita la spiegazione, ed è ammesso un nuovo tentativo.' : 'L’esperimento procede un passo alla volta, e ogni passo è accompagnato dalla sua descrizione.';
+      if (R('notamodo')) R('notamodo').textContent = modo === 'guidato' ? 'Alcuni passi richiedono una risposta. In caso di errore è fornita la spiegazione, ed è ammesso un nuovo tentativo.' : 'L’esperimento procede un passo alla volta, e ogni passo è accompagnato dalla sua descrizione.';
       R('hud').innerHTML = (s.hud || []).map((x) => '<div class="' + (x[2] || '') + '"><small>' + E(x[0]) + '</small><b>' + E(x[1]) + '</b></div>').join('') +
         '<div><small>Passo</small><b>' + due(i + 1) + '<span style="font-size:15px;color:var(--muto)"> di ' + costr.passi.length + '</span></b></div>';
       scena.mostra(s.els || []);
@@ -126,6 +126,7 @@
       R('tacche').innerHTML = costr.passi.map((x, k) => '<i class="' + (k === i ? 'q' : k < i ? 'p' : '') + (k > 0 && x.atto !== costr.passi[k - 1].atto ? ' n' : '') + '"></i>').join('');
       const barra = R('barra'); barra.max = ultimo(); barra.value = i;
       const senzaPrev = ctx.pred == null;
+      barra.disabled = senzaPrev; // prima della previsione la sequenza non scorre
       R('prev').hidden = !senzaPrev;
       if (senzaPrev) disegnaPrev();
       const q = !senzaPrev && domandaAttiva() ? s.chiedi : null;

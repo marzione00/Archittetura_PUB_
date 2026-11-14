@@ -5,7 +5,7 @@ SL.unita621 = (() => {
   const ind = (frame, off) => frame * PAG + off;
   // f: 0 solo VA · 1 scomposto · 2 tabella A · 3 PA di A · 4 tabella B · 5 PA di B · 6 confronto
   const quadro = (pre, p, f, o) => {
-    const el = SL.el, els = [], w3 = (o.w - 20) / 3, w2 = (o.w - 10) / 2, va = ind(VPN, p.off), paA = ind(FA, p.off), paB = ind(p.fb, p.off), wc = (o.w - 9 * 6) / 10, stesso = p.fb === FA;
+    const el = SL.el, els = [], w3 = (o.w - 20) / 3, w2 = (o.w - 10) / 2, va = ind(VPN, p.off), paA = ind(FA, p.off), paB = ind(p.fb, p.off), wc = (o.w - 9 * 6) / 10;
     els.push(el.box(pre + 'v', o.x, o.y, w3, 50, 'indirizzo virtuale · A e B', hex(va) + ' = ' + SL.num(va), f === 0 ? 'att' : 'on', { cls: 'stretta' }));
     els.push(el.box(pre + 'n', o.x + w3 + 10, o.y, w3, 50, 'pagina virtuale · VPN', f >= 1 ? String(VPN) : '·', f === 1 ? 'att' : f >= 1 ? 'on' : '', { cls: 'stretta' }));
     els.push(el.box(pre + 'o', o.x + 2 * (w3 + 10), o.y, w3, 50, 'offset nella pagina', f >= 1 ? p.off + ' = ' + hex(p.off) : '·', f === 1 ? 'att' : f >= 1 ? 'on' : '', { cls: 'stretta' }));

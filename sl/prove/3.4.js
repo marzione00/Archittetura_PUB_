@@ -4,7 +4,6 @@
   const I = SL.scritture.intero, ESA = SL.scritture.esa, H = SL.y86.esa, N = SL.x86.num;
   const DIAG = (giuste, lista) => { const visti = new Set(giuste); return lista.filter((x) => { if (!x || visti.has(x.se[0])) return false; visti.add(x.se[0]); return true; }); };
   const PS = (v) => I(v).concat(I(v).map((x) => x + 'ps'));
-  const PA = (v) => (v < 0 ? '(' + N(v) + ')' : String(v));
 
   SL.registraProva('3.4', { domande: [
     // 3.4.1 · un registro prima e dopo il fronte

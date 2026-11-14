@@ -1,7 +1,7 @@
 'use strict';
 /* Prova del capitolo 2.3: una domanda per unità. */
 (() => {
-  const I = SL.scritture.intero, ESA = SL.scritture.esa, X = SL.x86, N = X.num;
+  const I = SL.scritture.intero, ESA = SL.scritture.esa, X = SL.x86;
   const H2 = (v) => X.esa2(v), HA = (a) => '0x' + a.toString(16).toUpperCase(), H8 = (v) => '0x' + v.toString(16).toUpperCase().padStart(8, '0');
   const PTR = { 1: 'byte ptr', 2: 'word ptr', 4: 'dword ptr' }, NOME = { 1: 'un byte', 2: 'due byte', 4: 'quattro byte' };
 

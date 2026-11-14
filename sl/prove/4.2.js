@@ -54,7 +54,7 @@
     },
     // 4.2.3 · preparare la chiamata successiva
     (r) => {
-      const base = 0x5000 + 0x100 * r.int(0, 40), n = r.int(12, 60), ok = r.int(0, 3) > 0, k = ok ? r.int(3, n - 2) : 0, ret = ok ? k : -9, cosa = r.int(0, 1);
+      const base = 0x5000 + 0x100 * r.int(0, 40), n = r.int(12, 60), ok = r.int(0, 3) > 0, k = ok ? r.int(3, n - 2) : 0, cosa = r.int(0, 1);
       const testa = 'Un programma chiama write con RSI = ' + H(base) + ' e RDX = ' + n + '. Il kernel restituisce ' + (ok ? k : '−9') + '. ';
       if (cosa === 0) { const v = base + k, giuste = ESA(v, 4); return { u: '4.2.3', d: testa + 'Quale valore va scritto in RSI per la chiamata successiva? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste,
         ok: ok ? 'Il puntatore avanza dei byte confermati: ' + H(base) + ' + ' + k + ' = ' + H(v) + '.' : 'Dopo un errore nessun byte è stato consegnato, e il puntatore resta ' + H(base) + '.',

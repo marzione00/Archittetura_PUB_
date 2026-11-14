@@ -71,7 +71,7 @@ SL.registra('4.5.3', {
       domanda: (p) => 'La testina è sul cilindro ' + p.pos + '. Le richieste, in ordine di arrivo, riguardano i cilindri 80, 15 e 55' + (p.cache === 'hit' ? ', e il blocco del cilindro 80 è già nella cache' : '') + '. Con la regola ' + SL.unita453.NOMI[p.disc] + ', quanti cilindri percorre complessivamente la testina?',
       opzioni: (p) => { const U = SL.unita453, a = U.totale(p, 'fcfs'), b = U.totale(p, 'sstf'); return Array.from(new Set([b, a, Math.max(a, b) + 40])).sort((x, y) => x - y).map((v) => [v, v + ' cilindri']); }
     },
-    confronto: (pred, esito, p) => { const U = SL.unita453; return 'La previsione indicava ' + pred + ' cilindri. La testina ne percorre ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.disc === 'fcfs' ? 'FCFS segue l’ordine di arrivo, anche quando esso impone un ritorno verso cilindri già superati.' : 'SSTF seleziona ogni volta la richiesta più vicina alla posizione attuale.'); },
+    confronto: (pred, esito, p) => { return 'La previsione indicava ' + pred + ' cilindri. La testina ne percorre ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.disc === 'fcfs' ? 'FCFS segue l’ordine di arrivo, anche quando esso impone un ritorno verso cilindri già superati.' : 'SSTF seleziona ogni volta la richiesta più vicina alla posizione attuale.'); },
     costruisci(p) {
       const U = SL.unita453, el = SL.el, passi = [], tappe = U.percorso(p), hit = p.cache === 'hit', altra = p.disc === 'fcfs' ? 'sstf' : 'fcfs', totAltra = U.totale(p, altra), tot = tappe[tappe.length - 1].tot;
       const quadro = (fatte, cacheVista, fine) => {

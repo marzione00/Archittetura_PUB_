@@ -32,7 +32,7 @@ SL.registra('2.7.7', {
   },
   esperimento: {
     faremo: [
-      'Una routine riceve una stringa di n caratteri e deve copiarla, con il terminatore, in un buffer di capacità C. Prima della copia esegue un controllo. I comandi dell’esperimento fissano la capacità, la lunghezza e la condizione verificata dalla routine.',
+      'Una routine riceve una stringa di n caratteri e deve copiarla, con il terminatore, in un buffer di capacità C. Prima della copia esegue un controllo. I controlli dell’esperimento fissano la capacità, la lunghezza e la condizione verificata dalla routine.',
       'Sono mostrati la cella in cui cadrebbe il terminatore, la decisione del controllo e il numero di byte scritti. Dopo il caso proposto è istruttivo il caso di 7 caratteri, e in seguito la condizione `n <= C` con 8 caratteri.'
     ],
     vedrai: [

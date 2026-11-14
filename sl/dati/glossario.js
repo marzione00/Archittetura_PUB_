@@ -134,7 +134,7 @@ SL.glossario = {
   'virgola fissa': { t: 'Virgola fissa', d: 'Rappresentazione di una grandezza mediante un intero e un fattore di scala stabilito una volta per tutte, come gli importi conservati in centesimi.', u: '1.7.5', s: 'virgola' },
   'ingresso standard': { t: 'Ingresso standard', d: 'Canale dal quale un programma legge i propri dati. La shell lo collega al terminale oppure, con una redirezione, a un file.', u: '1.7.6', s: 'input' },
   'dominio': { t: 'Dominio (di una grandezza)', d: 'Insieme dei valori che una grandezza può effettivamente assumere, di norma più ristretto dell’insieme dei valori rappresentabili nel suo tipo.', u: '1.7.7', s: 'scudo', f: ['domini'] },
-  'andata e ritorno': { t: 'Andata e ritorno', d: 'Prova che codifica un dato, lo rilegge e confronta il risultato con l’originale.', u: '1.7.7', s: 'riproduci' },
+  'andata e ritorno': { t: 'Andata e ritorno', d: 'Controllo in cui un dato è codificato, riletto e confrontato con l’originale.', u: '1.7.7', s: 'riproduci' },
   // Capitolo 2.1
   'stato architetturale': { t: 'Stato architetturale', d: 'Tutto ciò che un programma può leggere o modificare: i registri, la memoria, il puntatore di istruzione e i flag.', u: '2.1.1', s: 'register' },
   'puntatore di istruzione': { t: 'Puntatore di istruzione (RIP)', d: 'Registro che contiene l’indirizzo della prossima istruzione da eseguire. Nei processori x86-64 è denominato RIP.', u: '2.1.1', s: 'puntatore' },
@@ -406,7 +406,7 @@ SL.glossario = {
   'larghezza del bus': { t: 'Larghezza del bus', d: 'Numero di bit che un bus trasporta insieme, uno per filo. Divisa per otto fornisce i byte di ogni trasferimento.', u: '4.4.2', s: 'bus' },
   'megahertz': { t: 'Megahertz', d: 'Unità di misura della frequenza, abbreviata MHz: un milione di cicli al secondo.', u: '4.4.2', s: 'clock' },
   'ddr': { t: 'DDR', d: 'Dall’inglese «double data rate»: modo di trasmissione che compie due trasferimenti per ciclo di clock. Il modo con un solo trasferimento per ciclo è denominato SDR.', u: '4.4.2', s: 'clock' },
-  'banda aggregata': { t: 'Banda aggregata', d: 'Somma dei byte che tutti i collegamenti occupati trasferiscono in un secondo. Costituisce un limite superiore ideale, calcolato senza attese.', u: '4.4.2', s: 'bus' },
+  'banda aggregata': { t: 'Banda aggregata', d: 'Totale dei byte che tutti i collegamenti occupati trasferiscono in un secondo. Costituisce un limite superiore ideale, calcolato senza attese.', u: '4.4.2', s: 'bus' },
   'protocollo del bus': { t: 'Protocollo del bus', d: 'Insieme delle regole che stabiliscono l’operazione compiuta sul bus in ogni ciclo di una transazione.', u: '4.4.3', s: 'bus' },
   'ciclo di attesa del bus': { t: 'Ciclo di attesa del bus', d: 'Ciclo di clock, inserito dal destinatario di una transazione, in cui il bus resta impegnato senza il trasferimento di alcun dato.', u: '4.4.3', s: 'clock' },
   'raffica': { t: 'Raffica', d: 'Transazione che trasferisce più parole consecutive con la presentazione del solo indirizzo della prima.', u: '4.4.3', s: 'coda' },

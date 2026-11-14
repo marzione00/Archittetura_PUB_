@@ -46,7 +46,7 @@
     },
     // 2.5.2 · i registri degli argomenti e la traduzione degli errori
     (r) => {
-      const forma = r.int(0, 2), FUN = ['RDI', 'RSI', 'RDX', 'RCX', 'R8', 'R9'], SIS = ['RDI', 'RSI', 'RDX', 'R10', 'R8', 'R9'], ORD = ['primo', 'secondo', 'terzo', 'quarto', 'quinto', 'sesto'];
+      const forma = r.int(0, 2), SIS = ['RDI', 'RSI', 'RDX', 'R10', 'R8', 'R9'], ORD = ['primo', 'secondo', 'terzo', 'quarto', 'quinto', 'sesto'];
       if (forma === 0) {
         const k = r.scegli([0, 1, 2, 3, 3, 3, 4, 5]), altri = r.mescola(['RAX', 'RCX', 'R10', 'R11', 'RDI', 'RSI', 'RDX', 'R8', 'R9'].filter((x) => x !== SIS[k])).slice(0, 3);
         const fb = (x) => (x === 'RCX' ? 'RCX è il registro che SYSCALL sovrascrive con l’indirizzo di ripresa. Un argomento lasciato in tale registro andrebbe perduto.' : x === 'RAX' ? 'RAX contiene il numero del servizio, che è un’informazione distinta.' : x === 'R11' ? 'R11 riceve da SYSCALL la copia dei flag. Gli argomenti sono trasmessi in RDI, RSI, RDX, R10, R8 e R9.' : 'In ' + x + ' il kernel cerca il ' + ORD[SIS.indexOf(x)] + ' argomento.');

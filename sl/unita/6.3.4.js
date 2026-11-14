@@ -1,6 +1,6 @@
 'use strict';
 SL.unita634 = (() => {
-  const PAG = 4096, VA = 0x1FFC, V1 = 19, BASE = 0x100000;
+  const PAG = 4096, VA = 0x1FFC, V1 = 19;
   const H = (v) => '0x' + v.toString(16).toUpperCase();
   // Stato della pagina 2: 'valida' (voce 41), 'invalida' (voce 40), 'fuori' (la tabella ha soltanto le voci 0 e 1)
   const analisi = (p) => {

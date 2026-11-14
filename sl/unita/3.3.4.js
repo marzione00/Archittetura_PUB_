@@ -55,7 +55,7 @@ SL.registra('3.3.4', {
     },
     confronto: (pred, esito, p) => 'La previsione indicava ' + pred + '. Il codice di stato è ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : esito === 'INS' ? 'Il primo byte F0 ha icode F, al quale non corrisponde alcuna classe.' : esito === 'HLT' ? '`halt` è un’istruzione valida, che richiede l’arresto.' : esito === 'ADR' ? 'L’accesso impiegherebbe le celle da ' + p.a + ' a ' + (p.a + 7) + ', e la memoria termina alla cella 63.' : 'Le celle da ' + p.a + ' a ' + (p.a + 7) + ' esistono tutte, e l’istruzione è completata.'),
     costruisci(p) {
-      const el = SL.el, U = SL.unita334, passi = [], op = p.op, a = p.a, mem = op === 'mrmovq' || op === 'rmmovq', B0 = { mrmovq: '50', rmmovq: '40', halt: '00', ris: 'F0' }[op];
+      const el = SL.el, passi = [], op = p.op, a = p.a, mem = op === 'mrmovq' || op === 'rmmovq', B0 = { mrmovq: '50', rmmovq: '40', halt: '00', ris: 'F0' }[op];
       const fuori = mem && a + 7 > 63, stat = op === 'ris' ? 'INS' : op === 'halt' ? 'HLT' : fuori ? 'ADR' : 'AOK', s0 = a <= 44 ? a - 2 : 54;
       const st = { cls: false, ind: false, scr: false, fine: false };
       const quadro = (o) => {

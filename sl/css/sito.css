@@ -1,4 +1,4 @@
-/* SistemiLab · foglio di stile unico del nuovo sito */
+/* SistemiLab · foglio di stile unico del sito */
 /* Caratteri serviti dal sito stesso (cartella sl/font, licenza SIL OFL 1.1): nessuna richiesta a server esterni. */
 @font-face{font-family:'Chakra Petch';font-style:normal;font-weight:500;font-display:swap;src:url(../font/chakra-petch-500.woff2) format('woff2')}
 @font-face{font-family:'Chakra Petch';font-style:normal;font-weight:600;font-display:swap;src:url(../font/chakra-petch-600.woff2) format('woff2')}
@@ -43,11 +43,10 @@ code{font-family:var(--mono);font-size:.94em;color:var(--chiaro);background:var(
 .testa nav{display:flex;flex-wrap:wrap;gap:4px;flex:1 1 auto}
 .testa nav a{display:flex;align-items:center;min-height:44px;padding:0 14px;text-decoration:none;color:var(--testo2);border-bottom:2px solid transparent}
 .testa nav a[aria-current]{color:var(--ambra);border-bottom-color:var(--ambra);font-weight:600}
-.testa .lato{font-size:14px;color:var(--muto);text-decoration:none;min-height:44px;display:flex;align-items:center}
 .piede{border-top:1px solid var(--riga);margin-top:48px}
-.piede .licenza{margin-left:auto}.piede .licenza a{color:var(--ambra)}
+.piede .licenza{margin-left:auto}.piede .licenza a{display:inline-block;padding:4px 0;color:var(--ambra)}
 .piede .in{max-width:1320px;margin:0 auto;padding:22px 24px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;color:var(--muto);font-size:14px}
-main{display:block;outline:none}
+main{display:block;outline:none;min-height:100vh}
 .pagina{max-width:1160px;margin:0 auto;padding:36px 24px 56px;display:flex;flex-direction:column;gap:32px}
 .pagina.larga{max-width:1320px}
 
@@ -80,6 +79,9 @@ main{display:block;outline:none}
 .avviso.no{background:var(--rosso-s);border-color:var(--rosso)}.avviso.no .eti{color:var(--rosso-t)}
 .avviso.con-sim{align-items:center;flex-wrap:nowrap;gap:14px}
 .nota{font-size:14px;color:var(--muto)}
+.briciole{font-family:var(--mono)}
+.briciole a{display:inline-flex;align-items:center;min-height:32px}
+.rinvio{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:32px;font-family:var(--mono)}
 .piste{display:flex;flex-wrap:wrap;gap:8px}
 .pista{display:inline-flex;align-items:center;gap:8px;padding:4px 12px 4px 6px;background:var(--pan2);border:1px solid var(--riga3);font-size:14px}
 
@@ -213,7 +215,7 @@ main{display:block;outline:none}
 .el-box.riga{flex-direction:row;gap:10px;justify-content:flex-start;text-align:left}
 .el-box.riga>div{display:flex;flex-direction:column;gap:2px;min-width:0}
 .el-box.stretta .va{font-size:14px}
-.el-cella{display:flex;align-items:center;justify-content:center;font:600 34px var(--mono);background:#17140f;border:1px solid var(--riga3);color:#6b6048}
+.el-cella{display:flex;align-items:center;justify-content:center;font:600 34px var(--mono);background:#17140f;border:1px solid var(--riga3);color:#8f8468}
 .el-cella.piccola{font-size:20px}
 .el-cella.minuta{font-size:15px}
 /* Celle colorate per le immagini: lo stato si legge dal bordo e dall'alone. */
@@ -267,13 +269,42 @@ input[type=range]{width:100%;height:28px;accent-color:var(--ambra)}
 .comandi .valore{min-width:76px;height:44px;display:flex;align-items:center;justify-content:center;padding:0 10px;font:600 20px var(--mono);color:#fff3d6;border:1px solid var(--ambra);background:var(--ambra-s)}
 .comandi input[type=text]{height:44px;width:150px;padding:0 12px;font:600 18px var(--mono);color:#fff3d6;background:var(--ambra-s);border:1px solid var(--ambra)}
 
+/* Orientamento: percorso di studio, moduli, scheda del modulo, unità di un capitolo, attività di una fase */
+.tappe{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:16px 24px}
+.tappe li{display:flex;gap:14px;align-items:flex-start}
+.tappe .n{flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font:600 20px var(--tit);color:var(--ambra);background:var(--buio);border:1px solid var(--ambra)}
+.tappe p{margin-top:4px;font-size:15px;line-height:1.55;color:var(--testo2)}
+.linguette{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(104px,100%),1fr));gap:8px}
+.linguetta{display:flex;flex-direction:column;justify-content:center;gap:1px;min-height:56px;padding:6px 12px;text-align:left;line-height:1.25;background:var(--pan);border:1px solid var(--riga3);color:var(--testo)}
+.linguetta b{font:500 12px var(--mono);letter-spacing:.08em;color:var(--ambra)}
+.linguetta:hover{border-color:var(--ambra-t);color:var(--chiaro)}
+.linguetta[aria-pressed="true"]{background:var(--ambra-s);border-color:var(--ambra);color:var(--chiaro);font-weight:600}
+.modulo{display:flex;flex-direction:column;gap:20px}
+.modulo .su{display:flex;align-items:center;gap:16px}
+.modulo .tre{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:20px 32px}
+.modulo .tre>div{display:flex;flex-direction:column;gap:8px}
+.modulo p,.modulo li{font-size:15.5px;line-height:1.55;color:var(--testo2)}
+.modulo ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.modulo li{position:relative;padding-left:18px}
+.modulo li::before{content:"";position:absolute;left:0;top:.58em;width:7px;height:7px;background:var(--ciano)}
+.premesse{min-height:1.6em;font-size:15px;color:var(--testo2);max-width:640px}
+.premesse b{color:var(--ciano);font-weight:600}
+.carte.elenco{grid-template-columns:minmax(0,1fr)}
+.carta.unita{display:grid;grid-template-columns:52px minmax(0,5fr) minmax(0,7fr);gap:6px 18px;align-items:start;min-height:92px;padding:14px 16px}
+.carta.unita .v{font-size:17px;font-weight:600;color:var(--chiaro)}
+.carta.unita .w{font-size:14px}
+.carta.unita .ob{font-size:14.5px;line-height:1.5;color:var(--testo2);min-height:4.5em;padding-left:18px;border-left:1px solid var(--riga)}
+@media (max-width:760px){.carta.unita{grid-template-columns:52px minmax(0,1fr)}.carta.unita .ob{grid-column:2;min-height:7.5em;padding:8px 0 0;border-left:0;border-top:1px solid var(--riga)}}
+.consegna{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;max-width:860px;padding:10px 14px;font-size:15.5px;line-height:1.55;color:var(--testo2);background:var(--ciano-s);border-left:3px solid var(--ciano)}
+.consegna b{flex:none;font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ciano)}
+.consegna span{flex:1 1 420px;min-width:0}
 /* Esercizi */
 .esercizio{display:flex;flex-direction:column;gap:16px}
 .esercizio input[type=text]::placeholder{font:400 15px var(--corpo);color:var(--muto);opacity:1}
 .esercizio input[type=text]{width:300px;max-width:100%;height:48px;padding:0 14px;font:500 20px var(--mono);color:var(--chiaro);background:var(--pan);border:1px solid var(--riga2)}
 .esercizio label.campo{display:flex;flex-direction:column;gap:6px;color:var(--testo2);font-size:14px}
 .spunta{display:flex;gap:12px;align-items:flex-start;min-height:44px;color:#e4dbc6}
-.spunta input{width:22px;height:22px;margin-top:2px;accent-color:var(--ciano);flex:none}
+.spunta input{width:24px;height:24px;margin-top:1px;accent-color:var(--ciano);flex:none}
 .sfida{display:flex;flex-wrap:wrap;gap:24px}
 .sfida .id{font:500 16px var(--mono);color:var(--chiaro);word-break:break-all}
 

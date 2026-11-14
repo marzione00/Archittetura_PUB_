@@ -58,7 +58,7 @@ SL.registra('2.6.3', {
       domanda: (p) => 'AL contiene ' + SL.unita263.H(p.a) + ' e BL contiene ' + SL.unita263.H(p.b) + '. Il frammento esegue `cmp al, bl`, `' + p.t + ' fine`, `mov al, bl` e, all’etichetta fine, `ret`. Quale byte contiene AL al ritorno?',
       opzioni: (p) => [p.a, p.b].sort((x, y) => x - y).map(SL.unita263.H)
     },
-    confronto: (pred, esito, p) => { const U = SL.unita263, c = SL.x86.differenza(p.a, p.b, 8); return 'La previsione indicava ' + pred + '. AL contiene ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t === 'jl' ? 'JL impiega l’ordine con segno: AL vale ' + SL.x86.num(c.sa) + ' e BL vale ' + SL.x86.num(c.sb) + '.' : 'JB impiega l’ordine senza segno: AL vale ' + p.a + ' e BL vale ' + p.b + '.'); },
+    confronto: (pred, esito, p) => { const c = SL.x86.differenza(p.a, p.b, 8); return 'La previsione indicava ' + pred + '. AL contiene ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t === 'jl' ? 'JL impiega l’ordine con segno: AL vale ' + SL.x86.num(c.sa) + ' e BL vale ' + SL.x86.num(c.sb) + '.' : 'JB impiega l’ordine senza segno: AL vale ' + p.a + ' e BL vale ' + p.b + '.'); },
     costruisci(p) {
       const el = SL.el, X = SL.x86, U = SL.unita263, N = X.num, passi = [], c = X.differenza(p.a, p.b, 8), JL = p.t === 'jl';
       const salta = JL ? c.sf !== c.of : c.cf === 1, ris = salta ? p.a : p.b, altro = (JL ? c.cf === 1 : c.sf !== c.of) ? p.a : p.b;

@@ -3,7 +3,7 @@ SL.unita622 = (() => {
   const esito = (p) => (p.cond === 'fuori' || p.acc === 'scrive' ? 'violazione' : p.cond === 'file' ? 'carica' : 'subito');
   const traccia = (p) => {
     const T = [], scr = p.acc === 'scrive', verbo = scr ? 'scrivere' : 'leggere', e = esito(p);
-    const voce0 = p.cond === 'residente' ? 'presente 1 · frame 7' : 'presente 0', reg0 = p.cond === 'fuori' ? 'nessuna' : 'file · sola lettura';
+    const voce0 = p.cond === 'residente' ? 'presente 1 · frame 7' : 'presente 0';
     const S = (atto, titolo, testo, s, extra) => T.push(Object.assign({ atto, titolo, testo, istr: (scr ? 'scrive' : 'legge') + ' 0x2010', voce: voce0, kern: '·', letture: 0, ram: p.cond === 'residente' ? 'pagina 2 del file' : 'libero', fine: '·', acc: '', rosso: '' }, s, extra ? { extra } : {}));
     S(0, 'La situazione', 'Un processo ha richiesto al kernel di disporre di un file come regione della propria memoria, in sola lettura. ' + (p.cond === 'residente' ? 'La pagina 2 è già stata caricata nel frame 7.' : p.cond === 'file' ? 'La pagina 2 appartiene alla regione, ed è ancora da caricare.' : 'La pagina 2 è esterna a ogni regione del processo.') + ' Il programma si accinge a ' + verbo + ' il byte di indirizzo 0x2010.', { istr: '·' });
     S(0, 'L’istruzione richiede un byte', 'L’indirizzo 0x2010 si scompone in pagina 2 e offset 16, che in esadecimale è 0x010. Il processore trasmette la richiesta alla MMU.', { acc: 'i' }, { calc: '0x2010 → pagina 2 · offset 16' });

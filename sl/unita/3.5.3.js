@@ -55,7 +55,7 @@ SL.registra('3.5.3', {
     },
     confronto: (pred, esito, p) => 'La previsione indicava ' + (pred === 0 ? 'nessun ciclo perduto' : pred + (pred === 1 ? ' ciclo perduto' : ' cicli perduti')) + '. I cicli perduti sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : SL.unita353.PERCHE[p.h][p.v]),
     costruisci(p) {
-      const el = SL.el, U = SL.unita353, passi = [], S = U.SCENE[p.h][p.v], F5 = ['F', 'D', 'E', 'M', 'W'];
+      const el = SL.el, U = SL.unita353, passi = [], S = U.SCENE[p.h][p.v];
       const quadro = (o) => {
         const els = [el.nota('t0', 20, 0, 'CICLO', 'mono')];
         SL.pipe.diagramma('d', S.righe, { x: 190, y: 0, passo: 60, cicli: 9, py: 32, h: 26, fino: o.c, evid: o.evid }).forEach((e) => els.push(e));

@@ -62,7 +62,7 @@ SL.registra('2.4.1', {
     confronto: (pred, esito, p) => { const c = SL.unita241.calcola(p.x, p.op, p.k); return 'La previsione indicava ' + pred + '. AL contiene ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : (p.op === 'shl' ? 'I bit salgono di ' + p.k + (p.k === 1 ? ' posizione' : ' posizioni') + ' e da destra entrano zeri.' : 'I bit scendono di ' + p.k + (p.k === 1 ? ' posizione' : ' posizioni') + ' e da sinistra ' + (p.op === 'shr' ? 'entrano zeri.' : 'entrano copie del bit di segno, che vale ' + c.segno + '.'))); },
     costruisci(p) {
       const el = SL.el, X = SL.x86, U = SL.unita241, N = X.num, c = U.calcola(p.x, p.op, p.k), passi = [], k = p.k, SIN = p.op === 'shl';
-      const IST = p.op + ' al, ' + k, PX = (b) => 150 + (7 - b) * 62, D = Math.pow(2, k), POS = k === 1 ? 'una posizione' : k + ' posizioni';
+      const IST = p.op + ' al, ' + k, PX = (b) => 150 + (7 - b) * 62, POS = k === 1 ? 'una posizione' : k + ' posizioni';
       const st = { cf: null, vis: false };
       const quadro = (o) => {
         const f = o.fase, els = [el.nota('n1', 20, 52, 'AL prima', 'mono'), el.nota('n2', 20, 196, 'AL dopo', 'mono'), el.box('ist', 20, 262, 250, 60, 'istruzione', IST, f === 0 ? 'att' : '', { cls: 'stretta' })];

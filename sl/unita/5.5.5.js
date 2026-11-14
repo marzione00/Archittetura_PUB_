@@ -3,7 +3,7 @@ SL.unita555 = (() => {
   const conto = (p) => { const spin = p.modo === 'spin'; return { cpu: spin ? p.d : 0, presa: spin ? p.d : p.d + p.r }; };
   // fase: 0 la richiesta · 1 l'attesa · 2 il rilascio · 3 il conto
   const quadro = (pre, p, f, o) => {
-    const el = SL.el, els = [], c = conto(p), spin = p.modo === 'spin', n = Math.max(10, c.presa + 1), passo = o.wc + 3;
+    const el = SL.el, els = [], c = conto(p), spin = p.modo === 'spin', passo = o.wc + 3;
     els.push(el.nota(pre + 't0', o.x, o.y, 'CORE 0 · il thread A, che possiede il lock', 'mono'), el.nota(pre + 't1', o.x, o.y + 84, 'CORE 1 · il thread B, che lo attende', 'mono'));
     for (let k = 0; k < 11; k++) {
       const vis = f >= 1 && (f >= 2 || k < p.d);

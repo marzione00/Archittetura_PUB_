@@ -1,15 +1,17 @@
 'use strict';
 /* Avvio: collega i percorsi, disegna la prima vista e presenta la sequenza iniziale.
-   La sequenza compare a ogni apertura della pagina, dura pochi secondi e si interrompe con un tasto o un clic.
+   La sequenza compare a ogni apertura della pagina principale, dura pochi secondi e si interrompe con un tasto o un clic.
+   Chi apre direttamente un modulo, un capitolo o un'unità giunge al contenuto senza passare dalla sequenza.
    Non compare quando il sistema chiede di ridurre il movimento, né sotto il controllo di uno strumento automatico.
    Nulla viene memorizzato: il sito non sa se la sequenza è già stata vista. */
 (() => {
   const DURATA = 4200;
   const sequenza = () => {
     if (navigator.webdriver) return;
+    if (SL.percorso().vista !== 'rete') return;
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let capitoli = 0, unita = 0, prove = 0;
-    SL.corso.forEach((m) => m.capitoli.forEach((c) => { capitoli++; unita += c.unita && c.unita.length ? c.unita.length : 1; if (c.prova) prove++; }));
+    SL.corso.forEach((m) => m.capitoli.forEach((c) => { if (!c.diretta) capitoli++; unita += c.unita && c.unita.length ? c.unita.length : 1; if (c.prova) prove++; }));
     const righe = [
       ['rete del corso', SL.corso.length + ' moduli · ' + capitoli + ' capitoli · ' + unita + ' unità'],
       ['laboratori', 'esperimenti eseguibili un passo alla volta'],

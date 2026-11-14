@@ -10,7 +10,7 @@ SL.unita544 = (() => {
     if (loop) els.push(el.cella(pre + 'i', o.x, o.y + 42, 120, 34, String(f >= 1 ? p.n : 0), f === 1 ? 'att' : 'on', { so: 'i', piccola: true }));
     else for (let k = 0; k < p.n; k++) els.push(el.cella(pre + 'a' + k, o.x + k * (ww + 10), o.y + 42, ww, 34, String(k), f === 3 && k < L.length ? 'att' : 'on', { so: 'a[' + k + ']', piccola: true }));
     els.push(el.nota(pre + 't1', o.x, o.y + 92, 'WORKER · l’argomento ricevuto e il valore letto', 'mono'));
-    for (let k = 0; k < p.n; k++) { const fallito = ko && k === p.n - 1, creato = f >= 1 && !fallito; els.push(el.box(pre + 'w' + k, o.x + k * (ww + 10), o.y + 116, ww, 54, 'worker ' + (k + 1), f < 1 ? '·' : fallito ? 'EAGAIN · non creato' : (loop ? '&i' : '&a[' + k + ']') + (f >= 4 ? ' → ' + L[k] + ' · raccolto' : f >= 3 ? ' → ' + L[k] : f === 2 ? ' · via' : ' · attende'), f < 1 ? '' : fallito ? 'err' : f === 3 || f === 4 ? 'att' : 'on', { cls: 'stretta' })); }
+    for (let k = 0; k < p.n; k++) { const fallito = ko && k === p.n - 1; els.push(el.box(pre + 'w' + k, o.x + k * (ww + 10), o.y + 116, ww, 54, 'worker ' + (k + 1), f < 1 ? '·' : fallito ? 'EAGAIN · non creato' : (loop ? '&i' : '&a[' + k + ']') + (f >= 4 ? ' → ' + L[k] + ' · raccolto' : f >= 3 ? ' → ' + L[k] : f === 2 ? ' · via' : ' · attende'), f < 1 ? '' : fallito ? 'err' : f === 3 || f === 4 ? 'att' : 'on', { cls: 'stretta' })); }
     return els;
   };
   return { letti, chiave, quadro };

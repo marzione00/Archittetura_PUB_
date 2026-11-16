@@ -24,7 +24,7 @@ SL.registra('5.1.3', {
     carte: [
       { sim: 'register', da: 'Dall’unità 4.1.6', t: 'Il contesto', d: 'I valori dei registri che descrivono il punto raggiunto da un programma.' },
       { sim: 'puntatore', da: 'Dall’unità 3.3.1', t: 'Il contatore di programma', d: 'Il registro, abbreviato PC, con l’indirizzo dell’istruzione successiva.' },
-      { sim: 'coda', da: 'Dall’unità 5.1.2', t: 'Il quanto di tempo', d: 'La durata massima di un turno sul processore.' }
+      { sim: 'coda', da: 'Dall’unità 5.1.2', t: 'Il time slice', d: 'La durata massima di un turno sul processore.' }
     ],
     domanda: { d: 'Prima di proseguire: ogni istruzione occupa 4 byte. Dopo tre istruzioni, di quanti byte è avanzato il contatore di programma?', o: [
       { t: '12', ok: true, fb: '3 × 4 = 12, che in esadecimale si scrive 0xC.' },
@@ -45,7 +45,7 @@ SL.registra('5.1.3', {
   },
   esperimento: {
     faremo: [
-      'Il processo A ha inizio all’indirizzo 0x1000. I controlli fissano il numero di istruzioni che A completa prima della scadenza del quanto, e il numero di quelle che B esegue nel proprio turno.',
+      'Il processo A ha inizio all’indirizzo 0x1000. I controlli fissano il numero di istruzioni che A completa prima della scadenza del time slice, e il numero di quelle che B esegue nel proprio turno.',
       'L’esperimento segue il contatore di programma del processore e le due copie salvate nelle schede. È istruttivo modificare il numero di istruzioni di B e verificare se il punto di ripresa di A varia.'
     ],
     vedrai: [
@@ -76,10 +76,10 @@ SL.registra('5.1.3', {
 
       P(0, 0, 'A ha inizio', 'Il processore esegue A. Il contatore di programma vale 0x1000, l’indirizzo della sua prima istruzione, i0.', {});
       P(1, 0, 'A esegue ' + p.n + ' istruzioni', 'A completa le istruzioni da i0 a i' + (p.n - 1) + '. A ogni istruzione il contatore avanza di 4 byte: dopo ' + p.n + ' istruzioni vale 0x1000 + ' + H(4 * p.n) + ' = ' + H(pcA) + ', l’indirizzo di i' + p.n + '.', { calc: '0x1000 + ' + p.n + ' × 4 = ' + H(pcA), chiedi: { d: 'Quale istruzione di A sarebbe eseguita in questo istante?', o: ['i' + (p.n - 1), 'i' + p.n, 'i0'], g: 1, no: 'Il contatore contiene l’indirizzo dell’istruzione successiva, la numero ' + p.n + '.' } });
-      P(2, 1, 'Il salvataggio', 'Il timer segnala la fine del quanto. Il kernel copia nella scheda di A i registri, e fra questi il contatore di programma: ' + H(pcA) + '.', { calc: 'scheda di A ← ' + H(pcA) });
+      P(2, 1, 'Il salvataggio', 'Il timer segnala la fine del time slice. Il kernel copia nella scheda di A i registri, e fra questi il contatore di programma: ' + H(pcA) + '.', { calc: 'scheda di A ← ' + H(pcA) });
       P(3, 1, 'Il ripristino di B', 'Il kernel carica nei registri i valori conservati nella scheda di B. Il contatore del processore diviene 0x2400, e nel processore l’indirizzo di A non è più presente.', { calc: 'PC ← 0x2400' });
       P(4, 2, 'B esegue ' + p.m + ' istruzioni', 'B esegue per il proprio turno, e il contatore avanza fino a ' + H(pcB) + '. La scheda di A resta invariata.', { calc: '0x2400 + ' + p.m + ' × 4 = ' + H(pcB) });
-      P(5, 3, 'Il ritorno', 'Scade il quanto di B. Il kernel salva ' + H(pcB) + ' nella scheda di B, e ricarica dalla scheda di A il valore ' + H(pcA) + '.', { calc: 'PC ← ' + H(pcA) });
+      P(5, 3, 'Il ritorno', 'Scade il time slice di B. Il kernel salva ' + H(pcB) + ' nella scheda di B, e ricarica dalla scheda di A il valore ' + H(pcA) + '.', { calc: 'PC ← ' + H(pcA) });
       P(6, 3, 'A riprende', 'A prosegue dall’istruzione i' + p.n + ', come se l’esecuzione non fosse mai stata interrotta. Il numero di istruzioni eseguite da B è stato privo di effetto sul punto di ripresa.', { calc: 'A riprende da ' + H(pcA), esito: ['riprende da ' + H(pcA), ''] });
       return { passi, esito: pcA };
     }

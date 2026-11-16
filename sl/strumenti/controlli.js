@@ -299,7 +299,8 @@ const ACCETTATI = {
   'percorso dati': 'nell’unità 1.1.4 le due parole sono accostate per caso: «il percorso dati/voti.txt» indica un file nella directory dati',
   'pipeline': 'le unità 3.4.3 e 3.4.5 la annunciano come tema dei capitoli successivi, senza farne uso',
   'codice di errore': 'nell’unità 2.5.2 l’espressione indica il numero conservato in errno, un oggetto diverso dal valore che il processore aggiunge al frame di interruzione',
-  'autorizzazione': 'nelle unità 1.7.4 e 2.4.3 compare soltanto nel nome «byte di autorizzazione», un campo del formato descritto sul posto; la decisione di autorizzazione arriva nell’unità 6.7.1'
+  'autorizzazione': 'nelle unità 1.7.4 e 2.4.3 compare soltanto nel nome «byte di autorizzazione», un campo del formato descritto sul posto; la decisione di autorizzazione arriva nell’unità 6.7.1',
+  'cpu con pipeline': 'nel capitolo 3.5 compare soltanto come rinvio esplicito al capitolo 3.6, che la costruisce'
 };
 const piano = (s) => s.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2').replace(/\[\[([^\]]+)\]\]/g, '$1').replace(/`/g, '');
 const parola = (f) => new RegExp('(?<![\\p{L}\\p{N}])' + f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'iu');

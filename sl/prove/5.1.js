@@ -24,7 +24,7 @@
     },
     // 5.1.2 · lo stato dopo un evento, oppure i turni di attesa in coda
     (r) => {
-      if (r.int(0, 3) === 0) { const coda = r.mescola(['B', 'C', 'D', 'E', 'F']).slice(0, r.int(1, 4)), giuste = I(coda.length); return { u: '5.1.2', d: 'La coda dei pronti contiene, nell’ordine, ' + coda.join(', ') + '. Il processo A, in esecuzione, esaurisce il quanto di tempo. Il dispatcher seleziona sempre il primo della coda, e nessun processo si blocca o termina. Quanti turni di altri processi trascorrono prima che A riceva di nuovo il processore?', segnaposto: 'Un numero', giuste,
+      if (r.int(0, 3) === 0) { const coda = r.mescola(['B', 'C', 'D', 'E', 'F']).slice(0, r.int(1, 4)), giuste = I(coda.length); return { u: '5.1.2', d: 'La coda dei pronti contiene, nell’ordine, ' + coda.join(', ') + '. Il processo A, in esecuzione, esaurisce il time slice. Il dispatcher seleziona sempre il primo della coda, e nessun processo si blocca o termina. Quanti turni di altri processi trascorrono prima che A riceva di nuovo il processore?', segnaposto: 'Un numero', giuste,
         ok: 'A passa all’ultima posizione della coda: ' + coda.concat(['A']).join(', ') + '. È preceduto da ' + coda.length + (coda.length === 1 ? ' processo.' : ' processi.'),
         diagnosi: DIAG(giuste, [
           { se: I(coda.length + 1), msg: 'Si contano soltanto i processi che precedono A, che sono ' + coda.length + '.' },
@@ -36,7 +36,7 @@
       const E = r.scegli([
         ['è in esecuzione e richiede al kernel una lettura dal disco', 'Bloccato', 'Gli manca un evento, la risposta del disco.'],
         ['è in esecuzione e si pone in attesa di un tasto dalla tastiera', 'Bloccato', 'Gli manca un evento, la pressione del tasto.'],
-        ['è in esecuzione quando il timer segnala la fine del suo quanto, e ha ancora calcoli da svolgere', 'Pronto', 'Potrebbe proseguire immediatamente: gli manca soltanto il turno.'],
+        ['è in esecuzione quando il timer segnala la fine del suo time slice, e ha ancora calcoli da svolgere', 'Pronto', 'Potrebbe proseguire immediatamente: gli manca soltanto il turno.'],
         ['è bloccato in attesa di dati dal disco, e i dati giungono mentre un altro processo è in esecuzione', 'Pronto', 'L’evento si è verificato. Per eseguire gli occorre ancora il processore.'],
         ['è pronto, in testa alla coda, e il dispatcher gli consegna il processore', 'In esecuzione', 'Il dispatcher lo ha selezionato, e ora impiega il processore.'],
         ['è in esecuzione ed esegue la sua ultima istruzione', 'Terminato', 'Non ha più istruzioni da eseguire, e lascia il sistema.']
@@ -83,7 +83,7 @@
       const E = r.scegli([
         ['ha richiesto una lettura dal disco D, che non ha ancora risposto', 'Nella coda di attesa del disco D', 'Il processo è bloccato, e la sua scheda si trova fra quelle in attesa di tale disco.'],
         ['aveva richiesto una lettura dal disco D, che ha appena risposto mentre un altro processo è in esecuzione', 'Nella coda dei pronti', 'Il gestore lo ha rimosso dalla coda di attesa: ora gli manca soltanto il processore.'],
-        ['ha esaurito il quanto di tempo e ha ancora calcoli da svolgere', 'Nella coda dei pronti', 'Attende soltanto un nuovo turno, senza alcun evento.'],
+        ['ha esaurito il time slice e ha ancora calcoli da svolgere', 'Nella coda dei pronti', 'Attende soltanto un nuovo turno, senza alcun evento.'],
         ['attende un pacchetto dalla scheda di rete, che deve ancora giungere', 'Nella coda di attesa della scheda di rete', 'Il processo è bloccato, e la sua scheda si trova fra quelle in attesa di tale periferica.']
       ]);
       return { u: '5.1.4', d: 'Un processo ' + E[0] + '. In quale elenco del kernel si trova il suo PCB?', guida: 'Si scelga la risposta.', o: r.mescola(['Nella coda dei pronti', 'Nella coda di attesa del disco D', 'Nella coda di attesa della scheda di rete'].map((t) => ({ t, ok: t === E[1], fb: E[2] }))) };

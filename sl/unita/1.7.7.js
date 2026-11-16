@@ -11,7 +11,7 @@ SL.registra('1.7.7', {
       { sim: 'conflitto', da: 'Dall’unità 1.6.2', t: 'Le parole speciali', d: 'Con l’esponente tutto a 1, una parola in virgola mobile indica un infinito oppure un NaN, cioè un risultato privo di significato.' }
     ],
     domanda: { d: 'Prima di proseguire: i quattro byte 00 00 C0 BF, in ordine little-endian, formano la parola 0xBFC00000. Rispetto a 0x3FC00000, che vale 1,5, che cosa cambia?', o: [
-      { t: 'Il segno: vale −1,5', ok: true, fb: 'Fra 3 e B cambia soltanto il bit più a sinistra, che è il bit di segno. Esponente e significando restano uguali.' },
+      { t: 'Il segno: vale −1,5', ok: true, fb: 'Fra 3 e B cambia soltanto il bit più a sinistra, che è il bit di segno. Esponente e mantissa restano uguali.' },
       { t: 'L’esponente: vale 3', fb: 'Il bit che cambia è il primo della parola, cioè il bit di segno. L’esponente occupa gli otto bit successivi.' },
       { t: 'Nulla: vale ancora 1,5', fb: 'La prima cifra esadecimale passa da 3 a B, cioè da 0011 a 1011. Si accende il bit di segno.' }
     ] }
@@ -104,7 +104,7 @@ SL.registra('1.7.7', {
       s.scritti = 7 + n;
       P({ scrive: [iT, iT + 2], box: 1, b1: 'temperatura', b2: '−3,5 °C', b3: esa(B, iT, iT + 2) }, 0, 'La temperatura', 'Con il fattore di scala dieci, −3,5 gradi sono −35 decimi. In complemento a due su sedici bit −35 è 0xFFDD, e in ordine little-endian il byte meno significativo precede l’altro.', { calc: '−3,5 °C → −35 → 0xFFDD → DD FF' });
       s.scritti = N;
-      P({ scrive: [iV, iV + 4], box: 1, b1: 'tensione', b2: '1,5 V', b3: esa(B, iV, iV + 4) }, 0, 'La tensione', 'In virgola mobile a 32 bit, 1,5 volt sono la parola 0x3FC00000: segno 0, esponente 127, significando 1,5. In ordine little-endian diventa 00 00 C0 3F. Il record è completo e conta ' + N + ' byte.', { calc: '1,5 V → 0x3FC00000 → 00 00 C0 3F' });
+      P({ scrive: [iV, iV + 4], box: 1, b1: 'tensione', b2: '1,5 V', b3: esa(B, iV, iV + 4) }, 0, 'La tensione', 'In virgola mobile a 32 bit, 1,5 volt sono la parola 0x3FC00000: segno 0, esponente 127, mantissa 1,5. In ordine little-endian diventa 00 00 C0 3F. Il record è completo e conta ' + N + ' byte.', { calc: '1,5 V → 0x3FC00000 → 00 00 C0 3F' });
 
       // Atto secondo: il viaggio.
       s.fase = 'viaggio'; s.copia = true;
@@ -173,12 +173,12 @@ SL.registra('1.7.7', {
       }
       const b4 = C.slice(s.cur, s.cur + 4), wV = ((b4[3] << 24) | (b4[2] << 16) | (b4[1] << 8) | b4[0]) >>> 0, v = T.tensione(b4);
       if (v !== v) {
-        P({ campo: 'tens', err: [s.cur, s.cur + 4], box: 2, b1: 'tensione', b2: 'è un numero ?', b3: 'fallito', male: true }, 2, 'La tensione non è un numero', 'I quattro byte ' + esa(C, s.cur, s.cur + 4) + ' formano la parola ' + H(wV, 8) + '. Gli otto bit dell’esponente valgono tutti 1 e le cifre del significando sono diverse da zero: la parola è un NaN, privo di valore numerico. Una tensione deve essere un numero, e il lettore rifiuta.', { calc: H(wV, 8) + ' = NaN', esito: ['no', 'no'] });
+        P({ campo: 'tens', err: [s.cur, s.cur + 4], box: 2, b1: 'tensione', b2: 'è un numero ?', b3: 'fallito', male: true }, 2, 'La tensione non è un numero', 'I quattro byte ' + esa(C, s.cur, s.cur + 4) + ' formano la parola ' + H(wV, 8) + '. Gli otto bit dell’esponente valgono tutti 1 e le cifre della mantissa sono diverse da zero: la parola è un NaN, privo di valore numerico. Una tensione deve essere un numero, e il lettore rifiuta.', { calc: H(wV, 8) + ' = NaN', esito: ['no', 'no'] });
         chiudi('Il record è stato rifiutato poiché la tensione era un NaN. La copia differiva dall’originale per un solo bit, e la struttura era corretta. Un lettore che controllasse soltanto i byte disponibili avrebbe fornito al programma una tensione priva di valore.', 'arrestato da: il dominio della tensione');
         return rifiuta('dominio');
       }
       if (v < 0 || v > 5) {
-        P({ campo: 'tens', err: [s.cur, s.cur + 4], box: 2, b1: 'tensione', b2: '0 ≤ ' + T.virgola(v) + ' ≤ 5 ?', b3: 'fallito', male: true }, 2, 'La tensione è fuori dal dominio', 'I quattro byte ' + esa(C, s.cur, s.cur + 4) + ' formano la parola ' + H(wV, 8) + '. Il bit di segno vale 1, mentre esponente e significando sono quelli di 1,5: il valore è ' + T.virgola(v) + ' volt. La batteria di un sensore fornisce una tensione fra 0 e 5 volt, e un valore negativo è esterno al dominio.', { calc: '0 ≤ ' + T.virgola(v) + ' ≤ 5 ?', esito: ['no', 'no'] });
+        P({ campo: 'tens', err: [s.cur, s.cur + 4], box: 2, b1: 'tensione', b2: '0 ≤ ' + T.virgola(v) + ' ≤ 5 ?', b3: 'fallito', male: true }, 2, 'La tensione è fuori dal dominio', 'I quattro byte ' + esa(C, s.cur, s.cur + 4) + ' formano la parola ' + H(wV, 8) + '. Il bit di segno vale 1, mentre esponente e mantissa sono quelli di 1,5: il valore è ' + T.virgola(v) + ' volt. La batteria di un sensore fornisce una tensione fra 0 e 5 volt, e un valore negativo è esterno al dominio.', { calc: '0 ≤ ' + T.virgola(v) + ' ≤ 5 ?', esito: ['no', 'no'] });
         chiudi('Il record è stato rifiutato al controllo sul dominio della tensione. La copia differiva dall’originale per un solo bit, e la sua struttura era corretta: firma corretta, lunghezze corrette, ogni campo completo. Soltanto il confronto con i valori possibili ha rivelato il guasto.', 'arrestato da: il dominio della tensione');
         return rifiuta('dominio');
       }

@@ -53,15 +53,15 @@
       const S = w >>> 31, E = (w >>> 23) & 255, F = w & 0x7FFFFF, sig = 1 + F / 8388608, esp = E - 127;
       const esa = '0x' + w.toString(16).toUpperCase().padStart(8, '0'), b = w.toString(2).padStart(32, '0');
       return { u: '1.6.2', d: 'Quanto vale la parola `' + esa + '`, letta come numero in virgola mobile a 32 bit?', segnaposto: 'Un numero in base dieci', giuste: SL.scritture.decimale(val, []),
-        ok: 'Il bit di segno vale ' + S + ', il campo esponente ' + E + ' e il significando ' + V(sig) + '. Il valore è ' + (S ? '−' : '') + V(sig) + ' × 2 elevato a ' + V(esp) + ', cioè ' + V(val) + '.',
+        ok: 'Il bit di segno vale ' + S + ', il campo esponente ' + E + ' e la mantissa ' + V(sig) + '. Il valore è ' + (S ? '−' : '') + V(sig) + ' × 2 elevato a ' + V(esp) + ', cioè ' + V(val) + '.',
         diagnosi: [
           { se: SL.scritture.decimale(-val, []), msg: 'Il valore assoluto è corretto. Va riesaminato il primo bit della parola, che è il bit di segno.' },
           { se: SL.scritture.decimale(val * 2, []).concat(SL.scritture.decimale(val / 2, [])), msg: 'Va riesaminato l’esponente. Il campo vale ' + E + ', e l’esponente effettivo è ' + E + ' − 127 = ' + V(esp) + '.' },
-          { se: SL.scritture.decimale(sig * (S ? -1 : 1), []), msg: 'Questo è il significando. Va ancora moltiplicato per 2 elevato a ' + V(esp) + '.' }
+          { se: SL.scritture.decimale(sig * (S ? -1 : 1), []), msg: 'Questa è la mantissa. Va ancora moltiplicata per 2 elevato a ' + V(esp) + '.' }
         ],
-        altro: 'Il valore è diverso. Si scriva la parola in binario e si separi il bit di segno, gli otto bit dell’esponente e le cifre del significando.',
-        indizi: ['I primi nove bit della parola sono ' + b[0] + ' ' + b.slice(1, 9) + '.', 'Il campo esponente vale ' + E + ', e l’esponente effettivo è quindi ' + V(esp) + '.', 'Le cifre conservate cominciano con ' + b.slice(9, 12) + ': con l’uno implicito, il significando è ' + V(sig) + '.'],
-        svolgimento: ['In binario: ' + b[0] + ' ' + b.slice(1, 9) + ' ' + b.slice(9, 13) + ' e poi soli zeri.', 'Segno: ' + S + (S ? ', numero negativo.' : ', numero positivo.'), 'Esponente: ' + E + ' − 127 = ' + V(esp) + '.', 'Significando: ' + V(sig) + '.', 'Valore: ' + (S ? '−' : '') + V(sig) + ' × ' + V(Math.pow(2, esp)) + ' = ' + V(val) + '.'] };
+        altro: 'Il valore è diverso. Si scriva la parola in binario e si separi il bit di segno, gli otto bit dell’esponente e le cifre della mantissa.',
+        indizi: ['I primi nove bit della parola sono ' + b[0] + ' ' + b.slice(1, 9) + '.', 'Il campo esponente vale ' + E + ', e l’esponente effettivo è quindi ' + V(esp) + '.', 'Le cifre conservate cominciano con ' + b.slice(9, 12) + ': con l’uno implicito, la mantissa è ' + V(sig) + '.'],
+        svolgimento: ['In binario: ' + b[0] + ' ' + b.slice(1, 9) + ' ' + b.slice(9, 13) + ' e poi soli zeri.', 'Segno: ' + S + (S ? ', numero negativo.' : ', numero positivo.'), 'Esponente: ' + E + ' − 127 = ' + V(esp) + '.', 'Mantissa: ' + V(sig) + '.', 'Valore: ' + (S ? '−' : '') + V(sig) + ' × ' + V(Math.pow(2, esp)) + ' = ' + V(val) + '.'] };
     },
     // 1.6.3 · la tacca più vicina
     (r) => {
@@ -76,22 +76,22 @@
         ],
         altro: 'Il valore è diverso. Si determinino le due tacche fra cui cade la somma esatta e si scelga la più vicina.',
         indizi: ['Le tacche sono ' + N(base) + ', ' + N(base + passo) + ', ' + N(base + 2 * passo) + ' e così di seguito, di ' + passo + ' in ' + passo + '.', 'La somma esatta è ' + N(esatta) + ', fra ' + N(sotto) + ' e ' + N(sopra) + '.', meta ? 'A metà esatta prevale la tacca con l’ultimo bit a 0.' : 'Prevale la tacca più vicina.'],
-        svolgimento: ['Valore esatto della somma: ' + N(esatta) + '.', 'Tacche adiacenti: ' + N(sotto) + ' e ' + N(sopra) + '.', meta ? 'La somma esatta è a metà. Delle due tacche, ' + N(giusto) + ' ha l’ultimo bit del significando a 0.' : 'Distanze: ' + (esatta - sotto) + ' dalla prima e ' + (sopra - esatta) + ' dalla seconda.', 'Valore conservato: ' + N(giusto) + '.'] };
+        svolgimento: ['Valore esatto della somma: ' + N(esatta) + '.', 'Tacche adiacenti: ' + N(sotto) + ' e ' + N(sopra) + '.', meta ? 'La somma esatta è a metà. Delle due tacche, ' + N(giusto) + ' ha l’ultimo bit della mantissa a 0.' : 'Distanze: ' + (esatta - sotto) + ' dalla prima e ' + (sopra - esatta) + ' dalla seconda.', 'Valore conservato: ' + N(giusto) + '.'] };
     },
     // 1.6.4 · di quanto scorre il numero più piccolo
     (r) => {
       const a = r.int(6, 9), diff = r.int(1, 5), b = a - diff, primoGrande = r.int(0, 1) === 1;
       const s1 = r.scegli(['1,000', '1,010', '1,100', '1,001']), s2 = r.scegli(['1,100', '1,110', '1,011', '1,101']);
       const e1 = primoGrande ? a : b, e2 = primoGrande ? b : a;
-      return { u: '1.6.4', d: 'Per sommare ' + s1 + ' × 2 elevato a ' + e1 + ' e ' + s2 + ' × 2 elevato a ' + e2 + ', di quante posizioni deve scorrere a destra il significando del numero minore?', segnaposto: 'Un numero di posizioni', giuste: I(diff),
-        ok: 'Gli esponenti sono ' + e1 + ' e ' + e2 + '. Il numero minore è il ' + (primoGrande ? 'secondo' : 'primo') + ', e il suo significando scorre di ' + a + ' − ' + b + ' = ' + diff + ' posizioni.',
+      return { u: '1.6.4', d: 'Per sommare ' + s1 + ' × 2 elevato a ' + e1 + ' e ' + s2 + ' × 2 elevato a ' + e2 + ', di quante posizioni deve scorrere a destra la mantissa del numero minore?', segnaposto: 'Un numero di posizioni', giuste: I(diff),
+        ok: 'Gli esponenti sono ' + e1 + ' e ' + e2 + '. Il numero minore è il ' + (primoGrande ? 'secondo' : 'primo') + ', e la sua mantissa scorre di ' + a + ' − ' + b + ' = ' + diff + ' posizioni.',
         diagnosi: [
           { se: I(a + b), msg: 'Gli esponenti vanno resi uguali. È rilevante la loro differenza.' },
           { se: I(b), msg: 'Lo scorrimento porta l’esponente minore al valore del maggiore, ed è quindi pari alla differenza fra i due.' },
           { se: I(-diff), msg: 'Lo scorrimento è un numero di posizioni, senza segno.' }
         ],
         altro: 'Il numero è diverso. Si individui l’esponente minore e si calcoli quanto gli manca per raggiungere l’altro.',
-        indizi: ['Prima di sommare i significandi, gli esponenti devono essere uguali.', 'Si fa scorrere a destra il numero con l’esponente minore.', 'Ogni posizione di scorrimento aumenta l’esponente di uno.'],
+        indizi: ['Prima di sommare le mantisse, gli esponenti devono essere uguali.', 'Si fa scorrere a destra il numero con l’esponente minore.', 'Ogni posizione di scorrimento aumenta l’esponente di uno.'],
         svolgimento: ['Esponente maggiore: ' + a + '.', 'Esponente minore: ' + b + '.', 'Scorrimento: ' + a + ' − ' + b + ' = ' + diff + ' posizioni a destra.'] };
     }
   ] });

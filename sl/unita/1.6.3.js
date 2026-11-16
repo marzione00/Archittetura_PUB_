@@ -6,11 +6,11 @@ SL.registra('1.6.3', {
   filigrana: ['lente', 'virgola', 'conflitto'],
   richiami: {
     carte: [
-      { sim: 'virgola', da: 'Dall’unità 1.6.2', t: 'Significando ed esponente', d: 'Un numero in virgola mobile è un significando moltiplicato per una potenza di due. A 32 bit il significando ha 24 cifre binarie, compreso l’uno implicito.' },
+      { sim: 'virgola', da: 'Dall’unità 1.6.2', t: 'Mantissa ed esponente', d: 'Un numero in virgola mobile è una mantissa moltiplicata per una potenza di due. A 32 bit la mantissa ha 24 cifre binarie, compreso l’uno implicito.' },
       { sim: 'lente', da: 'Dall’unità 1.6.1', t: 'La precisione', d: 'Il numero di cifre conservate è fissato. Quanto eccede viene troncato.' },
       { sim: 'bilancio', da: 'Dall’unità 1.2.2', t: 'I pesi raddoppiano', d: 'Ogni posizione binaria ha peso doppio rispetto a quella alla sua destra.' }
     ],
-    domanda: { d: 'Prima di proseguire: un significando ha 24 cifre binarie e la prima ha peso 16. Quale peso ha la seconda?', o: [
+    domanda: { d: 'Prima di proseguire: una mantissa ha 24 cifre binarie e la prima ha peso 16. Quale peso ha la seconda?', o: [
       { t: '32', fb: 'I pesi raddoppiano procedendo verso sinistra. La seconda cifra si trova a destra della prima e ha peso dimezzato.' },
       { t: '8', ok: true, fb: 'Ogni cifra ha peso pari alla metà di quella alla sua sinistra.' },
       { t: '15', fb: 'I pesi binari si dimezzano a ogni posizione: 16, 8, 4, 2.' }
@@ -20,7 +20,7 @@ SL.registra('1.6.3', {
     titolo: 'Una retta con tacche a distanza crescente',
     termini: ['arrotondamento', 'pareggio al pari'],
     testo: [
-      'Un numero in virgola mobile a 32 bit ha 24 cifre binarie di significando. Il loro numero è costante, per un numero molto piccolo come per uno molto grande. Varia invece il peso dell’ultima cifra, che dipende dall’esponente.',
+      'Un numero in virgola mobile a 32 bit ha 24 cifre binarie di mantissa. Il loro numero è costante, per un numero molto piccolo come per uno molto grande. Varia invece il peso dell’ultima cifra, che dipende dall’esponente.',
       'I numeri rappresentabili possono essere disposti su una retta, ciascuno contrassegnato da una tacca. In prossimità di 1 le tacche distano circa un decimilionesimo; in prossimità di mille, circa un decimillesimo; in prossimità di sedici milioni, esattamente 1. Oltre tale valore distano 2, poi 4, poi 8. I numeri che cadono fra due tacche sono privi di rappresentazione in questo formato.',
       { fig: 'scena', w: 700, h: 214, titolo: 'La distanza fra due numeri vicini, a 32 bit', nota: 'A ogni raddoppio della grandezza raddoppia anche la distanza fra le tacche.', els: [
         SL.el.box('a1', 10, 6, 330, 44, null, 'vicino a 1', '', { cls: 'stretta' }), SL.el.box('b1', 360, 6, 330, 44, null, '0,0000001', 'on', { cls: 'stretta' }),
@@ -79,9 +79,9 @@ SL.registra('1.6.3', {
       const hud = () => [['Aggiunte eseguite', fatte + ' di ' + p.k, 'a'], ['Distanza fra tacche', mostraTacche ? T(passoT) : '·'], ['In memoria', SL.num(cur), 'c']];
       const P = (o, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(), els: quadro(o) }, extra));
 
-      P({}, 0, 'Il numero di partenza', 'Si parte da ' + SL.num(x) + ', che è 2 moltiplicato per se stesso ' + p.e + ' volte. È una potenza di due, e il formato lo rappresenta quindi esattamente: significando 1, esponente ' + p.e + '.');
+      P({}, 0, 'Il numero di partenza', 'Si parte da ' + SL.num(x) + ', che è 2 moltiplicato per se stesso ' + p.e + ' volte. È una potenza di due, e il formato lo rappresenta quindi esattamente: mantissa 1, esponente ' + p.e + '.');
       mostraTacche = true;
-      P({ att: 'di' }, 1, 'Il peso dell’ultima cifra', 'Il significando ha 24 cifre. La prima ha peso ' + SL.num(x) + ' e ogni cifra successiva ha peso dimezzato. Dimezzando 23 volte si ottiene il peso dell’ultima, ' + T(passoT) + ': è la distanza fra due tacche adiacenti.', { calc: SL.num(x) + ' ÷ 8 388 608 = ' + T(passoT) });
+      P({ att: 'di' }, 1, 'Il peso dell’ultima cifra', 'La mantissa ha 24 cifre. La prima ha peso ' + SL.num(x) + ' e ogni cifra successiva ha peso dimezzato. Dimezzando 23 volte si ottiene il peso dell’ultima, ' + T(passoT) + ': è la distanza fra due tacche adiacenti.', { calc: SL.num(x) + ' ÷ 8 388 608 = ' + T(passoT) });
       P({}, 1, 'Gli interi rappresentabili', passoT <= 1
         ? 'Le tacche distano ' + T(passoT) + ', e tutti gli interi mostrati cadono quindi su una tacca.' + (passoT < 1 ? ' Fra un intero e il successivo se ne trovano molte altre.' : '')
         : 'Le tacche distano ' + T(passoT) + '. Dei cinque interi mostrati sono rappresentabili soltanto quelli che distano da ' + SL.num(x) + ' un multiplo di ' + T(passoT) + '. Gli altri cadono fra due tacche.',
@@ -104,7 +104,7 @@ SL.registra('1.6.3', {
   },
   bilancio: {
     regola: [
-      'A 32 bit il significando ha 24 cifre. La distanza fra due numeri adiacenti cresce con la grandezza: vale 1 fra 8 e 16 milioni, 2 nell’intervallo successivo.',
+      'A 32 bit la mantissa ha 24 cifre. La distanza fra due numeri adiacenti cresce con la grandezza: vale 1 fra 8 e 16 milioni, 2 nell’intervallo successivo.',
       'Ogni operazione arrotonda il risultato alla tacca più vicina. A metà esatta sceglie quella con l’ultimo bit a 0. Un’aggiunta inferiore alla metà della distanza va perduta.'
     ],
     errori: [

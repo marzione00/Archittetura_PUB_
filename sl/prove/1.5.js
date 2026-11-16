@@ -25,15 +25,15 @@
         indizi: ['Con tre ingressi le righe sono otto, da 000 a 111.', 'In ogni riga si risolve prima la porta ' + p1 + ', poi la porta ' + p2 + '.', 'La colonna A ' + p1 + ' B vale 1 in ' + righe.filter((x) => x[3] === 1).length + ' righe su otto.'],
         svolgimento: righe.map((x) => 'A B C = ' + x[0] + ' ' + x[1] + ' ' + x[2] + ': A ' + p1 + ' B = ' + x[3] + ', uscita ' + x[4] + '.').concat(['Righe con uscita 1: ' + uno + '.']) };
     },
-    // 1.5.2 · il mintermine di una riga
+    // 1.5.2 · la AND che riconosce una riga
     (r) => {
       const v = [r.int(0, 1), r.int(0, 1), r.int(0, 1)], nomi = ['A', 'B', 'C'];
       const termine = (bit, lega) => bit.map((b, k) => (b ? '' : 'NOT ') + nomi[k]).join(' ' + lega + ' ');
       const inv = v.map((b) => 1 - b), sbaglio = v.slice(); const j = r.int(0, 2); sbaglio[j] = 1 - sbaglio[j];
-      return { u: '1.5.2', d: 'Una funzione ha tre ingressi, A, B e C. Qual è il mintermine che riconosce la riga A = ' + v[0] + ', B = ' + v[1] + ', C = ' + v[2] + '?', o: [
+      return { u: '1.5.2', d: 'Una funzione ha tre ingressi, A, B e C. Quale espressione riconosce la sola riga A = ' + v[0] + ', B = ' + v[1] + ', C = ' + v[2] + '?', o: [
         { t: termine(v, 'AND'), ok: true, fb: 'Gli ingressi che nella riga valgono 0 attraversano una NOT. La AND vale 1 soltanto con tale combinazione.' },
         { t: termine(inv, 'AND'), fb: 'Le NOT sono collocate in modo errato: vanno poste sugli ingressi che nella riga valgono 0. Questo termine riconosce la riga ' + inv.join(' ') + '.' },
-        { t: termine(v, 'OR'), fb: 'Un mintermine è una AND. Con la OR l’uscita varrebbe 1 in sette righe su otto.' },
+        { t: termine(v, 'OR'), fb: 'Il riconoscitore di una riga è una AND. Con la OR l’uscita varrebbe 1 in sette righe su otto.' },
         { t: termine(sbaglio, 'AND'), fb: 'Va riesaminato l’ingresso ' + nomi[j] + '. Questo termine riconosce la riga ' + sbaglio.join(' ') + '.' }] };
     },
     // 1.5.3 · un operatore bit a bit con una maschera

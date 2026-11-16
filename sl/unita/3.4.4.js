@@ -1,130 +1,122 @@
 'use strict';
 SL.registra('3.4.4', {
   titolo: 'Equazioni di controllo, traccia e verifica',
-  obiettivo: 'Obiettivo: scrivere i segnali di controllo di SEQ per `pushq` e per `popq`: l’indirizzo presentato alla memoria, la direzione del trasferimento e i registri da scrivere.',
+  obiettivo: 'Obiettivo: scrivere i segnali di controllo della CPU a ciclo singolo per una lettura e per una scrittura della memoria: gli ingressi dell’ALU, l’indirizzo, la direzione del trasferimento e i registri da scrivere.',
   concetti: [['mux', 'Regole di selezione'], ['memory', 'Indirizzo e direzione'], ['lente', 'La verifica mediante una traccia']],
   filigrana: ['mux', 'memory', 'tabella'],
   richiami: {
     carte: [
-      { sim: 'alu', da: 'Dall’unità 3.4.2', t: 'Gli ingressi dell’ALU', d: 'Per le istruzioni della pila aluB riceve il valore precedente di %rsp, e aluA riceve −8 oppure +8.' },
+      { sim: 'alu', da: 'Dall’unità 3.4.2', t: 'Gli ingressi dell’ALU', d: 'Negli accessi alla memoria ALU A seleziona valC e ALU B seleziona valB: l’ALU calcola l’indirizzo.' },
       { sim: 'mux', da: 'Dall’unità 3.1.4', t: 'I segnali di controllo', d: 'L’unità di controllo legge l’istruzione e ne ricava i comandi per i blocchi del percorso dati.' },
-      { sim: 'tabella', da: 'Dall’unità 3.3.5', t: 'La traccia di ret', d: '`ret` legge la pila all’indirizzo valA, cioè il valore precedente di %rsp, mentre l’ALU prepara valE = %rsp + 8.' }
+      { sim: 'tabella', da: 'Dall’unità 3.3.3', t: 'La lettura dalla memoria', d: '`mov rA, D(rB)` legge la parola valM all’indirizzo valE e la deposita in rA attraverso la porta M.' }
     ],
-    domanda: { d: 'Prima di proseguire: in `ret`, da quale indirizzo la memoria legge l’indirizzo di ritorno?', o: [
-      { t: 'Da valA, il valore precedente di %rsp', ok: true, fb: 'L’indirizzo di ritorno è contenuto nella cima attuale della pila.' },
-      { t: 'Da valE, il valore precedente di %rsp più 8', fb: 'valE è la cima dopo il ritorno, e ha lo scopo di aggiornare %rsp.' },
-      { t: 'Da valP, il successore di ret', fb: 'valP è un indirizzo del programma. L’indirizzo di ritorno è contenuto nella pila.' }
+    domanda: { d: 'Prima di proseguire: in `mov rax, 8(rbx)`, attraverso quale porta del banco è scritto RAX?', o: [
+      { t: 'La porta M, che riceve valM', ok: true, fb: 'La parola letta dalla memoria è valM, e la porta M la deposita nel registro indicato da dstM.' },
+      { t: 'La porta E, che riceve valE', fb: 'valE è l’indirizzo della parola. Il dato letto è valM.' },
+      { t: 'Nessuna porta: la memoria scrive direttamente il registro', fb: 'Ogni scrittura di un registro passa da una porta del banco.' }
     ] }
   },
   idea: {
     titolo: 'Poche regole per l’intero percorso dati',
-    termini: ['equazione di controllo', 'mem_addr'],
+    termini: ['equazione di controllo'],
     testo: [
-      'Il percorso dati di SEQ è il medesimo per tutte le istruzioni. La capacità di eseguirle deriva dai segnali di controllo: i comandi dei multiplexer e le abilitazioni di scrittura. Ogni segnale è descritto da una [[equazione di controllo]], cioè una regola che ne stabilisce il valore a partire da icode.',
-      'Un esempio è l’indirizzo presentato alla memoria dei dati, detto [[mem_addr]]. Per `rmmovq`, `mrmovq`, `pushq` e `call` vale valE, l’indirizzo appena calcolato dall’ALU. Per `popq` e `ret` vale valA, cioè il valore precedente di %rsp, poiché la parola da leggere si trova alla cima attuale della pila.',
-      'Altre due equazioni fissano la direzione del trasferimento. `mem_read` vale 1 per le istruzioni che leggono: `mrmovq`, `popq`, `ret`. `mem_write` vale 1 per quelle che scrivono: `rmmovq`, `pushq`, `call`. Per le altre valgono entrambe 0, e la memoria dei dati resta invariata.',
-      { fig: 'scena', w: 720, h: 190, titolo: 'pushq e popq a confronto', nota: 'L’ALU opera in modo quasi identico. Variano l’indirizzo, la direzione e i registri scritti.', els: [
-        SL.el.nota('h1', 230, 0, 'pushq rA', 'mono'), SL.el.nota('h2', 480, 0, 'popq rA', 'mono'),
-        SL.el.nota('r1', 0, 34, 'mem_addr', 'mono minuta'), SL.el.box('a1', 230, 22, 230, 34, null, 'valE', 'on', { cls: 'stretta' }), SL.el.box('b1', 480, 22, 230, 34, null, 'valA', 'att', { cls: 'stretta' }),
-        SL.el.nota('r2', 0, 74, 'mem_read · mem_write', 'mono minuta'), SL.el.box('a2', 230, 62, 230, 34, null, '0 · 1', 'on', { cls: 'stretta' }), SL.el.box('b2', 480, 62, 230, 34, null, '1 · 0', 'att', { cls: 'stretta' }),
-        SL.el.nota('r3', 0, 114, 'dstE, riceve valE', 'mono minuta'), SL.el.box('a3', 230, 102, 230, 34, null, '%rsp', 'on', { cls: 'stretta' }), SL.el.box('b3', 480, 102, 230, 34, null, '%rsp', 'on', { cls: 'stretta' }),
-        SL.el.nota('r4', 0, 154, 'dstM, riceve valM', 'mono minuta'), SL.el.box('a4', 230, 142, 230, 34, null, 'nessuno', '', { cls: 'stretta' }), SL.el.box('b4', 480, 142, 230, 34, null, 'rA', 'att', { cls: 'stretta' })
+      'Il percorso dati della CPU a ciclo singolo è il medesimo per tutte le istruzioni. La capacità di eseguirle deriva dai segnali di controllo, che l’unità di controllo genera a partire da icode: i comandi dei multiplexer, l’operazione dell’ALU e le abilitazioni di scrittura. Ogni segnale è descritto da una [[equazione di controllo]], cioè una regola che ne stabilisce il valore per ogni categoria di istruzioni. Un’unità realizzata con circuiti combinatori prende il nome di unità di controllo cablata.',
+      'Nel prelievo, Instr valid indica se icode è previsto, Need regids se l’istruzione ha il byte dei registri, Need valC se ha la costante. Nell’esecuzione, ALU A e ALU B scelgono gli ingressi, ALU fun l’operazione, e Set ZF stabilisce se ZF è aggiornato: soltanto per le istruzioni aritmetiche e logiche.',
+      'Nella fase di memoria i segnali sono quattro. Mem addr è l’indirizzo presentato alla memoria dei dati, e vale sempre valE. Mem data è il dato da scrivere, e vale valA. Mem read vale 1 per `mov rA, D(rB)`, Mem write vale 1 per `mov D(rB), rA`. Per tutte le altre istruzioni valgono entrambi 0, e la memoria dei dati resta invariata.',
+      { fig: 'scena', w: 720, h: 190, titolo: 'Una lettura e una scrittura a confronto', nota: 'L’ALU opera in modo identico. Variano la direzione e il registro scritto.', els: [
+        SL.el.nota('h1', 230, 0, 'mov rA, D(rB)', 'mono'), SL.el.nota('h2', 480, 0, 'mov D(rB), rA', 'mono'),
+        SL.el.nota('r1', 0, 34, 'ALU A · ALU B', 'mono minuta'), SL.el.box('a1', 230, 22, 230, 34, null, 'valC · valB', 'on', { cls: 'stretta' }), SL.el.box('b1', 480, 22, 230, 34, null, 'valC · valB', 'on', { cls: 'stretta' }),
+        SL.el.nota('r2', 0, 74, 'Mem read · Mem write', 'mono minuta'), SL.el.box('a2', 230, 62, 230, 34, null, '1 · 0', 'att', { cls: 'stretta' }), SL.el.box('b2', 480, 62, 230, 34, null, '0 · 1', 'att', { cls: 'stretta' }),
+        SL.el.nota('r3', 0, 114, 'dstE, riceve valE', 'mono minuta'), SL.el.box('a3', 230, 102, 230, 34, null, 'F', '', { cls: 'stretta' }), SL.el.box('b3', 480, 102, 230, 34, null, 'F', '', { cls: 'stretta' }),
+        SL.el.nota('r4', 0, 154, 'dstM, riceve valM', 'mono minuta'), SL.el.box('a4', 230, 142, 230, 34, null, 'rA', 'att', { cls: 'stretta' }), SL.el.box('b4', 480, 142, 230, 34, null, 'F', '', { cls: 'stretta' })
       ] },
-      'Due equazioni indicano infine i registri da scrivere. `dstE` è il registro che riceve valE: %rsp per le istruzioni della pila, rB per le operazioni aritmetiche. `dstM` è il registro che riceve valM: rA per `mrmovq` e per `popq`.',
-      'Un’equazione errata passa facilmente inosservata, poiché il processore continua a funzionare ed esegue un’operazione diversa da quella richiesta dall’istruzione. La verifica si conduce con le tracce: si parte da uno stato noto, si esegue l’istruzione manualmente e si confronta lo stato finale con quello prescritto dall’ISA.'
+      'Due equazioni indicano infine i registri da scrivere. dstE è il registro che riceve valE: rA per le istruzioni aritmetiche e logiche e per `mov rA, rB`, rB per `mov rB, V`. dstM è il registro che riceve valM: rA per `mov rA, D(rB)`. Il valore F indica che la porta corrispondente non scrive alcun registro.',
+      'Un’equazione errata passa facilmente inosservata, poiché la CPU continua a funzionare ed esegue un’operazione diversa da quella richiesta dall’istruzione. La verifica si conduce con le tracce: si parte da uno stato noto, si esegue l’istruzione manualmente e si confronta lo stato finale con quello prescritto dall’ISA.'
     ]
   },
   esperimento: {
     faremo: [
-      'Lo stato iniziale è sempre il medesimo: una cima della pila, un valore in %rax e una parola già presente alla cima. I controlli fissano l’istruzione, `pushq %rax` oppure `popq %rax`, e i valori.',
+      'Lo stato iniziale è sempre il medesimo: una base in RBX, un valore in RAX e una parola già presente in memoria all’indirizzo RBX + 8. I controlli fissano l’istruzione, `mov rax, 8(rbx)` oppure `mov 8(rbx), rax`, e i valori.',
       'I segnali di controllo assumono i rispettivi valori, uno dopo l’altro, fino allo stato finale che ne deriva. Dopo il caso proposto, è istruttivo eseguire l’altra istruzione dal medesimo stato e confrontare le due colonne.'
     ],
     vedrai: [
-      ['bus', 'I valori', 'In alto: valA, valB, valE e valM.'],
-      ['mux', 'I segnali di controllo', 'Al centro: aluA, mem_addr, le due abilitazioni della memoria, dstE e dstM.'],
-      ['register', 'Lo stato', 'In basso: %rsp, %rax e le due celle della pila coinvolte.']
+      ['bus', 'I valori', 'In alto: valA, valB, valC, valE e valM.'],
+      ['mux', 'I segnali di controllo', 'Al centro: ALU A, ALU B, Mem addr, le due abilitazioni della memoria, dstE e dstM.'],
+      ['register', 'Lo stato', 'In basso: RBX, RAX e la parola della memoria coinvolta.']
     ]
   },
   lab: {
-    titolo: 'pushq e popq dal medesimo stato',
+    titolo: 'Una lettura e una scrittura dal medesimo stato',
     scena: { w: 860, h: 306 },
     atti: ['Decodifica', 'L’ALU', 'L’indirizzo per la memoria', 'Lettura oppure scrittura', 'I registri da scrivere', 'Il fronte'],
     controlli: [
-      { id: 'op', tipo: 'scelta', eti: 'Istruzione', opzioni: [['pushq', 'pushq %rax'], ['popq', 'popq %rax']], valore: 'popq' },
-      { id: 'sp', tipo: 'scelta', eti: '%rsp iniziale', opzioni: [[0x60, '0x60'], [0x200, '0x200']], valore: 0x60 },
-      { id: 'v', tipo: 'scelta', eti: '%rax', opzioni: [[0x2B, '0x2B'], [0x7, '0x7']], valore: 0x2B },
-      { id: 'm', tipo: 'scelta', eti: 'Parola alla cima', opzioni: [[0x51, '0x51'], [0x9, '0x9']], valore: 0x51 }
+      { id: 'op', tipo: 'scelta', eti: 'Istruzione', opzioni: [['mr', 'mov rax, 8(rbx)'], ['rm', 'mov 8(rbx), rax']], valore: 'mr' },
+      { id: 'b', tipo: 'scelta', eti: 'RBX', opzioni: [[0x60, '0x60'], [0x200, '0x200']], valore: 0x60 },
+      { id: 'v', tipo: 'scelta', eti: 'RAX', opzioni: [[0x2B, '0x2B'], [0x7, '0x7']], valore: 0x2B },
+      { id: 'm', tipo: 'scelta', eti: 'Parola in memoria', opzioni: [[0x51, '0x51'], [0x9, '0x9']], valore: 0x51 }
     ],
-    nota: 'I passi sono sempre sei. La cella sotto la cima contiene all’inizio un valore qualsiasi.',
+    nota: 'I passi sono sempre sei. La parola coinvolta è quella che ha inizio all’indirizzo RBX + 8.',
     previsione: {
-      domanda: (p) => { const H = SL.y86.esa; return 'Lo stato iniziale è %rsp = ' + H(p.sp) + ' e %rax = ' + H(p.v) + ', e la cella ' + H(p.sp) + ' contiene ' + H(p.m) + '. SEQ esegue `' + p.op + ' %rax`. Quale operazione esegue la memoria dei dati?'; },
-      opzioni: (p) => { const H = SL.y86.esa; return [['W' + H(p.sp - 8), 'Scrive nella cella ' + H(p.sp - 8)], ['W' + H(p.sp), 'Scrive nella cella ' + H(p.sp)], ['R' + H(p.sp), 'Legge la cella ' + H(p.sp)], ['R' + H(p.sp + 8), 'Legge la cella ' + H(p.sp + 8)]]; }
+      domanda: (p) => { const H = SL.isa.esa; return 'Lo stato iniziale è RBX = ' + H(p.b) + ' e RAX = ' + H(p.v) + ', e la parola all’indirizzo ' + H(p.b + 8) + ' contiene ' + H(p.m) + '. La CPU esegue `' + (p.op === 'mr' ? 'mov rax, 8(rbx)' : 'mov 8(rbx), rax') + '`. Quale operazione esegue la memoria dei dati?'; },
+      opzioni: (p) => { const H = SL.isa.esa; return [['W' + H(p.b + 8), 'Scrive la parola ' + H(p.b + 8)], ['W' + H(p.b), 'Scrive la parola ' + H(p.b)], ['R' + H(p.b + 8), 'Legge la parola ' + H(p.b + 8)], ['R' + H(p.b), 'Legge la parola ' + H(p.b)]]; }
     },
-    confronto: (pred, esito, p) => { const T = (k) => (k[0] === 'W' ? 'una scrittura nella cella ' : 'una lettura della cella ') + k.slice(1); return 'La previsione indicava ' + T(pred) + '. La memoria esegue ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.op === 'pushq' ? '`pushq` scrive, alla cima nuova: mem_addr = valE = %rsp − 8.' : '`popq` legge, alla cima attuale: mem_addr = valA = %rsp. valE, una cella più in alto, ha il solo scopo di aggiornare il puntatore.'); },
+    confronto: (pred, esito, p) => { const T = (k) => (k[0] === 'W' ? 'una scrittura della parola ' : 'una lettura della parola ') + k.slice(1); return 'La previsione indicava ' + T(pred) + '. La memoria esegue ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'In entrambe le forme Mem addr vale valE = RBX + 8. ' + (p.op === 'mr' ? '`mov rA, D(rB)` legge: Mem read vale 1.' : '`mov D(rB), rA` scrive: Mem write vale 1.')); },
     costruisci(p) {
-      const el = SL.el, H = SL.y86.esa, passi = [], push = p.op === 'pushq', valE = push ? p.sp - 8 : p.sp + 8, addr = push ? valE : p.sp, giu = p.sp - 8;
-      const st = { v: {}, s: {}, rsp: p.sp, rax: p.v, cg: null, ck: 'basso' };
+      const el = SL.el, I = SL.isa, H = I.esa, passi = [], leggi = p.op === 'mr', ind = p.b + 8, ist = { n: p.op, a: 'rax', b: 'rbx', c: 8 };
+      const s0 = { R: { rax: p.v, rbx: p.b }, M: {}, zf: 1, pc: 0x40 }; s0.M[ind] = p.m;
+      const f = I.fasi(ist, s0), s1 = I.esegui(ist, s0);
+      const st = { v: {}, sg: {}, rax: p.v, mem: p.m, ck: 'basso' };
       const quadro = (o) => {
         const els = [];
-        ['valA', 'valB', 'valE', 'valM'].forEach((n, k) => els.push(el.box('v' + n, 20 + k * 210, 0, 200, 60, n, st.v[n] == null ? '·' : st.v[n], (o.nuovi || []).includes(n) ? 'att' : st.v[n] == null ? '' : 'on', { cls: 'stretta' })));
-        [['aluA', 'aluA'], ['addr', 'mem_addr'], ['rw', 'mem_read · mem_write'], ['dstE', 'dstE'], ['dstM', 'dstM']].forEach((x, k) => els.push(el.box('s' + x[0], 20 + (k % 3) * 280, 76 + Math.floor(k / 3) * 70, 266, 60, x[1], st.s[x[0]] == null ? '·' : st.s[x[0]], (o.nuovi || []).includes(x[0]) ? 'att' : st.s[x[0]] == null ? '' : 'on', { cls: 'stretta' })));
-        els.push(el.box('ck', 580, 146, 266, 60, 'clock', st.ck, o.fronte ? 'att' : '', { cls: 'stretta' }),
-          el.box('rs', 20, 228, 190, 66, '%rsp', H(st.rsp), o.fronte ? 'att' : 'on', { cls: 'stretta' }),
-          el.box('ra', 220, 228, 190, 66, '%rax', H(st.rax), o.fronte && !push ? 'att' : 'on', { cls: 'stretta' }),
-          el.box('c1', 430, 228, 200, 66, 'cella ' + H(giu), st.cg == null ? 'qualsiasi' : H(st.cg), o.cella === giu ? 'att' : st.cg == null ? '' : 'on', { cls: 'stretta' }),
-          el.box('c2', 640, 228, 206, 66, 'cella ' + H(p.sp), H(p.m), o.cella === p.sp ? 'att' : 'on', { cls: 'stretta' }));
+        ['valA', 'valB', 'valC', 'valE', 'valM'].forEach((n, k) => els.push(el.box('v' + n, 20 + k * 166, 0, 158, 58, n, st.v[n] === undefined ? '·' : st.v[n] === null ? '·' : H(st.v[n]), (o.nuovi || []).includes(n) ? 'att' : st.v[n] === undefined ? '' : st.v[n] === null ? 'off' : 'on', { cls: 'stretta' })));
+        [['aluA', 'ALU A'], ['aluB', 'ALU B'], ['addr', 'Mem addr'], ['rw', 'Mem read · Mem write'], ['dstE', 'dstE'], ['dstM', 'dstM']].forEach((x, k) => els.push(el.box('s' + x[0], 20 + (k % 3) * 276, 74 + Math.floor(k / 3) * 68, 268, 60, x[1], st.sg[x[0]] == null ? '·' : st.sg[x[0]], (o.segnali || []).includes(x[0]) ? 'att' : st.sg[x[0]] == null ? '' : 'on', { cls: 'stretta' })));
+        els.push(el.box('rb', 20, 226, 200, 66, 'RBX', H(p.b), 'on', { cls: 'stretta' }),
+          el.box('ra', 230, 226, 200, 66, 'RAX', H(st.rax), o.fronte && leggi ? 'att' : 'on', { cls: 'stretta' }),
+          el.box('mm', 440, 226, 260, 66, 'parola a ' + H(ind), H(st.mem), o.fronte && !leggi ? 'att' : 'on', { cls: 'stretta' }),
+          el.box('ck', 710, 226, 134, 66, 'clock', st.ck, o.fronte ? 'att' : '', { cls: 'stretta' }));
         return els;
       };
-      const hud = () => [['Istruzione', p.op, 'a'], ['mem_addr', st.s.addr == null ? '·' : H(addr)], ['%rsp', H(st.rsp), 'c']];
+      const hud = () => [['Istruzione', leggi ? 'mov rax, 8(rbx)' : 'mov 8(rbx), rax', 'a'], ['Mem addr', st.sg.addr || '·'], ['RAX', H(st.rax), 'c']];
       const P = (o, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(), els: quadro(o) }, extra));
 
-      st.v.valA = push ? H(p.v) : H(p.sp); st.v.valB = H(p.sp);
-      P({ nuovi: ['valA', 'valB'] }, 0, 'Le letture del banco', push ? '`pushq %rax` legge due registri. valA è il contenuto di %rax, ' + H(p.v) + ', il dato da depositare. valB è il valore precedente di %rsp, ' + H(p.sp) + '.' : '`popq %rax` legge %rsp su entrambe le porte: valA = valB = ' + H(p.sp) + '. Il contenuto attuale di %rax è irrilevante, poiché sta per essere sostituito.',
-        { calc: 'valA = ' + st.v.valA + ' · valB = ' + st.v.valB, chiedi: { d: push ? 'La pila sta per crescere. Quale costante riceve l’ingresso aluA?' : 'La pila sta per ridursi. Quale costante riceve l’ingresso aluA?', o: ['−8', '+8'], g: push ? 0 : 1, no: 'La pila cresce verso gli indirizzi bassi: il deposito sottrae 8 al puntatore, il prelievo aggiunge 8.' } });
-      st.s.aluA = push ? '−8' : '+8'; st.v.valE = H(valE);
-      P({ nuovi: ['aluA', 'valE'] }, 1, 'Il puntatore successivo', 'L’equazione di aluA seleziona ' + (push ? '−8' : '+8') + ' per questa classe. L’ALU calcola valE = ' + H(p.sp) + (push ? ' − 8 = ' : ' + 8 = ') + H(valE) + ', il valore che %rsp avrà dopo l’istruzione.',
-        { calc: 'valE = ' + H(valE), chiedi: { d: 'Quale valore va presentato alla memoria come indirizzo?', o: ['valA', 'valE'], g: push ? 1 : 0, no: push ? 'Il dato va scritto alla cima nuova, che è valE.' : 'La parola da prelevare si trova alla cima attuale, che è valA. valE indica già la cella successiva.' } });
-      st.s.addr = (push ? 'valE = ' : 'valA = ') + H(addr);
-      P({ nuovi: ['addr'], cella: addr }, 2, push ? 'mem_addr = valE' : 'mem_addr = valA', push ? 'Per `pushq` l’equazione di mem_addr seleziona valE. La memoria riceve l’indirizzo ' + H(addr) + ', la cella che la pila sta per occupare.' : 'Per `popq` l’equazione di mem_addr seleziona valA. La memoria riceve l’indirizzo ' + H(addr) + ', la cima attuale. Con valE avrebbe letto la cella ' + H(valE) + ', che appartiene a un altro dato.',
-        { calc: 'mem_addr = ' + H(addr), chiedi: { d: 'A questo indirizzo la memoria deve leggere oppure scrivere?', o: ['Leggere', 'Scrivere'], g: push ? 1 : 0, no: push ? '`pushq` deposita un dato sulla pila: è una scrittura.' : '`popq` preleva un dato dalla pila: è una lettura.' } });
-      st.s.rw = push ? '0 · 1' : '1 · 0'; if (!push) st.v.valM = H(p.m);
-      P({ nuovi: push ? ['rw', 'valA'] : ['rw', 'valM'], cella: addr }, 3, push ? 'mem_write = 1' : 'mem_read = 1', push ? 'Le due abilitazioni valgono mem_read = 0 e mem_write = 1. All’ingresso dei dati della memoria giunge valA, ' + H(p.v) + '. La scrittura avverrà al fronte.' : 'Le due abilitazioni valgono mem_read = 1 e mem_write = 0. La memoria fornisce la parola contenuta a ' + H(addr) + ': valM = ' + H(p.m) + '.',
-        { calc: push ? 'M8[' + H(addr) + '] ← ' + H(p.v) : 'valM = ' + H(p.m) });
-      st.s.dstE = '%rsp'; st.s.dstM = push ? 'nessuno' : '%rax';
-      P({ nuovi: ['dstE', 'dstM'] }, 4, push ? 'Un registro da scrivere' : 'Due registri da scrivere', 'L’equazione di dstE indica %rsp, che riceverà valE = ' + H(valE) + '. ' + (push ? 'L’equazione di dstM indica «nessuno», poiché `pushq` non legge alcun dato dalla memoria.' : 'L’equazione di dstM indica rA, cioè %rax, che riceverà valM = ' + H(p.m) + '. Il banco ha due porte di scrittura, e al fronte le impiegherà entrambe.'),
-        { calc: push ? '%rsp ← ' + H(valE) : '%rsp ← ' + H(valE) + ' · %rax ← ' + H(p.m) });
-      st.rsp = valE; st.ck = 'sale ↑'; if (push) st.cg = p.v; else st.rax = p.m;
-      P({ fronte: true, cella: push ? giu : null }, 5, 'Il fronte e la verifica', push ? 'Al fronte la cella ' + H(giu) + ' riceve ' + H(p.v) + ' e %rsp diviene ' + H(valE) + '. La verifica: la ISA prescrive a `pushq` di abbassare la cima di 8 e di depositarvi il registro. Lo stato finale corrisponde.' : 'Al fronte %rax riceve ' + H(p.m) + ' e %rsp diviene ' + H(valE) + '. La verifica: la ISA prescrive a `popq` di fornire la parola in cima e di alzare la cima di 8. Lo stato finale corrisponde. La cella ' + H(p.sp) + ' contiene ancora ' + H(p.m) + ', e si trova ora sotto la cima.',
-        { calc: '%rsp = ' + H(valE) + (push ? ' · M8[' + H(giu) + '] = ' + H(p.v) : ' · %rax = ' + H(p.m)), esito: [(push ? 'scrive a ' : 'legge a ') + H(addr), 'si'] });
-      return { passi, esito: (push ? 'W' : 'R') + H(addr) };
+      st.v = { valA: leggi ? null : p.v, valB: p.b, valC: 8 };
+      P({ nuovi: leggi ? ['valB', 'valC'] : ['valA', 'valB', 'valC'] }, 0, 'Decodifica', leggi ? 'Il prelievo ricava valC = 8. La decodifica legge soltanto la base: valB = R[rbx] = ' + H(p.b) + '. RAX è la destinazione, e il suo contenuto precedente non è letto.' : 'Il prelievo ricava valC = 8. La decodifica legge due registri: valA = R[rax] = ' + H(p.v) + ', il dato da scrivere, e valB = R[rbx] = ' + H(p.b) + ', la base.',
+        { calc: 'valB = ' + H(p.b) + (leggi ? '' : ' · valA = ' + H(p.v)), chiedi: { d: 'La CPU deve calcolare l’indirizzo della parola. Quali ingressi selezioneranno ALU A e ALU B?', o: ['valC e valB', 'valA e valB', '0 e valB'], g: 0, no: 'Negli accessi alla memoria l’ALU somma lo spostamento valC e la base valB.' } });
+      st.v.valE = f.valE; st.sg.aluA = 'valC = 8'; st.sg.aluB = 'valB = ' + H(p.b);
+      P({ nuovi: ['valE'], segnali: ['aluA', 'aluB'] }, 1, 'L’ALU', 'ALU A seleziona valC e ALU B seleziona valB, e ALU fun vale «somma»: valE = ' + H(p.b) + ' + 8 = ' + H(ind) + '. Set ZF vale 0, e ZF resta invariato. In questo passo le due istruzioni coincidono.', { calc: 'valE = ' + H(p.b) + ' + 8 = ' + H(ind) });
+      st.sg.addr = 'valE = ' + H(ind);
+      P({ segnali: ['addr'] }, 2, 'L’indirizzo per la memoria', 'Mem addr vale valE = ' + H(ind) + ', per entrambe le istruzioni. È l’indirizzo della parola sulla quale la memoria opererà.',
+        { calc: 'Mem addr = ' + H(ind), chiedi: { d: 'La memoria deve leggere oppure scrivere?', o: ['Leggere', 'Scrivere'], g: leggi ? 0 : 1, no: leggi ? '`mov rA, D(rB)` porta un dato dalla memoria a un registro: Mem read vale 1.' : '`mov D(rB), rA` porta un dato da un registro alla memoria: Mem write vale 1.' } });
+      st.sg.rw = leggi ? '1 · 0' : '0 · 1'; st.v.valM = leggi ? p.m : null;
+      P({ segnali: ['rw'], nuovi: leggi ? ['valM'] : ['valA'] }, 3, leggi ? 'Una lettura' : 'Una scrittura', leggi ? 'Mem read vale 1 e Mem write vale 0. La memoria fornisce la parola all’indirizzo ' + H(ind) + ': valM = ' + H(p.m) + '.' : 'Mem write vale 1 e Mem read vale 0. Mem data riceve valA = ' + H(p.v) + ', che al fronte sostituirà la parola all’indirizzo ' + H(ind) + '. Nessun valM è prodotto.', { calc: 'Mem read · Mem write = ' + st.sg.rw });
+      st.sg.dstE = 'F'; st.sg.dstM = leggi ? 'rA = RAX' : 'F';
+      P({ segnali: ['dstE', 'dstM'] }, 4, 'I registri da scrivere', leggi ? 'dstE vale F: la porta E non scrive alcun registro, e valE, che è un indirizzo, non raggiunge il banco. dstM vale RAX: la porta M depositerà valM in RAX.' : 'dstE e dstM valgono entrambi F: nessun registro è scritto. La sola modifica dello stato riguarda la memoria.', { calc: 'dstE = F · dstM = ' + (leggi ? 'RAX' : 'F') });
+      st.ck = 'sale ↑'; st.rax = s1.R.rax; st.mem = s1.M[ind];
+      P({ fronte: true }, 5, 'Il fronte', leggi ? 'Al fronte RAX riceve ' + H(p.m) + ', e la memoria resta invariata.' : 'Al fronte la parola all’indirizzo ' + H(ind) + ' diviene ' + H(p.v) + ', e RAX resta ' + H(p.v) + '.' + ' La traccia conferma l’effetto prescritto dall’ISA: ' + (leggi ? 'R[rax] ← M8[R[rbx] + 8].' : 'M8[R[rbx] + 8] ← R[rax].'),
+        { calc: leggi ? 'RAX = ' + H(p.m) : 'M8[' + H(ind) + '] = ' + H(p.v), esito: [(leggi ? 'lettura di ' : 'scrittura di ') + H(ind), 'si'] });
+      return { passi, esito: (leggi ? 'R' : 'W') + H(ind) };
     }
   },
   bilancio: {
     regola: [
-      'Ogni segnale di controllo ha un’equazione che ne fissa il valore per ogni classe di istruzioni. mem_addr vale valE per `rmmovq`, `mrmovq`, `pushq` e `call`, e valA per `popq` e `ret`.',
-      '`pushq` scrive valA all’indirizzo valE = %rsp − 8, e %rsp riceve valE. `popq` legge valM all’indirizzo valA = %rsp, %rsp riceve valE = %rsp + 8 e rA riceve valM.'
+      'Ogni segnale di controllo ha un’equazione che ne fissa il valore per ogni categoria di istruzioni. Negli accessi alla memoria ALU A vale valC, ALU B vale valB, Mem addr vale valE e Mem data vale valA.',
+      '`mov rA, D(rB)` attiva Mem read e scrive valM in rA attraverso la porta M, con dstM = rA. `mov D(rB), rA` attiva Mem write, e dstE e dstM valgono F.'
     ],
     errori: [
-      ['Far leggere a popq dall’indirizzo valE.', 'valE è la cima dopo il prelievo, una cella più in alto. La parola da prelevare si trova alla cima attuale, valA.'],
-      ['Attivare contemporaneamente mem_read e mem_write.', 'In un ciclo la memoria dei dati legge oppure scrive, quindi al massimo una delle due abilitazioni vale 1.'],
-      ['Trascurare che popq scrive due registri.', 'Al medesimo fronte %rsp riceve valE e rA riceve valM.']
+      ['Attivare contemporaneamente Mem read e Mem write.', 'In un ciclo la memoria dei dati legge oppure scrive, quindi al massimo una delle due abilitazioni vale 1.'],
+      ['Scrivere valE nel registro di destinazione di una lettura.', 'valE è l’indirizzo. Il registro riceve valM attraverso la porta M, e dstE vale F.'],
+      ['Aggiornare ZF dopo un `mov`.', 'Set ZF vale 1 soltanto per le istruzioni aritmetiche e logiche.']
     ],
-    saFare: ['Scrivere mem_addr, mem_read e mem_write per le istruzioni che impiegano la memoria.', 'Indicare dstE e dstM per ogni classe.', 'Verificare un’equazione con una traccia che parte da uno stato noto.'],
+    saFare: ['Scrivere Mem addr, Mem read e Mem write per le istruzioni che impiegano la memoria.', 'Indicare dstE e dstM per ogni forma di istruzione.', 'Verificare un’equazione con una traccia che parte da uno stato noto.'],
     esercizi: [
-      { d: 'Per quale gruppo di istruzioni il segnale mem_write vale 1?', guida: 'Si scelga la risposta.', o: [
-        { t: 'rmmovq, pushq, call', ok: true, fb: 'Sono le tre classi che scrivono una parola in memoria.' },
-        { t: 'mrmovq, popq, ret', fb: 'Queste tre classi leggono dalla memoria: per esse vale 1 mem_read.' },
-        { t: 'addq, subq, rrmovq', fb: 'Queste istruzioni operano soltanto sui registri, e le due abilitazioni della memoria valgono 0.' }] },
-      { d: 'SEQ esegue `popq %rbx` con %rsp = 0x1F0. Quanto vale %rsp dopo il fronte? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x200', giuste: ['0x1f8', '1f8', '1f8h'],
-        ok: '`popq` rilascia una cella: valE = 0x1F0 + 8 = 0x1F8.',
-        diagnosi: [
-          { se: ['0x1e8', '1e8', '1e8h'], msg: 'La sottrazione di 8 riserva una cella, come in `pushq`. `popq` ne rilascia una.' },
-          { se: ['0x1f0', '1f0', '1f0h'], msg: 'Questo è l’indirizzo dal quale `popq` legge. Dopo il prelievo il puntatore avanza di 8.' },
-          { se: ['0x200', '200', '200h'], msg: 'Una parola occupa 8 byte, quindi il puntatore avanza di 8.' }
-        ],
-        altro: 'Il valore è diverso. Si aggiunga 8 al valore precedente di %rsp, in esadecimale.',
-        indizi: ['aluB = valB = 0x1F0.', 'Per `popq`, aluA = +8.', '0x1F0 + 8.'],
-        svolgimento: ['valB = 0x1F0.', 'valE = 0x1F0 + 8 = 0x1F8.', 'Al fronte: %rsp = 0x1F8.'] }
+      { d: 'Per quale istruzione il segnale Mem write vale 1?', guida: 'Si scelga la risposta.', o: [
+        { t: 'mov D(rB), rA', ok: true, fb: 'È la sola forma che scrive una parola in memoria.' },
+        { t: 'mov rA, D(rB)', fb: 'Questa forma legge dalla memoria: per essa vale 1 Mem read.' },
+        { t: 'add rA, rB', fb: 'Le istruzioni aritmetiche operano soltanto sui registri, e le due abilitazioni della memoria valgono 0.' }] },
+      { d: 'Per `mov rbx, 291`, quale registro indica dstE?', guida: 'Si scelga la risposta.', o: [
+        { t: 'RBX, cioè rB', ok: true, fb: 'Nella forma `mov rB, V` la destinazione è rB, e il campo rA vale F.' },
+        { t: 'F, nessun registro', fb: 'La costante transita nell’ALU e deve raggiungere un registro attraverso la porta E.' },
+        { t: 'RBX, attraverso dstM', fb: 'dstM riceve valM, prodotto soltanto dalle letture della memoria.' }] }
     ],
     sfida: ['cslez3_4_03_random_assembly', 'Segnali di controllo di SEQ']
   }

@@ -1,6 +1,8 @@
 Architecture of Computer Systems
 Aldina editorial revision 2.22.0, 6 November 2026
 Named authors in the supplied edition: Marzio De Corato and Danilo Bruschi.
+This PDF was compiled on 16 November 2026 from the revised source (revision
+protocol 1.2, not yet validated), which keeps the revision label 2.22.0.
 
 The supplied source edition declares original text and figures to be licensed
 under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International,

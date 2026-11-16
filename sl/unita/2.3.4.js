@@ -2,7 +2,7 @@
 SL.registra('2.3.4', {
   titolo: 'Strutture, allineamento e riempimento',
   obiettivo: 'Obiettivo: disporre i membri di una struttura rispettando i vincoli di allineamento, calcolarne la dimensione e trovare l’indirizzo di un membro.',
-  concetti: [['tabella', 'Struttura e membri'], ['memory', 'Multipli obbligati'], ['byte', 'Byte di riempimento']],
+  concetti: [['tabella', 'Struttura e membri'], ['memory', 'Multipli richiesti'], ['byte', 'Byte di riempimento']],
   filigrana: ['tabella', 'byte', 'memory'],
   richiami: {
     carte: [

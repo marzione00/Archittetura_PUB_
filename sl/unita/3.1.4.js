@@ -39,7 +39,7 @@ SL.registra('3.1.4', {
   },
   esperimento: {
     faremo: [
-      'Un’ALU a otto bit con quattro operazioni riceve due byte e un comando. I controlli fissano gli operandi e l’operazione.',
+      'Un’ALU da otto bit con quattro operazioni riceve due byte e un comando. I controlli fissano gli operandi e l’operazione.',
       'Si osserva la formazione dei quattro risultati candidati, poi la scelta del multiplexer e il segnale di zero. Dopo il caso proposto, è istruttivo modificare soltanto il comando e osservare quali elementi della scena restano invariati.'
     ],
     vedrai: [
@@ -59,7 +59,7 @@ SL.registra('3.1.4', {
     ],
     nota: 'I passi sono sempre sette. I quattro candidati dipendono soltanto dagli operandi.',
     previsione: {
-      domanda: (p) => 'Un’ALU a otto bit riceve A = ' + SL.unita314.H(p.a) + ' e B = ' + SL.unita314.H(p.b) + ' con il comando «' + SL.unita314.NOMI[p.f] + '». Quale byte si presenta in uscita?',
+      domanda: (p) => 'Un’ALU da otto bit riceve A = ' + SL.unita314.H(p.a) + ' e B = ' + SL.unita314.H(p.b) + ' con il comando «' + SL.unita314.NOMI[p.f] + '». Quale byte si presenta in uscita?',
       opzioni: (p) => { const U = SL.unita314, c = U.candidati(p), v = Array.from(new Set([c.add, c.sub, c.and, c.xor])); if (v.length < 2) v.push((v[0] + 1) & 255); return v.sort((x, y) => x - y).map((x) => [x, U.H(x)]); }
     },
     confronto: (pred, esito, p) => { const U = SL.unita314, c = U.candidati(p), altro = ['add', 'sub', 'and', 'xor'].find((k) => c[k] === pred && k !== p.f); return 'La previsione indicava ' + U.H(pred) + '. L’uscita dell’ALU è ' + U.H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : altro ? 'Il byte ' + U.H(pred) + ' è il candidato del ramo «' + U.NOMI[altro] + '», che il multiplexer scarta.' : 'Il comando «' + U.NOMI[p.f] + '» seleziona il candidato ' + U.H(esito) + '.'); },
@@ -122,7 +122,7 @@ SL.registra('3.1.4', {
     ],
     saFare: ['Descrivere l’interno di una ALU: rami in parallelo e multiplexer finale.', 'Calcolare il byte in uscita per ciascun comando.', 'Stabilire il valore di ZF a partire dal risultato scelto.'],
     esercizi: [
-      { d: 'Un’ALU a otto bit riceve A = 0x3C e B = 0x0F con il comando AND. Quale byte si presenta in uscita? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1F', giuste: ['0x0c', '0c', '0ch', '0xc', 'c'],
+      { d: 'Un’ALU da otto bit riceve A = 0x3C e B = 0x0F con il comando AND. Quale byte si presenta in uscita? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1F', giuste: ['0x0c', '0c', '0ch', '0xc', 'c'],
         ok: 'In binario 0011 1100 AND 0000 1111 dà 0000 1100: restano i bit a 1 in entrambi.',
         diagnosi: [
           { se: ['0x3f', '3f', '3fh'], msg: 'Questo è il risultato della OR. La AND mantiene a 1 soltanto le posizioni in cui entrambi i byte valgono 1.' },
@@ -132,7 +132,7 @@ SL.registra('3.1.4', {
         altro: 'Il byte è diverso. Si scrivano i due operandi in binario e si mantengano a 1 soltanto le posizioni in cui valgono 1 entrambi.',
         indizi: ['0x3C vale 0011 1100 e 0x0F vale 0000 1111.', 'La metà alta di 0x0F è tutta a 0, quindi la metà alta del risultato vale 0.', 'Nella metà bassa: 1100 AND 1111.'],
         svolgimento: ['0x3C = 0011 1100, 0x0F = 0000 1111.', 'AND posizione per posizione: 0000 1100.', 'Risultato: 0x0C.'] },
-      { d: 'Un’ALU a otto bit riceve A = 0xFF e B = 0x01. Con quale comando il segnale ZF vale 1?', guida: 'Si scelga la risposta.', o: [
+      { d: 'Un’ALU da otto bit riceve A = 0xFF e B = 0x01. Con quale comando il segnale ZF vale 1?', guida: 'Si scelga la risposta.', o: [
         { t: 'Addizione', ok: true, fb: '255 + 1 = 256, e negli otto bit resta 0x00.' },
         { t: 'Differenza', fb: '255 − 1 = 254, cioè 0xFE, che ha sette bit a 1.' },
         { t: 'AND', fb: '0xFF AND 0x01 dà 0x01: il bit 0 vale 1 in entrambi i byte.' },

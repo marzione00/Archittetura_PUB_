@@ -1,146 +1,139 @@
 'use strict';
 SL.registra('3.3.5', {
   titolo: 'Tracce complete delle istruzioni',
-  obiettivo: 'Obiettivo: compilare la traccia completa di `call` e di `ret` attraverso le sei fasi, e indicare quale valore è scritto nel PC, quale in %rsp e quale in memoria.',
-  concetti: [['tabella', 'Una riga per fase'], ['pila', 'Chiamata e ritorno'], ['puntatore', 'Tre candidati per il PC']],
-  filigrana: ['tabella', 'pila', 'puntatore'],
+  obiettivo: 'Obiettivo: compilare la traccia completa di `sub` e di `je` attraverso le sei fasi, e indicare quale valore riceve il PC dopo il salto.',
+  concetti: [['tabella', 'Una riga per fase'], ['flag', 'ZF, scritto da sub e letto da je'], ['puntatore', 'Due candidati per il PC']],
+  filigrana: ['tabella', 'flag', 'puntatore'],
   richiami: {
     carte: [
-      { sim: 'strati', da: 'Dall’unità 3.3.3', t: 'Le sei fasi', d: 'Prelievo, decodifica, esecuzione, memoria, scrittura, aggiornamento del PC. I valori sono trasmessi da una fase all’altra con nomi fissi.' },
-      { sim: 'pila', da: 'Dall’unità 2.6.1', t: 'La chiamata e la pila', d: 'CALL sottrae 8 al puntatore alla pila e deposita nella nuova cima l’indirizzo di ritorno. RET lo preleva e aggiunge 8 al puntatore.' },
-      { sim: 'puntatore', da: 'Dall’unità 3.3.2', t: 'Il successore valP', d: 'valP è il PC più la lunghezza dell’istruzione. Una `call` occupa 9 byte.' }
+      { sim: 'strati', da: 'Dall’unità 3.3.3', t: 'Le sei fasi', d: 'Prelievo, decodifica, esecuzione, memoria, scrittura e aggiornamento del PC, sempre nel medesimo ordine.' },
+      { sim: 'flag', da: 'Dall’unità 3.3.1', t: 'ZF', d: 'Le istruzioni aritmetiche e logiche pongono ZF a 1 quando il risultato è zero, e a 0 negli altri casi.' },
+      { sim: 'puntatore', da: 'Dall’unità 3.3.2', t: 'Il successore valP', d: 'valP = PC + lunghezza è l’indirizzo dell’istruzione che segue in memoria.' }
     ],
-    domanda: { d: 'Prima di proseguire: una `call` di Y86-64 ha inizio all’indirizzo 0x40. Quanto vale il suo valP?', o: [
-      { t: '0x49', ok: true, fb: 'La `call` occupa 9 byte: un byte di codice e otto di destinazione.' },
-      { t: '0x4A', fb: 'Dieci byte è la lunghezza delle istruzioni con il byte dei registri e la costante. La `call` è priva del byte dei registri.' },
-      { t: '0x48', fb: 'Agli otto byte della destinazione va aggiunto il byte di codice.' }
+    domanda: { d: 'Prima di proseguire: un `je` occupa 9 byte e ha inizio all’indirizzo 0x16. Quanto vale il suo valP?', o: [
+      { t: '0x1F', ok: true, fb: '0x16 + 9 = 0x1F: il codice e gli otto byte della destinazione.' },
+      { t: '0x18', fb: 'Un `je` contiene anche la destinazione, una costante di otto byte.' },
+      { t: '0x20', fb: '`je` è privo del byte dei registri, e occupa 9 byte, non 10.' }
     ] }
   },
   idea: {
     titolo: 'Una riga per fase',
-    termini: ['tabella delle fasi'],
+    termini: ['tabella delle fasi', 'cnd'],
     testo: [
-      'La descrizione completa di un’istruzione si ottiene compilandone la [[tabella delle fasi]]: una riga per fase, e in ogni riga i valori letti, calcolati e scritti. La tabella è la specifica dalla quale deriva il circuito del capitolo 3.4, poiché indica a ciascun blocco l’operazione da compiere per quella classe di istruzioni.',
-      'Le istruzioni che impiegano la pila coinvolgono tutte e sei le fasi. `call Dest` ha due compiti: salvare sulla pila l’indirizzo di ritorno e saltare alla procedura. L’indirizzo di ritorno è valP, il successore della `call`. La cima della pila è contenuta nel registro %rsp. Nel seguito la scrittura M8[x] indica la parola di otto byte che ha inizio all’indirizzo x.',
-      { fig: 'scena', w: 720, h: 232, titolo: 'La tabella delle fasi di call Dest', nota: 'L’ALU calcola la nuova cima, la memoria riceve l’indirizzo di ritorno, il PC riceve la destinazione.', els: [
-        SL.el.nota('a1', 0, 12, 'prelievo', 'mono'), SL.el.box('b1', 180, 0, 540, 34, null, 'valC = Dest · valP = PC + 9', 'on', { cls: 'stretta' }),
-        SL.el.nota('a2', 0, 50, 'decodifica', 'mono'), SL.el.box('b2', 180, 38, 540, 34, null, 'valB = %rsp', 'on', { cls: 'stretta' }),
-        SL.el.nota('a3', 0, 88, 'esecuzione', 'mono'), SL.el.box('b3', 180, 76, 540, 34, null, 'valE = valB − 8', 'on', { cls: 'stretta' }),
-        SL.el.nota('a4', 0, 126, 'memoria', 'mono'), SL.el.box('b4', 180, 114, 540, 34, null, 'M8[valE] = valP', 'att', { cls: 'stretta' }),
-        SL.el.nota('a5', 0, 164, 'scrittura', 'mono'), SL.el.box('b5', 180, 152, 540, 34, null, '%rsp = valE', 'on', { cls: 'stretta' }),
-        SL.el.nota('a6', 0, 202, 'PC', 'mono'), SL.el.box('b6', 180, 190, 540, 34, null, 'PC = valC', 'att', { cls: 'stretta' })
+      'La descrizione completa di un’istruzione si ottiene compilandone la [[tabella delle fasi]]: una riga per fase, e in ogni riga i valori letti, calcolati e scritti. La tabella è la specifica dalla quale deriva il circuito del capitolo 3.4, poiché indica a ciascun blocco l’operazione da compiere per quella categoria di istruzioni. Nel seguito R[r] indica il contenuto del registro r e M1[a] il byte all’indirizzo a.',
+      'Per `sub rA, rB` il prelievo legge icode:ifun = 6:1 e rA:rB, e calcola valP = PC + 2. La decodifica legge valA = R[rA] e valB = R[rB]. L’esecuzione calcola valE = valA − valB e aggiorna ZF. La fase di memoria resta inattiva. La scrittura deposita valE in rA, e il PC riceve valP.',
+      { fig: 'scena', w: 720, h: 232, titolo: 'La tabella delle fasi di je Dest', nota: 'La decodifica, la memoria e la scrittura restano inattive. Il PC sceglie fra due candidati.', els: [
+        SL.el.nota('a1', 0, 12, 'prelievo', 'mono'), SL.el.box('b1', 180, 0, 540, 34, null, 'icode:ifun = 7:3 · valC = Dest · valP = PC + 9', 'on', { cls: 'stretta' }),
+        SL.el.nota('a2', 0, 50, 'decodifica', 'mono'), SL.el.box('b2', 180, 38, 540, 34, null, 'nessun registro', 'off', { cls: 'stretta' }),
+        SL.el.nota('a3', 0, 88, 'esecuzione', 'mono'), SL.el.box('b3', 180, 76, 540, 34, null, 'Cnd = Cond(ZF, ifun)', 'att', { cls: 'stretta' }),
+        SL.el.nota('a4', 0, 126, 'memoria', 'mono'), SL.el.box('b4', 180, 114, 540, 34, null, 'nessun accesso', 'off', { cls: 'stretta' }),
+        SL.el.nota('a5', 0, 164, 'scrittura', 'mono'), SL.el.box('b5', 180, 152, 540, 34, null, 'nessun registro', 'off', { cls: 'stretta' }),
+        SL.el.nota('a6', 0, 202, 'PC', 'mono'), SL.el.box('b6', 180, 190, 540, 34, null, 'PC = Cnd ? valC : valP', 'att', { cls: 'stretta' })
       ] },
-      '`ret` segue il percorso inverso. Nella decodifica legge %rsp due volte, come valA e come valB. valA è l’indirizzo per la memoria, dalla quale si legge l’indirizzo di ritorno, valM. valB è trasmesso all’ALU, che calcola la cima dopo il ritorno, valE = valB + 8. La scrittura deposita valE in %rsp, e il PC riceve valM.',
-      'Il PC ha quindi tre sorgenti possibili: valP per le istruzioni ordinarie, valC per `call` e per i salti con condizione vera, valM per `ret`. Nel circuito la scelta fra le tre spetta a un multiplexer.'
+      'L’esecuzione di `je` coinvolge due indirizzi: valP, quello dell’istruzione che segue il salto, e valC, la destinazione contenuta nell’istruzione. Nella fase di esecuzione l’unità Cond calcola il segnale [[cnd|Cnd]] a partire da ZF e da ifun: per `je`, Cnd vale 1 quando ZF vale 1. L’aggiornamento del PC assegna valC se Cnd vale 1, valP in caso contrario.',
+      'Le due istruzioni sono quindi collegate da ZF. `sub` lo scrive nella propria fase di esecuzione, e `je` lo legge nella propria. Fra le due nessun’altra istruzione deve modificarlo, poiché `je` esamina sempre il valore lasciato dall’ultima istruzione aritmetica o logica.'
     ]
   },
   esperimento: {
     faremo: [
-      'L’esperimento segue una `call` e, immediatamente dopo, il `ret` della procedura chiamata, sei fasi ciascuna. I controlli fissano l’indirizzo della `call`, la destinazione e il valore iniziale di %rsp.',
-      'L’indirizzo di ritorno ha origine come valP, è depositato sulla pila e torna nel PC come valM. Dopo il caso proposto, è istruttivo modificare l’indirizzo della `call` e osservare quale valore è trasmesso.'
+      'L’esperimento segue `sub rax, rbx`, all’indirizzo 0x14, e il `je` che la segue all’indirizzo 0x16, come nell’esempio della dispensa. I controlli fissano i valori di RAX e di RBX e la destinazione del salto.',
+      'ZF nasce nella fase di esecuzione di `sub` e decide l’aggiornamento del PC di `je`. Dopo il caso proposto, è istruttivo rendere uguali RAX e RBX e osservare quale candidato riceve il PC.'
     ],
     vedrai: [
       ['strati', 'Le fasi', 'In alto: l’istruzione in corso e la fase raggiunta.'],
-      ['tabella', 'I valori', 'Al centro: valC, valP, valA, valB, valE e valM.'],
-      ['pila', 'Pila, %rsp e PC', 'In basso: le due celle della pila coinvolte, il puntatore alla pila e il contatore di programma.']
+      ['tabella', 'I valori', 'Al centro: valC, valP, valA, valB, valE e Cnd.'],
+      ['flag', 'Stato e PC', 'In basso: RAX, ZF e il contatore di programma.']
     ]
   },
   lab: {
-    titolo: 'Una call e il suo ret',
+    titolo: 'Una sottrazione e il suo salto',
     scena: { w: 860, h: 300 },
-    atti: ['call: prelievo e decodifica', 'call: esecuzione e memoria', 'call: scrittura e PC', 'ret: prelievo e decodifica', 'ret: esecuzione e memoria', 'ret: scrittura e PC'],
+    atti: ['sub: prelievo e decodifica', 'sub: esecuzione', 'sub: scrittura e PC', 'je: prelievo', 'je: esecuzione', 'je: aggiornamento del PC'],
     controlli: [
-      { id: 'pc', tipo: 'scelta', eti: 'Indirizzo della call', opzioni: [[0x40, '0x40'], [0x12C, '0x12C']], valore: 0x40 },
-      { id: 't', tipo: 'scelta', eti: 'Destinazione', opzioni: [[0x80, '0x80'], [0x200, '0x200']], valore: 0x80 },
-      { id: 'sp', tipo: 'scelta', eti: '%rsp iniziale', opzioni: [[0xC0, '0xC0'], [0x400, '0x400']], valore: 0xC0 }
+      { id: 'a', tipo: 'scelta', eti: 'RAX', opzioni: [[5, '5'], [3, '3'], [8, '8']], valore: 5 },
+      { id: 'b', tipo: 'scelta', eti: 'RBX', opzioni: [[3, '3'], [8, '8']], valore: 3 },
+      { id: 't', tipo: 'scelta', eti: 'Destinazione', opzioni: [[0x64, '0x64'], [0x200, '0x200']], valore: 0x64 }
     ],
-    nota: 'I passi sono sempre dodici: sei fasi per call e sei per ret.',
+    nota: 'I passi sono sempre otto: cinque per sub e tre per je. All’inizio ZF vale 1.',
     previsione: {
-      domanda: (p) => { const H = SL.y86.esa; return 'Una `call ' + H(p.t) + '` ha inizio all’indirizzo ' + H(p.pc) + ', con %rsp = ' + H(p.sp) + '. Quale valore scrive in memoria, e a quale indirizzo?'; },
-      opzioni: (p) => { const H = SL.y86.esa; return [[p.pc + 9, p.sp - 8], [p.pc + 9, p.sp], [p.t, p.sp - 8], [p.pc, p.sp - 8]].map((x) => [H(x[0]) + '@' + H(x[1]), H(x[0]) + ' all’indirizzo ' + H(x[1])]); }
+      domanda: (p) => { const H = SL.isa.esa; return 'All’indirizzo 0x14 si trova `sub rax, rbx`, e all’indirizzo 0x16 `je ' + H(p.t) + '`. RAX vale ' + p.a + ' e RBX vale ' + p.b + '. Quale valore riceve il PC dopo il salto?'; },
+      opzioni: (p) => { const H = SL.isa.esa; return [0x16, 0x1F, p.t].map((v) => [H(v), H(v)]); }
     },
-    confronto: (pred, esito, p) => { const T = (k) => k.split('@')[0] + ' all’indirizzo ' + k.split('@')[1], H = SL.y86.esa; return 'La previsione indicava ' + T(pred) + '. La `call` scrive ' + T(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : 'Il valore salvato è valP = ' + H(p.pc) + ' + 9, l’istruzione dalla quale riprendere. La cella è quella appena riservata, valE = ' + H(p.sp) + ' − 8.'); },
+    confronto: (pred, esito, p) => { const H = SL.isa.esa, z = p.a === p.b; return 'La previsione indicava ' + pred + '. Dopo il salto il PC vale ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === '0x16' ? '0x16 è l’indirizzo del `je` stesso. Il PC riceve valC oppure valP del salto.' : z ? 'La differenza ' + p.a + ' − ' + p.b + ' è zero, quindi ZF = 1, Cnd = 1, e il PC riceve la destinazione ' + H(p.t) + '.' : 'La differenza ' + p.a + ' − ' + p.b + ' è diversa da zero, quindi ZF = 0, Cnd = 0, e il PC riceve valP = 0x16 + 9 = 0x1F.'); },
     costruisci(p) {
-      const el = SL.el, H = SL.y86.esa, passi = [], FASI = ['prelievo', 'decodifica', 'esecuzione', 'memoria', 'scrittura', 'PC'], valP = p.pc + 9, giu = p.sp - 8;
-      const st = { ist: 'call', f: 0, v: {}, rsp: p.sp, pc: p.pc, cella: null };
+      const el = SL.el, I = SL.isa, H = I.esa, N = I.num, passi = [], FASI = ['prelievo', 'decodifica', 'esecuzione', 'memoria', 'scrittura', 'PC'];
+      const sub = { n: 'sub', a: 'rax', b: 'rbx' }, je = { n: 'je', c: p.t }, s0 = { R: { rax: p.a, rbx: p.b }, M: {}, zf: 1, pc: 0x14 };
+      const f1 = I.fasi(sub, s0), s1 = I.esegui(sub, s0), f2 = I.fasi(je, s1), fine = f2.pcNuovo;
+      const st = { ist: 'sub', f: 0, v: {}, rax: p.a, zf: 1, pc: 0x14 };
       const quadro = (o) => {
-        const els = [el.box('is', 20, 0, 150, 40, null, st.ist === 'call' ? 'call ' + H(p.t) : 'ret', 'on', { cls: 'stretta' })];
+        const els = [el.box('is', 20, 0, 150, 40, null, st.ist === 'sub' ? 'sub rax, rbx' : 'je ' + H(p.t), 'on', { cls: 'stretta' })];
         FASI.forEach((n, k) => els.push(el.box('f' + k, 180 + k * 112, 0, 106, 40, null, n, k === st.f ? 'att' : k < st.f ? 'on' : '', { cls: 'stretta' })));
-        ['valC', 'valP', 'valA', 'valB', 'valE', 'valM'].forEach((n, k) => els.push(el.box('v' + n, 20 + k * 138, 56, 130, 62, n, st.v[n] == null ? '·' : H(st.v[n]), (o.nuovi || []).includes(n) ? 'att' : st.v[n] == null ? '' : 'on', { cls: 'stretta' })));
-        els.push(el.nota('tp', 20, 132, 'PILA', 'mono'),
-          el.nota('a1', 20, 170, H(p.sp), 'mono minuta', st.rsp === p.sp ? 'att' : ''), el.cella('c1', 100, 158, 220, 42, 'dati del chiamante', 'off', { piccola: true, cls: 'minuta' }), el.nota('r1', 332, 170, st.rsp === p.sp ? '← %rsp' : '', 'mono minuta', 'att'),
-          el.nota('a2', 20, 218, H(giu), 'mono minuta', st.rsp === giu ? 'att' : ''), el.cella('c2', 100, 206, 220, 42, st.cella == null ? '·' : H(st.cella), st.cella == null ? '' : o.cella ? 'att' : 'on', { piccola: true, cls: 'minuta' }), el.nota('r2', 332, 218, st.rsp === giu ? '← %rsp' : '', 'mono minuta', 'att'),
-          el.box('rs', 470, 150, 180, 100, '%rsp', H(st.rsp), o.rsp ? 'att' : 'on', { cls: 'stretta' }),
-          el.box('pc', 664, 150, 180, 100, 'PC', H(st.pc), o.pc ? 'att' : 'on', { cls: 'stretta' }));
+        ['valC', 'valP', 'valA', 'valB', 'valE', 'Cnd'].forEach((n, k) => {
+          const v = st.v[n], txt = v === undefined ? '·' : v === null ? '·' : n === 'valP' || n === 'valC' ? H(v) : N(v);
+          els.push(el.box('v' + n, 20 + k * 138, 56, 130, 62, n, txt, (o.nuovi || []).includes(n) ? 'att' : v === undefined ? '' : v === null ? 'off' : 'on', { cls: 'stretta' }));
+        });
+        els.push(el.nota('tc', 20, 136, 'CANDIDATI DEL PC', 'mono', st.ist === 'je' && st.f === 5 ? 'att' : ''),
+          el.box('k1', 20, 160, 200, 60, 'valP', st.ist === 'je' ? H(0x1F) : H(0x16), o.pc && fine === 0x1F ? 'att' : '', { cls: 'stretta' }),
+          el.box('k2', 230, 160, 200, 60, 'valC', st.ist === 'je' ? H(p.t) : 'assente', st.ist !== 'je' ? 'off' : o.pc && fine === p.t ? 'att' : '', { cls: 'stretta' }),
+          el.box('ra', 20, 232, 200, 60, 'RAX', N(st.rax), o.rax ? 'att' : 'on', { cls: 'stretta' }),
+          el.box('zf', 230, 232, 200, 60, 'ZF', String(st.zf), o.zf ? 'att' : st.zf ? 'on' : '', { cls: 'stretta' }),
+          el.box('pc', 470, 160, 374, 132, 'PC', H(st.pc), o.pc ? 'att' : 'on', { cls: 'stretta' }));
         return els;
       };
-      const hud = () => [['Istruzione', st.ist, 'a'], ['%rsp', H(st.rsp)], ['PC', H(st.pc), 'c']];
+      const hud = () => [['Istruzione', st.ist, 'a'], ['ZF', String(st.zf)], ['PC', H(st.pc), 'c']];
       const P = (o, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(), els: quadro(o) }, extra));
 
-      // call
-      st.v.valC = p.t; st.v.valP = valP;
-      P({ nuovi: ['valC', 'valP'] }, 0, 'call: prelievo', 'Il PC vale ' + H(p.pc) + '. Il primo byte, 80, è il codice di `call`. Gli otto byte seguenti sono la destinazione: valC = ' + H(p.t) + '. L’istruzione occupa 9 byte, quindi valP = ' + H(p.pc) + ' + 9 = ' + H(valP) + '. È l’indirizzo dal quale il programma dovrà riprendere al ritorno.',
-        { calc: 'valP = ' + H(p.pc) + ' + 9 = ' + H(valP) });
-      st.f = 1; st.v.valB = p.sp;
-      P({ nuovi: ['valB'] }, 0, 'call: decodifica', 'Nel testo della `call` nessun registro è nominato, e tuttavia l’istruzione ne impiega uno in modo implicito: %rsp, la cima della pila. Il banco dei registri lo legge, e valB = ' + H(p.sp) + '.',
-        { calc: 'valB = %rsp = ' + H(p.sp), chiedi: { d: 'La pila cresce verso gli indirizzi bassi. In quale cella sarà scritto l’indirizzo di ritorno?', o: [H(giu), H(p.sp), H(p.sp + 8)], g: 0, no: 'Occorre una cella nuova, otto byte sotto la cima attuale: ' + H(p.sp) + ' − 8 = ' + H(giu) + '.' } });
-      st.f = 2; st.v.valE = giu;
-      P({ nuovi: ['valE'] }, 1, 'call: esecuzione', 'L’ALU calcola la nuova cima della pila: valE = valB − 8 = ' + H(p.sp) + ' − 8 = ' + H(giu) + '. Per il momento è soltanto un valore sui fili: %rsp contiene ancora ' + H(p.sp) + '.', { calc: 'valE = ' + H(p.sp) + ' − 8 = ' + H(giu) });
-      st.f = 3; st.cella = valP;
-      P({ cella: true, nuovi: ['valP', 'valE'] }, 1, 'call: memoria', 'La memoria riceve l’indirizzo valE e il dato valP: nella cella ' + H(giu) + ' è scritto ' + H(valP) + ', l’indirizzo di ritorno.',
-        { calc: 'M8[' + H(giu) + '] = ' + H(valP) });
-      st.f = 4; st.rsp = giu;
-      P({ rsp: true, nuovi: ['valE'] }, 2, 'call: scrittura', 'Il banco dei registri riceve valE con l’indirizzo di %rsp. La cima della pila passa da ' + H(p.sp) + ' a ' + H(giu) + ', e indica ora la cella che contiene l’indirizzo di ritorno.',
-        { calc: '%rsp = ' + H(giu), chiedi: { d: 'Resta da aggiornare il PC. Quale valore riceverà?', o: ['valC, ' + H(p.t), 'valP, ' + H(valP)], g: 0, no: 'La `call` salta alla procedura, il cui indirizzo è valC. valP è stato salvato sulla pila.' } });
-      st.f = 5; st.pc = p.t;
-      P({ pc: true, nuovi: ['valC'] }, 2, 'call: aggiornamento del PC', 'Il PC riceve valC = ' + H(p.t) + ', e la prossima istruzione prelevata sarà la prima della procedura. In questo esperimento la procedura è costituita da un solo `ret`.', { calc: 'PC = valC = ' + H(p.t) });
-      // ret
-      st.ist = 'ret'; st.f = 0; st.v = { valP: p.t + 1 };
-      P({ nuovi: ['valP'] }, 3, 'ret: prelievo', 'Il PC vale ' + H(p.t) + '. Il byte prelevato, 90, è il codice di `ret`, che occupa un solo byte: valP = ' + H(p.t + 1) + '. Questo valore resterà inutilizzato, poiché `ret` ricava altrove la propria destinazione.', { calc: 'valP = ' + H(p.t) + ' + 1 = ' + H(p.t + 1) });
-      st.f = 1; st.v.valA = giu; st.v.valB = giu;
-      P({ nuovi: ['valA', 'valB'] }, 3, 'ret: decodifica', 'Il banco dei registri legge %rsp su entrambe le porte: valA = valB = ' + H(giu) + '. I due valori sono uguali e hanno impieghi diversi: valA è l’indirizzo per la memoria, valB è trasmesso all’ALU.',
-        { calc: 'valA = valB = ' + H(giu), chiedi: { d: 'Da quale indirizzo la memoria leggerà l’indirizzo di ritorno?', o: [H(giu), H(p.sp)], g: 0, no: 'L’indirizzo di ritorno è contenuto nella cima attuale della pila, ' + H(giu) + ', che è valA.' } });
-      st.f = 2; st.v.valE = p.sp;
-      P({ nuovi: ['valE'] }, 4, 'ret: esecuzione', 'L’ALU calcola la cima che la pila avrà dopo il ritorno: valE = valB + 8 = ' + H(giu) + ' + 8 = ' + H(p.sp) + '.', { calc: 'valE = ' + H(giu) + ' + 8 = ' + H(p.sp) });
-      st.f = 3; st.v.valM = valP;
-      P({ cella: true, nuovi: ['valM'] }, 4, 'ret: memoria', 'La memoria riceve l’indirizzo valA = ' + H(giu) + ' e fornisce la parola ivi contenuta: valM = ' + H(valP) + '. È il valore che la `call` aveva scritto.',
-        { calc: 'valM = M8[' + H(giu) + '] = ' + H(valP), chiedi: { d: 'Quale valore riceverà il PC?', o: ['valM, ' + H(valP), 'valP, ' + H(p.t + 1)], g: 0, no: '`ret` riprende dall’indirizzo letto dalla pila, valM. Il suo valP indicherebbe il byte che segue il `ret`.' } });
-      st.f = 4; st.rsp = p.sp;
-      P({ rsp: true, nuovi: ['valE'] }, 5, 'ret: scrittura', '%rsp riceve valE e torna a ' + H(p.sp) + ', il valore che aveva prima della chiamata. La cella ' + H(giu) + ' conserva ancora ' + H(valP) + '. Essa si trova ormai sotto la cima, e sarà sovrascritta dalla prossima scrittura sulla pila.', { calc: '%rsp = ' + H(p.sp) });
-      st.f = 5; st.pc = valP;
-      P({ pc: true, nuovi: ['valM'] }, 5, 'ret: aggiornamento del PC', 'Il PC riceve valM = ' + H(valP) + ', e il programma riprende dall’istruzione che segue la `call`. Il medesimo numero è stato valP nella `call`, contenuto di una cella della pila, e valM nel `ret`.',
-        { calc: 'PC = valM = ' + H(valP), esito: ['PC = ' + H(valP) + ' · %rsp = ' + H(p.sp), 'si'] });
-      return { passi, esito: H(valP) + '@' + H(giu) };
+      st.v = { valC: null, valP: f1.valP };
+      P({ nuovi: ['valP'] }, 0, 'sub: prelievo', 'Il PC vale 0x14. Il primo byte, 61, indica icode:ifun = 6:1, cioè `sub`. Il byte dei registri, 03, indica rA = RAX e rB = RBX. Manca la costante. L’istruzione occupa 2 byte, quindi valP = 0x14 + 2 = 0x16.',
+        { calc: 'valP = 0x14 + 2 = 0x16' });
+      st.f = 1; st.v.valA = f1.valA; st.v.valB = f1.valB;
+      P({ nuovi: ['valA', 'valB'] }, 0, 'sub: decodifica', 'Il banco dei registri riceve i numeri di RAX e di RBX sulle porte di lettura A e B, e fornisce valA = R[rax] = ' + p.a + ' e valB = R[rbx] = ' + p.b + '.',
+        { calc: 'valA = ' + p.a + ' · valB = ' + p.b, chiedi: { d: 'Quale differenza calcolerà l’ALU?', o: [N(p.a - p.b), N(p.b - p.a), N(p.a + p.b)].filter((x, k, a) => a.indexOf(x) === k), g: 0, no: 'L’ALU calcola valA − valB, cioè RAX − RBX = ' + p.a + ' − ' + p.b + ' = ' + N(p.a - p.b) + '.' } });
+      st.f = 2; st.v.valE = f1.valE; st.zf = f1.zf;
+      P({ nuovi: ['valE'], zf: true }, 1, 'sub: esecuzione', 'L’ALU calcola valE = valA − valB = ' + p.a + ' − ' + p.b + ' = ' + N(f1.valE) + '. ' + (f1.zf ? 'Il risultato è zero, e ZF passa a 1.' : 'Il risultato è diverso da zero, e ZF passa a 0.') + ' È il valore che il `je` successivo esaminerà.',
+        { calc: 'valE = ' + N(f1.valE) + ' · ZF = ' + f1.zf, chiedi: { d: 'Il risultato vale ' + N(f1.valE) + '. Quanto vale ZF?', o: ['0', '1'], g: f1.zf, no: 'ZF vale 1 soltanto quando il risultato è zero.' } });
+      st.f = 4; st.rax = f1.valE;
+      P({ rax: true }, 2, 'sub: memoria e scrittura', 'La fase di memoria resta inattiva: `sub` non accede alla memoria dei dati. Nella scrittura il banco dei registri riceve valE sulla porta E, con dstE uguale al numero di RAX: al fronte RAX assume il valore ' + N(f1.valE) + '.', { calc: 'R[rax] = valE = ' + N(f1.valE) });
+      st.f = 5; st.pc = 0x16;
+      P({ pc: true }, 2, 'sub: aggiornamento del PC', '`sub` lascia invariato il flusso, e il PC riceve valP e passa a 0x16, dove ha inizio il salto.', { calc: 'PC = valP = 0x16' });
+      st.ist = 'je'; st.f = 0; st.v = { valC: p.t, valP: f2.valP, valA: null, valB: null, valE: null };
+      P({ nuovi: ['valC', 'valP'] }, 3, 'je: prelievo', 'Il primo byte, 73, indica icode:ifun = 7:3, cioè `je`. Il salto è privo del byte dei registri, e gli otto byte da 1 a 8 sono la destinazione: valC = ' + H(p.t) + '. L’istruzione occupa 9 byte, quindi valP = 0x16 + 9 = 0x1F. La decodifica non legge alcun registro.',
+        { calc: 'valC = ' + H(p.t) + ' · valP = 0x1F', chiedi: { d: 'Il salto deve esaminare un dato dello stato. Quale?', o: ['ZF', 'RAX', 'RBX'], g: 0, no: '`je` è privo di operandi registro, ed esamina soltanto ZF, lasciato da `sub`.' } });
+      st.f = 2; st.v.Cnd = f2.cnd;
+      P({ nuovi: ['Cnd'], zf: true }, 4, 'je: esecuzione', 'L’ALU resta inattiva. L’unità Cond legge ZF = ' + s1.zf + ' e ifun = 3, la condizione «uguale», e produce Cnd = ' + f2.cnd + '. Le fasi di memoria e di scrittura restano inattive: il salto non modifica né la memoria né i registri, e lascia invariato ZF.',
+        { calc: 'Cnd = Cond(ZF = ' + s1.zf + ', 3) = ' + f2.cnd, chiedi: { d: 'Cnd vale ' + f2.cnd + '. Quale candidato riceverà il PC?', o: ['valC = ' + H(p.t), 'valP = 0x1F'], g: f2.cnd ? 0 : 1, no: 'Il PC riceve valC se Cnd vale 1, valP se vale 0.' } });
+      st.f = 5; st.pc = fine;
+      P({ pc: true }, 5, 'je: aggiornamento del PC', f2.cnd ? 'Cnd vale 1: il salto è eseguito, e il PC riceve valC = ' + H(p.t) + '. L’istruzione all’indirizzo 0x1F non sarà eseguita in questo passaggio.' : 'Cnd vale 0: il salto non è eseguito, e il PC riceve valP = 0x1F, l’istruzione che segue in memoria. La destinazione ' + H(p.t) + ' è rimasta inutilizzata.',
+        { calc: 'PC = ' + (f2.cnd ? 'valC' : 'valP') + ' = ' + H(fine), esito: ['PC = ' + H(fine), 'si'] });
+      return { passi, esito: H(fine) };
     }
   },
   bilancio: {
     regola: [
-      '`call Dest` calcola valE = %rsp − 8, scrive valP in M8[valE], deposita valE in %rsp e valC nel PC.',
-      '`ret` legge valM da M8[%rsp], calcola valE = %rsp + 8, deposita valE in %rsp e valM nel PC. Il PC riceve dunque valP, valC oppure valM, secondo l’istruzione.'
+      '`sub rA, rB` calcola valE = valA − valB, aggiorna ZF, deposita valE in rA attraverso la porta E e assegna al PC valP = PC + 2.',
+      '`je Dest` ricava valC = Dest e valP = PC + 9, non legge registri, calcola Cnd da ZF e assegna al PC valC se Cnd vale 1, valP in caso contrario.'
     ],
     errori: [
-      ['Salvare sulla pila l’indirizzo della call.', 'Il valore salvato è valP, l’indirizzo dell’istruzione successiva. Con un ritorno sulla `call` il programma la ripeterebbe indefinitamente.'],
-      ['Scrivere nella cima precedente.', 'La `call` scrive a valE = %rsp − 8, la cella appena riservata. La cima precedente contiene dati del chiamante.'],
-      ['Far leggere a ret dalla cima nuova.', '`ret` legge all’indirizzo valA, cioè %rsp prima dell’aggiornamento. valE ha il solo scopo di aggiornare il registro.']
+      ['Attribuire a `je` la scrittura di ZF.', 'Il salto si limita a leggere ZF. Lo scrive l’ultima istruzione aritmetica o logica che lo precede.'],
+      ['Assegnare al PC la destinazione in ogni caso.', 'Con Cnd = 0 il PC riceve valP, l’istruzione che segue il salto.'],
+      ['Contare 10 byte per `je`.', '`je` è privo del byte dei registri: 1 byte di codice e 8 di destinazione.']
     ],
-    saFare: ['Compilare la tabella delle fasi di `call` e di `ret`.', 'Indicare quale valore è scritto in memoria, quale in %rsp e quale nel PC.', 'Indicare la sorgente del PC per ogni classe di istruzioni.'],
+    saFare: ['Compilare la tabella delle fasi di `sub` e di `je`.', 'Calcolare Cnd a partire da ZF.', 'Indicare quale valore riceve il PC dopo un salto.'],
     esercizi: [
-      { d: 'Una `call 0x200` ha inizio all’indirizzo 0x124, con %rsp = 0x800. Quale valore è scritto in memoria? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x130', giuste: ['0x12d', '12d', '12dh'],
-        ok: 'È scritto valP = 0x124 + 9 = 0x12D, l’indirizzo di ritorno.',
+      { d: 'Un `je 0x200` ha inizio all’indirizzo 0x124, e ZF vale 0. Quale valore riceve il PC? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x130', giuste: ['0x12d', '12d', '12dh'],
+        ok: 'Con ZF = 0 si ha Cnd = 0, e il PC riceve valP = 0x124 + 9 = 0x12D.',
         diagnosi: [
-          { se: ['0x124', '124', '124h'], msg: 'Questo è l’indirizzo della `call`. È salvato l’indirizzo dell’istruzione successiva, valP.' },
-          { se: ['0x200', '200', '200h'], msg: 'Questa è la destinazione, che è scritta nel PC. In memoria è scritto l’indirizzo di ritorno.' },
-          { se: ['0x12e', '12e', '12eh'], msg: 'La `call` occupa 9 byte: uno di codice e otto di destinazione.' },
-          { se: ['0x7f8', '7f8', '7f8h'], msg: 'Questo è l’indirizzo della cella in cui si scrive. La domanda riguarda il valore scritto.' }
+          { se: ['0x200', '200', '200h'], msg: 'La destinazione è scelta soltanto con ZF = 1. Qui ZF vale 0.' },
+          { se: ['0x12e', '12e', '12eh'], msg: '`je` occupa 9 byte, perché non ha il byte dei registri.' },
+          { se: ['0x124', '124', '124h'], msg: 'Questo è l’indirizzo del salto stesso. Il PC riceve valC oppure valP.' }
         ],
-        altro: 'Il valore è diverso. Si calcoli valP sommando all’indirizzo della `call` la sua lunghezza.',
-        indizi: ['In memoria è scritto l’indirizzo di ritorno, valP.', 'Una `call` occupa 9 byte.', '0x124 + 9.'],
-        svolgimento: ['Lunghezza della `call`: 9 byte.', 'valP = 0x124 + 9 = 0x12D.', 'M8[0x7F8] = 0x12D.'] },
-      { d: 'Per quale di queste istruzioni il PC riceve valM?', guida: 'Si scelga la risposta.', o: [
-        { t: 'ret', ok: true, fb: 'L’indirizzo di ritorno è letto dalla pila nella fase di memoria, ed è valM.' },
-        { t: 'call 0x200', fb: 'Per `call` il PC riceve la destinazione scritta nell’istruzione, valC.' },
-        { t: 'mrmovq 8(%rbx), %rax', fb: '`mrmovq` legge una parola valM e la deposita in un registro. Il PC riceve valP.' },
-        { t: 'addq %rax, %rbx', fb: 'Un’operazione aritmetica prosegue con l’istruzione successiva: il PC riceve valP.' }] }
+        altro: 'Il valore è diverso. Si calcoli Cnd da ZF, e quindi si scelga fra valC e valP.',
+        indizi: ['Per `je`, Cnd vale 1 soltanto quando ZF vale 1.', 'Con Cnd = 0 il PC riceve valP.', 'valP = 0x124 + 9.'],
+        svolgimento: ['ZF = 0, quindi Cnd = 0.', 'valP = 0x124 + 9 = 0x12D.', 'PC = 0x12D.'] },
+      { d: 'In quale fase `je` stabilisce se il salto è eseguito?', guida: 'Si scelga la risposta.', o: [
+        { t: 'Nella fase di esecuzione', ok: true, fb: 'L’unità Cond calcola Cnd da ZF e da ifun nella fase di esecuzione. L’aggiornamento del PC impiega poi Cnd.' },
+        { t: 'Nella fase di decodifica', fb: 'La decodifica legge i registri, e `je` non ne nomina alcuno.' },
+        { t: 'Nella fase di prelievo', fb: 'Il prelievo ricava valC e valP, entrambi necessari. La scelta richiede ZF, esaminato nella fase successiva.' }] }
     ],
     sfida: ['cslez3_3_03_random_assembly', 'Registri sorgente e destinazione']
   }

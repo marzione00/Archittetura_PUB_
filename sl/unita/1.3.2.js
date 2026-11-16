@@ -18,12 +18,12 @@ SL.registra('1.3.2', {
   },
   idea: {
     titolo: 'Un’unica tabella per tutte le scritture',
-    termini: ['unicode', 'punto di codice', 'utf-8', 'byte di continuazione'],
+    termini: ['unicode', 'punto di codice', 'utf-8'],
     testo: [
       'La tabella ASCII dispone di 128 codici. Essi sono sufficienti per l’inglese, ed escludono la è dell’italiano, la ñ dello spagnolo, l’alfabeto greco, gli ideogrammi cinesi e il simbolo dell’euro. Per decenni ogni paese ha adottato una propria tabella estesa, con la conseguenza che il medesimo byte indicava lettere diverse da un calcolatore all’altro. Un testo trasmesso all’estero risultava spesso illeggibile.',
       'La soluzione è consistita in una tabella unica, denominata [[unicode|Unicode]], che assegna un numero a ogni carattere di ogni scrittura. Tale numero prende il nome di [[punto di codice]] e si scrive con il prefisso U+ seguito da cifre esadecimali. La A maiuscola è U+0041, la è è U+00E8, il simbolo € è U+20AC. I primi 128 punti di codice coincidono con la tabella ASCII, sicché i testi preesistenti restano validi.',
       'Un punto di codice è un numero, e resta da stabilire come scriverlo in byte. Poiché i punti di codice superano il milione, un solo byte è insufficiente. L’impiego costante di quattro byte quadruplicherebbe lo spazio occupato dai testi in inglese. La codifica [[utf-8|UTF-8]] adotta una soluzione intermedia: impiega da uno a quattro byte, secondo la grandezza del numero.',
-      'Il meccanismo risiede nei primi bit di ogni byte, che svolgono la funzione di etichetta. Un byte che comincia con 0 è un carattere completo, con sette bit a disposizione: si tratta dei codici ASCII. Un byte che comincia con 110 apre un carattere di due byte, con 1110 uno di tre, con 11110 uno di quattro. I byte successivi al primo cominciano tutti con 10 e prendono il nome di [[byte di continuazione]]. Ciascuno trasporta sei bit del punto di codice.',
+      'Il meccanismo risiede nei primi bit di ogni byte, che svolgono la funzione di etichetta. Un byte che comincia con 0 è un carattere completo, con sette bit a disposizione: si tratta dei codici ASCII. Un byte che comincia con 110 apre un carattere di due byte, con 1110 uno di tre, con 11110 uno di quattro. I byte successivi al primo cominciano tutti con 10 e ciascuno trasporta sei bit del punto di codice. Il primo byte apre dunque la sequenza, e i successivi la completano.',
       { fig: 'scena', w: 700, h: 214, titolo: 'Le quattro forme di un carattere UTF-8', nota: 'Le x sono i bit che trasportano il punto di codice. I bit scritti per esteso sono le etichette.', els: [
         SL.el.box('a1', 10, 6, 210, 44, null, 'fino a U+007F', '', { cls: 'stretta' }), SL.el.box('b1', 250, 6, 440, 44, null, '0xxxxxxx', 'on', { cls: 'stretta' }),
         SL.el.box('a2', 10, 58, 210, 44, null, 'fino a U+07FF', '', { cls: 'stretta' }), SL.el.box('b2', 250, 58, 440, 44, null, '110xxxxx 10xxxxxx', 'on', { cls: 'stretta' }),
@@ -49,13 +49,13 @@ SL.registra('1.3.2', {
     titolo: 'Ricostruzione di un carattere dai suoi byte',
     scena: { w: 860, h: 356 },
     atti: ['I byte in memoria', 'L’etichetta del primo byte', 'I bit utili', 'Il punto di codice'],
-    nota: 'Il numero di passi dipende dal carattere: ogni byte di continuazione ne aggiunge due.',
+    nota: 'Il numero di passi dipende dal carattere: ogni byte successivo al primo ne aggiunge due.',
     controlli: [{ id: 'ch', tipo: 'scelta', eti: 'Carattere', opzioni: [['A', 'A'], ['è', 'è'], ['€', '€'], ['f', 'volto']], valore: 'è' }],
     previsione: {
       domanda: (p) => { const c = { A: [0x41], 'è': [0xC3, 0xA8], '€': [0xE2, 0x82, 0xAC], f: [0xF0, 0x9F, 0x98, 0x80] }[p.ch]; return 'In memoria il carattere occupa ' + (c.length === 1 ? 'il byte ' : 'i byte ') + c.map((b) => '0x' + b.toString(16).toUpperCase()).join(' ') + '. Quanti bit del punto di codice trasportano, una volta rimosse le etichette?'; },
       opzioni: (p) => { const n = { A: 1, 'è': 2, '€': 3, f: 4 }[p.ch]; return Array.from(new Set([7, 11, 16, 21, 8 * n])).sort((a, b) => a - b); }
     },
-    confronto: (pred, esito, p) => { const n = { A: 1, 'è': 2, '€': 3, f: 4 }[p.ch]; return 'La previsione indicava ' + pred + ' bit utili. Sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 8 * n ? 'Il valore indicato è il numero totale dei bit. Una parte è occupata dalle etichette, estranee al punto di codice.' : 'Il primo byte di un carattere di ' + n + ' byte trasporta ' + [7, 5, 4, 3][n - 1] + ' bit utili' + (n > 1 ? ', e ogni byte di continuazione ne trasporta 6.' : '.')); },
+    confronto: (pred, esito, p) => { const n = { A: 1, 'è': 2, '€': 3, f: 4 }[p.ch]; return 'La previsione indicava ' + pred + ' bit utili. Sono ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 8 * n ? 'Il valore indicato è il numero totale dei bit. Una parte è occupata dalle etichette, estranee al punto di codice.' : 'Il primo byte di un carattere di ' + n + ' byte trasporta ' + [7, 5, 4, 3][n - 1] + ' bit utili' + (n > 1 ? ', e ogni byte successivo al primo ne trasporta 6.' : '.')); },
     costruisci(p) {
       const el = SL.el, passi = [];
       const DATI = { A: [0x41, 'A'], 'è': [0xE8, 'è'], '€': [0x20AC, '€'], f: [0x1F600, '😀'] }[p.ch];
@@ -99,26 +99,26 @@ SL.registra('1.3.2', {
       bytes.forEach((b, k) => {
         if (k > 0) {
           mostrati[k] = true;
-          P({ byte: k, etichetta: k }, 2, 'Il byte ' + k + ' in binario', H(b) + ' in binario è ' + B(b) + '. Comincia con 10, l’etichetta di ogni byte di continuazione, a conferma che il carattere prosegue in questo byte.', { calc: H(b) + ' = ' + B(b) }, k);
+          P({ byte: k, etichetta: k }, 2, 'Il byte ' + k + ' in binario', H(b) + ' in binario è ' + B(b) + '. Comincia con 10, l’etichetta di ogni byte successivo al primo, a conferma che il carattere prosegue in questo byte.', { calc: H(b) + ' = ' + B(b) }, k);
         }
         separati[k] = true;
         const quanti = 8 - pref(k), da = raccolti; raccolti += quanti;
         P({ byte: k, nuovi: da || -1 }, 2, k === 0 ? 'I bit utili del primo byte' : 'I bit utili del byte ' + k, (k === 0
           ? 'Rimossa l’etichetta, il primo byte fornisce ' + quanti + ' bit utili: ' + B(b).slice(pref(k)) + '. Essi confluiscono nella fila.'
           : 'Rimossa l’etichetta restano 6 bit utili, ' + B(b).slice(2) + ', che si accodano ai precedenti.'),
-          Object.assign({ calc: 'bit utili: ' + da + ' + ' + quanti + ' = ' + raccolti }, k === 0 && n > 1 ? { chiedi: { d: 'I byte successivi al primo hanno tutti la medesima etichetta. Quale?', o: ['10', '11', '01'], g: 0, no: 'I byte di continuazione cominciano con 10. In tal modo nessuno di essi può essere scambiato per l’inizio di un carattere.' } } : {}), k);
+          Object.assign({ calc: 'bit utili: ' + da + ' + ' + quanti + ' = ' + raccolti }, k === 0 && n > 1 ? { chiedi: { d: 'I byte successivi al primo hanno tutti la medesima etichetta. Quale?', o: ['10', '11', '01'], g: 0, no: 'I byte successivi al primo cominciano con 10. In tal modo nessuno di essi può essere scambiato per l’inizio di un carattere.' } } : {}), k);
       });
       const esa = cp.toString(16).toUpperCase();
       P({}, 3, 'La fila letta come numero', (utili === 11 ? 'Gli 11' : 'I ' + utili) + ' bit in fila vanno letti come un solo numero binario, con i pesi dell’unità 1.2.2. Il loro valore è ' + cp + '.', { calc: fila + ' = ' + cp });
       P({ numero: true }, 3, 'Il punto di codice', 'Il medesimo numero, in esadecimale, si scrive ' + esa + '. Con il prefisso U+ e almeno quattro cifre assume la forma U+' + esa.padStart(4, '0') + ', con la quale si indicano i punti di codice.', { calc: cp + ' = 0x' + esa });
-      P({ numero: true, car: true }, 3, 'Il carattere', 'Nella tabella Unicode il punto di codice U+' + esa.padStart(4, '0') + ' corrisponde ' + (p.ch === 'f' ? 'al simbolo di un volto sorridente' : 'al carattere «' + car + '»') + '. ' + (n === 1 ? 'Un byte, sette bit utili.' : n + ' byte, ' + utili + ' bit utili: ' + primi + ' dal primo e 6 da ciascun byte di continuazione.'), { calc: primi + (n > 1 ? ' + 6 × ' + (n - 1) : '') + ' = ' + utili + ' bit utili' });
+      P({ numero: true, car: true }, 3, 'Il carattere', 'Nella tabella Unicode il punto di codice U+' + esa.padStart(4, '0') + ' corrisponde ' + (p.ch === 'f' ? 'al simbolo di un volto sorridente' : 'al carattere «' + car + '»') + '. ' + (n === 1 ? 'Un byte, sette bit utili.' : n + ' byte, ' + utili + ' bit utili: ' + primi + ' dal primo e 6 da ciascun byte successivo.'), { calc: primi + (n > 1 ? ' + 6 × ' + (n - 1) : '') + ' = ' + utili + ' bit utili' });
       return { passi, esito: utili };
     }
   },
   bilancio: {
     regola: [
       'Unicode assegna a ogni carattere un numero, il punto di codice. UTF-8 scrive tale numero impiegando da uno a quattro byte.',
-      'Il primo byte annuncia la lunghezza: 0 per un byte, 110 per due, 1110 per tre, 11110 per quattro. I byte di continuazione cominciano con 10 e trasportano sei bit ciascuno.'
+      'Il primo byte annuncia la lunghezza: 0 per un byte, 110 per due, 1110 per tre, 11110 per quattro. I byte successivi al primo cominciano con 10 e trasportano sei bit ciascuno.'
     ],
     errori: [
       ['Contare un carattere per byte.', 'Le lettere accentate occupano due byte, il simbolo € ne occupa tre. Caratteri e byte vanno contati separatamente.'],

@@ -57,18 +57,18 @@
         indizi: [(nb - 1) + ' × ' + bl + ' = ' + (nb - 1) * bl + ', e ' + nb + ' × ' + bl + ' = ' + nb * bl + '.', 'Il file, di ' + s + ' byte, è compreso fra questi due valori: occorrono ' + nb + (nb === 1 ? ' blocco.' : ' blocchi.'), cosa === 0 ? 'Blocchi: ' + nb + '.' : cosa === 1 ? nb * bl + ' − ' + s + ' = ' + spreco + '.' : 'Ultimo byte in posizione ' + (s - 1) + ': blocco logico ' + (nb - 1) + '.'],
         svolgimento: ['Blocchi: ' + nb + '.', 'Riservati: ' + nb * bl + ' byte.', 'Inutilizzati: ' + spreco + ' byte.', 'Ultimo byte: blocco logico ' + (nb - 1) + '.'] };
     },
-    // 6.5.4 · blocco raggiunto seguendo una catena, oppure blocchi liberi di una bitmap
+    // 6.5.4 · blocco raggiunto seguendo una catena, oppure blocchi liberi di una bit map
     (r) => {
-      if (r.int(0, 2) === 0) { const n = r.int(10, 16), bit = []; for (let k = 0; k < n; k++) bit.push(r.int(0, 1)); const zeri = bit.filter((b) => b === 0).length, giuste = I(zeri);
-        return { u: '6.5.4', d: 'La bitmap di un volume di ' + n + ' blocchi è ' + bit.join(' ') + '. Quanti blocchi sono liberi?', segnaposto: 'Un numero', giuste,
-          ok: 'I bit a 0 sono ' + zeri + '.',
+      if (r.int(0, 2) === 0) { const n = r.int(10, 16), bit = []; for (let k = 0; k < n; k++) bit.push(r.int(0, 1)); const uni = bit.filter((b) => b === 1).length, giuste = I(uni);
+        return { u: '6.5.4', d: 'La bit map di un volume di ' + n + ' blocchi, con 1 per i blocchi liberi, è ' + bit.join(' ') + '. Quanti blocchi sono liberi?', segnaposto: 'Un numero', giuste,
+          ok: 'I bit a 1 sono ' + uni + '.',
           diagnosi: DIAG(giuste, [
-            { se: I(n - zeri), msg: 'Questi sono i bit a 1, cioè i blocchi occupati. I liberi sono gli zeri.' },
+            { se: I(n - uni), msg: 'Questi sono i bit a 0, cioè i blocchi occupati. I liberi sono gli uni.' },
             { se: I(n), msg: 'Questi sono i blocchi complessivi.' }
           ]),
-          altro: 'Il numero è diverso. Si contino i bit a 0.',
-          indizi: ['Un bit a 0 indica un blocco libero.', 'I bit a 1 sono ' + (n - zeri) + '.', n + ' − ' + (n - zeri) + ' = ' + zeri + '.'],
-          svolgimento: ['Occupati: ' + (n - zeri) + '.', 'Liberi: ' + zeri + '.'] }; }
+          altro: 'Il numero è diverso. Si contino i bit a 1.',
+          indizi: ['Un bit a 1 indica un blocco libero.', 'I bit a 0 sono ' + (n - uni) + '.', n + ' − ' + (n - uni) + ' = ' + uni + '.'],
+          svolgimento: ['Occupati: ' + (n - uni) + '.', 'Liberi: ' + uni + '.'] }; }
       const len = r.int(4, 5), cat = r.mescola([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]).slice(0, len), ind = r.int(1, len - 1), off = r.int(0, 1023), pos = ind * 1024 + off, giuste = I(cat[ind]);
       return { u: '6.5.4', d: 'I blocchi sono da 1024 byte. Un file ha inizio nel blocco ' + cat[0] + ', e la FAT indica i successori ' + cat.slice(1).map((b, k) => cat[k] + ' → ' + b).join(', ') + '. In quale blocco del volume si trova il byte di posizione ' + pos + '?', segnaposto: 'Un numero', giuste,
         ok: pos + ' = ' + ind + ' × 1024 + ' + off + ': blocco logico ' + ind + '. Catena: ' + cat.slice(0, ind + 1).join(', ') + '.',

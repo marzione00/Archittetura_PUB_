@@ -8,7 +8,7 @@ SL.registra('1.7.2', {
     carte: [
       { sim: 'byte', da: 'Dall’unità 1.2.3', t: 'L’ordine little-endian', d: 'Un numero di più byte scritto a partire dal byte meno significativo. Il numero 0x1234 diventa 34 12.' },
       { sim: 'segno', da: 'Dall’unità 1.4.1', t: 'Il complemento a due', d: 'Su sedici bit, una parola con il bit di segno a 1 vale il suo valore senza segno diminuito di 65 536.' },
-      { sim: 'virgola', da: 'Dall’unità 1.6.2', t: 'La virgola mobile a 32 bit', d: 'Un bit di segno, otto bit di esponente aumentato di 127, ventitré bit per le cifre del significando.' }
+      { sim: 'virgola', da: 'Dall’unità 1.6.2', t: 'La virgola mobile a 32 bit', d: 'Un bit di segno, otto bit di esponente aumentato di 127, ventitré bit per le cifre della mantissa.' }
     ],
     domanda: { d: 'Prima di proseguire: i due byte 34 12 sono un intero senza segno in ordine little-endian. Quanto vale?', o: [
       { t: '0x1234, cioè 4660', ok: true, fb: 'Il primo byte è il meno significativo. Per scrivere il numero si antepone il secondo.' },
@@ -110,10 +110,10 @@ SL.registra('1.7.2', {
 
       campo = 'tensione'; regola = 'virgola mobile';
       P({ campo: 'tens', att: [iV, iV + 4], box: 2, b1: esa(iV, iV + 4), b2: H(w, 8) }, 3, 'La tensione: l’ordine dei byte', 'La tensione occupa quattro byte, ancora in ordine little-endian. Letti dall’ultimo al primo formano la parola ' + H(w, 8) + '.', { calc: esa(iV, iV + 4) + ' → ' + H(w, 8) });
-      P({ campo: 'tens', att: [iV, iV + 4], box: 2, b1: esa(iV, iV + 4), b2: H(w, 8) }, 3, 'La tensione: segno, esponente, significando', 'La parola va letta come virgola mobile a 32 bit. Il bit di segno vale ' + S + '. Gli otto bit dell’esponente valgono ' + E + ', e sottratto 127 resta ' + esp + '. Le cifre conservate, precedute dall’uno implicito, danno il significando ' + V(sig) + '.',
-        { calc: 'S = ' + S + ' · E = ' + E + ' · significando = ' + V(sig) });
+      P({ campo: 'tens', att: [iV, iV + 4], box: 2, b1: esa(iV, iV + 4), b2: H(w, 8) }, 3, 'La tensione: segno, esponente, mantissa', 'La parola va letta come virgola mobile a 32 bit. Il bit di segno vale ' + S + '. Gli otto bit dell’esponente valgono ' + E + ', e sottratto 127 resta ' + esp + '. Le cifre conservate, precedute dall’uno implicito, danno la mantissa ' + V(sig) + '.',
+        { calc: 'S = ' + S + ' · E = ' + E + ' · mantissa = ' + V(sig) });
       cur = iV + 4;
-      P({ campo: 'tens', att: [iV, iV + 4], box: 2, b1: esa(iV, iV + 4), b2: H(w, 8), b3: V(volt) + ' V' }, 3, 'La tensione: il valore', 'Il valore è il significando moltiplicato per 2 elevato a ' + esp + ', cioè per ' + Math.pow(2, esp) + ': ' + V(sig) + ' × ' + Math.pow(2, esp) + ' = ' + V(volt) + '. Il campo indica ' + V(volt) + ' volt. Il cursore avanza di quattro.',
+      P({ campo: 'tens', att: [iV, iV + 4], box: 2, b1: esa(iV, iV + 4), b2: H(w, 8), b3: V(volt) + ' V' }, 3, 'La tensione: il valore', 'Il valore è la mantissa moltiplicata per 2 elevato a ' + esp + ', cioè per ' + Math.pow(2, esp) + ': ' + V(sig) + ' × ' + Math.pow(2, esp) + ' = ' + V(volt) + '. Il campo indica ' + V(volt) + ' volt. Il cursore avanza di quattro.',
         { calc: V(sig) + ' × 2^' + esp + ' = ' + V(volt) + ' V' });
 
       campo = '·'; regola = '·';

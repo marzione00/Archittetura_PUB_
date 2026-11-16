@@ -20,7 +20,7 @@ SL.registra('3.5.2', {
     titolo: 'Lettura per righe e lettura per colonne',
     termini: ['diagramma di pipeline', 'svuotamento'],
     testo: [
-      'Le fasi del capitolo 3.3 corrispondono ai cinque stadi della pipeline di Y86-64. Ciascuno è indicato da una lettera, tratta dal nome inglese: F per il prelievo, D per la decodifica, E per l’esecuzione, M per la memoria, W per la scrittura nei registri. L’aggiornamento del PC è privo di uno stadio proprio, poiché la scelta del prossimo indirizzo avviene all’inizio di F.',
+      'Le fasi del capitolo 3.3 corrispondono ai cinque stadi della CPU con pipeline del capitolo 3.6. Ciascuno è indicato da una lettera, tratta dal nome inglese: F per il prelievo, D per la decodifica, E per l’esecuzione, M per la memoria, W per la scrittura nei registri. L’aggiornamento del PC è privo di uno stadio proprio, poiché la scelta del prossimo indirizzo avviene all’inizio di F.',
       'Il [[diagramma di pipeline]] ha una riga per istruzione e una colonna per ciclo. Letto lungo una riga descrive il percorso di un’istruzione: F, D, E, M, W, una lettera per ciclo. Letto lungo una colonna è un’istantanea, che indica quale istruzione occupa ciascuno stadio in quel ciclo.',
       { fig: 'scena', w: 720, h: 222, titolo: 'Cinque istruzioni indipendenti', nota: 'La colonna in evidenza è l’istantanea del ciclo 5: tutti gli stadi sono occupati.', els:
         SL.pipe.diagramma('g', [1, 2, 3, 4, 5].map((i) => ({ n: 'I' + i, da: i, s: ['F', 'D', 'E', 'M', 'W'] })), { x: 100, y: 4, passo: 66, cicli: 9, py: 38, h: 30, evid: 5 }) },

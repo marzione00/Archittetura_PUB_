@@ -1,6 +1,6 @@
 'use strict';
 SL.unita612 = (() => {
-  // Otto letture: quattro interi presi ogni «passo» interi, due passate. Linee di 64 byte, interi di 4 byte.
+  // Otto letture: quattro interi presi ogni «passo» interi, due passate. Blocchi di 64 byte, interi di 4 byte.
   const indirizzi = (p) => { const una = [0, 1, 2, 3].map((k) => k * p.passo * 4); return una.concat(una); };
   const simula = (p) => { const pos = []; for (let k = 0; k < p.pos; k++) pos.push(null); const S = []; let hit = 0; indirizzi(p).forEach((a) => { const b = Math.floor(a / 64), i = b % p.pos, tag = Math.floor(b / p.pos), ok = pos[i] === b, fuori = ok ? null : pos[i]; if (ok) hit++; pos[i] = b; S.push({ a, b, i, tag, ok, fuori, pos: pos.slice(), hit }); }); return S; };
   const hit = (p) => { const S = simula(p); return S[S.length - 1].hit; };
@@ -21,12 +21,12 @@ SL.registra('6.1.2', {
   filigrana: ['cache', 'tabella', 'conflitto'],
   richiami: {
     carte: [
-      { sim: 'cache', da: 'Dall’unità 6.1.1', t: 'Hit e miss', d: 'Un hit trova la linea in cache. Un miss ne richiede il trasferimento dalla RAM.' },
-      { sim: 'byte', da: 'Dall’unità 6.1.1', t: 'La linea', d: 'Un gruppo di 64 byte consecutivi, trasferito in cache per intero.' },
+      { sim: 'cache', da: 'Dall’unità 6.1.1', t: 'Hit e miss', d: 'Un hit trova il blocco in cache. Un miss ne richiede il trasferimento dalla RAM.' },
+      { sim: 'byte', da: 'Dall’unità 6.1.1', t: 'Il blocco', d: 'Un gruppo di 64 byte consecutivi, trasferito in cache per intero.' },
       { sim: 'operation', da: 'Dall’unità 1.4.4', t: 'La divisione intera', d: 'Una divisione fra interi produce un quoziente e un resto: 255 diviso 13 dà 19, con resto 8.' }
     ],
     domanda: { d: 'Prima di proseguire: un array di interi da 4 byte ha inizio all’indirizzo 0. A quale indirizzo ha inizio l’elemento di indice 16?', o: [
-      { t: 'All’indirizzo 64', ok: true, fb: '16 × 4 = 64: si tratta del primo byte della linea successiva.' },
+      { t: 'All’indirizzo 64', ok: true, fb: '16 × 4 = 64: si tratta del primo byte del blocco successivo.' },
       { t: 'All’indirizzo 16', fb: 'Sedici è l’indice. Ogni elemento occupa 4 byte.' },
       { t: 'All’indirizzo 60', fb: 'All’indirizzo 60 ha inizio l’elemento di indice 15.' }
     ] }
@@ -35,12 +35,12 @@ SL.registra('6.1.2', {
     titolo: 'La sufficienza di una memoria piccola',
     termini: ['località spaziale', 'località temporale', 'indice e tag'],
     testo: [
-      'Una cache contiene una frazione ridotta dei dati di un programma, e tuttavia serve la maggior parte delle letture. La ragione è una regolarità nel comportamento dei programmi, che ha due aspetti. Il primo è la [[località spaziale]]: dopo avere impiegato un dato, un programma impiega spesso quelli adiacenti. La scansione di un array ne è l’esempio più comune. Con interi da 4 byte, una linea di 64 byte ne contiene sedici, e un solo rifornimento serve sedici letture.',
-      'Il secondo è la [[località temporale]]: un dato appena impiegato sarà probabilmente impiegato di nuovo a breve. Il contatore di un ciclo, o un array percorso due volte, sono casi tipici. Finché la linea resta in cache, ogni nuovo accesso è un hit, anche a distanza di tempo.',
-      'Resta da stabilire la collocazione di ogni linea nella cache. Nel seguito si denomina blocco il gruppo di 64 byte della RAM, numerato come nell’unità precedente, e posizione ciascuna delle sedi della cache. Lo schema più diretto assegna a ogni blocco una sola posizione ammessa. Se le posizioni sono due, il blocco è collocato nella posizione data dal resto della divisione del suo numero per 2: i blocchi pari nella posizione 0, i dispari nella posizione 1. Tale resto prende il nome di indice.',
+      'Una cache contiene una frazione ridotta dei dati di un programma, e tuttavia serve la maggior parte delle letture. La ragione è una regolarità nel comportamento dei programmi, che ha due aspetti. Il primo è la [[località spaziale]]: dopo avere impiegato un dato, un programma impiega spesso quelli adiacenti. La scansione di un array ne è l’esempio più comune. Con interi da 4 byte, un blocco di 64 byte ne contiene sedici, e un solo rifornimento serve sedici letture.',
+      'Il secondo è la [[località temporale]]: un dato appena impiegato sarà probabilmente impiegato di nuovo a breve. Il contatore di un ciclo, o un array percorso due volte, sono casi tipici. Finché il blocco resta in cache, ogni nuovo accesso è un hit, anche a distanza di tempo.',
+      'Resta da stabilire la collocazione di ogni blocco nella cache. I blocchi della RAM sono numerati come nell’unità precedente, e nel seguito si denomina posizione ciascuna delle sedi della cache. Lo schema più diretto assegna a ogni blocco una sola posizione ammessa. Se le posizioni sono due, il blocco è collocato nella posizione data dal resto della divisione del suo numero per 2: i blocchi pari nella posizione 0, i dispari nella posizione 1. Tale resto prende il nome di indice.',
       { fig: 'scena', w: 720, h: 172, titolo: 'Passo di sedici interi: il blocco 2 ha sostituito il blocco 0', nota: 'Alla terza lettura il blocco 2 è entrato nella posizione 0, da cui ha rimosso il blocco 0.', els: SL.unita612.quadro('g', { passo: 16, pos: 2 }, 3, { x: 10, y: 4, w: 700 }) },
       'Molti blocchi condividono la medesima posizione, e la cache deve identificare quello che la occupa in un dato momento. A tale scopo, accanto ai dati, conserva un’etichetta: il quoziente della medesima divisione, denominato tag. La coppia [[indice e tag]] identifica il blocco: l’indice indica la posizione da esaminare, il tag indica se il blocco residente è quello richiesto. Con due posizioni, il blocco 3 ha indice 1 e tag 1, mentre il blocco 1 ha il medesimo indice e tag 0.',
-      'Ne deriva un inconveniente. Due blocchi con il medesimo indice si sostituiscono a vicenda, anche se il resto della cache è vuoto. Un programma che avanza di una linea a ogni lettura può pertanto richiedere un rifornimento a ogni passo, mentre un programma che legge dati vicini opera quasi sempre in cache. Per completezza: se il programma scrive, la copia in cache diviene diversa dall’originale, e prima di essere sostituita va ricopiata in RAM. In questa unità le richieste sono tutte letture.'
+      'Ne deriva un inconveniente. Due blocchi con il medesimo indice si sostituiscono a vicenda, anche se il resto della cache è vuoto. Un programma che avanza di un blocco a ogni lettura può pertanto richiedere un rifornimento a ogni passo, mentre un programma che legge dati vicini opera quasi sempre in cache. Per completezza: se il programma scrive, la copia in cache diviene diversa dall’originale, e prima di essere sostituita va ricopiata in RAM. In questa unità le richieste sono tutte letture.'
     ]
   },
   esperimento: {
@@ -77,7 +77,7 @@ SL.registra('6.1.2', {
         P(k + 1, k < 4 ? 1 : 2, 'Lettura ' + (k + 1) + ' · indirizzo ' + s.a, testo, Object.assign({ calc: conto + ' · ' + (s.ok ? 'hit' : 'miss') }, k === 4 ? { chiedi: { d: 'Ha inizio la seconda passata, che torna all’indirizzo 0. Il blocco 0 è ancora in cache?', o: ['Sì', 'No, un altro blocco ha occupato la sua posizione'], g: s.ok ? 0 : 1, no: s.ok ? 'Nessun blocco con il medesimo indice è stato letto nel frattempo.' : 'Il blocco ' + s.fuori + ' ha il medesimo indice del blocco 0, e lo ha sostituito.' } } : {}));
       });
       const h = U.hit(p);
-      P(8, 3, 'Il totale', 'Otto letture: ' + h + ' hit e ' + (8 - h) + ' miss. ' + (p.passo === 1 ? 'Gli interi letti sono vicini, e si trovano tutti nella medesima linea, per località spaziale. La seconda passata li trova in cache, per località temporale.' : h === 0 ? 'Gli interi letti distano una linea o più, e i loro blocchi si contendono le medesime posizioni. La seconda passata non trova in cache alcun blocco.' : 'I blocchi impiegati hanno occupato ciascuno una posizione propria, e la seconda passata li ha trovati tutti in cache.'), { calc: h + ' hit · ' + (8 - h) + ' miss', esito: [h + ' hit su 8', ''] });
+      P(8, 3, 'Il totale', 'Otto letture: ' + h + ' hit e ' + (8 - h) + ' miss. ' + (p.passo === 1 ? 'Gli interi letti sono vicini, e si trovano tutti nel medesimo blocco, per località spaziale. La seconda passata li trova in cache, per località temporale.' : h === 0 ? 'Gli interi letti distano un blocco o più, e i loro blocchi si contendono le medesime posizioni. La seconda passata non trova in cache alcun blocco.' : 'I blocchi impiegati hanno occupato ciascuno una posizione propria, e la seconda passata li ha trovati tutti in cache.'), { calc: h + ' hit · ' + (8 - h) + ' miss', esito: [h + ' hit su 8', ''] });
       return { passi, esito: h };
     }
   },
@@ -115,7 +115,7 @@ SL.registra('6.1.2', {
       { d: 'Un programma legge A[0], A[1], A[2] e così via, ogni elemento una volta sola. Quale proprietà produce gli hit?', guida: 'Si scelga la risposta.', o: [
         { t: 'La località spaziale', ok: true, fb: 'Ogni rifornimento trasferisce in cache anche gli elementi successivi.' },
         { t: 'La località temporale', fb: 'Nessun elemento è riletto. È determinante la vicinanza fra gli indirizzi.' },
-        { t: 'Nessuna, poiché ogni lettura è un miss', fb: 'Sedici interi da 4 byte condividono una linea: un miss, seguito da quindici hit.' }] }
+        { t: 'Nessuna, poiché ogni lettura è un miss', fb: 'Sedici interi da 4 byte condividono un blocco: un miss, seguito da quindici hit.' }] }
     ],
     sfida: ['cslez6_1_02_locality', 'Località']
   }

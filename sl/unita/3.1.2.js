@@ -26,7 +26,7 @@ SL.registra('3.1.2', {
       { fig: 'scena', w: 720, h: 150, titolo: 'Un multiplexer a due ingressi, con S = 0', nota: 'La AND superiore trasferisce I0. Quella inferiore dà 0, e I1 è ignorato.', els: [
         SL.el.cella('i0', 20, 22, 70, 46, '1', 'on', { piccola: true, so: 'I0' }), SL.el.cella('i1', 20, 98, 70, 46, '1', 'zero', { piccola: true, so: 'I1' }),
         SL.el.linea('a', 90, 45, 220, 45, 'on'), SL.el.linea('b', 90, 121, 220, 121, ''),
-        SL.el.box('g0', 220, 12, 190, 60, 'NOT S AND I0', '1', 'on', { cls: 'stretta' }), SL.el.box('g1', 220, 88, 190, 60, 'S AND I1', '0', '', { cls: 'stretta' }),
+        SL.el.box('g0', 220, 12, 190, 60, 'S̄·I0', '1', 'on', { cls: 'stretta' }), SL.el.box('g1', 220, 88, 190, 60, 'S·I1', '0', '', { cls: 'stretta' }),
         SL.el.linea('c', 410, 42, 490, 70, 'on'), SL.el.linea('d', 410, 118, 490, 90, ''),
         SL.el.box('or', 490, 46, 100, 66, 'OR', '1', 'on', { cls: 'stretta' }), SL.el.linea('e', 590, 79, 630, 79, 'on'),
         SL.el.cella('u', 630, 56, 70, 46, '1', 'att', { piccola: true, so: 'uscita' })

@@ -164,33 +164,73 @@ SL.x86 = (() => {
   return { u64, esa, esa2, byteDi, larghezza, scrivi, leggi, registro, bit, fila, pila, listato, flag, bin8, conSegno, somma, differenza, num, labFlag, traccia };
 })();
 
-/* Strumenti comuni alle unità sul repertorio Y86-64: registri, lunghezze, codifica in byte e scrittura
-   delle istruzioni. Un'istruzione è { n: nome, a: registro rA, b: registro rB, c: costante }. */
-SL.y86 = (() => {
+/* Strumenti comuni alle unità sulla CPU del caso di studio (capitoli 3.3–3.6), come nella dispensa:
+   undici istruzioni in sintassi Intel, con la destinazione per prima, e il solo flag ZF.
+   Un'istruzione è { n, a: registro rA, b: registro rB, c: costante }. I nomi n sono:
+   'halt', 'nop', 'rr' (mov rA, rB), 'ir' (mov rB, V), 'mr' (mov rA, D(rB)), 'rm' (mov D(rB), rA),
+   'add', 'sub', 'and', 'or' (OP rA, rB, con il risultato in rA) e 'je' (je Dest). */
+SL.isa = (() => {
   const REG = ['rax', 'rcx', 'rdx', 'rbx', 'rsp', 'rbp', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14'];
-  const OP = { addq: 0, subq: 1, andq: 2, xorq: 3 }, J = { jmp: 0, jle: 1, jl: 2, je: 3, jne: 4, jge: 5, jg: 6 };
-  const ICODE = { halt: 0, nop: 1, rrmovq: 2, irmovq: 3, rmmovq: 4, mrmovq: 5, opq: 6, jxx: 7, call: 8, ret: 9, pushq: 10, popq: 11 };
-  const classe = (n) => (n in OP ? 'opq' : n in J ? 'jxx' : n);
-  const conRegistri = (n) => ['rrmovq', 'irmovq', 'rmmovq', 'mrmovq', 'opq', 'pushq', 'popq'].includes(classe(n));
-  const conCostante = (n) => ['irmovq', 'rmmovq', 'mrmovq', 'jxx', 'call'].includes(classe(n));
+  const OP = { add: 0, sub: 1, and: 2, or: 3 };
+  const ICODE = { halt: 0, nop: 1, rr: 2, ir: 3, mr: 4, rm: 5, op: 6, je: 7 };
+  // La dispensa lascia generico il codice di funzione di je («7 fn»): si adotta 3, il codice della condizione «uguale» in Y86-64.
+  const FN_JE = 3;
+  const FORMA = { halt: 'halt', nop: 'nop', rr: 'mov rA, rB', ir: 'mov rB, V', mr: 'mov rA, D(rB)', rm: 'mov D(rB), rA', add: 'add rA, rB', sub: 'sub rA, rB', and: 'and rA, rB', or: 'or rA, rB', je: 'je Dest' };
+  const classe = (n) => (n in OP ? 'op' : n);
+  const conRegistri = (n) => ['rr', 'ir', 'mr', 'rm', 'op'].includes(classe(n));
+  const conCostante = (n) => ['ir', 'mr', 'rm', 'je'].includes(classe(n));
   const lung = (n) => 1 + (conRegistri(n) ? 1 : 0) + (conCostante(n) ? 8 : 0);
   const esa2 = (v) => v.toString(16).toUpperCase().padStart(2, '0');
-  const esa = (v) => '0x' + v.toString(16).toUpperCase();
+  const esa = (v) => (v < 0 ? '−0x' + (-v).toString(16).toUpperCase() : '0x' + v.toString(16).toUpperCase());
+  const num = (v) => (v < 0 ? '−' + (-v) : String(v));
   // Gli otto byte di una costante, dal meno significativo.
   const le8 = (v) => { let x = BigInt.asUintN(64, BigInt(v)); const out = []; for (let k = 0; k < 8; k++) { out.push(Number(x & 255n)); x >>= 8n; } return out; };
   const idReg = (r) => (r == null ? 15 : REG.indexOf(r));
   const byteIst = (i) => {
-    const c = classe(i.n), b = [(ICODE[c] << 4) | (c === 'opq' ? OP[i.n] : c === 'jxx' ? J[i.n] : 0)];
-    if (conRegistri(i.n)) b.push((idReg(i.a) << 4) | idReg(i.b));
+    const c = classe(i.n), b = [(ICODE[c] << 4) | (c === 'op' ? OP[i.n] : c === 'je' ? FN_JE : 0)];
+    if (conRegistri(i.n)) b.push((idReg(c === 'ir' ? null : i.a) << 4) | idReg(i.b));
     if (conCostante(i.n)) le8(i.c).forEach((x) => b.push(x));
     return b;
   };
+  // Testo dell'istruzione. La costante di mov rB, V è scritta in decimale, salvo i.hex; lo spostamento in decimale.
   const testo = (i) => {
-    const c = classe(i.n);
-    return c === 'rrmovq' || c === 'opq' ? i.n + ' %' + i.a + ', %' + i.b : c === 'irmovq' ? 'irmovq $' + i.c + ', %' + i.b : c === 'rmmovq' ? 'rmmovq %' + i.a + ', ' + i.c + '(%' + i.b + ')'
-      : c === 'mrmovq' ? 'mrmovq ' + i.c + '(%' + i.b + '), %' + i.a : c === 'jxx' || c === 'call' ? i.n + ' ' + esa(i.c) : c === 'pushq' || c === 'popq' ? i.n + ' %' + i.a : i.n;
+    const c = classe(i.n), V = i.hex ? esa(i.c).replace('−', '-') : String(i.c), D = String(i.c || 0);
+    return c === 'rr' ? 'mov ' + i.a + ', ' + i.b : c === 'ir' ? 'mov ' + i.b + ', ' + V : c === 'mr' ? 'mov ' + i.a + ', ' + D + '(' + i.b + ')'
+      : c === 'rm' ? 'mov ' + D + '(' + i.b + '), ' + i.a : c === 'op' ? i.n + ' ' + i.a + ', ' + i.b : c === 'je' ? 'je ' + (i.et || esa(i.c)) : i.n;
   };
-  return { REG, OP, J, ICODE, classe, conRegistri, conCostante, lung, esa2, esa, le8, idReg, byteIst, testo };
+  const mnemonico = (n) => (['rr', 'ir', 'mr', 'rm'].includes(n) ? 'mov' : n);
+  // Operazione dell'ALU su interi a 64 bit, restituita come numero.
+  const alu = (n, x, y) => { const X = BigInt.asIntN(64, BigInt(x)), Y = BigInt.asIntN(64, BigInt(y)); return Number(BigInt.asIntN(64, n === 'sub' ? X - Y : n === 'and' ? X & Y : n === 'or' ? X | Y : X + Y)); };
+  /* I valori delle sei fasi di un'istruzione, secondo le tabelle della dispensa.
+     s: { R: { registro: valore }, M: { indirizzo: valore di 8 byte }, zf, pc }. Lo stato s non viene modificato. */
+  const fasi = (i, s) => {
+    const c = classe(i.n), R = (r) => (r == null ? undefined : s.R[r] || 0), f = { icode: ICODE[c], ifun: c === 'op' ? OP[i.n] : c === 'je' ? FN_JE : 0, valP: s.pc + lung(i.n) };
+    f.rA = conRegistri(i.n) ? (c === 'ir' ? null : i.a) : null; f.rB = conRegistri(i.n) ? i.b : null; f.valC = conCostante(i.n) ? i.c : null;
+    f.srcA = c === 'op' || c === 'rm' ? i.a : null; f.srcB = ['rr', 'mr', 'rm', 'op'].includes(c) ? i.b : null;
+    f.valA = R(f.srcA); f.valB = R(f.srcB);
+    f.aluA = c === 'op' ? f.valA : c === 'rr' ? 0 : ['ir', 'mr', 'rm'].includes(c) ? f.valC : null;
+    f.aluB = c === 'op' || c === 'rr' || c === 'mr' || c === 'rm' ? f.valB : c === 'ir' ? 0 : null;
+    f.aluFun = c === 'op' ? i.n : f.aluA == null ? null : 'add';
+    f.valE = f.aluFun ? alu(f.aluFun, f.aluA, f.aluB) : null;
+    f.zf = c === 'op' ? (f.valE === 0 ? 1 : 0) : s.zf;
+    f.cnd = c === 'je' ? s.zf : null;
+    f.mem = c === 'mr' ? 'leggi' : c === 'rm' ? 'scrivi' : null;
+    f.valM = c === 'mr' ? s.M[f.valE] || 0 : null;
+    f.dstE = c === 'op' || c === 'rr' ? i.a : c === 'ir' ? i.b : null; f.dstM = c === 'mr' ? i.a : null;
+    f.pcNuovo = c === 'je' && f.cnd ? i.c : c === 'halt' ? s.pc : f.valP;
+    f.codiceStato = c === 'halt' ? 'SHLT' : 'SAOK';
+    return f;
+  };
+  // Lo stato dopo l'istruzione: una copia di s con registri, memoria, ZF e PC aggiornati.
+  const esegui = (i, s) => {
+    const f = fasi(i, s), R = Object.assign({}, s.R), M = Object.assign({}, s.M);
+    if (f.dstE) R[f.dstE] = f.valE; if (f.dstM) R[f.dstM] = f.valM; if (f.mem === 'scrivi') M[f.valE] = f.valA;
+    return { R, M, zf: f.zf, pc: f.pcNuovo, f };
+  };
+  // Registri letti in Decode e registri scritti in Write back: servono al conteggio delle dipendenze.
+  const letti = (i) => { const f = fasi(i, { R: {}, M: {}, zf: 0, pc: 0 }); return [f.srcA, f.srcB].filter((r) => r != null).filter((r, k, a) => a.indexOf(r) === k); };
+  const scritti = (i) => { const f = fasi(i, { R: {}, M: {}, zf: 0, pc: 0 }); return [f.dstE, f.dstM].filter((r) => r != null); };
+  return { REG, OP, ICODE, FN_JE, FORMA, classe, conRegistri, conCostante, lung, esa2, esa, num, le8, idReg, byteIst, testo, mnemonico, alu, fasi, esegui, letti, scritti };
 })();
 
 /* Diagramma di una pipeline: una riga per istruzione, una colonna per ciclo.

@@ -1,6 +1,6 @@
 'use strict';
 SL.registra('2.6.2', {
-  titolo: 'Frame dello stack e trasferimenti di controllo',
+  titolo: 'Frame della pila e trasferimenti di controllo',
   obiettivo: 'Obiettivo: seguire RSP e RIP dall’istruzione CALL all’istruzione RET, e indicare il contenuto di ogni cella del frame di una funzione.',
   concetti: [['puntatore', 'CALL e RET'], ['pila', 'Il frame'], ['register', 'Registri da conservare']],
   filigrana: ['pila', 'puntatore', 'register'],

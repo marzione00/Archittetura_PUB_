@@ -1,8 +1,8 @@
 'use strict';
 SL.registra('2.2.5', {
-  titolo: 'Leggere il contratto di un’istruzione',
+  titolo: 'Leggere gli effetti di un’istruzione',
   obiettivo: 'Obiettivo: elencare tutti gli effetti di un’istruzione, flag compresi, e spiegare perché due istruzioni che scrivono il medesimo numero possono condurre il programma su percorsi diversi.',
-  concetti: [['lente', 'Contratto'], ['flag', 'Chi scrive i flag'], ['puntatore', 'Salto condizionale']],
+  concetti: [['lente', 'Effetti'], ['flag', 'Chi scrive i flag'], ['puntatore', 'Salto condizionale']],
   filigrana: ['lente', 'flag', 'puntatore'],
   richiami: {
     carte: [
@@ -18,17 +18,17 @@ SL.registra('2.2.5', {
   },
   idea: {
     titolo: 'L’insieme degli effetti di un’istruzione',
-    termini: ['contratto di un’istruzione', 'salto condizionale', 'jz'],
+    termini: ['effetti di un’istruzione', 'salto condizionale', 'jz'],
     testo: [
-      'Due istruzioni possono lasciare il medesimo numero nel medesimo registro e risultare, per il resto del programma, differenti. La differenza emerge dall’esame di tutti gli effetti di un’istruzione: i registri letti, il registro scritto, i flag modificati, l’eventuale accesso alla memoria, il valore assegnato a RIP. L’elenco completo di tali effetti prende il nome di [[contratto di un’istruzione|contratto]] dell’istruzione.',
+      'Due istruzioni possono lasciare il medesimo numero nel medesimo registro e risultare, per il resto del programma, differenti. La differenza emerge dall’esame di tutti gli effetti di un’istruzione: i registri letti, il registro scritto, i flag modificati, l’eventuale accesso alla memoria, il valore assegnato a RIP. L’elenco completo di tali modifiche costituisce gli [[effetti di un’istruzione|effetti]] dell’istruzione.',
       'Nelle unità precedenti RIP è sempre avanzato all’istruzione successiva. Un [[salto condizionale]] introduce un’alternativa: esamina un flag e, secondo il suo valore, lascia proseguire l’esecuzione in sequenza oppure scrive in RIP un altro indirizzo. Il più semplice è [[jz|JZ]], «salta se zero». Esso salta alla destinazione indicata quando ZF vale 1, e prosegue con l’istruzione successiva quando ZF vale 0.',
-      'Un salto condizionale si limita a leggere. Esso trova i flag nello stato lasciato dall’ultima istruzione che li ha scritti, e decide in base a tale stato. Il contratto delle istruzioni precedenti determina pertanto l’esito del salto.',
+      'Un salto condizionale si limita a leggere. Esso trova i flag nello stato lasciato dall’ultima istruzione che li ha scritti, e decide in base a tale stato. Gli effetti delle istruzioni precedenti determinano pertanto l’esito del salto.',
       'Si considerino due modi di aggiungere 1 a EAX. L’istruzione `add eax, 1` esegue la somma e scrive tutti i flag in base al risultato, e ZF vale quindi 1 soltanto se EAX è diventato zero. L’istruzione `lea eax, [rax + 1]` produce il medesimo numero e lascia invariati i flag. Se l’istruzione seguente è un JZ, nel primo caso il salto dipende dal nuovo valore di EAX. Nel secondo dipende da un’operazione anteriore, che può trovarsi a grande distanza nel programma.',
-      { fig: 'scena', w: 720, h: 150, titolo: 'Due contratti a confronto', nota: 'Le due istruzioni coincidono su EAX e sulla memoria, e differiscono sui flag.', els: [
+      { fig: 'scena', w: 720, h: 150, titolo: 'Due elenchi di effetti a confronto', nota: 'Le due istruzioni coincidono su EAX e sulla memoria, e differiscono sui flag.', els: [
         SL.el.nota('h1', 300, 0, 'SCRIVE EAX', 'mono'), SL.el.nota('h2', 440, 0, 'SCRIVE I FLAG', 'mono'), SL.el.nota('h3', 580, 0, 'USA LA MEMORIA', 'mono'),
         SL.el.box('i1', 10, 26, 260, 50, null, 'add eax, 1', '', { cls: 'stretta' }), SL.el.cella('a1', 300, 26, 120, 50, 'sì', 'on', { piccola: true }), SL.el.cella('b1', 440, 26, 120, 50, 'sì', 'att', { piccola: true }), SL.el.cella('c1', 580, 26, 120, 50, 'no', 'zero', { piccola: true }),
         SL.el.box('i2', 10, 88, 260, 50, null, 'lea eax, [rax + 1]', '', { cls: 'stretta' }), SL.el.cella('a2', 300, 88, 120, 50, 'sì', 'on', { piccola: true }), SL.el.cella('b2', 440, 88, 120, 50, 'no', 'att', { piccola: true }), SL.el.cella('c2', 580, 88, 120, 50, 'no', 'zero', { piccola: true })] },
-      'Per questa ragione due istruzioni sono scambiabili soltanto dopo il confronto integrale dei contratti, e dopo aver accertato che nessuna istruzione successiva legga un effetto che cambia. I compilatori eseguono sistematicamente tale verifica, e la lettura del loro codice richiede di saperla ripetere.',
+      'Per questa ragione due istruzioni sono scambiabili soltanto dopo il confronto integrale dei loro effetti, e dopo aver accertato che nessuna istruzione successiva legga un effetto che cambia. I compilatori eseguono sistematicamente tale verifica, e la lettura del loro codice richiede di saperla ripetere.',
       'Il caso limite chiarisce la differenza. Con EAX uguale a 0xFFFFFFFF, l’aggiunta di 1 dà 0 su 32 bit. Dopo ADD il flag ZF vale 1 e il salto è eseguito. Dopo LEA il registro contiene il medesimo zero, e ZF conserva il valore precedente, qualunque esso fosse.'
     ]
   },
@@ -40,7 +40,7 @@ SL.registra('2.2.5', {
     vedrai: [
       ['tabella', 'Il programma', 'A sinistra: l’istruzione scelta, il salto e le due possibili prosecuzioni.'],
       ['register', 'Lo stato', 'A destra: EAX, ZF e RIP.'],
-      ['lente', 'Il contratto', 'In basso: gli effetti dell’istruzione scelta, uno per uno.']
+      ['lente', 'Gli effetti', 'In basso: gli effetti dell’istruzione scelta, uno per uno.']
     ]
   },
   lab: {
@@ -71,7 +71,7 @@ SL.registra('2.2.5', {
         els.push(el.box('eax', 350, 28, 230, 70, 'EAX', HX(s.eax) + ' · ' + s.eax, o.att === 'eax' ? 'att' : '', { cls: 'stretta' }));
         els.push(el.box('zf', 600, 28, 100, 70, 'ZF', String(s.zf), o.att === 'zf' ? 'att' : s.zf ? 'on' : ''));
         els.push(el.box('rip', 720, 28, 110, 70, 'RIP', s.rip, o.att === 'rip' ? 'att' : '', { cls: 'stretta' }));
-        els.push(el.nota('t2', 350, 120, 'IL CONTRATTO DI ' + (ADD ? 'ADD' : 'LEA'), 'mono'));
+        els.push(el.nota('t2', 350, 120, 'GLI EFFETTI DI ' + (ADD ? 'ADD' : 'LEA'), 'mono'));
         els.push(el.box('c1', 350, 146, 150, 70, 'scrive EAX', o.c >= 1 ? 'sì' : '·', o.c >= 1 ? 'on' : ''));
         els.push(el.box('c2', 515, 146, 150, 70, 'scrive i flag', o.c >= 2 ? (ADD ? 'sì' : 'no') : '·', o.c >= 2 ? 'att' : ''));
         els.push(el.box('c3', 680, 146, 150, 70, 'usa la memoria', o.c >= 2 ? 'no' : '·', ''));
@@ -91,13 +91,13 @@ SL.registra('2.2.5', {
       P({ riga: 1, fatte: [0], att: 'zf', c: 2, dec: 'ZF = ' + zfDopo + (salta ? ' → salta' : ' → prosegue') }, 2, 'JZ legge ZF', 'Il salto condizionale esamina soltanto il flag. ZF vale ' + zfDopo + ', quindi ' + (salta ? 'la condizione «zero» è vera e il salto è eseguito.' : 'la condizione «zero» è falsa e il salto non è eseguito.'), { calc: 'jz: ZF = ' + zfDopo, esito: [salta ? 'salta' : 'prosegue', salta ? 'si' : 'no'] });
       s.rip = salta ? '0x401020' : '0x401005';
       P({ riga: salta ? 3 : 2, fatte: [0, 1], att: 'rip', c: 2, dec: salta ? 'RIP ← 0x401020' : 'RIP ← 0x401005' }, 2, salta ? 'RIP riceve la destinazione' : 'RIP avanza in sequenza', salta ? 'JZ scrive in RIP l’indirizzo indicato, 0x401020. L’istruzione situata a 0x401005 è omessa.' : 'JZ occupa due byte, e RIP avanza a 0x401005 come dopo ogni altra istruzione. La destinazione 0x401020 resta inutilizzata.', { calc: 'RIP = ' + s.rip });
-      P({ riga: salta ? 3 : 2, fatte: [0, 1], c: 2, dec: (ADD ? 'con LEA' : 'con ADD') + ': ZF = ' + zfAltra + (zfAltra ? ' → salta' : ' → prosegue') }, 3, 'Con l’altra istruzione', 'Se l’aumento fosse stato eseguito con ' + (ADD ? 'LEA' : 'ADD') + ', EAX conterrebbe il medesimo valore, ' + HX(dopo) + ', e ZF varrebbe ' + zfAltra + '. ' + (zfAltra === zfDopo ? 'In questo caso i due percorsi coincidono, per i dati scelti. Con altri dati essi divergono.' : 'Il salto avrebbe seguito l’altro percorso. Le due istruzioni scrivono il medesimo numero e hanno contratti diversi.'), { calc: (ADD ? 'add' : 'lea') + ': ZF = ' + zfDopo + ' · ' + (ADD ? 'lea' : 'add') + ': ZF = ' + zfAltra });
+      P({ riga: salta ? 3 : 2, fatte: [0, 1], c: 2, dec: (ADD ? 'con LEA' : 'con ADD') + ': ZF = ' + zfAltra + (zfAltra ? ' → salta' : ' → prosegue') }, 3, 'Con l’altra istruzione', 'Se l’aumento fosse stato eseguito con ' + (ADD ? 'LEA' : 'ADD') + ', EAX conterrebbe il medesimo valore, ' + HX(dopo) + ', e ZF varrebbe ' + zfAltra + '. ' + (zfAltra === zfDopo ? 'In questo caso i due percorsi coincidono, per i dati scelti. Con altri dati essi divergono.' : 'Il salto avrebbe seguito l’altro percorso. Le due istruzioni scrivono il medesimo numero e hanno effetti diversi.'), { calc: (ADD ? 'add' : 'lea') + ': ZF = ' + zfDopo + ' · ' + (ADD ? 'lea' : 'add') + ': ZF = ' + zfAltra });
       return { passi, esito: salta ? 'salta' : 'prosegue' };
     }
   },
   bilancio: {
     regola: [
-      'Il contratto di un’istruzione è l’elenco di tutti i suoi effetti: registri, flag, memoria, RIP. Due istruzioni sono equivalenti soltanto se coincidono su ogni effetto letto dal seguito del programma.',
+      'Gli effetti di un’istruzione sono l’elenco di tutte le sue modifiche: registri, flag, memoria, RIP. Due istruzioni sono equivalenti soltanto se coincidono su ogni effetto letto dal seguito del programma.',
       'Un salto condizionale legge i flag lasciati dall’ultima istruzione che li ha scritti. JZ salta quando ZF vale 1. ADD e SUB scrivono i flag, mentre MOV e LEA li lasciano invariati.'
     ],
     errori: [

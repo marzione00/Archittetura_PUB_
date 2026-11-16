@@ -10,20 +10,20 @@
     (r) => {
       const L = r.scegli([16, 32, 64]), t = r.int(1, 3), pen = r.scegli([20, 40, 50, 100]), n = r.int(3, 4), ind = [], viste = [];
       for (let k = 0; k < n; k++) ind.push(k > 0 && r.int(0, 1) === 0 ? Math.floor(ind[r.int(0, k - 1)] / L) * L + r.int(0, L - 1) : r.int(0, 4 * L - 1));
-      let miss = 0; const righe = ind.map((a) => { const l = Math.floor(a / L), ok = viste.indexOf(l) >= 0; if (!ok) { viste.push(l); miss++; } return 'Byte ' + a + ': linea ' + l + ', ' + (ok ? 'hit, ' + t + ' ns.' : 'miss, ' + (t + pen) + ' ns.'); });
+      let miss = 0; const righe = ind.map((a) => { const l = Math.floor(a / L), ok = viste.indexOf(l) >= 0; if (!ok) { viste.push(l); miss++; } return 'Byte ' + a + ': blocco ' + l + ', ' + (ok ? 'hit, ' + t + ' ns.' : 'miss, ' + (t + pen) + ' ns.'); });
       const tot = n * t + miss * pen, cosa = r.int(0, 1), giuste = cosa === 0 ? NS(tot) : I(miss);
-      return { u: '6.1.1', d: 'La cache è vuota, e può contenere tutte le linee necessarie. Le linee sono di ' + L + ' byte. Una consultazione costa ' + t + ' ns, e un rifornimento ' + pen + ' ns aggiuntivi. Il processore legge, nell’ordine, i byte ' + ind.join(', ') + '. ' + (cosa === 0 ? 'Quanti nanosecondi occorrono complessivamente?' : 'Quante letture terminano in miss?'), segnaposto: 'Un numero', giuste,
-        ok: cosa === 0 ? n + ' consultazioni e ' + miss + (miss === 1 ? ' rifornimento: ' : ' rifornimenti: ') + n + ' × ' + t + ' + ' + miss + ' × ' + pen + ' = ' + tot + ' ns.' : 'Le linee distinte lette sono ' + miss + ', e ciascuna richiede un miss alla prima lettura.',
+      return { u: '6.1.1', d: 'La cache è vuota, e può contenere tutti i blocchi necessari. I blocchi sono di ' + L + ' byte. Una consultazione costa ' + t + ' ns, e un rifornimento ' + pen + ' ns aggiuntivi. Il processore legge, nell’ordine, i byte ' + ind.join(', ') + '. ' + (cosa === 0 ? 'Quanti nanosecondi occorrono complessivamente?' : 'Quante letture terminano in miss?'), segnaposto: 'Un numero', giuste,
+        ok: cosa === 0 ? n + ' consultazioni e ' + miss + (miss === 1 ? ' rifornimento: ' : ' rifornimenti: ') + n + ' × ' + t + ' + ' + miss + ' × ' + pen + ' = ' + tot + ' ns.' : 'I blocchi distinti letti sono ' + miss + ', e ciascuno richiede un miss alla prima lettura.',
         diagnosi: DIAG(giuste, cosa === 0 ? [
-          { se: NS(n * (t + pen)), msg: 'È stato contato un rifornimento per ogni lettura. Una linea già in cache richiede la sola consultazione.' },
+          { se: NS(n * (t + pen)), msg: 'È stato contato un rifornimento per ogni lettura. Un blocco già in cache richiede la sola consultazione.' },
           { se: NS(miss * pen), msg: 'Mancano le consultazioni: ogni lettura, hit o miss, comprende ' + t + ' ns.' },
           { se: NS(miss * (t + pen)), msg: 'Anche gli hit comprendono la consultazione.' }
         ] : [
-          { se: I(n), msg: 'Una lettura in una linea già presente in cache è un hit.' },
+          { se: I(n), msg: 'Una lettura in un blocco già presente in cache è un hit.' },
           { se: I(n - miss), msg: 'Questo è il numero degli hit. La domanda riguarda i miss.' }
         ]),
-        altro: 'Il numero è diverso. Si calcoli per ogni byte la linea, e si controlli se è già stata letta.',
-        indizi: ['La linea di un byte è il quoziente intero fra indirizzo e ' + L + '.', righe.join(' '), cosa === 0 ? 'Totale: ' + tot + ' ns.' : 'Miss: ' + miss + '.'],
+        altro: 'Il numero è diverso. Si calcoli per ogni byte il blocco, e si controlli se è già stato letto.',
+        indizi: ['Il blocco di un byte è il quoziente intero fra indirizzo e ' + L + '.', righe.join(' '), cosa === 0 ? 'Totale: ' + tot + ' ns.' : 'Miss: ' + miss + '.'],
         svolgimento: righe.concat([cosa === 0 ? 'Totale: ' + tot + ' ns.' : 'Miss: ' + miss + '.']) };
     },
     // 6.1.2 · indice o tag di un indirizzo, oppure hit di una sequenza di blocchi
@@ -64,9 +64,9 @@
             { se: NS(t + pen), msg: 'Questo è il tempo di un singolo miss. La penalità incide soltanto per ' + m + ' letture su cento.' },
             { se: NS(100 * t + m * pen), msg: 'Questo è il tempo totale delle cento letture. Va diviso per cento.' }
           ]),
-          altro: 'Il valore è diverso. Si applichi AMAT = consultazione + frazione di miss × penalità.',
+          altro: 'Il valore è diverso. Si applichi la formula: tempo medio = consultazione + frazione di miss × penalità.',
           indizi: ['Frazione di miss: ' + m + ' / 100 = ' + fr + '.', fr + ' × ' + pen + ' = ' + (m * pen / 100) + ' ns.', t + ' + ' + (m * pen / 100) + ' = ' + amat + ' ns.'],
-          svolgimento: ['Frazione di miss: ' + fr + '.', 'Contributo delle penalità: ' + (m * pen / 100) + ' ns.', 'AMAT: ' + amat + ' ns.'] }; }
+          svolgimento: ['Frazione di miss: ' + fr + '.', 'Contributo delle penalità: ' + (m * pen / 100) + ' ns.', 'Tempo medio di accesso: ' + amat + ' ns.'] }; }
       const k = r.int(1, 5), N = 100 * k, M = m * k, tot = N * t + M * pen, giuste = NS(tot);
       return { u: '6.1.3', d: 'Un programma esegue ' + N + ' letture, con ' + M + ' miss. La consultazione costa ' + t + ' ns, e la penalità di miss ' + pen + ' ns. Quanti nanosecondi occorrono complessivamente?', segnaposto: 'Un numero', giuste,
         ok: N + ' × ' + t + ' + ' + M + ' × ' + pen + ' = ' + tot + ' ns.',

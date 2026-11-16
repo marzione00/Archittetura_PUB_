@@ -19,7 +19,7 @@ SL.unita642 = (() => {
 SL.registra('6.4.2', {
   titolo: 'Perché una tabella lineare diventa grande',
   obiettivo: 'Obiettivo: calcolare lo spazio occupato da una tabella delle pagine lineare, e quello occupato da una struttura a due livelli che conserva soltanto le parti in uso.',
-  concetti: [['tabella', 'Una voce per ogni pagina possibile'], ['strati', 'Una radice e poche figlie'], ['bilancio', 'Megabyte contro kilobyte']],
+  concetti: [['tabella', 'Una voce per ogni pagina possibile'], ['strati', 'Una radice e poche figlie'], ['bilancio', 'Milioni di byte contro migliaia']],
   filigrana: ['tabella', 'strati', 'bilancio'],
   richiami: {
     carte: [

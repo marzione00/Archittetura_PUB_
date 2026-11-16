@@ -121,7 +121,7 @@
       main.querySelectorAll('[data-q]').forEach((nodo) => {
         const k = Number(nodo.dataset.q), x = domande[k];
         SL.esercizio(nodo, x, k + 1, dopo, {
-          occhiello: 'Domanda ' + (k + 1) + ' di ' + n + (x.u ? ' · dall’unità ' + x.u : ''),
+          occhiello: 'Domanda ' + (k + 1) + ' di ' + n + (x.u ? ' · dall’unità ' + x.u + ((SL.trovaUnita(x.u) || {}).oltre ? ', di approfondimento' : '') : ''),
           alEsito: (ok, tentativi, indizi) => {
             if (stati[k] === 'piena' || stati[k] === 'aiutata') return;
             stati[k] = ok ? (tentativi === 1 && !indizi ? 'piena' : 'aiutata') : 'tentata';

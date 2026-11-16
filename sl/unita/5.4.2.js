@@ -26,7 +26,7 @@ SL.registra('5.4.2', {
     domanda: { d: 'Prima di proseguire: su un solo core, due thread possono eseguire nel medesimo istante?', o: [
       { t: 'No, si alternano', ok: true, fb: 'Un core esegue un flusso per volta. I due thread avanzano a turno.' },
       { t: 'Sì, se appartengono al medesimo processo', fb: 'Anche i thread del medesimo processo richiedono ciascuno un core.' },
-      { t: 'Sì, con un quanto sufficientemente breve', fb: 'Un quanto breve li alterna rapidamente, e produce soltanto l’apparenza di un’esecuzione simultanea.' }
+      { t: 'Sì, con un time slice sufficientemente breve', fb: 'Un time slice breve li alterna rapidamente, e produce soltanto l’apparenza di un’esecuzione simultanea.' }
     ] }
   },
   idea: {

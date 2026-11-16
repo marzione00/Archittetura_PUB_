@@ -6,51 +6,51 @@
   const LET = (da, n) => { const l = []; for (let j = 0; j < n; j++) l.push('L' + (da + j)); return l; };
 
   SL.registraProva('5.6', { domande: [
-    // 5.6.1 · vuoti, pieni oppure permessi in transito
+    // 5.6.1 · vuoti, pieni oppure posti in transito
     (r) => {
       if (r.int(0, 2) === 0) { const cap = r.int(4, 12), tr = r.int(0, 2), V = r.int(0, cap - tr), Pn = cap - tr - V, giuste = I(tr);
-        return { u: '5.6.1', d: 'Un buffer limitato ha ' + cap + ' posti. In un certo istante il semaforo vuoti vale ' + V + ' e il semaforo pieni vale ' + Pn + '. Quanti permessi sono in transito?', segnaposto: 'Un numero', giuste,
+        return { u: '5.6.1', d: 'Un buffer limitato ha ' + cap + ' posti. In un certo istante il semaforo vuoti vale ' + V + ' e il semaforo pieni vale ' + Pn + '. Quanti posti sono in transito?', segnaposto: 'Un numero', giuste,
           ok: cap + ' − ' + V + ' − ' + Pn + ' = ' + tr + '.',
           diagnosi: DIAG(giuste, [
-            { se: I(V + Pn), msg: 'Questa è la somma dei due semafori. I permessi in transito sono la differenza rispetto a ' + cap + '.' },
-            { se: I(cap), msg: 'Questa è la capacità. Si sottraggano i permessi contati dai due semafori.' }
+            { se: I(V + Pn), msg: 'Questa è la somma dei due semafori. I posti in transito sono la differenza rispetto a ' + cap + '.' },
+            { se: I(cap), msg: 'Questa è la capacità. Si sottraggano i posti contati dai due semafori.' }
           ]),
-          altro: 'Il numero è diverso. Si applichi l’invariante: vuoti, pieni e permessi in transito, sommati, sono pari alla capacità.',
+          altro: 'Il numero è diverso. Si applichi l’invariante: vuoti, pieni e posti in transito, sommati, sono pari alla capacità.',
           indizi: ['La capacità è ' + cap + '.', 'vuoti + pieni = ' + (V + Pn) + '.', cap + ' − ' + (V + Pn) + ' = ' + tr + '.'],
           svolgimento: ['Capacità: ' + cap + '.', 'Vuoti più pieni: ' + (V + Pn) + '.', 'In transito: ' + tr + '.'] }; }
       const cap = r.int(4, 12), a = r.int(1, cap - 1), b = r.int(0, a), t = r.int(0, 1), cosa = r.scegli(['vuoti', 'pieni']);
       const vuoti = cap - a + b - t, pieni = a - b, v = cosa === 'vuoti' ? vuoti : pieni, giuste = I(v);
-      return { u: '5.6.1', d: 'Un buffer limitato ha ' + cap + ' posti, inizialmente tutti vuoti. Sono stati completati ' + a + (a === 1 ? ' inserimento' : ' inserimenti') + ' e ' + b + (b === 1 ? ' prelievo.' : ' prelievi.') + (t ? ' Un produttore ha inoltre prenotato un posto con wait(vuoti), e deve ancora eseguire la sua signal(pieni).' : ' Nessuna operazione è in corso.') + ' Quanto vale il semaforo ' + cosa + '?', segnaposto: 'Un numero', giuste,
+      return { u: '5.6.1', d: 'Un buffer limitato ha ' + cap + ' posti, inizialmente tutti vuoti. Sono stati completati ' + a + (a === 1 ? ' inserimento' : ' inserimenti') + ' e ' + b + (b === 1 ? ' prelievo.' : ' prelievi.') + (t ? ' Un produttore ha inoltre prenotato un posto con down(vuoti), e deve ancora eseguire la sua up(pieni).' : ' Nessuna operazione è in corso.') + ' Quanto vale il semaforo ' + cosa + '?', segnaposto: 'Un numero', giuste,
         ok: cosa === 'vuoti' ? cap + ' − ' + a + ' + ' + b + (t ? ' − 1' : '') + ' = ' + vuoti + '.' : a + ' − ' + b + ' = ' + pieni + (t ? '. Il dato in lavorazione deve ancora essere pubblicato.' : '.'),
         diagnosi: DIAG(giuste, cosa === 'vuoti' ? [
-          t ? { se: I(cap - a + b), msg: 'Manca il posto prenotato: la wait(vuoti) del produttore ha già sottratto un permesso.' } : null,
-          b > 0 ? { se: I(cap - a - t), msg: 'Ogni prelievo completato restituisce un permesso a vuoti.' } : null,
+          t ? { se: I(cap - a + b), msg: 'Manca il posto prenotato: la down(vuoti) del produttore ha già sottratto un posto.' } : null,
+          b > 0 ? { se: I(cap - a - t), msg: 'Ogni prelievo completato restituisce un posto a vuoti.' } : null,
           { se: I(pieni), msg: 'Questo è il valore di pieni. La domanda riguarda i posti liberi.' }
         ] : [
-          t ? { se: I(pieni + 1), msg: 'Il dato in lavorazione entrerà nel conteggio soltanto con la signal(pieni).' } : null,
-          b > 0 ? { se: I(a), msg: 'Ogni prelievo completato ha sottratto un permesso a pieni.' } : null,
+          t ? { se: I(pieni + 1), msg: 'Il dato in lavorazione entrerà nel conteggio soltanto con la up(pieni).' } : null,
+          b > 0 ? { se: I(a), msg: 'Ogni prelievo completato ha sottratto un dato a pieni.' } : null,
           { se: I(vuoti), msg: 'Questo è il valore di vuoti. La domanda riguarda i dati pubblicati.' }
         ]),
-        altro: 'Il valore è diverso. Si seguano i permessi: ogni inserimento ne sposta uno da vuoti a pieni, ogni prelievo compie lo spostamento opposto.',
-        indizi: ['Inizialmente vuoti vale ' + cap + ' e pieni vale 0.', 'Dopo ' + a + (a === 1 ? ' inserimento' : ' inserimenti') + ' e ' + b + (b === 1 ? ' prelievo' : ' prelievi') + ': vuoti ' + (cap - a + b) + ', pieni ' + pieni + '.', t ? 'La prenotazione in corso sottrae un permesso a vuoti: ' + vuoti + '. Il semaforo pieni resta ' + pieni + '.' : 'Nessun permesso è in transito.'],
+        altro: 'Il valore è diverso. Si seguano i posti: ogni inserimento ne sposta uno da vuoti a pieni, ogni prelievo compie lo spostamento opposto.',
+        indizi: ['Inizialmente vuoti vale ' + cap + ' e pieni vale 0.', 'Dopo ' + a + (a === 1 ? ' inserimento' : ' inserimenti') + ' e ' + b + (b === 1 ? ' prelievo' : ' prelievi') + ': vuoti ' + (cap - a + b) + ', pieni ' + pieni + '.', t ? 'La prenotazione in corso sottrae un posto a vuoti: ' + vuoti + '. Il semaforo pieni resta ' + pieni + '.' : 'Nessun posto è in transito.'],
         svolgimento: ['Vuoti: ' + vuoti + '.', 'Pieni: ' + pieni + '.', 'In transito: ' + t + '.'] };
     },
     // 5.6.2 · esito secondo l'ordine di acquisizione, oppure produttori ancora bloccati
     (r) => {
       if (r.int(0, 2) === 0) { const c = r.int(1, 4), m = r.int(2, 5), j = r.int(1, m - 1), v = m - j, giuste = I(v);
-        return { u: '5.6.2', d: 'Un buffer limitato ha ' + c + (c === 1 ? ' posto, pieno. ' : ' posti, tutti pieni. ') + m + ' produttori, che richiedono prima il permesso e quindi il mutex, eseguono wait(vuoti) e si bloccano. In seguito un consumatore completa ' + j + (j === 1 ? ' prelievo, compresa la signal(vuoti).' : ' prelievi, comprese le signal(vuoti).') + ' Quanti produttori restano bloccati?', segnaposto: 'Un numero', giuste,
-          ok: 'Ogni signal(vuoti) consegna un permesso al primo produttore in coda: ' + m + ' − ' + j + ' = ' + v + '.',
+        return { u: '5.6.2', d: 'Un buffer limitato ha ' + c + (c === 1 ? ' posto, pieno. ' : ' posti, tutti pieni. ') + m + ' produttori, che eseguono la down sul semaforo prima di richiedere il mutex, eseguono down(vuoti) e si bloccano. In seguito un consumatore completa ' + j + (j === 1 ? ' prelievo, compresa la up(vuoti).' : ' prelievi, comprese le up(vuoti).') + ' Quanti produttori restano bloccati?', segnaposto: 'Un numero', giuste,
+          ok: 'Ogni up(vuoti) risveglia il primo produttore in coda: ' + m + ' − ' + j + ' = ' + v + '.',
           diagnosi: DIAG(giuste, [
             { se: I(j), msg: 'Questi sono i produttori sbloccati. La domanda riguarda quelli residui in coda.' },
             { se: I(m), msg: 'Ogni prelievo completato sblocca un produttore.' },
-            { se: I(0), msg: 'I permessi restituiti sono ' + j + ', e i produttori in coda erano ' + m + '.' }
+            { se: I(0), msg: 'Le up eseguite sono ' + j + ', e i produttori in coda erano ' + m + '.' }
           ]),
-          altro: 'Il numero è diverso. Si conti un produttore sbloccato per ogni signal(vuoti).',
+          altro: 'Il numero è diverso. Si conti un produttore sbloccato per ogni up(vuoti).',
           indizi: ['In coda su vuoti sono presenti ' + m + ' produttori.', 'I prelievi completati sono ' + j + '.', m + ' − ' + j + ' = ' + v + '.'],
-          svolgimento: ['Produttori in coda: ' + m + '.', 'Permessi consegnati: ' + j + '.', 'Ancora bloccati: ' + v + '.'] }; }
+          svolgimento: ['Produttori in coda: ' + m + '.', 'Produttori risvegliati: ' + j + '.', 'Ancora bloccati: ' + v + '.'] }; }
       const c = r.int(1, 4), pieno = r.int(0, 2) > 0, vm = r.int(0, 1) === 0, e = !pieno ? 0 : vm ? 1 : 2;
-      const fb = e === 0 ? 'Un posto è libero: la wait(vuoti) trova un permesso, e nessun thread resta in attesa.' : e === 1 ? 'P si blocca su vuoti senza possedere il mutex. C preleva, e la sua signal(vuoti) sblocca P.' : 'P si blocca su vuoti in possesso del mutex. C, per prelevare, richiede quel mutex.';
-      return { u: '5.6.2', d: 'Un buffer limitato ha ' + c + (c === 1 ? ' posto' : ' posti') + (pieno ? ' ed è pieno.' : ' e ha un posto libero.') + ' Il produttore P esegue ' + (vm ? 'wait(vuoti) e quindi lock(mutex).' : 'lock(mutex) e quindi wait(vuoti).') + ' Un consumatore C preleverà appena troverà un dato pubblicato. Che cosa accade?', guida: 'Si scelga la risposta.', o: r.mescola([
+      const fb = e === 0 ? 'Un posto è libero: la down(vuoti) trova il semaforo maggiore di zero, e nessun thread resta in attesa.' : e === 1 ? 'P si blocca su vuoti senza possedere il mutex. C preleva, e la sua up(vuoti) sblocca P.' : 'P si blocca su vuoti in possesso del mutex. C, per prelevare, richiede quel mutex.';
+      return { u: '5.6.2', d: 'Un buffer limitato ha ' + c + (c === 1 ? ' posto' : ' posti') + (pieno ? ' ed è pieno.' : ' e ha un posto libero.') + ' Il produttore P esegue ' + (vm ? 'down(vuoti) e quindi lock(mutex).' : 'lock(mutex) e quindi down(vuoti).') + ' Un consumatore C preleverà appena troverà un dato pubblicato. Che cosa accade?', guida: 'Si scelga la risposta.', o: r.mescola([
         { t: 'P inserisce immediatamente il proprio dato', ok: e === 0, fb },
         { t: 'P inserisce il proprio dato dopo un prelievo di C', ok: e === 1, fb },
         { t: 'P e C restano bloccati indefinitamente', ok: e === 2, fb }]) };

@@ -36,8 +36,8 @@ SL.registra('5.3.1', {
     titolo: 'Gli istanti della decisione e i processi favoriti',
     termini: ['prelazione', 'tempo di attesa'],
     testo: [
-      'Lo scheduler interviene soltanto quando un evento può modificare l’assegnazione del processore. Gli eventi sono quattro: il processo in esecuzione si blocca, in attesa di un dispositivo; il processo in esecuzione termina; scade il suo quanto di tempo; un processo bloccato torna pronto, poiché il dispositivo che attendeva ha risposto.',
-      'Nei primi due casi il processore resta libero, e una scelta è obbligata. Negli altri due il processo in esecuzione potrebbe proseguire, e la decisione spetta alla politica. Se lo scheduler può sottrarre il processore a un processo che non lo ha ceduto, si parla di [[prelazione]]. La scadenza del quanto è una prelazione, al pari del caso in cui un processo appena risvegliato precede quello in esecuzione.',
+      'Lo scheduler interviene soltanto quando un evento può modificare l’assegnazione del processore. Gli eventi sono quattro: il processo in esecuzione si blocca, in attesa di un dispositivo; il processo in esecuzione termina; scade il suo time slice; un processo bloccato torna pronto, poiché il dispositivo che attendeva ha risposto.',
+      'Nei primi due casi il processore resta libero, e una scelta è obbligata. Negli altri due il processo in esecuzione potrebbe proseguire, e la decisione spetta alla politica. Se lo scheduler può sottrarre il processore a un processo che non lo ha ceduto, si parla di [[prelazione]]. La scadenza del time slice è una prelazione, al pari del caso in cui un processo appena risvegliato precede quello in esecuzione.',
       { fig: 'scena', w: 720, h: 176, titolo: 'B si risveglia a 2 ms, e A conserva il turno fino a 5 ms', nota: 'Per tre millisecondi B è pronto senza eseguire: tale intervallo è il suo tempo di attesa dopo il risveglio.', els: SL.unita531.quadro('g', { t: 2, fine: 5, pol: 'turno' }, 4, { x: 10, y: 0, wc: 64 }) },
       'Si consideri un caso. A è in esecuzione dall’istante 0. B attende un dato dal disco, che giunge all’istante 2 ms: un interrupt avvisa il kernel, e B torna pronto. Se la politica consente ad A di concludere il proprio turno, che scade a 5 ms, B ha inizio a 5. I tre millisecondi fra 2 e 5 sono il suo [[tempo di attesa]]: il tempo trascorso fra i pronti senza eseguire. Il tempo precedente, impiegato dal disco, è una grandezza diversa, che nessuno scheduler poteva ridurre.',
       'Se invece la politica assegna a B una precedenza maggiore e prevede la prelazione, al risveglio di B lo scheduler sottrae immediatamente il processore ad A. B ha inizio a 2 ms, e la sua attesa è nulla. A è ricollocato fra i pronti e terminerà in seguito. Nessuna delle due scelte è corretta in assoluto: la prima favorisce il processo in esecuzione, la seconda il processo che ha appena ricevuto il dato atteso. I capitoli seguenti confrontano le politiche su queste misure.'
@@ -84,7 +84,7 @@ SL.registra('5.3.1', {
   },
   bilancio: {
     regola: [
-      'Lo scheduler decide quando il processo in esecuzione si blocca, termina o esaurisce il quanto, e quando un processo bloccato torna pronto.',
+      'Lo scheduler decide quando il processo in esecuzione si blocca, termina o esaurisce il time slice, e quando un processo bloccato torna pronto.',
       'Tempo di attesa dopo un risveglio = istante in cui il processo inizia l’esecuzione − istante in cui è tornato pronto.'
     ],
     errori: [

@@ -25,7 +25,7 @@ SL.registra('3.1.3', {
       'Un solo filo di comando, indicato con SUB, svolge i due compiti: entra in tutte le XOR e costituisce il riporto entrante. Con SUB = 0 i bit di B restano invariati e il circuito calcola A + B. Con SUB = 1 i bit di B risultano invertiti, C0 vale 1, e il circuito calcola A − B. Tale circuito è il [[sommatore-sottrattore]], la parte aritmetica dell’ALU.',
       { fig: 'scena', w: 720, h: 170, titolo: 'Il sommatore-sottrattore', nota: 'Il filo SUB comanda le XOR e costituisce il riporto entrante.', els: [
         SL.el.box('a', 20, 10, 110, 56, 'A', '4 bit', 'on', { cls: 'stretta' }), SL.el.box('b', 20, 100, 110, 56, 'B', '4 bit', 'on', { cls: 'stretta' }),
-        SL.el.box('x', 200, 100, 150, 56, 'quattro XOR', 'B oppure NOT B', 'att', { cls: 'stretta' }), SL.el.linea('l1', 130, 128, 200, 128, 'on'),
+        SL.el.box('x', 200, 100, 150, 56, 'quattro XOR', 'B oppure B̄', 'att', { cls: 'stretta' }), SL.el.linea('l1', 130, 128, 200, 128, 'on'),
         SL.el.box('s', 430, 34, 150, 96, 'sommatore', 'quattro celle', 'on', { cls: 'stretta' }), SL.el.linea('l2', 130, 38, 430, 60, 'on'), SL.el.linea('l3', 350, 128, 430, 104, 'on'),
         SL.el.box('u', 640, 34, 70, 96, 'S', '4 bit', 'on', { cls: 'stretta' }), SL.el.linea('l4', 580, 82, 640, 82, 'on'),
         SL.el.nota('n', 200, 14, 'SUB', 'mono', 'att'), SL.el.linea('l5', 240, 34, 270, 100, 'att'), SL.el.linea('l6', 250, 24, 500, 34, 'att'), SL.el.nota('n2', 372, 6, 'C0', 'mono minuta', 'att')

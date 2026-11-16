@@ -1,130 +1,129 @@
 'use strict';
 SL.unita362 = (() => {
-  const H = SL.y86.esa;
-  const GRUPPI = [{ p: 0x40, m: 0x62, w: 0x96 }, { p: 0x120, m: 0x9B, w: 0x2F4 }];
-  const NOMI = { m: 'M_valA', w: 'W_valM', p: 'F_predPC' };
-  const scelta = (j, r) => (j ? 'm' : r ? 'w' : 'p');
-  // fase: 0 candidati · 1 prima verifica · 2 seconda verifica · 3 scelta · 4 prelievo
-  const quadro = (pre, j, r, g, f, o) => {
-    const el = SL.el, s = scelta(j, r), els = [], xk = o.x + o.wc + o.gap, xf = xk + o.wk + o.gap, yf = o.y + o.py;
-    const righe = [['m', 'salvato dal salto', '1 · previsione errata in M', j ? 'sì' : 'no'], ['w', 'letto dalla pila', '2 · ret nello stadio W', r ? 'sì' : 'no'], ['p', 'PC previsto', '3 · in tutti gli altri casi', 'passa']];
-    righe.forEach((R, k) => {
-      const yy = o.y + k * o.py, visto = f >= k + 1, deciso = (k === 1 && j) || (k === 2 && (j || r)), preso = f >= 3 && R[0] === s;
-      els.push(el.box(pre + 'c' + k, o.x, yy, o.wc, o.h, R[1], NOMI[R[0]] + ' = ' + H(g[R[0]]), f >= 3 ? (preso ? 'att' : 'off') : 'on', { cls: 'stretta' }));
-      els.push(el.box(pre + 'k' + k, xk, yy, o.wk, o.h, R[2], !visto ? '·' : deciso ? 'già deciso' : R[3], !visto ? '' : deciso ? 'off' : preso || f === k + 1 ? 'att' : 'on', { cls: 'stretta' }));
-      els.push(el.linea(pre + 'l' + k, o.x + o.wc, yy + o.h / 2, xk, yy + o.h / 2, preso ? 'att' : ''));
-      els.push(el.linea(pre + 'm' + k, xk + o.wk, yy + o.h / 2, xf, yf + o.h / 2, preso ? 'att' : ''));
-    });
-    els.push(el.box(pre + 'f', xf, yf, o.wf, o.h, 'indirizzo del prelievo', f >= 3 ? 'f_pc = ' + H(g[s]) : 'f_pc = ·', f === 3 ? 'att' : f > 3 ? 'on' : '', { cls: 'stretta' }));
-    if (o.memoria) els.push(el.box(pre + 'z', xf, yf + o.py, o.wf, o.h, 'memoria delle istruzioni', f >= 4 ? 'legge da ' + H(g[s]) : '·', f >= 4 ? 'att' : '', { cls: 'stretta' }));
-    return els;
+  const H = SL.isa.esa;
+  // Istruzione completata nel ciclo precedente: pIcode, pCnd, pValC, pValP.
+  const PREC = {
+    op: { testo: 'add rax, rbx', icode: 6, cnd: null, lung: 2, valC: null },
+    mr: { testo: 'mov rax, 8(rbx)', icode: 4, cnd: null, lung: 10, valC: 8 },
+    je1: { testo: 'je 0x100', icode: 7, cnd: 1, lung: 9, valC: 0x100 },
+    je0: { testo: 'je 0x100', icode: 7, cnd: 0, lung: 9, valC: 0x100 }
   };
-  return { H, GRUPPI, NOMI, scelta, quadro };
+  const GRUPPI = [0x40, 0x1F0];
+  const valori = (k, g) => { const x = PREC[k], pc = GRUPPI[g]; return { pIcode: x.icode, pCnd: x.cnd, pValC: x.valC, pValP: pc + x.lung, pc }; };
+  const scelta = (k, g) => { const v = valori(k, g); return v.pIcode === 7 && v.pCnd === 1 ? v.pValC : v.pValP; };
+  return { H, PREC, GRUPPI, valori, scelta };
 })();
 SL.registra('3.6.2', {
-  titolo: 'Stato della pipeline e controllo del prelievo',
-  obiettivo: 'Obiettivo: indicare l’indirizzo dal quale PIPE preleva la prossima istruzione, scegliendo fra il PC previsto, la correzione di un salto e l’indirizzo di ritorno di una `ret`.',
-  concetti: [['puntatore', 'Tre candidati per il prelievo'], ['mux', 'Un selettore con priorità'], ['pipeline', 'La sorgente della decisione e il suo stadio']],
-  filigrana: ['puntatore', 'mux', 'pipeline'],
+  titolo: 'Il calcolo del PC nella pipeline',
+  obiettivo: 'Obiettivo: spiegare perché il calcolo del PC è spostato prima del prelievo, e ricavare l’indirizzo del prelievo dai segnali pIcode, pCnd, pValC e pValP dell’istruzione precedente.',
+  concetti: [['puntatore', 'Un indirizzo a ogni ciclo'], ['mux', 'La selezione del PC'], ['register', 'I valori del ciclo precedente']],
+  filigrana: ['puntatore', 'mux', 'register'],
   richiami: {
     carte: [
-      { sim: 'puntatore', da: 'Dall’unità 3.3.3', t: 'Il nuovo PC in SEQ', d: 'È selezionato alla fine dell’istruzione, quando valP, valC e valM sono tutti noti.' },
-      { sim: 'conflitto', da: 'Dall’unità 3.5.3', t: 'La previsione dei salti', d: 'PIPE preleva dalla destinazione di un salto condizionato senza attendere la condizione.' },
-      { sim: 'pila', da: 'Dall’unità 3.3.5', t: 'La ret', d: 'Legge l’indirizzo di ritorno dalla cima della pila, nella fase di memoria.' }
+      { sim: 'puntatore', da: 'Dall’unità 3.3.5', t: 'L’aggiornamento del PC', d: 'Il PC riceve valP per tutte le istruzioni, salvo `je` con Cnd = 1, per il quale riceve valC.' },
+      { sim: 'register', da: 'Dall’unità 3.6.1', t: 'I registri di pipeline', d: 'A ogni fronte ogni registro cattura i dati preparati dallo stadio precedente.' },
+      { sim: 'mux', da: 'Dall’unità 3.1.2', t: 'Il multiplexer', d: 'Copia sull’uscita uno dei suoi ingressi, selezionato da un segnale di controllo.' }
     ],
-    domanda: { d: 'Prima di proseguire: in quale stadio una `ret` ottiene l’indirizzo al quale tornare?', o: [
-      { t: 'Nello stadio M, quando legge la pila', ok: true, fb: 'L’indirizzo di ritorno è un dato in memoria, e la memoria dei dati si legge nello stadio M.' },
-      { t: 'Nello stadio F, dai byte dell’istruzione', fb: 'La `ret` occupa un solo byte, che contiene soltanto il suo codice.' },
-      { t: 'Nello stadio E, dall’ALU', fb: 'Nello stadio E l’ALU calcola la nuova cima della pila. La lettura avviene nello stadio seguente.' }
+    domanda: { d: 'Prima di proseguire: un `je 0x100` occupa 9 byte e ha inizio all’indirizzo 0x40. ZF vale 0. Quale indirizzo riceve il PC?', o: [
+      { t: '0x49', ok: true, fb: 'Con ZF = 0 si ha Cnd = 0, e il PC riceve valP = 0x40 + 9 = 0x49.' },
+      { t: '0x100', fb: 'La destinazione è scelta soltanto con Cnd = 1, cioè con ZF = 1.' },
+      { t: '0x4A', fb: '`je` è privo del byte dei registri, e occupa 9 byte.' }
     ] }
   },
   idea: {
-    titolo: 'La sorgente del prelievo',
-    termini: ['pc previsto', 'f_pc'],
+    titolo: 'Il PC calcolato all’inizio del ciclo',
+    termini: ['selezione del pc'],
     testo: [
-      'In SEQ il nuovo PC era selezionato alla fine dell’istruzione, quando ogni valore era noto. PIPE preleva un’istruzione a ogni ciclo, e deve selezionare l’indirizzo molto prima: immediatamente dopo il prelievo, quando dell’istruzione conosce soltanto i byte.',
-      'Per quasi tutte le istruzioni i byte sono sufficienti. L’istruzione successiva ha inizio a valP, l’indirizzo che segue. Per `jmp` e `call` la destinazione è la costante valC, scritta nell’istruzione. Per un salto condizionato PIPE assume che il salto avvenga, e impiega ancora valC. L’indirizzo così selezionato è il [[pc previsto|PC previsto]], ed è conservato nel registro F con la sigla `F_predPC`.',
-      'La previsione fallisce in due casi. Il primo è un salto condizionato che doveva proseguire in sequenza. L’errore è rilevato nello stadio E, e nel ciclo seguente il salto, giunto in M, contiene l’indirizzo corretto nel campo `M_valA`. Il secondo è la `ret`, i cui byte sono privi di informazioni sulla destinazione. La `ret` legge l’indirizzo di ritorno dalla pila nello stadio M, e nel ciclo seguente lo presenta dal registro W nel campo `W_valM`.',
-      { fig: 'scena', w: 720, h: 212, titolo: 'Il selettore del prelievo con una ret nello stadio W', nota: 'La prima verifica dà esito negativo, la seconda positiva: è selezionato l’indirizzo letto dalla pila.', els: SL.unita362.quadro('g', 0, 1, SL.unita362.GRUPPI[0], 3, { x: 10, y: 8, wc: 200, wk: 236, wf: 200, gap: 24, h: 56, py: 66 }) },
-      'Un selettore sceglie fra i tre candidati l’indirizzo effettivo del prelievo, detto [[f_pc]]. Le verifiche seguono un ordine. Se nello stadio M è presente un salto con previsione errata, è selezionato `M_valA`. In caso contrario, se nello stadio W è presente una `ret`, è selezionato `W_valM`. In tutti gli altri casi è selezionato il PC previsto.',
-      'Mentre una `ret` avanza verso lo stadio W, PIPE è priva di un indirizzo valido dal quale prelevare. Per tre cicli il prelievo resta sospeso e nella pipeline entrano tre bolle. L’unità 3.6.5 ne descrive il meccanismo.'
+      'Nella CPU a ciclo singolo l’aggiornamento del PC è l’ultima fase: assegna PC ← valP per tutte le istruzioni, salvo `je`, per il quale sceglie fra la destinazione e valP secondo Cnd. In una pipeline ciò avviene troppo tardi, poiché a ogni ciclo deve essere prelevata un’istruzione nuova, e il suo indirizzo deve essere noto all’inizio del ciclo.',
+      'La modifica consiste nello spostare il blocco che calcola il nuovo PC prima della fase di prelievo. Il blocco calcola il PC in base alle informazioni prodotte nel ciclo di clock precedente, conservate in registri dedicati. Per questa ragione i nomi dei suoi segnali hanno il prefisso «p», da previous: `pIcode`, `pCnd`, `pValC` e `pValP`. Il blocco prende il nome di [[selezione del pc|selezione del PC]].',
+      { fig: 'scena', w: 720, h: 150, titolo: 'La selezione del PC prima del prelievo', nota: 'Il calcolo è il medesimo della CPU a ciclo singolo, e la sua posizione si sposta dalla fine di un’istruzione all’inizio della successiva.', els: [
+        SL.el.box('g1', 0, 6, 150, 56, 'pIcode', 'categoria', 'on', { cls: 'stretta' }), SL.el.box('g2', 0, 76, 150, 56, 'pCnd', 'esito di je', 'on', { cls: 'stretta' }),
+        SL.el.box('g3', 170, 6, 150, 56, 'pValC', 'destinazione', 'on', { cls: 'stretta' }), SL.el.box('g4', 170, 76, 150, 56, 'pValP', 'successore', 'on', { cls: 'stretta' }),
+        SL.el.linea('gl1', 320, 34, 380, 70, 'on'), SL.el.linea('gl2', 320, 104, 380, 70, 'on'),
+        SL.el.box('g5', 380, 36, 160, 68, 'selezione del PC', 'PC', 'att', { cls: 'stretta' }), SL.el.linea('gl3', 540, 70, 580, 70, 'att'),
+        SL.el.box('g6', 580, 36, 140, 68, 'stadio F', 'prelievo', 'on', { cls: 'stretta' })
+      ] },
+      'La regola è quella della fase di aggiornamento del PC, espressa con i nuovi segnali: se pIcode è la categoria di `je` e pCnd vale 1, il PC riceve pValC; in tutti gli altri casi riceve pValP. Dopo questa modifica le fasi divengono cinque: il prelievo, che comprende ora la selezione del PC, la decodifica, l’esecuzione, la memoria e la scrittura.',
+      'Nella pipeline vera e propria l’istruzione precedente non è ancora completata quando ha inizio il prelievo della successiva. Per questa ragione il registro F contiene un PC il cui valore è previsto. Il trattamento delle previsioni errate esula da questo capitolo, che considera programmi nei quali l’ordine delle istruzioni è noto.'
     ]
   },
   esperimento: {
     faremo: [
-      'L’esperimento osserva lo stadio F nell’istante della selezione. I tre candidati hanno indirizzi diversi, e risulta evidente quale è selezionato.',
-      'I controlli fissano la presenza di un salto da correggere nello stadio M e di una ret nello stadio W. Il selettore esamina le due condizioni nel proprio ordine. Dopo il caso proposto, è istruttivo attivare entrambe le condizioni: è una combinazione forzata, utile per osservare quale prevale.'
+      'L’esperimento osserva la selezione del PC all’inizio di un ciclo. L’istruzione completata nel ciclo precedente ha lasciato i propri valori nei registri dedicati.',
+      'I controlli fissano l’istruzione precedente e il suo indirizzo. La selezione esamina pIcode e pCnd, e sceglie fra pValC e pValP. Dopo il caso proposto, è istruttivo confrontare i due casi di `je`, con Cnd uguale a 1 e a 0.'
     ],
     vedrai: [
-      ['puntatore', 'I tre candidati', 'A sinistra: l’indirizzo salvato dal salto, quello letto dalla pila e il PC previsto.'],
-      ['mux', 'Le verifiche', 'Al centro: le condizioni del selettore, in ordine di priorità.'],
-      ['memory', 'Il prelievo', 'A destra: f_pc, l’indirizzo presentato alla memoria delle istruzioni.']
+      ['register', 'I valori precedenti', 'A sinistra: pIcode, pCnd, pValC e pValP.'],
+      ['mux', 'La verifica', 'Al centro: la condizione della selezione del PC.'],
+      ['memory', 'Il prelievo', 'A destra: l’indirizzo presentato alla memoria delle istruzioni.']
     ]
   },
   lab: {
-    titolo: 'Il selettore del prelievo',
+    titolo: 'La selezione del PC',
     scena: { w: 860, h: 272 },
-    atti: ['I candidati', 'Le verifiche', 'La scelta', 'Il prelievo'],
+    atti: ['I valori precedenti', 'La verifica', 'La scelta', 'Il prelievo'],
     controlli: [
-      { id: 'j', tipo: 'scelta', eti: 'Previsione errata in M', opzioni: [[0, 'no'], [1, 'sì']], valore: 0 },
-      { id: 'r', tipo: 'scelta', eti: 'ret nello stadio W', opzioni: [[0, 'no'], [1, 'sì']], valore: 1 },
-      { id: 'a', tipo: 'scelta', eti: 'Indirizzi', opzioni: [[0, 'primo gruppo'], [1, 'secondo gruppo']], valore: 0 }
+      { id: 'k', tipo: 'scelta', eti: 'Istruzione precedente', opzioni: [['op', 'add rax, rbx'], ['mr', 'mov rax, 8(rbx)'], ['je1', 'je 0x100 con Cnd = 1'], ['je0', 'je 0x100 con Cnd = 0']], valore: 'je1' },
+      { id: 'g', tipo: 'scelta', eti: 'Indirizzo dell’istruzione precedente', opzioni: [[0, '0x40'], [1, '0x1F0']], valore: 0 }
     ],
-    nota: 'I passi sono sempre cinque. Salto e ret attivi contemporaneamente costituiscono una combinazione forzata: in un’esecuzione reale, dietro una ret la pipeline contiene soltanto bolle.',
+    nota: 'I passi sono sempre quattro. I valori p sono quelli dell’istruzione completata nel ciclo precedente.',
     previsione: {
-      domanda: (p) => 'Nello stadio M ' + (p.j ? 'è presente un salto condizionato con previsione errata' : 'manca un salto da correggere') + ', e nello stadio W ' + (p.r ? 'è presente una ret' : 'manca una ret') + '. Da quale indirizzo preleva lo stadio F?',
-      opzioni: (p) => { const g = SL.unita362.GRUPPI[p.a], H = SL.unita362.H; return [[g.m, H(g.m) + ', salvato dal salto'], [g.w, H(g.w) + ', letto dalla pila'], [g.p, H(g.p) + ', il PC previsto']]; }
+      domanda: (p) => { const U = SL.unita362, x = U.PREC[p.k]; return 'L’istruzione precedente è `' + x.testo + '`, all’indirizzo ' + U.H(U.GRUPPI[p.g]) + (x.cnd == null ? '' : ', con Cnd = ' + x.cnd) + '. Da quale indirizzo preleva lo stadio F?'; },
+      opzioni: (p) => { const U = SL.unita362, v = U.valori(p.k, p.g); return Array.from(new Set([v.pValP, 0x100, v.pc])).sort((a, b) => a - b).map((x) => [x, U.H(x)]); }
     },
-    confronto: (pred, esito, p) => 'La previsione indicava ' + SL.unita362.H(pred) + '. Il prelievo usa ' + SL.unita362.H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.j ? 'Un salto con previsione errata nello stadio M ha la precedenza sugli altri candidati.' : p.r ? 'Una ret nello stadio W presenta l’indirizzo letto dalla pila, che prevale sul PC previsto.' : 'In assenza di richieste di correzione è selezionato il PC previsto.'),
+    confronto: (pred, esito, p) => { const U = SL.unita362, v = U.valori(p.k, p.g); return 'La previsione indicava ' + U.H(pred) + '. Il prelievo usa ' + U.H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === v.pc ? 'Questo è l’indirizzo dell’istruzione precedente. Il prelievo riguarda l’istruzione successiva.' : v.pIcode === 7 && v.pCnd === 1 ? 'pIcode è la categoria di `je` e pCnd vale 1: è selezionato pValC.' : 'La condizione per pValC richiede un `je` con pCnd = 1. In questo caso è selezionato pValP, il successore in memoria.'); },
     costruisci(p) {
-      const el = SL.el, U = SL.unita362, H = U.H, passi = [], g = U.GRUPPI[p.a], s = U.scelta(p.j, p.r), v = g[s];
-      const quadro = (f) => [el.nota('t0', 20, 0, 'CANDIDATI', 'mono'), el.nota('t1', 300, 0, 'VERIFICHE, IN ORDINE', 'mono'), el.nota('t2', 590, 0, 'PRELIEVO', 'mono')].concat(U.quadro('q', p.j, p.r, g, f, { x: 20, y: 24, wc: 250, wk: 260, wf: 250, gap: 30, h: 64, py: 80, memoria: true }));
-      const hud = (f) => [['Salto da correggere', p.j ? 'sì' : 'no', 'a'], ['ret in W', p.r ? 'sì' : 'no'], ['f_pc', f >= 3 ? H(v) : '·', 'c']];
+      const el = SL.el, U = SL.unita362, H = U.H, passi = [], x = U.PREC[p.k], v = U.valori(p.k, p.g), salta = v.pIcode === 7 && v.pCnd === 1, dest = U.scelta(p.k, p.g);
+      const quadro = (f) => [
+        el.box('a1', 20, 8, 220, 56, 'pIcode', f >= 0 ? String(v.pIcode) + (v.pIcode === 7 ? ' · je' : '') : '·', f === 1 ? 'att' : 'on', { cls: 'stretta' }),
+        el.box('a2', 20, 74, 220, 56, 'pCnd', v.pCnd == null ? 'non definito' : String(v.pCnd), v.pCnd == null ? 'off' : f === 1 ? 'att' : 'on', { cls: 'stretta' }),
+        el.box('a3', 20, 140, 220, 56, 'pValC', v.pValC == null ? 'assente' : H(v.pValC), v.pValC == null ? 'off' : f >= 2 && salta ? 'att' : f >= 2 ? 'off' : 'on', { cls: 'stretta' }),
+        el.box('a4', 20, 206, 220, 56, 'pValP', H(v.pValP), f >= 2 && !salta ? 'att' : f >= 2 ? 'off' : 'on', { cls: 'stretta' }),
+        el.linea('l1', 240, 168, 300, 130, f >= 2 && salta ? 'att' : ''), el.linea('l2', 240, 234, 300, 150, f >= 2 && !salta ? 'att' : ''),
+        el.box('k', 300, 74, 280, 130, 'pIcode = je e pCnd = 1?', f >= 1 ? (salta ? 'sì · pValC' : 'no · pValP') : '·', f === 1 ? 'att' : f > 1 ? 'on' : '', { cls: 'stretta' }),
+        el.linea('l3', 580, 139, 620, 139, f >= 2 ? 'att' : ''),
+        el.box('pc', 620, 74, 224, 60, 'PC selezionato', f >= 2 ? H(dest) : '·', f === 2 ? 'att' : f > 2 ? 'on' : '', { cls: 'stretta' }),
+        el.box('mi', 620, 146, 224, 60, 'memoria delle istruzioni', f >= 3 ? 'legge da ' + H(dest) : '·', f >= 3 ? 'att' : '', { cls: 'stretta' })
+      ];
+      const hud = (f) => [['Precedente', x.testo, 'a'], ['pCnd', v.pCnd == null ? '·' : String(v.pCnd)], ['PC', f >= 2 ? H(dest) : '·', 'c']];
       const P = (f, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(f), els: quadro(f) }, extra));
 
-      P(0, 0, 'I tre candidati', 'Nel medesimo ciclo allo stadio F si presentano tre indirizzi. `F_predPC` vale ' + H(g.p) + ', ed è il PC previsto dopo l’ultimo prelievo. `M_valA` vale ' + H(g.m) + ', ed è rilevante soltanto se nello stadio M è presente un salto con previsione errata. `W_valM` vale ' + H(g.w) + ', ed è rilevante soltanto se nello stadio W è presente una `ret`.',
-        { chiedi: { d: 'Quale dei tre candidati è quello valido nella grande maggioranza dei cicli?', o: ['F_predPC', 'M_valA', 'W_valM'], g: 0, no: 'Gli altri due intervengono soltanto dopo un salto con previsione errata oppure dopo una ret.' } });
-      P(1, 1, 'Prima verifica: il salto', p.j ? 'Nello stadio M è presente un salto condizionato la cui condizione è risultata falsa. PIPE aveva prelevato dalla destinazione, e tale percorso va abbandonato. Il campo `M_valA` contiene l’indirizzo dell’istruzione che segue il salto in memoria, cioè il percorso corretto.' : 'Il selettore esamina per primo lo stadio M. Nessun salto con previsione errata vi è presente, e si passa alla verifica successiva.', { calc: 'previsione errata in M: ' + (p.j ? 'sì' : 'no') });
-      P(2, 1, 'Seconda verifica: la ret', p.j ? 'La prima verifica ha già determinato l’esito, e la seconda diviene irrilevante. Nel circuito le condizioni sono valutate tutte contemporaneamente: la priorità stabilisce quale prevale.' : p.r ? 'Nello stadio W è presente una `ret`. Nel ciclo precedente, nello stadio M, essa ha letto dalla pila l’indirizzo di ritorno, che ora si trova nel campo `W_valM`.' : 'Anche nello stadio W manca una richiesta: nessuna `ret` vi è presente. Nessuna delle due correzioni è necessaria.', { calc: p.j ? 'già determinato dalla prima verifica' : 'ret nello stadio W: ' + (p.r ? 'sì' : 'no') });
-      P(3, 2, 'La scelta', 'Il selettore trasferisce in uscita `' + U.NOMI[s] + '`, e f_pc vale ' + H(v) + '. ' + (s === 'm' ? 'La correzione del salto prevale: la pipeline stava seguendo il percorso errato, e ogni altro prelievo sarebbe inutile.' : s === 'w' ? 'L’indirizzo di ritorno prevale sul PC previsto, che dopo una `ret` è privo di significato.' : 'Nessuna correzione è richiesta, e il prelievo prosegue lungo il percorso previsto.'), { calc: 'f_pc = ' + U.NOMI[s] + ' = ' + H(v), esito: ['f_pc = ' + H(v), 'si'] });
-      P(4, 3, 'Il prelievo', 'La memoria delle istruzioni riceve f_pc e restituisce i byte che hanno inizio all’indirizzo ' + H(v) + '. Dai medesimi byte lo stadio F ricava il nuovo PC previsto, che al fronte entra nel registro F.' + (p.j && p.r ? ' In un’esecuzione reale le due richieste sono incompatibili, poiché quando una `ret` raggiunge lo stadio W gli stadi che la seguono contengono bolle. L’ordine delle verifiche resta comunque definito.' : ''), { calc: 'prelievo da ' + H(v), esito: ['f_pc = ' + H(v), 'si'] });
-      return { passi, esito: v };
+      P(0, 0, 'I valori dell’istruzione precedente', 'Nel ciclo precedente la CPU ha trattato `' + x.testo + '`, all’indirizzo ' + H(v.pc) + '. I registri dedicati ne conservano icode, cioè pIcode = ' + v.pIcode + ', ' + (v.pCnd == null ? 'nessun valore di Cnd, che soltanto `je` calcola, ' : 'pCnd = ' + v.pCnd + ', ') + (v.pValC == null ? 'nessuna costante' : 'pValC = ' + H(v.pValC)) + ' e pValP = ' + H(v.pc) + ' + ' + x.lung + ' = ' + H(v.pValP) + '.',
+        { chiedi: { d: 'Quale valore di pIcode identifica `je`?', o: ['6', '7', '3'], g: 1, no: 'La categoria del salto è icode 7.' } });
+      P(1, 1, 'La verifica', 'La selezione del PC esamina pIcode e pCnd. ' + (v.pIcode === 7 ? 'pIcode vale 7, la categoria di `je`, e pCnd vale ' + v.pCnd + (salta ? ': la condizione è soddisfatta.' : ': la condizione non è soddisfatta.') : 'pIcode vale ' + v.pIcode + ', e l’istruzione precedente è diversa da un salto, e la condizione risulta falsa.'),
+        { calc: 'pIcode = ' + v.pIcode + ' · pCnd = ' + (v.pCnd == null ? '·' : v.pCnd), chiedi: { d: 'Quale candidato riceverà il PC?', o: ['pValC', 'pValP'], g: salta ? 0 : 1, no: salta ? 'Un `je` con pCnd = 1 è eseguito: il PC riceve la destinazione, pValC.' : 'In tutti i casi diversi da un `je` con pCnd = 1 il PC riceve il successore in memoria, pValP.' } });
+      P(2, 2, salta ? 'La destinazione del salto' : 'Il successore in memoria', salta ? 'Il PC riceve pValC = ' + H(dest) + ', la destinazione del salto. L’istruzione che segue `je` in memoria, a ' + H(v.pValP) + ', non è prelevata.' : 'Il PC riceve pValP = ' + H(dest) + ', l’indirizzo dell’istruzione che segue `' + x.testo + '` in memoria.' + (v.pIcode === 7 ? ' La destinazione ' + H(v.pValC) + ' resta inutilizzata.' : ''), { calc: 'PC = ' + (salta ? 'pValC' : 'pValP') + ' = ' + H(dest) });
+      P(3, 3, 'Il prelievo', 'Lo stadio F presenta ' + H(dest) + ' alla memoria delle istruzioni, già all’inizio del ciclo. Il calcolo è identico a quello della fase di aggiornamento del PC della CPU a ciclo singolo: è cambiata soltanto la sua posizione, dalla fine di un’istruzione all’inizio della successiva.',
+        { calc: 'prelievo da ' + H(dest), esito: ['PC = ' + H(dest), 'si'] });
+      return { passi, esito: dest };
     }
   },
   bilancio: {
     regola: [
-      'Lo stadio F seleziona l’indirizzo del prelievo fra tre candidati: `M_valA` quando nello stadio M è presente un salto con previsione errata, `W_valM` quando nello stadio W è presente una `ret`, il PC previsto in tutti gli altri casi.',
-      'Il PC previsto si ricava dai soli byte dell’istruzione appena prelevata: valC per `jmp`, `call` e salti condizionati, valP per tutte le altre.'
+      'Nella pipeline il nuovo PC deve essere disponibile all’inizio di ogni ciclo. Il blocco che lo calcola è quindi spostato prima del prelievo, e impiega i valori dell’istruzione precedente, conservati in registri dedicati: pIcode, pCnd, pValC e pValP.',
+      'Se pIcode è la categoria di `je` e pCnd vale 1, il PC riceve pValC; in tutti gli altri casi riceve pValP. Le fasi divengono cinque: F, che comprende la selezione del PC, D, E, M e W.'
     ],
     errori: [
-      ['Ritenere che la ret conosca la destinazione al prelievo.', 'L’indirizzo di ritorno è contenuto nella pila, ed è letto soltanto nello stadio M.'],
-      ['Correggere il salto con la destinazione.', 'La destinazione era la previsione. La correzione è l’altro percorso: l’istruzione che segue il salto, conservata in M_valA.'],
-      ['Leggere le tre sigle come valori del medesimo stadio.', 'F_predPC appartiene al registro F, M_valA al registro M, W_valM al registro W. Essi riguardano tre istruzioni diverse.']
+      ['Selezionare pValC per ogni `je`.', 'La destinazione è scelta soltanto con pCnd = 1. Con pCnd = 0 il PC riceve pValP.'],
+      ['Ritenere che il calcolo sia nuovo.', 'La regola è quella della fase di aggiornamento del PC. È cambiata soltanto la posizione del blocco.'],
+      ['Leggere i valori p come valori dell’istruzione da prelevare.', 'Il prefisso p indica l’istruzione precedente: i suoi valori stabiliscono dove si trova la successiva.']
     ],
-    saFare: ['Elencare i tre candidati per il prelievo.', 'Applicare la priorità del selettore.', 'Ricavare il PC previsto dal tipo di istruzione.'],
+    saFare: ['Spiegare perché il calcolo del PC precede il prelievo.', 'Ricavare l’indirizzo del prelievo da pIcode, pCnd, pValC e pValP.', 'Elencare le cinque fasi della CPU con pipeline.'],
     esercizi: [
-      { d: 'Il registro F contiene F_predPC = 0x200. Nello stadio M è presente una `addq`, e nello stadio W una `ret` con W_valM = 0x58. Quanto vale f_pc? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['58', '0x58', '58h', '058', '0x058'],
-        ok: 'Nello stadio M manca un salto da correggere, e nello stadio W è presente una ret: è selezionato W_valM.',
+      { d: 'L’istruzione precedente è `je 0x200`, all’indirizzo 0x30, con pCnd = 0. Da quale indirizzo preleva lo stadio F? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['0x39', '39', '39h'],
+        ok: 'Con pCnd = 0 il PC riceve pValP = 0x30 + 9 = 0x39.',
         diagnosi: [
-          { se: ['200', '0x200', '200h'], msg: 'Il PC previsto è selezionato soltanto quando mancano entrambe le richieste. In questo caso nello stadio W è presente una ret.' }
+          { se: ['0x200', '200', '200h'], msg: 'Questa è pValC, la destinazione. È scelta soltanto con pCnd = 1.' },
+          { se: ['0x30', '30', '30h'], msg: 'Questo è l’indirizzo del salto stesso. Occorre quello dell’istruzione che lo segue.' },
+          { se: ['0x3a', '3a', '3ah'], msg: '`je` occupa 9 byte, poiché non ha il byte dei registri.' }
         ],
-        altro: 'Il valore è diverso. Si esaminino le verifiche nell’ordine: prima il salto in M, poi la ret in W.',
-        indizi: ['Nello stadio M è presente una addq, che non richiede correzioni.', 'Nello stadio W è presente una ret.', 'Con una ret in W è selezionato W_valM.'],
-        svolgimento: ['Previsione errata in M: no.', 'ret in W: sì.', 'f_pc = W_valM = 0x58.'] },
-      { d: 'Uno `jne` ha inizio all’indirizzo 0x30, occupa 9 byte e ha destinazione 0x100. PIPE prevede che il salto avvenga, e nello stadio E la condizione risulta falsa. Quale indirizzo contiene il campo M_valA del salto? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['39', '0x39', '39h', '039', '0x039'],
-        ok: 'M_valA contiene l’indirizzo dell’istruzione che segue il salto: 0x30 + 9 = 0x39.',
-        diagnosi: [
-          { se: ['100', '0x100', '100h'], msg: 'Questa è la destinazione, cioè il percorso già prelevato e ora da abbandonare.' },
-          { se: ['30', '0x30', '30h'], msg: 'Questo è l’indirizzo del salto stesso. Occorre quello dell’istruzione che lo segue.' },
-          { se: ['3f', '0x3f', '3fh'], msg: 'La somma va eseguita in esadecimale: 0x30 + 9 = 0x39.' }
-        ],
-        altro: 'Il valore è diverso. Occorre l’indirizzo dell’istruzione che segue il salto in memoria.',
-        indizi: ['La previsione era la destinazione, e si è rivelata errata.', 'Il percorso corretto è l’istruzione che segue il salto.', '0x30 + 9.'],
-        svolgimento: ['Indirizzo del salto: 0x30.', 'Lunghezza: 9 byte.', 'M_valA = valP = 0x30 + 9 = 0x39.'] },
-      { d: 'Lo stadio F ha appena prelevato una `call 0x400` che ha inizio all’indirizzo 0x20. Quanto vale il PC previsto?', guida: 'Si scelga la risposta.', o: [
-        { t: '0x400', ok: true, fb: 'La destinazione di una call è la costante valC, scritta nell’istruzione e nota fin dal prelievo.' },
-        { t: '0x29', fb: 'Questo è valP, l’indirizzo di ritorno che la call salva sulla pila.' },
-        { t: 'Resta ignoto fino allo stadio M', fb: 'Ciò vale per la ret. La destinazione di una call si legge nei byte dell’istruzione.' }] }
+        altro: 'Il valore è diverso. Si verifichi la condizione della selezione, e quindi si calcoli pValP.',
+        indizi: ['pIcode è la categoria di `je`, e pCnd vale 0.', 'La condizione per pValC non è soddisfatta.', 'pValP = 0x30 + 9.'],
+        svolgimento: ['pIcode = 7, pCnd = 0: condizione falsa.', 'PC = pValP.', 'pValP = 0x30 + 9 = 0x39.'] },
+      { d: 'Perché nella CPU con pipeline il calcolo del PC è spostato prima del prelievo?', guida: 'Si scelga la risposta.', o: [
+        { t: 'Perché a ogni ciclo occorre l’indirizzo di un’istruzione nuova, già all’inizio del ciclo', ok: true, fb: 'Alla fine dell’istruzione sarebbe troppo tardi: nel frattempo la pipeline deve avere già prelevato le successive.' },
+        { t: 'Perché la regola di selezione del PC cambia nella pipeline', fb: 'La regola è la medesima della CPU a ciclo singolo, e il blocco ha soltanto una posizione diversa.' },
+        { t: 'Perché `je` non calcola più Cnd', fb: '`je` calcola ancora Cnd, e il suo valore raggiunge la selezione come pCnd.' }] }
     ],
     sfida: ['cslez3_6_03_random_assembly', 'Priorità nella selezione del PC']
   }

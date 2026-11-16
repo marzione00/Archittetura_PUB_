@@ -71,20 +71,20 @@
         indizi: ['Il lock è rilasciato a ' + d + ' ms.', spin ? 'Nell’attesa attiva il thread esegue per l’intera durata.' : 'Un thread sospeso non esegue, e al rilascio va risvegliato.', 'Risposta: ' + v + ' ms.'],
         svolgimento: ['Rilascio: ' + d + ' ms.', 'Processore consumato nell’attesa: ' + (spin ? d : 0) + ' ms.', 'Lock ottenuto a: ' + (spin ? d : d + rs) + ' ms.'] };
     },
-    // 5.5.6 · contatore oppure coda dopo una sequenza di wait e signal
+    // 5.5.6 · valore oppure coda dopo una sequenza di down e up
     (r) => {
       const s = r.int(0, 3), k = r.int(4, 6), nomi = ['A', 'B', 'C', 'D', 'E', 'F'], ops = []; let n = s, w = 0; const coda = [];
-      for (let j = 0; j < k; j++) { if (r.int(0, 2) > 0 && w < 6) { const chi = nomi[w++]; ops.push(chi + ' esegue wait'); if (n > 0) n--; else coda.push(chi); } else { ops.push('un altro thread esegue signal'); if (coda.length) coda.shift(); else n++; } }
+      for (let j = 0; j < k; j++) { if (r.int(0, 2) > 0 && w < 6) { const chi = nomi[w++]; ops.push(chi + ' esegue down'); if (n > 0) n--; else coda.push(chi); } else { ops.push('un altro thread esegue up'); if (coda.length) coda.shift(); else n++; } }
       const cosa = r.int(0, 1), v = cosa === 0 ? n : coda.length, giuste = I(v);
-      return { u: '5.5.6', d: 'Un semaforo ha ' + (s === 1 ? '1 permesso libero' : s + ' permessi liberi') + ' e la coda vuota. Avvengono, in quest’ordine: ' + ops.join('; ') + '. ' + (cosa === 0 ? 'Quanti permessi liberi ha il semaforo al termine?' : 'Quanti thread sono bloccati in coda al termine?'), segnaposto: 'Un numero', giuste,
-        ok: 'Al termine i permessi liberi sono ' + n + ', e la coda ' + (coda.length === 0 ? 'è vuota.' : coda.length === 1 ? 'contiene ' + coda[0] + '.' : 'contiene ' + coda.join(', ') + '.'),
+      return { u: '5.5.6', d: 'Un semaforo ha valore ' + s + ' e la coda vuota. Avvengono, in quest’ordine: ' + ops.join('; ') + '. ' + (cosa === 0 ? 'Quale valore ha il semaforo al termine?' : 'Quanti thread sono bloccati in coda al termine?'), segnaposto: 'Un numero', giuste,
+        ok: 'Al termine il semaforo vale ' + n + ', e la coda ' + (coda.length === 0 ? 'è vuota.' : coda.length === 1 ? 'contiene ' + coda[0] + '.' : 'contiene ' + coda.join(', ') + '.'),
         diagnosi: DIAG(giuste, [
-          { se: I(cosa === 0 ? coda.length : n), msg: cosa === 0 ? 'Questo è il numero dei thread in coda. La domanda riguarda i permessi liberi.' : 'Questo è il numero dei permessi liberi. La domanda riguarda la coda.' },
-          { se: I(Math.max(0, s + ops.filter((x) => /signal/.test(x)).length - (cosa === 0 ? 0 : 99))), msg: 'Una signal incrementa il contatore soltanto se la coda è vuota, e ogni wait riuscita lo decrementa.' }
+          { se: I(cosa === 0 ? coda.length : n), msg: cosa === 0 ? 'Questo è il numero dei thread in coda. La domanda riguarda il valore del semaforo.' : 'Questo è il valore del semaforo. La domanda riguarda la coda.' },
+          { se: I(Math.max(0, s + ops.filter((x) => / up$/.test(x)).length - (cosa === 0 ? 0 : 99))), msg: 'Una up incrementa il valore soltanto se la coda è vuota, e ogni down che non blocca lo decrementa.' }
         ]),
-        altro: 'Il numero è diverso. Si aggiornino contatore e coda dopo ogni operazione.',
-        indizi: ['wait: se il contatore è maggiore di zero scende di 1, altrimenti il thread è posto in coda.', 'signal: se la coda contiene un thread lo risveglia, altrimenti il contatore sale di 1.', 'Al termine: permessi ' + n + ', thread in coda ' + coda.length + '.'],
-        svolgimento: ['Permessi iniziali: ' + s + '.', 'Operazioni: ' + ops.length + '.', 'Permessi finali: ' + n + '.', 'Thread in coda: ' + coda.length + '.'] };
+        altro: 'Il numero è diverso. Si aggiornino valore e coda dopo ogni operazione.',
+        indizi: ['down: se il valore è maggiore di zero scende di 1, altrimenti il thread è posto in coda.', 'up: se la coda contiene un thread lo risveglia, altrimenti il valore sale di 1.', 'Al termine: valore ' + n + ', thread in coda ' + coda.length + '.'],
+        svolgimento: ['Valore iniziale: ' + s + '.', 'Operazioni: ' + ops.length + '.', 'Valore finale: ' + n + '.', 'Thread in coda: ' + coda.length + '.'] };
     },
     // 5.5.7 · conferme inviate, oppure esito di una serie di confronti e scambi
     (r) => {

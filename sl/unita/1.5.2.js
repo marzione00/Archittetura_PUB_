@@ -2,7 +2,7 @@
 SL.registra('1.5.2', {
   titolo: 'Dalla tabella di verità al circuito',
   obiettivo: 'Obiettivo: costruire, per qualunque tabella di verità, un circuito di porte AND, OR e NOT che la realizzi, mediante un procedimento di validità generale.',
-  concetti: [['tabella', 'Tabella'], ['porta', 'Mintermine'], ['mux', 'Somma']],
+  concetti: [['tabella', 'Tabella'], ['porta', 'Una AND per riga'], ['mux', 'La OR finale']],
   filigrana: ['tabella', 'porta', 'mux'],
   richiami: {
     carte: [
@@ -18,18 +18,18 @@ SL.registra('1.5.2', {
   },
   idea: {
     titolo: 'Una porta AND per ogni riga vera',
-    termini: ['mintermine', 'somma di mintermini'],
+    termini: ['sintesi di un circuito'],
     testo: [
       'L’unità 1.5.1 ha ricavato la tabella a partire da una porta. Il progetto di un circuito pone il problema inverso: è nota la funzione da ottenere, cioè la tabella, e occorre determinare le porte. Esiste un procedimento che fornisce sempre una soluzione, per qualunque tabella.',
-      'Si considera dapprima una riga in cui l’uscita deve valere 1, per esempio quella con A = 1 e B = 0. Si costruisce un circuito elementare che riconosce tale riga e nessun’altra. È sufficiente una AND, alla quale A giunge direttamente e B attraverso una NOT. La AND dà 1 quando A vale 1 e B vale 0, e dà 0 in tutte le altre righe. Un riconoscitore di questo tipo prende il nome di [[mintermine]].',
+      'Si considera dapprima una riga in cui l’uscita deve valere 1, per esempio quella con A = 1 e B = 0. Si costruisce un circuito elementare che riconosce tale riga e nessun’altra. È sufficiente una AND, alla quale A giunge direttamente e B attraverso una NOT. La AND dà 1 quando A vale 1 e B vale 0, e dà 0 in tutte le altre righe. Una AND di questo tipo riconosce una sola riga della tabella.',
       'La regola di costruzione è meccanica. Gli ingressi che nella riga valgono 1 entrano nella AND senza modifiche; quelli che valgono 0 attraversano prima una NOT.',
-      'Si ripete l’operazione per ogni riga in cui l’uscita deve valere 1, e si collegano tutti i riconoscitori a una OR finale. L’uscita vale 1 quando si attiva almeno un riconoscitore, cioè esattamente nelle righe richieste. Il circuito ottenuto prende il nome di [[somma di mintermini]].',
-      { fig: 'scena', w: 700, h: 150, titolo: 'La XOR come somma di due mintermini', nota: 'Il primo riconoscitore si attiva nella riga 01, il secondo nella riga 10. La OR li unisce.', els: [
+      'Si ripete l’operazione per ogni riga in cui l’uscita deve valere 1, e si collegano tutti i riconoscitori a una OR finale. L’uscita vale 1 quando si attiva almeno un riconoscitore, cioè esattamente nelle righe richieste. Il procedimento, che parte dalla tabella e giunge al circuito senza richiedere alcuna invenzione, prende il nome di [[sintesi di un circuito|sintesi]].',
+      { fig: 'scena', w: 700, h: 150, titolo: 'La XOR ottenuta per sintesi', nota: 'Il primo riconoscitore si attiva nella riga 01, il secondo nella riga 10. La OR li unisce.', els: [
         SL.el.box('m1', 10, 8, 330, 58, 'riconosce A = 0, B = 1', 'NOT A AND B', 'on', { cls: 'stretta' }),
         SL.el.box('m2', 10, 84, 330, 58, 'riconosce A = 1, B = 0', 'A AND NOT B', 'on', { cls: 'stretta' }),
         SL.el.linea('l1', 340, 37, 460, 75, 'on'), SL.el.linea('l2', 340, 113, 460, 75, 'on'),
         SL.el.box('or', 460, 44, 230, 62, 'porta OR', 'Y', 'att', { sim: 'porta', riga: true })] },
-      'Il procedimento ha una portata generale. Esso dimostra che con AND, OR e NOT è possibile costruire qualunque funzione booleana, con qualsiasi numero di ingressi. Ogni calcolo eseguito da un processore si riduce, in ultima analisi, a queste tre funzioni.',
+      'Il procedimento ha una portata generale. Esso dimostra che con AND, OR e NOT è possibile costruire qualunque funzione booleana, con qualsiasi numero di ingressi: per questa ragione le tre porte formano un insieme funzionalmente completo. Ogni calcolo eseguito da un processore si riduce, in ultima analisi, a queste tre funzioni.',
       'Il circuito ottenuto è corretto, e solo di rado è il minimo possibile. La riduzione del numero di porte è un problema distinto, trattato nel Modulo III.'
     ]
   },
@@ -104,29 +104,29 @@ SL.registra('1.5.2', {
   },
   bilancio: {
     regola: [
-      'Per ogni riga in cui l’uscita deve valere 1 si costruisce un mintermine: una AND in cui gli ingressi che valgono 0 attraversano una NOT.',
-      'I mintermini si uniscono con una OR. Il circuito realizza la tabella esattamente, e il procedimento vale per qualunque numero di ingressi.'
+      'Per ogni riga in cui l’uscita deve valere 1 si costruisce una AND che riconosce soltanto quella riga: gli ingressi che vi valgono 0 la raggiungono attraverso una NOT.',
+      'Le AND così ottenute si uniscono con una OR. Il procedimento è la sintesi. Il circuito realizza la tabella esattamente, e il procedimento vale per qualunque numero di ingressi.'
     ],
     errori: [
       ['Costruire riconoscitori per le righe false.', 'Le righe con uscita 0 non richiedono porte. È sufficiente che in tali righe nessun riconoscitore si attivi.'],
       ['Porre la NOT sugli ingressi a 1.', 'Attraversano la NOT gli ingressi che nella riga valgono 0, poiché la AND richiede tutti gli ingressi a 1.'],
       ['Unire i riconoscitori con una AND.', 'Due riconoscitori di righe diverse non si attivano mai contemporaneamente. Per unirli occorre la OR.']
     ],
-    saFare: ['Scrivere il mintermine di una riga della tabella.', 'Costruire la somma di mintermini di una funzione.', 'Verificare il circuito su tutte le combinazioni.'],
+    saFare: ['Scrivere la AND che riconosce una riga della tabella.', 'Costruire per sintesi il circuito di una funzione.', 'Verificare il circuito su tutte le combinazioni.'],
     esercizi: [
-      { d: 'Una funzione ha tre ingressi, A, B e C. Qual è il mintermine che riconosce la riga A = 0, B = 1, C = 1?', guida: 'Si scelga la risposta.', o: [
+      { d: 'Una funzione ha tre ingressi, A, B e C. Quale espressione riconosce la sola riga A = 0, B = 1, C = 1?', guida: 'Si scelga la risposta.', o: [
         { t: 'A AND NOT B AND NOT C', fb: 'Le NOT sono collocate in modo errato. Vanno poste sugli ingressi che nella riga valgono 0, e in questo caso l’unico è A.' },
         { t: 'NOT A AND B AND C', ok: true, fb: 'A vale 0 e attraversa la NOT. B e C valgono 1 ed entrano direttamente.' },
         { t: 'NOT A OR B OR C', fb: 'Una OR si attiverebbe in molte righe. Un riconoscitore deve attivarsi in una sola, e impiega per questo la AND.' }] },
-      { d: 'La tabella di una funzione di tre ingressi ha uscita 1 in cinque righe. Quante porte AND contiene la sua somma di mintermini?', segnaposto: 'Un numero', giuste: ['5', 'cinque'],
-        ok: 'Un mintermine, cioè una AND, per ogni riga vera.',
+      { d: 'La tabella di una funzione di tre ingressi ha uscita 1 in cinque righe. Quante porte AND contiene il circuito ottenuto per sintesi?', segnaposto: 'Un numero', giuste: ['5', 'cinque'],
+        ok: 'Una AND per ogni riga vera.',
         diagnosi: [
           { se: ['8', 'otto'], msg: 'Otto sono tutte le righe della tabella. I riconoscitori occorrono soltanto per le righe con uscita 1.' },
           { se: ['3', 'tre'], msg: 'Tre è il numero degli ingressi. Le AND sono tante quante le righe vere.' }
         ],
         altro: 'Il numero è diverso. Ogni riga con uscita 1 riceve un riconoscitore, e ogni riconoscitore è una AND.',
-        indizi: ['Le righe con uscita 0 non richiedono porte.', 'Ogni riga con uscita 1 ha il proprio mintermine.', 'Le righe vere sono cinque.'],
-        svolgimento: ['Righe vere: 5.', 'Un mintermine per riga vera.', 'Porte AND: 5, unite da una OR.'] }
+        indizi: ['Le righe con uscita 0 non richiedono porte.', 'Ogni riga con uscita 1 ha la propria AND.', 'Le righe vere sono cinque.'],
+        svolgimento: ['Righe vere: 5.', 'Una AND per riga vera.', 'Porte AND: 5, unite da una OR.'] }
     ],
     sfida: ['lez05_05_truth_table_rows', 'Costruire una tabella di verità']
   }

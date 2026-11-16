@@ -36,12 +36,12 @@ SL.registra('6.1.3', {
   },
   idea: {
     titolo: 'Un solo valore per valutare una cache',
-    termini: ['penalità di miss', 'frazione di miss', 'amat'],
+    termini: ['penalità di miss', 'frazione di miss', 'tempo medio di accesso'],
     testo: [
       'Una lettura dura 2 ns oppure 52, secondo la posizione del dato. Per confrontare due cache, o due programmi, occorre un solo valore, che tenga conto della frequenza dei due casi. Tale valore è una media.',
       'Si considerino cento letture eseguite in successione, e si separino due tempi. Il primo è la consultazione della cache: 2 ns, dovuti da tutte e cento. Il secondo è il tempo aggiuntivo di un rifornimento, denominato [[penalità di miss]]: 50 ns, dovuti soltanto dalle letture che falliscono. Se i miss sono dieci, le consultazioni costano 100 × 2 = 200 ns e i rifornimenti 10 × 50 = 500 ns, per un totale di 700 ns.',
       { fig: 'scena', w: 720, h: 150, titolo: 'Cento letture, dieci miss', nota: 'Tutte le celle comprendono la consultazione. Soltanto le dieci contrassegnate comprendono anche la penalità.', els: SL.unita613.quadro('g', { m: 10, pen: 50 }, 5, { x: 10, y: 4, w: 700, lato: 11 }) },
-      'La ripartizione dei 700 ns sulle cento letture fornisce il tempo medio di accesso, 7 ns. In inglese è average memory access time, e la sigla [[amat|AMAT]] è la denominazione corrente. Il medesimo risultato si esprime con una formula. Si denomina [[frazione di miss]] il rapporto fra i miss e le letture, in questo caso 10 su 100, cioè 0,10. Ne segue AMAT = consultazione + frazione di miss × penalità = 2 + 0,10 × 50 = 7 ns.',
+      'La ripartizione dei 700 ns sulle cento letture fornisce il [[tempo medio di accesso]], 7 ns, in inglese average access time. Il medesimo risultato si esprime con una formula. Si denomina [[frazione di miss]] il rapporto fra i miss e le letture, in questo caso 10 su 100, cioè 0,10. Ne segue: tempo medio di accesso = consultazione + frazione di miss × penalità = 2 + 0,10 × 50 = 7 ns.',
       'La formula indica il termine su cui è opportuno intervenire. Il raddoppio dei miss, da dieci a venti, aumenta la media da 7 a 12 ns: il termine della penalità incide molto più della consultazione, poiché un rifornimento equivale a venticinque consultazioni. Per questa ragione i programmi che rispettano la località dell’unità precedente sono più veloci a parità di istruzioni eseguite.',
       'Occorre tuttavia precisare il contenuto informativo della media. Nessuna lettura dura 7 ns: ciascuna ne dura 2 oppure 52, e la media descrive la sequenza nel suo insieme. Il modello si fonda inoltre su tre ipotesi: le letture avvengono una per volta, la consultazione è dovuta anche dai miss, e la penalità è la medesima per ogni rifornimento. Se una di esse cambia, cambia anche il calcolo.'
     ]
@@ -78,13 +78,13 @@ SL.registra('6.1.3', {
       P(2, 1, 'I miss', 'Delle cento letture, ' + p.m + ' terminano in miss: sono le celle contrassegnate. La frazione di miss è ' + p.m + ' su 100, cioè ' + String(p.m / 100).replace('.', ',') + '.', { calc: 'frazione di miss = ' + String(p.m / 100).replace('.', ',') });
       P(3, 1, 'Le penalità', 'Ogni miss comprende la penalità, ' + p.pen + ' ns, oltre ai 2 ns già contati. I miss sono ' + p.m + ': ' + p.m + ' × ' + p.pen + ' = ' + c.rif + ' ns.', { calc: p.m + ' × ' + p.pen + ' = ' + c.rif + ' ns' });
       P(4, 2, 'Il tempo totale', 'La somma dei due contributi è ' + c.cons + ' + ' + c.rif + ' = ' + c.tot + ' ns per le cento letture.', { calc: c.cons + ' + ' + c.rif + ' = ' + c.tot + ' ns', chiedi: { d: 'Il tempo medio sarà ' + c.amat + ' ns. Esiste una lettura che dura esattamente ' + c.amat + ' ns?', o: ['No, ogni lettura dura 2 ns oppure ' + (2 + p.pen) + ' ns', 'Sì, sono tutte uguali'], g: 0, no: 'Un hit dura 2 ns, un miss ' + (2 + p.pen) + ' ns. La media descrive la sequenza nel suo insieme.' } });
-      P(5, 2, 'La media', 'Il totale diviso per il numero di letture dà ' + c.tot + ' / 100 = ' + c.amat + ' ns. La formula fornisce il medesimo valore: 2 + ' + String(p.m / 100).replace('.', ',') + ' × ' + p.pen + ' = ' + c.amat + ' ns.', { calc: 'AMAT = 2 + ' + String(p.m / 100).replace('.', ',') + ' × ' + p.pen + ' = ' + c.amat + ' ns', esito: [c.amat + ' ns di media', ''] });
+      P(5, 2, 'La media', 'Il totale diviso per il numero di letture dà ' + c.tot + ' / 100 = ' + c.amat + ' ns. La formula fornisce il medesimo valore: 2 + ' + String(p.m / 100).replace('.', ',') + ' × ' + p.pen + ' = ' + c.amat + ' ns.', { calc: 'media = 2 + ' + String(p.m / 100).replace('.', ',') + ' × ' + p.pen + ' = ' + c.amat + ' ns', esito: [c.amat + ' ns di media', ''] });
       return { passi, esito: c.amat };
     }
   },
   bilancio: {
     regola: [
-      'AMAT = tempo di consultazione + frazione di miss × penalità di miss.',
+      'Tempo medio di accesso = tempo di consultazione + frazione di miss × penalità di miss.',
       'Tempo totale = numero di letture × consultazione + numero di miss × penalità.'
     ],
     errori: [
@@ -101,9 +101,9 @@ SL.registra('6.1.3', {
           { se: ['101', '101 ns'], msg: 'Questo è il tempo di un singolo miss. La penalità incide soltanto per 4 letture su 100.' },
           { se: ['401', '401 ns'], msg: 'La frazione di miss è 4 diviso 100, cioè 0,04.' }
         ],
-        altro: 'Il valore è diverso. Si applichi AMAT = consultazione + frazione di miss × penalità.',
+        altro: 'Il valore è diverso. Si applichi la formula: tempo medio = consultazione + frazione di miss × penalità.',
         indizi: ['Frazione di miss: 4 / 100 = 0,04.', '0,04 × 100 = 4 ns.', '1 + 4 = 5 ns.'],
-        svolgimento: ['Frazione di miss: 0,04.', 'Contributo delle penalità: 4 ns.', 'AMAT: 5 ns.'] },
+        svolgimento: ['Frazione di miss: 0,04.', 'Contributo delle penalità: 4 ns.', 'Tempo medio di accesso: 5 ns.'] },
       { d: 'Un programma esegue 200 letture, con 30 miss. La consultazione costa 2 ns e la penalità 40 ns. Quanti nanosecondi occorrono complessivamente?', segnaposto: 'Un numero', giuste: ['1600', '1 600', '1600 ns', '1 600 ns'],
         ok: '200 × 2 + 30 × 40 = 400 + 1 200 = 1 600 ns.',
         diagnosi: [

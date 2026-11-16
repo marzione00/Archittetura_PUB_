@@ -1,6 +1,6 @@
 'use strict';
 SL.registra('2.7.1', {
-  titolo: 'I frame dello stack come convenzioni',
+  titolo: 'I frame della pila come convenzioni',
   obiettivo: 'Obiettivo: seguire il prologo e l’epilogo di una funzione che impiega RBP, e determinare l’indirizzo di una variabile locale a partire dal suo spiazzamento.',
   concetti: [['puntatore', 'Un riferimento fisso'], ['pila', 'Prologo ed epilogo'], ['tabella', 'Un accordo fra compilatori']],
   filigrana: ['pila', 'puntatore', 'tabella'],

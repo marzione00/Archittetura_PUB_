@@ -6,7 +6,9 @@ Indirizzo pubblico: <https://marzione00.github.io/Archittetura_PUB_/>
 
 ## Contenuto
 
-Il sito comprende 7 moduli, 41 capitoli e 210 unità. Ogni unità tratta un solo argomento in cinque fasi (richiami, esposizione, esperimento, esecuzione guidata, bilancio) ed è costruita attorno a un esperimento eseguibile un passo alla volta. Ogni capitolo dispone di una prova di fine capitolo in 999 varianti numerate, e il glossario conta 592 termini.
+Il sito comprende 7 moduli, 41 capitoli e 208 unità. Ogni unità tratta un solo argomento in cinque fasi (richiami, esposizione, esperimento, esecuzione guidata, bilancio) ed è costruita attorno a un esperimento eseguibile un passo alla volta. Ogni capitolo dispone di una prova di fine capitolo in 999 varianti numerate, e il glossario conta 578 termini.
+
+Il sito è allineato all'edizione rivista della dispensa, di cui adotta terminologia, notazione e processore del caso di studio. Le 43 unità che trattano argomenti oltre la dispensa sono contrassegnate come «Approfondimento», e la loro consultazione è facoltativa.
 
 All'apertura della pagina principale un'introduzione di 16 schede illustra l'organizzazione del sito e l'impiego del laboratorio, illuminando di volta in volta l'elemento descritto; il comando «Salta intro» la chiude. La pagina principale indica quindi il percorso di studio: il Modulo 0, privo di prerequisiti, e quindi i Moduli da I a VI nell'ordine della rete del corso. Ogni modulo è presentato da una scheda con argomento, prerequisiti ed esiti attesi; ogni capitolo elenca le proprie unità con il relativo obiettivo, seguite dalla prova e dalle sfide in terminale. Il sito non conserva alcun dato nel browser e non effettua richieste verso altri servizi.
 

@@ -1,6 +1,6 @@
 'use strict';
 SL.registra('2.7.5', {
-  titolo: 'Ottimizzazioni dello stack e dettagli ABI',
+  titolo: 'Ottimizzazioni della pila e dettagli ABI',
   obiettivo: 'Obiettivo: prevedere di quanto una funzione abbassa RSP, distinguendo le funzioni prive di chiamate ad altre funzioni da quelle che ne eseguono, e tenendo conto dell’allineamento.',
   concetti: [['pila', 'Funzioni senza frame'], ['memory', 'La zona rossa'], ['bilancio', 'RSP multiplo di 16']],
   filigrana: ['pila', 'memory', 'bilancio'],

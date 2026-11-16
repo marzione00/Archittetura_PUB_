@@ -28,12 +28,12 @@
       return { u: '1.3.2', d: 'Una sequenza UTF-8 comincia con il byte `0x' + H(b) + '`. Quanti byte occupa complessivamente il carattere?', segnaposto: 'Un numero di byte', giuste: I(lung).concat([['uno', 'due', 'tre', 'quattro'][lung - 1]]),
         ok: 'In binario 0x' + H(b) + ' è ' + BIN(b) + '. Comincia con ' + prefisso + ', l’etichetta dei caratteri di ' + (lung === 1 ? 'un solo byte.' : lung + ' byte.'),
         diagnosi: [
-          { se: lung > 1 ? I(lung - 1) : ['0'], msg: lung > 1 ? 'Il conteggio comprende anche il primo byte, oltre ai byte di continuazione.' : 'Un carattere occupa almeno un byte. Il primo bit a 0 annuncia un carattere di un solo byte.' },
+          { se: lung > 1 ? I(lung - 1) : ['0'], msg: lung > 1 ? 'Il conteggio comprende anche il primo byte, oltre a quelli che lo seguono.' : 'Un carattere occupa almeno un byte. Il primo bit a 0 annuncia un carattere di un solo byte.' },
           { se: I(lung + 1), msg: 'Lo zero che chiude l’etichetta è escluso dal conteggio. Vanno contati soltanto gli 1 iniziali.' }
         ],
         altro: 'Il numero è diverso. Si scriva il byte in binario e si osservi con quali bit comincia.',
         indizi: ['In binario 0x' + H(b) + ' è ' + BIN(b) + '.', 'Le etichette sono 0 per un byte, 110 per due, 1110 per tre, 11110 per quattro.', 'Questo byte comincia con ' + prefisso + '.'],
-        svolgimento: ['0x' + H(b) + ' in binario: ' + BIN(b) + '.', 'Il byte comincia con ' + prefisso + '.', 'Il carattere occupa ' + (lung === 1 ? '1 byte.' : lung + ' byte: il primo e ' + (lung - 1) + ' di continuazione.')] };
+        svolgimento: ['0x' + H(b) + ' in binario: ' + BIN(b) + '.', 'Il byte comincia con ' + prefisso + '.', 'Il carattere occupa ' + (lung === 1 ? '1 byte.' : lung + ' byte: il primo e ' + (lung - 1) + ' successivi.')] };
     },
     // 1.3.2 · i byte di una parola con lettere accentate
     (r) => {

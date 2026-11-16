@@ -54,7 +54,7 @@ SL.registra('5.7.5', {
       'A ogni iterazione sono aggiornati due contatori: i tentativi compiuti e le operazioni completate. Al termine la coppia dei contatori identifica la situazione.'
     ],
     vedrai: [
-      ['riproduci', 'Le iterazioni', 'In alto: l’attività di ciascun partecipante in ogni iterazione.'],
+      ['riproduci', 'Le iterazioni', 'In alto: l’attività di ciascun thread in ogni iterazione.'],
       ['lente', 'I contatori', 'In basso: tentativi, operazioni completate, e il thread senza avanzamento.']
     ]
   },

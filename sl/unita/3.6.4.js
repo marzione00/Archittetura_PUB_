@@ -1,124 +1,138 @@
 'use strict';
+SL.unita364 = (() => {
+  const TESTO = { load: '`mov rax, 0(rbx)`', uso: '`add rcx, rax`', ind: '`mov rdi, rsi`' };
+  const NOME = { vicino: 'L · U · I', separa: 'L · I · U' };
+  const F5 = ['F', 'D', 'E', 'M', 'W'];
+  /* Il programma con le nop necessarie. Nell'ordine L, U, I ogni gruppo richiede tre nop fra L e U;
+     nell'ordine L, I, U l'istruzione I ne sostituisce una, e ne bastano due. */
+  const traccia = (ordine, g) => {
+    const seq = [];
+    for (let k = 1; k <= g; k++) {
+      const x = g > 1 ? String(k) : '';
+      if (ordine === 'vicino') seq.push('L' + x, 'nop', 'nop', 'nop', 'U' + x, 'I' + x);
+      else seq.push('L' + x, 'I' + x, 'nop', 'nop', 'U' + x);
+    }
+    const righe = seq.map((n, j) => ({ n, da: j + 1, s: F5, st: n === 'nop' ? 'off' : '' }));
+    const nop = seq.filter((n) => n === 'nop').length;
+    return { righe, cicli: seq.length + 4, nop, utili: 3 * g, seq };
+  };
+  return { TESTO, NOME, traccia };
+})();
 SL.registra('3.6.4', {
-  titolo: 'Conflitti di controllo, stalli e bolle',
-  obiettivo: 'Obiettivo: seguire un salto condizionato in PIPE: quali istruzioni sono prelevate prima che ne sia noto l’esito, quali divengono bolle se la previsione è errata, e da quale indirizzo riparte il prelievo.',
-  concetti: [['conflitto', 'La previsione sul salto'], ['stallo', 'Due bolle in luogo di due istruzioni'], ['puntatore', 'L’indirizzo della ripresa']],
-  filigrana: ['conflitto', 'stallo', 'puntatore'],
+  titolo: 'Traccia e conteggio dei cicli',
+  obiettivo: 'Obiettivo: seguire una sequenza con una lettura dalla memoria e il suo uso, inserire le `nop` richieste dalla regola delle tre istruzioni, contare i cicli, e indicare quando una variazione dell’ordine riduce le `nop`.',
+  concetti: [['tabella', 'La traccia ciclo per ciclo'], ['stallo', 'Le nop necessarie'], ['bilancio', 'Il medesimo lavoro in un numero minore di cicli']],
+  filigrana: ['tabella', 'stallo', 'bilancio'],
   richiami: {
     carte: [
-      { sim: 'conflitto', da: 'Dall’unità 3.5.3', t: 'Il costo di una previsione errata', d: 'Le due istruzioni prelevate dalla destinazione sono annullate, e si perdono due cicli.' },
-      { sim: 'mux', da: 'Dall’unità 3.6.2', t: 'Il selettore del prelievo', d: 'Con un salto con previsione errata nello stadio M, f_pc assume il valore di M_valA.' },
-      { sim: 'register', da: 'Dall’unità 3.6.1', t: 'I registri di pipeline', d: 'Al fronte ogni registro cattura l’ingresso preparato dallo stadio precedente.' }
+      { sim: 'conflitto', da: 'Dall’unità 3.6.3', t: 'La regola delle tre istruzioni', d: 'Fra un’istruzione e quella che ne impiega il risultato devono trovarsi almeno tre altre istruzioni, eventualmente nop.' },
+      { sim: 'tabella', da: 'Dall’unità 3.3.3', t: 'La lettura dalla memoria', d: '`mov rA, D(rB)` scrive in rA la parola letta, nella fase di scrittura.' },
+      { sim: 'bilancio', da: 'Dall’unità 3.5.4', t: 'Il conteggio dei cicli', d: 'Un tratto di N istruzioni occupa N + 4 cicli in una pipeline di cinque stadi che parte vuota.' }
     ],
-    domanda: { d: 'Prima di proseguire: un salto condizionato entra nello stadio F al ciclo 1. Quante istruzioni sono state prelevate dopo di esso nel ciclo in cui lo stadio E ne valuta la condizione?', o: [
-      { t: 'Due', ok: true, fb: 'Il salto è nello stadio E al ciclo 3. Nei cicli 2 e 3 lo stadio F ha prelevato due istruzioni.' },
-      { t: 'Una', fb: 'Fra F ed E si trova lo stadio D: dopo il salto sono trascorsi due cicli, con due prelievi.' },
-      { t: 'Nessuna', fb: 'PIPE preleva a ogni ciclo, senza attendere la condizione.' }
+    domanda: { d: 'Prima di proseguire: fra due istruzioni dipendenti se ne trova già una indipendente. Quante `nop` occorre aggiungere?', o: [
+      { t: '2', ok: true, fb: 'Ne occorrono tre in tutto, e una è già presente.' },
+      { t: '3', fb: 'Tre è il numero complessivo di istruzioni intermedie. Una è già presente.' },
+      { t: '1', fb: 'Con una sola nop le istruzioni intermedie sarebbero due.' }
     ] }
   },
   idea: {
-    titolo: 'L’annullamento senza ripristino',
-    termini: ['e_cnd', 'segnale di bolla'],
+    titolo: 'Una nop sostituita da un’istruzione utile',
+    termini: ['riordino'],
     testo: [
-      'Un salto condizionato attraversa gli stadi F e D prima che il suo esito sia noto. PIPE assume che il salto avvenga, e nel frattempo preleva dalla destinazione. Quando il salto raggiunge lo stadio E, lo seguono già due istruzioni del percorso previsto: la prima nello stadio D, la seconda nello stadio F.',
-      'Nello stadio E i codici di condizione stabiliscono se il salto avviene. L’esito è trasmesso da un segnale detto [[e_cnd|e_Cnd]], che vale 1 quando la condizione è vera. Con e_Cnd = 1 la previsione è confermata, e nessun intervento è necessario.',
-      'Con e_Cnd = 0 le due istruzioni che seguono il salto appartengono al percorso errato. Nessuna delle due ha ancora modificato lo stato del programma, poiché i registri si scrivono nello stadio W, la memoria nello stadio M e i codici di condizione nello stadio E, mentre esse si trovano in stadi precedenti. È sufficiente impedirne l’avanzamento. Al fronte i registri D ed E ricevono una bolla in luogo del loro ingresso normale, per effetto di due [[segnale di bolla|segnali di bolla]], `D_bubble` ed `E_bubble`.',
-      { fig: 'scena', w: 720, h: 196, titolo: 'Una previsione errata, prima e dopo il fronte', nota: 'P0 e P1, prelevate dalla destinazione, sono sostituite da due bolle. Il salto prosegue.', els:
-        [SL.el.nota('ga', 10, 0, 'ciclo 3 · e_Cnd = 0', 'mono', 'att'), SL.el.nota('gb', 10, 92, 'ciclo 4', 'mono')]
-          .concat(SL.pipe.stadi('gp', ['P1', 'P0', 'jne', 'I2', 'I1'], { x: 10, y: 22, w: 124, gap: 12, h: 58, st: ['err', 'err', 'att', 'on', 'on'] }))
-          .concat(SL.pipe.stadi('gd', ['da 0x49', 'bolla', 'bolla', 'jne', 'I2'], { x: 10, y: 114, w: 124, gap: 12, h: 58, st: ['on', 'zero', 'zero', 'att', 'on'] })) },
-      'Il salto prosegue nel frattempo verso lo stadio M, con l’indirizzo dell’istruzione che lo segue in memoria nel campo `M_valA`. Nel ciclo successivo il selettore del prelievo rileva nello stadio M un salto con previsione errata, e fa ripartire il prelievo da tale indirizzo. Il costo è di due cicli, quelli impiegati per le due istruzioni scartate.',
-      'Una bolla si comporta come una `nop` generata dal controllo, e attraversa gli stadi restanti senza alcuna scrittura. Le istruzioni scartate sono eliminate prima di avere prodotto effetti, e nessuna scrittura deve essere ripristinata.'
+      'Il numero di `nop` richieste da una dipendenza dei dati dipende dalla distanza fra le due istruzioni. Se l’istruzione che impiega il risultato segue immediatamente quella che lo produce, ne occorrono tre. Ogni istruzione utile interposta ne sostituisce una.',
+      'Si considerino tre istruzioni. L legge una parola dalla memoria, `mov rax, 0(rbx)`. U impiega il dato letto, `add rcx, rax`. I è indipendente da entrambe, `mov rdi, rsi`: copia un registro in un altro, opera su registri diversi, non accede alla memoria e lascia invariato ZF.',
+      { fig: 'scena', w: 720, h: 220, titolo: 'L’ordine L, U, I: tre nop', nota: 'U è in D al ciclo 6, il ciclo che segue la scrittura di RAX. La sequenza occupa 10 cicli.', els: SL.pipe.diagramma('g', SL.unita364.traccia('vicino', 1).righe, { x: 150, y: 4, passo: 56, cicli: 10, py: 32, h: 26 }) },
+      'Nell’ordine L, U, I la sequenza richiede tre `nop` fra L e U, e occupa sei posizioni. Nell’ordine L, I, U una delle tre posizioni è occupata da I, che andava comunque eseguita, e bastano due `nop`. La sequenza occupa cinque posizioni, e termina un ciclo prima.',
+      'Lo scambio è un [[riordino]], ed è lecito soltanto perché I è indipendente: opera su registri diversi da quelli di L e di U, è priva di accessi alla memoria e lascia invariato ZF. Il risultato del programma è il medesimo nei due ordini. In un programma reale tutte queste condizioni vanno verificate prima di spostare un’istruzione. I compilatori eseguono abitualmente tale verifica.'
     ]
   },
   esperimento: {
     faremo: [
-      'L’esperimento segue uno `jne` nel ciclo in cui raggiunge lo stadio E, e nel ciclo seguente. Lo seguono due `nop` prelevate dalla destinazione, indicate con P0 e P1.',
-      'I controlli fissano l’esito della condizione e gli indirizzi. Si osservano i segnali di bolla, il contenuto dei registri dopo il fronte e l’indirizzo del nuovo prelievo. Dopo il caso proposto, è istruttivo esaminare la condizione vera e confrontare i due cicli.'
+      'La traccia della pipeline è seguita per le tre istruzioni L, U e I, con le `nop` necessarie. I controlli fissano l’ordine e il numero di ripetizioni del gruppo.',
+      'Si individua dove la regola delle tre istruzioni richiede le `nop`, poi si esamina l’intero diagramma e il conteggio finale. Dopo il caso proposto, è istruttivo modificare soltanto l’ordine e confrontare il numero di cicli.'
     ],
     vedrai: [
-      ['pipeline', 'Gli stadi', 'In alto e in basso: le istruzioni presenti nei cinque stadi, prima e dopo il fronte.'],
-      ['flag', 'I segnali', 'Al centro: e_Cnd e i due segnali di bolla.'],
-      ['puntatore', 'Il prelievo', 'Al centro, a destra: f_pc, l’indirizzo dal quale riparte il prelievo.']
+      ['tabella', 'La traccia', 'In alto: il diagramma di pipeline, con le nop in grigio.'],
+      ['conflitto', 'Il ciclo in esame', 'La colonna in evidenza: il ciclo in cui U legge RAX.'],
+      ['bilancio', 'Il conteggio', 'In basso: istruzioni utili, nop e cicli.']
     ]
   },
   lab: {
-    titolo: 'Un salto nello stadio E',
-    scena: { w: 860, h: 292 },
-    atti: ['Il salto in E', 'L’esito', 'Il fronte', 'Il nuovo prelievo'],
+    titolo: 'Tre istruzioni, due ordini',
+    scena: { w: 860, h: 400 },
+    atti: ['Il programma', 'La regola', 'La traccia intera', 'Il conteggio'],
     controlli: [
-      { id: 't', tipo: 'scelta', eti: 'Condizione del salto', opzioni: [[0, 'falsa'], [1, 'vera']], valore: 0 },
-      { id: 'a', tipo: 'scelta', eti: 'Indirizzi', opzioni: [[0, 'salto a 0x40, destinazione 0x180'], [1, 'salto a 0x100, destinazione 0x2C0']], valore: 0 }
+      { id: 'ordine', tipo: 'scelta', eti: 'Ordine', opzioni: [['vicino', 'L · U · I'], ['separa', 'L · I · U']], valore: 'vicino' },
+      { id: 'g', tipo: 'scelta', eti: 'Ripetizioni del gruppo', opzioni: [[1, '1'], [2, '2']], valore: 1 }
     ],
-    nota: 'I passi sono sempre cinque. P0 e P1 sono due nop da un byte, prelevate dalla destinazione del salto.',
+    nota: 'I passi sono sempre cinque. L è una lettura dalla memoria, U ne impiega il dato, I è indipendente. Le nop sono inserite secondo la regola delle tre istruzioni.',
     previsione: {
-      domanda: (p) => { const g = SL.unita364.G[p.a], H = SL.y86.esa; return 'Uno `jne` ha inizio all’indirizzo ' + H(g.b) + ', occupa 9 byte e ha destinazione ' + H(g.d) + '. PIPE ha già prelevato dalla destinazione due `nop` da un byte. Nello stadio E la condizione risulta ' + (p.t ? 'vera' : 'falsa') + '. Da quale indirizzo avviene il prelievo successivo?'; },
-      opzioni: (p) => { const g = SL.unita364.G[p.a], H = SL.y86.esa; return [g.b + 9, g.d, g.d + 1, g.d + 2].map((v) => [v, H(v)]); }
+      domanda: (p) => 'Le tre istruzioni entrano nell’ordine ' + SL.unita364.NOME[p.ordine].replace(/ · /g, ', ') + (p.g > 1 ? ', e il gruppo si ripete ' + p.g + ' volte' : '') + ', con le `nop` necessarie. La pipeline parte vuota. Quanti cicli trascorrono prima che l’ultima istruzione esca?',
+      opzioni: (p) => [3 * p.g + 4, 5 * p.g + 4, 6 * p.g + 4, 3 * p.g].sort((a, b) => a - b).map((v) => [v, v + ' cicli'])
     },
-    confronto: (pred, esito, p) => { const g = SL.unita364.G[p.a], H = SL.y86.esa; return 'La previsione indicava ' + H(pred) + '. Il prelievo avviene da ' + H(esito) + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : p.t ? (pred === g.b + 9 ? 'La condizione è vera, come PIPE aveva previsto, e il percorso sequenziale resta inutilizzato.' : 'Le istruzioni a ' + H(g.d) + ' e ' + H(g.d + 1) + ' sono già state prelevate. Il prelievo prosegue dopo di esse.') : (pred === g.d + 2 ? 'Tale sarebbe il prelievo con la previsione corretta. In questo caso la condizione è falsa.' : 'Gli indirizzi della destinazione appartengono al percorso da abbandonare.')); },
+    confronto: (pred, esito, p) => 'La previsione indicava ' + pred + ' cicli. La sequenza ne occupa ' + esito + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === 3 * p.g ? 'Mancano le nop e i 4 cicli che l’ultima istruzione impiega per raggiungere lo stadio W.' : pred === 3 * p.g + 4 ? 'Tale è il flusso senza nop, che darebbe a U un valore di RAX non aggiornato.' : p.ordine === 'vicino' ? 'In quest’ordine ogni U segue immediatamente il proprio L, e richiede tre nop.' : 'In quest’ordine I occupa una delle tre posizioni richieste, e per ogni gruppo bastano due nop.'),
     costruisci(p) {
-      const el = SL.el, H = SL.y86.esa, passi = [], g = SL.unita364.G[p.a], t = p.t, seq = g.b + 9, v = t ? g.d + 2 : seq;
-      const quadro = (f) => {
-        const els = [el.nota('t0', 20, 0, 'CICLO 3 · IL SALTO È NELLO STADIO E', 'mono', f < 3 ? 'att' : '')];
-        SL.pipe.stadi('a', ['P1', 'P0', 'jne', 'I2', 'I1'], { x: 20, y: 22, h: 62, st: [f >= 2 && !t ? 'err' : 'on', f >= 2 && !t ? 'err' : 'on', f <= 1 ? 'att' : 'on', 'on', 'on'] }).forEach((e) => els.push(e));
-        els.push(el.box('s1', 20, 104, 196, 66, 'esito della condizione', f >= 1 ? 'e_Cnd = ' + t : 'e_Cnd = ·', f === 1 ? 'att' : f > 1 ? 'on' : '', { cls: 'stretta' }),
-          el.box('s2', 228, 104, 196, 66, 'bolla nel registro D', f >= 2 ? 'D_bubble = ' + (1 - t) : 'D_bubble = ·', f === 2 ? (t ? 'att' : 'err') : f > 2 ? 'on' : '', { cls: 'stretta' }),
-          el.box('s3', 436, 104, 196, 66, 'bolla nel registro E', f >= 2 ? 'E_bubble = ' + (1 - t) : 'E_bubble = ·', f === 2 ? (t ? 'att' : 'err') : f > 2 ? 'on' : '', { cls: 'stretta' }),
-          el.box('s4', 644, 104, 196, 66, 'prossimo prelievo', f >= 4 ? 'f_pc = ' + H(v) : 'f_pc = ·', f >= 4 ? 'att' : '', { cls: 'stretta' }),
-          el.nota('t1', 20, 190, 'CICLO 4 · DOPO IL FRONTE', 'mono', f >= 3 ? 'att' : ''));
-        SL.pipe.stadi('b', f >= 3 ? [f >= 4 ? 'da ' + H(v) : '…', t ? 'P1' : 'bolla', t ? 'P0' : 'bolla', 'jne', 'I2'] : ['·', '·', '·', '·', '·'], { x: 20, y: 212, h: 62, st: f < 3 ? ['off', 'off', 'off', 'off', 'off'] : [f >= 4 ? 'att' : 'off', t ? 'on' : 'zero', t ? 'on' : 'zero', f === 3 ? 'att' : 'on', 'on'] }).forEach((e) => els.push(e));
+      const el = SL.el, U = SL.unita364, passi = [], T = U.traccia(p.ordine, p.g), vicino = p.ordine === 'vicino', altro = U.traccia(vicino ? 'separa' : 'vicino', p.g), s = p.g > 1 ? '1' : '';
+      const passo = T.righe.length > 6 ? 40 : 56, nL = vicino ? 3 : 2, posU = T.seq.indexOf('U' + s), dU = posU + 2;
+      const yb = 34 + T.righe.length * 24;
+      const quadro = (o) => {
+        const els = [el.nota('t0', 20, 0, 'CICLO', 'mono')];
+        SL.pipe.diagramma('d', T.righe, { x: 110, y: 0, passo, cicli: T.cicli, py: 24, h: 20, fino: o.fino, evid: o.evid }).forEach((e) => els.push(e));
+        els.push(el.box('b1', 20, yb, 264, 58, 'istruzioni utili', o.conti ? String(T.utili) : '·', o.conti ? 'on' : '', { cls: 'stretta' }),
+          el.box('b2', 298, yb, 264, 58, 'nop', o.fino >= T.cicli ? String(T.nop) : '·', o.conti ? (T.nop ? 'err' : 'on') : o.fino >= T.cicli ? 'on' : '', { cls: 'stretta' }),
+          el.box('b3', 576, yb, 264, 58, 'cicli', o.fino >= T.cicli ? String(T.cicli) : '·', o.conti ? 'att' : o.fino >= T.cicli ? 'on' : '', { cls: 'stretta' }));
         return els;
       };
-      const hud = (f) => [['e_Cnd', f >= 1 ? String(t) : '·', 'a'], ['Bolle inserite', f >= 3 ? String(t ? 0 : 2) : '·'], ['f_pc', f >= 4 ? H(v) : '·', 'c']];
-      const P = (f, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(f), els: quadro(f) }, extra));
+      const hud = (o) => [['Ordine', U.NOME[p.ordine], 'a'], ['Ciclo in esame', o.evid ? String(o.evid) : '·'], ['nop', o.fino >= T.cicli ? String(T.nop) : '·', 'c']];
+      const P = (o, atto, titolo, testo, extra) => passi.push(Object.assign({ atto, titolo, testo, hud: hud(o), els: quadro(o) }, extra));
 
-      P(0, 0, 'Il salto nello stadio E', 'Il ciclo in esame è il 3. Lo `jne` prelevato all’indirizzo ' + H(g.b) + ' è nello stadio E. Lo seguono P0, prelevata dalla destinazione ' + H(g.d) + ' e ora nello stadio D, e P1, che lo stadio F sta prelevando da ' + H(g.d + 1) + '. Le istruzioni meno recenti, I2 e I1, occupano gli stadi M e W.',
-        { chiedi: { d: 'Lo `jne` ha inizio a ' + H(g.b) + ' e occupa 9 byte. A quale indirizzo si trova l’istruzione che lo segue in memoria?', o: [H(g.b + 1), H(seq), H(g.d)], g: 1, no: 'L’istruzione seguente ha inizio dove il salto termina: ' + H(g.b) + ' + 9 = ' + H(seq) + '.' } });
-      P(1, 1, 'L’esito della condizione', 'Lo stadio E esamina i codici di condizione. ' + (t ? 'La condizione del salto è vera, e e_Cnd vale 1. La previsione di PIPE è confermata: P0 e P1 sono le istruzioni da eseguire.' : 'La condizione del salto è falsa, e e_Cnd vale 0. Il percorso corretto era quello sequenziale, che ha inizio a ' + H(seq) + '. P0 e P1 appartengono al percorso errato.'), { calc: 'e_Cnd = ' + t + (t ? ' · previsione corretta' : ' · previsione errata') });
-      P(2, 1, 'I segnali di bolla', t ? 'Con la previsione confermata i segnali di bolla restano a 0. Al fronte i registri D ed E cattureranno il loro ingresso normale, cioè P1 e P0.' : 'Il controllo porta a 1 i segnali `D_bubble` ed `E_bubble`. Al fronte il registro D riceverà una bolla in luogo di P1, e il registro E una bolla in luogo di P0. Le due istruzioni sono ancora nei primi due stadi, privi di scritture, e possono essere eliminate senza conseguenze.', { calc: 'D_bubble = ' + (1 - t) + ' · E_bubble = ' + (1 - t) });
-      P(3, 2, 'Dopo il fronte', 'Ciclo 4. ' + (t ? 'Ogni istruzione è avanzata di una posizione: lo `jne` è nello stadio M, P0 nello stadio E, P1 nello stadio D.' : 'Lo `jne` è avanzato nello stadio M, e contiene nel campo `M_valA` l’indirizzo ' + H(seq) + '. Negli stadi E e D sono presenti due bolle. P0 e P1 sono state eliminate dalla pipeline senza alcun effetto.'), { calc: 'ciclo 4:  D ' + (t ? 'P1' : 'bolla') + '  E ' + (t ? 'P0' : 'bolla') + '  M jne  W I2' });
-      P(4, 3, 'Il nuovo prelievo', t ? 'Il selettore del prelievo trova lo stadio M privo di correzioni da applicare, e impiega il PC previsto. P1 occupava il byte ' + H(g.d + 1) + ', quindi il prelievo prosegue da ' + H(v) + '. Il salto ha avuto il costo di ogni altra istruzione.' : 'Il selettore del prelievo rileva nello stadio M un salto con previsione errata, e seleziona `M_valA`. Il prelievo riparte da ' + H(v) + ', l’istruzione che segue il salto. Le due bolle sono il costo della previsione errata: due cicli.', { calc: 'f_pc = ' + (t ? 'F_predPC' : 'M_valA') + ' = ' + H(v), esito: ['f_pc = ' + H(v) + (t ? ' · 0 bolle' : ' · 2 bolle'), t ? 'si' : ''] });
-      return { passi, esito: v };
+      P({ fino: 1 }, 0, 'Il programma', 'L' + s + ' è ' + U.TESTO.load + '. U' + s + ' è ' + U.TESTO.uso + ', che impiega il dato letto in RAX. I' + s + ' è ' + U.TESTO.ind + ', indipendente dalle altre due. Entrano nell’ordine ' + U.NOME[p.ordine].replace(/ · /g, ', ') + '.',
+        { chiedi: { d: 'L' + s + ' entra nello stadio F al ciclo 1. In quale ciclo RAX diviene leggibile nello stadio D?', o: ['Ciclo 4', 'Ciclo 5', 'Ciclo 6'], g: 2, no: 'L' + s + ' scrive RAX nello stadio W al ciclo 5, e il valore è leggibile in D dal ciclo successivo, il 6.' } });
+      P({ fino: dU, evid: dU }, 1, 'La regola delle tre istruzioni', vicino ? 'U' + s + ' segue immediatamente L' + s + ': senza istruzioni intermedie sarebbe in D al ciclo 3, troppo presto. Occorrono tre `nop`, che portano U' + s + ' nello stadio D al ciclo 6.' : 'Fra L' + s + ' e U' + s + ' si trova I' + s + ', che occupa una delle tre posizioni richieste. Bastano due `nop`, e U' + s + ' è nello stadio D al ciclo 6.', { calc: nL + ' nop fra L' + s + ' e U' + s + ' · U' + s + ' in D al ciclo ' + dU });
+      P({ fino: T.cicli }, 2, 'La traccia intera', 'La sequenza termina al ciclo ' + T.cicli + '. ' + (p.g > 1 ? (vicino ? 'Nel secondo gruppo la situazione si ripete: U2 segue immediatamente L2, e richiede a sua volta tre nop.' : 'Nel secondo gruppo vale lo stesso: I2 separa L2 da U2, e bastano due nop.') : 'Ogni istruzione, nop comprese, avanza di uno stadio per ciclo: la pipeline non si arresta mai, e le nop occupano le posizioni che altrimenti leggerebbero valori non aggiornati.'), { calc: 'ultimo ciclo: ' + T.cicli });
+      P({ fino: T.cicli, conti: true }, 3, 'Il conteggio', 'Le istruzioni utili sono ' + T.utili + ', le `nop` ' + T.nop + '. I cicli sono ' + T.utili + ' + ' + T.nop + ' + 4 = ' + T.cicli + ': una posizione per ogni istruzione, nop comprese, e 4 cicli per il riempimento. Nell’ordine ' + U.NOME[vicino ? 'separa' : 'vicino'].replace(/ · /g, ', ') + ' le medesime istruzioni occuperebbero ' + altro.cicli + ' cicli.', { calc: T.utili + ' + ' + T.nop + ' + 4 = ' + T.cicli + ' cicli' });
+      P({ fino: T.cicli, conti: true }, 3, vicino ? 'Il riordino possibile' : 'Il riordino compiuto', vicino ? 'I' + s + ' è indipendente sia da L' + s + ' sia da U' + s + ', e spostata fra le due occuperebbe una delle tre posizioni richieste, e risparmierebbe una nop per gruppo, cioè ' + p.g + (p.g === 1 ? ' ciclo.' : ' cicli.') : 'Lo spostamento di I' + s + ' fra L' + s + ' e U' + s + ' ha sostituito una nop per gruppo con un’istruzione utile: ' + p.g + (p.g === 1 ? ' ciclo risparmiato' : ' cicli risparmiati') + ' rispetto all’ordine L, U, I.',
+        { calc: 'differenza: ' + Math.abs(altro.cicli - T.cicli) + (p.g === 1 ? ' ciclo' : ' cicli'), esito: [T.cicli + ' cicli · ' + T.nop + ' nop', vicino ? '' : 'si'] });
+      return { passi, esito: T.cicli };
     }
   },
   bilancio: {
     regola: [
-      'PIPE prevede che ogni salto condizionato avvenga. Quando il salto raggiunge lo stadio E, due istruzioni della destinazione occupano già gli stadi D e F.',
-      'Se e_Cnd vale 0, i segnali D_bubble ed E_bubble le sostituiscono con due bolle, e nel ciclo seguente il prelievo riparte da M_valA, l’indirizzo che segue il salto. Se e_Cnd vale 1 nessun intervento è necessario.'
+      'Una lettura dalla memoria seguita immediatamente dall’uso del dato richiede tre `nop`. Ogni istruzione utile interposta ne sostituisce una. I cicli di una sequenza sono le istruzioni, nop comprese, più 4.',
+      'Un riordino di istruzioni indipendenti può occupare con lavoro utile le posizioni altrimenti riempite da `nop`, lasciando invariato il risultato del programma.'
     ],
     errori: [
-      ['Annullare anche il salto.', 'Il salto prosegue fino allo stadio W come ogni istruzione. Sono annullate le due istruzioni che lo seguono.'],
-      ['Ripartire dalla destinazione dopo una previsione errata.', 'La destinazione era il percorso previsto. Il prelievo riparte dall’altro, cioè dall’istruzione che segue il salto in memoria.'],
-      ['Ritenere che gli effetti delle istruzioni annullate vadano ripristinati.', 'Esse si trovano negli stadi F e D, nei quali nessuna istruzione scrive registri, memoria o codici di condizione.']
+      ['Ritenere che il riordino elimini lavoro.', 'Le istruzioni utili eseguite sono le medesime. Una nop è sostituita da un’istruzione che andava comunque eseguita.'],
+      ['Riordinare senza verificare le dipendenze.', 'Lo scambio è lecito soltanto se l’istruzione spostata è indipendente dalle altre nei registri, nella memoria e in ZF.'],
+      ['Escludere le nop dal conteggio dei cicli.', 'Ogni nop attraversa la pipeline come le altre istruzioni, e occupa un ciclo.']
     ],
-    saFare: ['Indicare quali istruzioni seguono un salto nella pipeline.', 'Ricavare i segnali di bolla da e_Cnd.', 'Calcolare l’indirizzo del prelievo successivo.'],
+    saFare: ['Inserire le nop richieste in una sequenza con dipendenze.', 'Contare cicli e nop di una sequenza.', 'Riconoscere quando un riordino è lecito.'],
     esercizi: [
-      { d: 'Uno `je` ha inizio all’indirizzo 0x70, occupa 9 byte e ha destinazione 0x200. Nello stadio E risulta e_Cnd = 0. Da quale indirizzo avviene il prelievo successivo? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['79', '0x79', '79h', '079', '0x079'],
-        ok: 'La previsione era errata, e il prelievo riparte dall’istruzione che segue il salto: 0x70 + 9 = 0x79.',
+      { d: 'Il gruppo L, U, I è ripetuto tre volte, con tre nop fra ogni L e il suo U, a partire dalla pipeline vuota. Quanti cicli occupa complessivamente?', segnaposto: 'Un numero', giuste: ['22', 'ventidue'],
+        ok: 'Nove istruzioni utili, nove nop e 4 cicli di riempimento: 9 + 9 + 4 = 22.',
         diagnosi: [
-          { se: ['200', '0x200', '200h'], msg: 'La destinazione è il percorso già prelevato, che ora va abbandonato.' },
-          { se: ['202', '0x202', '202h'], msg: 'Tale sarebbe il prelievo con la previsione corretta. In questo caso e_Cnd vale 0.' },
-          { se: ['70', '0x70', '70h'], msg: 'Questo è l’indirizzo del salto stesso. Occorre quello dell’istruzione che lo segue.' }
+          { se: ['13', 'tredici'], msg: 'Questo è il flusso senza nop. In quest’ordine ogni U richiede tre nop.' },
+          { se: ['19', 'diciannove'], msg: 'Le nop sono tre per gruppo, e i gruppi sono tre.' },
+          { se: ['18', 'diciotto'], msg: 'Mancano i 4 cicli di riempimento.' }
         ],
-        altro: 'Il valore è diverso. Con e_Cnd = 0 il prelievo riparte dall’istruzione che segue il salto in memoria.',
-        indizi: ['e_Cnd = 0: la previsione era errata.', 'Il prelievo riparte da M_valA, l’indirizzo che segue il salto.', '0x70 + 9.'],
-        svolgimento: ['e_Cnd = 0: la destinazione va abbandonata.', 'M_valA = 0x70 + 9 = 0x79.', 'f_pc = 0x79.'] },
-      { d: 'Il medesimo `je` ha ora e_Cnd = 1. Le due istruzioni già prelevate dalla destinazione 0x200 occupano 2 byte ciascuna. Da quale indirizzo avviene il prelievo successivo? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1A0', giuste: ['204', '0x204', '204h'],
-        ok: 'La previsione era corretta. Dopo due istruzioni da 2 byte il prelievo prosegue da 0x200 + 4 = 0x204.',
+        altro: 'Il numero è diverso. Si sommino le istruzioni utili, le nop e i 4 cicli di riempimento.',
+        indizi: ['Le istruzioni utili sono 3 × 3 = 9.', 'Le nop sono 3 × 3 = 9.', '9 + 9 + 4.'],
+        svolgimento: ['Istruzioni utili: 9.', 'nop: 9.', 'Totale: 9 + 9 + 4 = 22 cicli.'] },
+      { d: 'Il medesimo programma è riordinato in L, I, U, sempre ripetuto tre volte. Quanti cicli occupa?', segnaposto: 'Un numero', giuste: ['19', 'diciannove'],
+        ok: 'Due nop per gruppo: 9 + 6 + 4 = 19 cicli.',
         diagnosi: [
-          { se: ['202', '0x202', '202h'], msg: 'Le istruzioni già prelevate sono due, da 2 byte ciascuna.' },
-          { se: ['79', '0x79', '79h'], msg: 'La condizione è vera, e il percorso sequenziale resta inutilizzato.' },
-          { se: ['200', '0x200', '200h'], msg: 'L’istruzione a 0x200 è già nella pipeline. Il prelievo prosegue dopo le due già prelevate.' }
+          { se: ['22', 'ventidue'], msg: 'Questo è il conteggio dell’ordine L, U, I. Con I fra L e U basta una nop in meno per gruppo.' },
+          { se: ['13', 'tredici'], msg: 'Questo è il flusso senza nop. I sostituisce una sola delle tre nop.' },
+          { se: ['15', 'quindici'], msg: 'Mancano i 4 cicli di riempimento.' }
         ],
-        altro: 'Il valore è diverso. Con e_Cnd = 1 il prelievo prosegue dopo le istruzioni già prelevate dalla destinazione.',
-        indizi: ['e_Cnd = 1: la previsione era corretta.', 'Dalla destinazione sono state prelevate due istruzioni.', '0x200 + 2 + 2.'],
-        svolgimento: ['Prima istruzione: da 0x200 a 0x201.', 'Seconda istruzione: da 0x202 a 0x203.', 'Prelievo successivo: 0x204.'] },
-      { d: 'Dopo una previsione errata, quali registri di pipeline ricevono una bolla al fronte?', guida: 'Si scelga la risposta.', o: [
-        { t: 'I registri D ed E', ok: true, fb: 'Le due istruzioni da scartare si trovano negli stadi F e D, e al fronte sarebbero entrate nei registri D ed E.' },
-        { t: 'I registri F e D', fb: 'Il registro F riceve il nuovo PC previsto. Le istruzioni da scartare sarebbero entrate nei registri D ed E.' },
-        { t: 'I registri E ed M', fb: 'Nel registro M entra il salto stesso, che deve proseguire.' }] }
+        altro: 'Il numero è diverso. In quest’ordine ogni gruppo richiede due nop.',
+        indizi: ['Le istruzioni utili sono ancora 9.', 'Fra ogni L e il suo U è presente I: bastano due nop.', '9 + 6 + 4.'],
+        svolgimento: ['Istruzioni utili: 9.', 'nop: 3 × 2 = 6.', 'Totale: 9 + 6 + 4 = 19 cicli.'] },
+      { d: 'Un programma contiene, nell’ordine, `mov rax, 0(rbx)`, `add rcx, rax` e `sub rdx, rcx`. La `sub` può essere spostata fra le altre due per ridurre le nop?', guida: 'Si scelga la risposta.', o: [
+        { t: 'No, poiché la sub legge RCX, che la add deve ancora scrivere', ok: true, fb: 'Spostata prima della add, la sub leggerebbe il valore precedente di RCX, e il risultato cambierebbe.' },
+        { t: 'Sì, poiché la sub è indipendente dalla lettura dalla memoria', fb: 'La sub è indipendente dalla prima istruzione. Essa dipende tuttavia dalla add, poiché legge RCX.' },
+        { t: 'Sì, poiché due istruzioni aritmetiche possono sempre essere scambiate', fb: 'Lo scambio è lecito soltanto fra istruzioni indipendenti. In questo caso la seconda legge il risultato della prima.' }] }
     ],
-    sfida: ['cslez3_6_05_random_assembly', 'Trasferimenti tra stadi e bolle']
+    sfida: ['cslez3_6_04_random_assembly', 'Cronologia degli stadi e completamento']
   }
 });
-SL.unita364 = { G: [{ b: 0x40, d: 0x180 }, { b: 0x100, d: 0x2C0 }] };

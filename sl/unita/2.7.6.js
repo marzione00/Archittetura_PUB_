@@ -1,6 +1,6 @@
 'use strict';
 SL.registra('2.7.6', {
-  titolo: 'Stack ombra e protezioni complementari',
+  titolo: 'Pila ombra e protezioni complementari',
   obiettivo: 'Obiettivo: indicare che cosa confronta RET quando la pila ombra è attiva, le alterazioni rilevate da tale confronto e quelle che esso lascia passare.',
   concetti: [['pila', 'Due pile'], ['bilancio', 'Il confronto di RET'], ['scudo', 'Difese complementari']],
   filigrana: ['pila', 'scudo', 'bilancio'],

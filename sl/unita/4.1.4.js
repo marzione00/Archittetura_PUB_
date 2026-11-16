@@ -25,7 +25,7 @@ SL.registra('4.1.4', {
   richiami: {
     carte: [
       { sim: 'conflitto', da: 'Dall’unità 4.1.2', t: 'Il fault', d: 'L’istruzione resta incompiuta, e l’indirizzo salvato è il suo.' },
-      { sim: 'scudo', da: 'Dall’unità 3.6.5', t: 'Lo stato preciso', d: 'Dopo un errore sono visibili tutti gli effetti delle istruzioni precedenti, e nessun effetto delle successive.' },
+      { sim: 'scudo', da: 'Dall’unità 3.3.4', t: 'L’istruzione errata resta senza effetti', d: 'Con un codice di stato diverso da SAOK le abilitazioni di scrittura restano a 0: l’istruzione che ha provocato l’errore non modifica lo stato.' },
       { sim: 'pipeline', da: 'Dall’unità 3.5.1', t: 'La pipeline', d: 'Più istruzioni avanzano insieme, una per stadio.' }
     ],
     domanda: { d: 'Prima di proseguire: sei istruzioni di 4 byte hanno inizio a 0x1000. A quale indirizzo ha inizio la quarta?', o: [

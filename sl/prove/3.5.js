@@ -17,7 +17,7 @@
       if (cosa === 0) { const giuste = I(cicli); return { u: '3.5.1', d: testa + 'Alla fine di quale ciclo esce l’ultima istruzione?', segnaposto: 'Un numero', giuste,
         ok: 'L’ultima istruzione entra al ciclo ' + n + ' e percorre altri ' + (k - 1) + ' stadi: ' + n + ' + ' + (k - 1) + ' = ' + cicli + '.',
         diagnosi: DIAG(giuste, [
-          { se: I(k * n), msg: 'Il prodotto vale per una macchina che esegue un’istruzione alla volta. In questo caso le istruzioni si sovrappongono.' },
+          { se: I(k * n), msg: 'Il prodotto vale per una CPU che esegue un’istruzione alla volta. In questo caso le istruzioni si sovrappongono.' },
           { se: I(k + n), msg: 'Il ciclo d’ingresso corrisponde già al primo stadio: dopo l’ingresso restano ' + (k - 1) + ' stadi.' },
           { se: I(n), msg: 'Al ciclo ' + n + ' l’ultima istruzione entra nel primo stadio. Deve ancora percorrere gli altri.' }
         ]),
@@ -38,7 +38,7 @@
       return { u: '3.5.1', d: testa + 'Dopo quanti picosecondi esce l’ultima istruzione?', segnaposto: 'Un tempo in ps', giuste,
         ok: 'I cicli sono ' + k + ' + ' + n + ' − 1 = ' + cicli + ', ciascuno da ' + T + ' ps: ' + (cicli * T) + ' ps.',
         diagnosi: DIAG(giuste, [
-          { se: PS(k * n * T), msg: 'Questo è il tempo di una macchina che esegue un’istruzione alla volta. Nella pipeline i cicli sono ' + cicli + '.' },
+          { se: PS(k * n * T), msg: 'Questo è il tempo di una CPU che esegue un’istruzione alla volta. Nella pipeline i cicli sono ' + cicli + '.' },
           { se: PS(n * T), msg: 'Mancano i ' + (k - 1) + ' cicli che l’ultima istruzione impiega dopo l’ingresso.' },
           { se: PS((k + n) * T), msg: 'I cicli sono ' + k + ' + ' + n + ' − 1: il ciclo d’ingresso corrisponde già al primo stadio.' },
           { se: I(cicli), msg: 'Questi sono i cicli. Il tempo si ottiene moltiplicandoli per il periodo.' }
@@ -67,67 +67,59 @@
       const dove = (x) => (c - x >= 1 ? 'Al ciclo ' + c + ' lo stadio ' + STADI[x] + ' ospita I' + (c - x) + '.' : 'Al ciclo ' + c + ' lo stadio ' + STADI[x] + ' è ancora vuoto.');
       return { u: '3.5.2', d: testa + 'In quale stadio si trova I' + j + ' al ciclo ' + c + '?', guida: 'Si scelga la risposta.', o: [{ t: 'Nello stadio ' + STADI[t], ok: true, fb: 'I' + j + ' entra in F al ciclo ' + j + ' e avanza di uno stadio per ciclo: al ciclo ' + c + ' è avanzata di ' + (t === 1 ? 'una posizione' : t + ' posizioni') + '.' }].concat(altre.map((x) => ({ t: 'Nello stadio ' + STADI[x], fb: dove(x) }))) };
     },
-    // 3.5.3 · riconoscere il conflitto, oppure contare i cicli perduti
+    // 3.5.3 · riconoscere il legame fra due istruzioni, oppure i cicli fra lettura e scrittura
     (r) => {
-      const OPZ = ['Un conflitto sui dati: uno stallo di un ciclo', 'Un conflitto strutturale: il prelievo attende un ciclo', 'Un conflitto di controllo: due istruzioni annullate', 'Nessun conflitto: il flusso resta ideale'];
+      const OPZ = ['Una dipendenza dei dati', 'Una dipendenza del controllo', 'Nessuna dipendenza'];
       const tipo = r.int(0, 3);
-      if (tipo === 0) {
-        const reg = r.mescola(['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi']), op = r.scegli(['addq', 'subq', 'andq', 'xorq']), caso = r.int(0, 2), a = caso === 0 ? reg[0] : reg[1], b = caso === 1 ? reg[0] : reg[2], g = caso === 2 ? 3 : 0;
-        return { u: '3.5.3', d: 'Una `mrmovq` carica un valore in %' + reg[0] + '. L’istruzione successiva è `' + op + ' %' + a + ', %' + b + '`. Che cosa accade nella pipeline?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[g], ok: true, fb: g === 0 ? 'La `' + op + '` legge %' + reg[0] + ', che la `mrmovq` rende disponibile soltanto alla fine dello stadio M.' : 'La `' + op + '` legge %' + a + ' e %' + b + ', che la `mrmovq` lascia invariato.' }]
-          .concat([0, 1, 2, 3].filter((x) => x !== g).map((x) => ({ t: OPZ[x], fb: x === 0 ? 'Gli operandi della `' + op + '` sono %' + a + ' e %' + b + ', e il registro caricato è un altro.' : x === 3 ? 'La `' + op + '` legge %' + reg[0] + ', il cui valore deve ancora giungere dalla memoria.' : x === 1 ? 'Il conflitto strutturale deriva da una risorsa contesa fra due stadi. In questo caso è rilevante il valore di un registro.' : 'Il conflitto di controllo riguarda i salti condizionati, assenti in questo caso.' }))) };
+      if (tipo < 3) {
+        const reg = r.mescola(['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi']), w = reg[0], v = r.int(2, 90), op = r.scegli(['add', 'sub', 'and', 'or']), prima = r.scegli(['mov ' + w + ', ' + v, 'add ' + w + ', ' + reg[3], 'mov ' + w + ', 8(' + reg[4] + ')']);
+        let seconda, g, perche;
+        if (tipo === 0) { const sui = r.int(0, 1); seconda = sui ? op + ' ' + reg[1] + ', ' + w : op + ' ' + w + ', ' + reg[1]; g = 0; perche = 'La seconda istruzione legge ' + w.toUpperCase() + ', che la prima scrive: è una dipendenza dei dati.'; }
+        else if (tipo === 1) { seconda = op + ' ' + reg[1] + ', ' + reg[2]; g = 2; perche = 'La seconda istruzione legge ' + reg[1].toUpperCase() + ' e ' + reg[2].toUpperCase() + ', mentre la prima scrive soltanto ' + w.toUpperCase() + ': le due istruzioni sono indipendenti.'; }
+        else { seconda = 'je ' + r.scegli(['fine', 'ciclo', 'stop']); g = 1; perche = '`je` sceglie l’istruzione successiva in base a ZF: le istruzioni che la seguono dipendono dal suo esito.'; }
+        const pre = tipo === 2 ? 'sub ' + reg[1] + ', ' + reg[2] : prima;
+        return { u: '3.5.3', d: 'Due istruzioni entrano nella pipeline in cicli consecutivi: `' + pre + '` e poi `' + seconda + '`. Quale legame unisce la seconda alla prima?', guida: 'Si scelga la risposta.', o: OPZ.map((tx, k) => (k === g ? { t: tx, ok: true, fb: perche } : { t: tx, fb: perche })) };
       }
-      if (tipo === 1) {
-        const esito = r.int(0, 1), g = esito ? 3 : 2;
-        return { u: '3.5.3', d: 'La pipeline prevede che un salto condizionato avvenga, e preleva due istruzioni dalla destinazione. Nello stadio E la condizione risulta ' + (esito ? 'vera' : 'falsa') + '. Che cosa accade?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[g], ok: true, fb: esito ? 'La previsione era corretta, e le istruzioni prelevate sono quelle da eseguire.' : 'La previsione era errata: le due istruzioni prelevate dalla destinazione sono annullate.' }]
-          .concat([0, 1, 2, 3].filter((x) => x !== g).map((x) => ({ t: OPZ[x], fb: x === 2 ? 'Le istruzioni sono annullate soltanto quando la previsione è errata. In questo caso la condizione è vera, come previsto.' : x === 3 ? 'La condizione è falsa, e la pipeline aveva previsto l’esito opposto.' : x === 0 ? 'Il conflitto sui dati riguarda un valore non ancora prodotto. In questo caso la questione è il percorso selezionato dopo un salto.' : 'Il conflitto strutturale deriva da una risorsa contesa. In questo caso la questione è il percorso selezionato dopo un salto.' }))) };
-      }
-      if (tipo === 2) {
-        const caso = r.int(0, 1), g = caso ? 3 : 1;
-        return { u: '3.5.3', d: 'Istruzioni e dati risiedono in una memoria con una sola porta. In un certo ciclo lo stadio F deve prelevare un’istruzione, e lo stadio M ospita una `' + (caso ? r.scegli(['addq', 'xorq', 'rrmovq']) : r.scegli(['mrmovq', 'rmmovq'])) + '`. Che cosa accade?', guida: 'Si scelga la risposta.', o: [{ t: OPZ[g], ok: true, fb: caso ? 'L’istruzione nello stadio M è priva di accessi alla memoria dei dati, e la porta è libera per il prelievo.' : 'L’istruzione nello stadio M impiega la porta per i dati, e il prelievo deve attendere.' }]
-          .concat([0, 1, 2, 3].filter((x) => x !== g).map((x) => ({ t: OPZ[x], fb: x === 1 ? 'L’istruzione nello stadio M opera soltanto sui registri, e lascia libera la porta.' : x === 3 ? 'L’istruzione nello stadio M accede alla memoria, e la porta è una sola.' : x === 0 ? 'Il conflitto sui dati riguarda un valore non ancora prodotto. In questo caso la questione è l’impiego della porta di memoria.' : 'Il conflitto di controllo riguarda i salti condizionati, assenti in questo caso.' }))) };
-      }
-      const L = r.int(1, 5), S = r.int(2, 6), E = r.int(1, S - 1), persi = L + 2 * E, giuste = I(persi);
-      return { u: '3.5.3', d: 'Un tratto di programma contiene ' + (L === 1 ? 'un carico immediatamente seguito' : L + ' carichi immediatamente seguiti') + ' da un uso, e ' + S + ' salti condizionati, di cui ' + (E === 1 ? 'uno con previsione errata' : E + ' con previsione errata') + '. Quanti cicli perde la pipeline rispetto al flusso ideale?', segnaposto: 'Un numero', giuste,
-        ok: 'Le attese costano ' + L + ' × 1 = ' + L + (L === 1 ? ' ciclo' : ' cicli') + ', i salti con previsione errata ' + E + ' × 2 = ' + (2 * E) + ': in tutto ' + persi + '.',
+      const f = r.int(1, 6), dist = r.int(1, 3), w = f + 4, d = f + dist + 1, giusto = w - d, giuste = I(giusto);
+      return { u: '3.5.3', d: 'Un’istruzione prelevata al ciclo ' + f + ' scrive un registro nello stadio W. Un’istruzione prelevata al ciclo ' + (f + dist) + ' lo legge nello stadio D. Di quanti cicli la lettura precede la scrittura?', segnaposto: 'Un numero', giuste,
+        ok: 'La scrittura avviene al ciclo ' + f + ' + 4 = ' + w + ', la lettura al ciclo ' + (f + dist) + ' + 1 = ' + d + ': ' + w + ' − ' + d + ' = ' + giusto + '.',
         diagnosi: DIAG(giuste, [
-          { se: I(L + 2 * S), msg: 'I salti con previsione corretta sono privi di costo. Sono rilevanti soltanto ' + (E === 1 ? 'quello con previsione errata' : 'i ' + E + ' con previsione errata') + '.' },
-          { se: I(L + E), msg: 'Ogni salto con previsione errata costa due cicli, uno per ciascuna istruzione annullata.' },
-          { se: I(2 * E), msg: 'Mancano le attese sui dati: un ciclo per ogni carico immediatamente seguito da un uso.' },
-          { se: I(L), msg: 'Mancano i salti con previsione errata, che costano due cicli ciascuno.' }
+          { se: I(dist), msg: 'Questa è la distanza fra i due prelievi. La lettura avviene in D, un ciclo dopo il prelievo, la scrittura in W, quattro cicli dopo.' },
+          { se: I(w), msg: 'Questo è il ciclo della scrittura. Va sottratto quello della lettura.' },
+          { se: I(d), msg: 'Questo è il ciclo della lettura. Va sottratto dal ciclo della scrittura.' }
         ]),
-        altro: 'Il numero è diverso. Si conti un ciclo per ogni attesa e due per ogni salto con previsione errata.',
-        indizi: ['Ogni carico immediatamente seguito da un uso costa 1 ciclo.', 'Ogni salto con previsione errata costa 2 cicli.', L + ' + ' + E + ' × 2.'],
-        svolgimento: ['Attese sui dati: ' + L + ' × 1 = ' + L + '.', 'Previsioni errate: ' + E + ' × 2 = ' + (2 * E) + '.', 'Cicli perduti: ' + L + ' + ' + (2 * E) + ' = ' + persi + '.'] };
+        altro: 'Il numero è diverso. Si calcolino il ciclo di W della prima istruzione e il ciclo di D della seconda.',
+        indizi: ['W segue il prelievo di quattro cicli: ' + f + ' + 4.', 'D segue il prelievo di un ciclo: ' + (f + dist) + ' + 1.', w + ' − ' + d + '.'],
+        svolgimento: ['Scrittura in W: ciclo ' + w + '.', 'Lettura in D: ciclo ' + d + '.', 'Distanza: ' + w + ' − ' + d + ' = ' + giusto + '.'] };
     },
     // 3.5.4 · cicli totali e CPI di un tratto
     (r) => {
-      const n = r.scegli([8, 10, 20, 25, 40, 50]), L = r.int(0, 4), S = r.int(L === 0 ? 1 : 0, 3), C = n + 4 + L + 2 * S;
-      const testa = 'Un tratto di ' + n + ' istruzioni entra in una pipeline vuota di cinque stadi. ' + (L === 0 ? 'Nessun carico è immediatamente seguito' : L === 1 ? 'Un carico è immediatamente seguito' : L + ' carichi sono immediatamente seguiti') + ' da un uso, e ' + (S === 0 ? 'nessun salto ha' : S === 1 ? 'un salto ha' : S + ' salti hanno') + ' una previsione errata. ';
+      const n = r.scegli([8, 10, 20, 25, 40, 50]), L = r.int(0, 3), S = r.int(L === 0 ? 1 : 0, 3), C = n + 4 + 3 * L + 2 * S;
+      const testa = 'Un tratto di ' + n + ' istruzioni entra in una pipeline vuota di cinque stadi. ' + (L === 0 ? 'Nessuna istruzione impiega' : L === 1 ? 'Un’istruzione impiega' : L + ' istruzioni impiegano') + ' il risultato di quella che la precede, con tre cicli di ritardo ciascuna, e ' + (S === 0 ? 'nessuna impiega' : S === 1 ? 'una impiega' : S + ' impiegano') + ' quello dell’istruzione che le precede di due posizioni, con due cicli di ritardo ciascuna. ';
       if (r.int(0, 1) === 0) { const giuste = I(C); return { u: '3.5.4', d: testa + 'Quanti cicli occupa il tratto?', segnaposto: 'Un numero', giuste,
-        ok: 'Riempimento 4, uscite ' + n + ', attese ' + L + ', salti ' + (2 * S) + ': in tutto ' + C + ' cicli.',
+        ok: 'Riempimento 4, uscite ' + n + ', ritardi ' + (3 * L) + ' + ' + (2 * S) + ': in tutto ' + C + ' cicli.',
         diagnosi: DIAG(giuste, [
           { se: I(C - 4), msg: 'Mancano i 4 cicli di riempimento, durante i quali nessuna istruzione esce.' },
-          S > 0 ? { se: I(C - S), msg: 'Ogni salto con previsione errata costa due cicli, uno per ciascuna istruzione annullata.' } : null,
-          { se: I(n + 4), msg: 'Questo è il flusso ideale. Vanno aggiunte le penalità.' },
+          L > 0 ? { se: I(n + 4 + L + 2 * S), msg: 'Una dipendenza fra istruzioni adiacenti costa tre cicli.' } : null,
+          { se: I(n + 4), msg: 'Questo è il flusso ideale. Vanno aggiunti i cicli di ritardo.' },
           { se: I(C + 1), msg: 'Il riempimento dura 4 cicli: al quinto la prima istruzione attraversa già l’ultimo stadio.' },
           { se: I(5 * n), msg: 'Le istruzioni si sovrappongono, e a regime ne esce una per ciclo.' }
         ]),
-        altro: 'Il numero è diverso. Si sommino quattro parti: riempimento, uscite, attese sui dati e salti con previsione errata.',
-        indizi: ['Il flusso ideale occupa ' + n + ' + 4 cicli.', 'Le attese costano un ciclo ciascuna: ' + L + '.', 'I salti con previsione errata costano due cicli ciascuno: ' + (2 * S) + '.'],
-        svolgimento: ['Flusso ideale: ' + n + ' + 4 = ' + (n + 4) + ' cicli.', 'Attese sui dati: ' + L + ' × 1 = ' + L + '.', 'Previsioni errate: ' + S + ' × 2 = ' + (2 * S) + '.', 'Totale: ' + (n + 4) + ' + ' + L + ' + ' + (2 * S) + ' = ' + C + ' cicli.'] }; }
+        altro: 'Il numero è diverso. Si sommino quattro parti: riempimento, uscite e i due tipi di ritardo.',
+        indizi: ['Il flusso ideale occupa ' + n + ' + 4 cicli.', 'Le dipendenze adiacenti costano 3 cicli ciascuna: ' + (3 * L) + '.', 'Quelle a distanza due costano 2 cicli ciascuna: ' + (2 * S) + '.'],
+        svolgimento: ['Flusso ideale: ' + n + ' + 4 = ' + (n + 4) + ' cicli.', 'Dipendenze adiacenti: ' + L + ' × 3 = ' + (3 * L) + '.', 'Dipendenze a distanza due: ' + S + ' × 2 = ' + (2 * S) + '.', 'Totale: ' + (n + 4) + ' + ' + (3 * L) + ' + ' + (2 * S) + ' = ' + C + ' cicli.'] }; }
       const giuste = DEC3(C / n);
-      return { u: '3.5.4', d: testa + 'Quanto vale il CPI del tratto?', segnaposto: 'Un numero con la virgola', giuste,
-        ok: 'I cicli sono ' + n + ' + 4 + ' + L + ' + ' + (2 * S) + ' = ' + C + ', e il CPI vale ' + C + ' / ' + n + ' = ' + V3(C / n) + '.',
+      return { u: '3.5.4', d: testa + 'Quanto vale il CPI del tratto, compreso il riempimento?', segnaposto: 'Un numero con la virgola', giuste,
+        ok: 'I cicli sono ' + n + ' + 4 + ' + (3 * L) + ' + ' + (2 * S) + ' = ' + C + ', e il CPI vale ' + C + ' / ' + n + ' = ' + V3(C / n) + '.',
         diagnosi: DIAG(giuste, [
-          { se: DEC3((C - 4) / n), msg: 'Mancano i 4 cicli di riempimento, che fanno parte dei cicli impiegati.' },
-          S > 0 ? { se: DEC3((C - S) / n), msg: 'Ogni salto con previsione errata costa due cicli, uno per ciascuna istruzione annullata.' } : null,
-          { se: DEC3((n + 4) / n), msg: 'Questo è il CPI del flusso ideale. Ai cicli vanno aggiunte le penalità.' },
+          { se: DEC3((C - 4) / n), msg: 'Questo è il CPI che trascura il riempimento. La domanda lo include.' },
+          { se: DEC3((n + 4) / n), msg: 'Questo è il CPI del flusso ideale. Ai cicli vanno aggiunti i ritardi.' },
           { se: I(C), msg: 'Questi sono i cicli. Il CPI si ottiene dividendoli per le ' + n + ' istruzioni.' },
-          { se: ['1', '1.0', '1.00', '1.000'], msg: 'Il valore 1 vale a regime e senza conflitti. In questo caso sono rilevanti il riempimento e le penalità.' }
+          { se: ['1', '1.0', '1.00', '1.000'], msg: 'Il valore 1 vale a regime e senza dipendenze. In questo caso sono rilevanti il riempimento e i ritardi.' }
         ]),
         altro: 'Il valore è diverso. Si contino i cicli del tratto, poi si dividano per le istruzioni.',
-        indizi: ['Cicli: ' + n + ' + 4 + ' + L + ' + ' + (2 * S) + '.', 'I cicli sono ' + C + '.', C + ' / ' + n + '.'],
-        svolgimento: ['Cicli: ' + n + ' + 4 + ' + L + ' + ' + (2 * S) + ' = ' + C + '.', 'Istruzioni completate: ' + n + '.', 'CPI = ' + C + ' / ' + n + ' = ' + V3(C / n) + '.'] };
+        indizi: ['Cicli: ' + n + ' + 4 + ' + (3 * L) + ' + ' + (2 * S) + '.', 'I cicli sono ' + C + '.', C + ' / ' + n + '.'],
+        svolgimento: ['Cicli: ' + n + ' + 4 + ' + (3 * L) + ' + ' + (2 * S) + ' = ' + C + '.', 'Istruzioni completate: ' + n + '.', 'CPI = ' + C + ' / ' + n + ' = ' + V3(C / n) + '.'] };
     }
   ] });
 })();

@@ -7,34 +7,34 @@
   SL.registraProva('6.6', { domande: [
     // 6.6.1 · stato del volume dopo un crash, dato l'ordine delle scritture e il punto dell'arresto
     (r) => {
-      const N = { d: 'dati', b: 'bitmap', i: 'inode' }, ord = r.scegli(['dbi', 'dib', 'bdi', 'bid', 'idb', 'ibd']), k = r.int(0, 3), fatte = ord.slice(0, k);
+      const N = { d: 'dati', b: 'bit map', i: 'inode' }, ord = r.scegli(['dbi', 'dib', 'bdi', 'bid', 'idb', 'ibd']), k = r.int(0, 3), fatte = ord.slice(0, k);
       const s = { d: fatte.indexOf('d') >= 0, b: fatte.indexOf('b') >= 0, i: fatte.indexOf('i') >= 0 }, e = s.i && !(s.b && s.d) ? 'esposto' : !s.i && s.b ? 'perso' : 'coerente';
       const durevoli = k === 0 ? 'nessuna' : fatte.split('').map((c) => N[c]).join(' e ');
-      const fb = 'Scritture durevoli: ' + durevoli + '. ' + (e === 'coerente' ? (k === 0 ? 'Il volume è invariato.' : k === 3 ? 'L’operazione è completa.' : 'I byte nuovi si trovano in un blocco ancora libero ed esterno a ogni file: per il file system lo stato equivale a quello iniziale.') : e === 'perso' ? 'La bitmap segna occupato il blocco, e l’inode è privo del riferimento.' : s.b ? 'L’inode indica un blocco in cui i byte nuovi non sono mai stati scritti.' : 'L’inode indica un blocco che la bitmap considera ancora libero.');
+      const fb = 'Scritture durevoli: ' + durevoli + '. ' + (e === 'coerente' ? (k === 0 ? 'Il volume è invariato.' : k === 3 ? 'L’operazione è completa.' : 'I byte nuovi si trovano in un blocco ancora libero ed esterno a ogni file: per il file system lo stato equivale a quello iniziale.') : e === 'perso' ? 'La bit map segna occupato il blocco, e l’inode è privo del riferimento.' : s.b ? 'L’inode indica un blocco in cui i byte nuovi non sono mai stati scritti.' : 'L’inode indica un blocco che la bit map considera ancora libero.');
       return { u: '6.6.1', d: 'Per aggiungere un blocco a un file occorrono tre scritture, che divengono durevoli in quest’ordine: ' + ord.split('').map((c) => N[c]).join(', ') + '. Il crash avviene quando ' + ['nessuna scrittura è durevole', 'soltanto la prima è durevole', 'le prime due sono durevoli', 'tutte e tre sono durevoli'][k] + '. In quale stato si trova il volume al riavvio?', guida: 'Si scelga la risposta.', o: r.mescola([
         { t: 'Coerente, con il file invariato oppure esteso per intero', ok: e === 'coerente', fb },
         { t: 'Un blocco segnato occupato, che nessun file raggiunge', ok: e === 'perso', fb },
         { t: 'Il file raggiunge un blocco con byte precedenti, oppure segnato libero', ok: e === 'esposto', fb }]) };
     },
-    // 6.6.2 · bit da modificare, oppure blocchi orfani, da inode e bitmap
+    // 6.6.2 · bit da modificare, oppure blocchi orfani, da inode e bit map
     (r) => {
       const B = [20, 21, 22, 23, 24, 25, 26, 27], m = r.mescola(B), na = r.int(2, 3), nb = r.int(1, 3), A = m.slice(0, na).sort((x, y) => x - y), Bb = m.slice(na, na + nb).sort((x, y) => x - y);
-      const uso = B.map((b) => (A.indexOf(b) >= 0 || Bb.indexOf(b) >= 0 ? 1 : 0)), nf = r.int(0, 3), guasti = r.mescola(B).slice(0, nf), bit = B.map((b, j) => (guasti.indexOf(b) >= 0 ? 1 - uso[j] : uso[j]));
-      const orfani = B.filter((b, j) => bit[j] === 1 && uso[j] === 0), scoperti = B.filter((b, j) => bit[j] === 0 && uso[j] === 1), cosa = r.int(0, 1), v = cosa === 0 ? orfani.length + scoperti.length : orfani.length, giuste = I(v);
+      const uso = B.map((b) => (A.indexOf(b) >= 0 || Bb.indexOf(b) >= 0 ? 1 : 0)), nf = r.int(0, 3), guasti = r.mescola(B).slice(0, nf), occ = B.map((b, j) => (guasti.indexOf(b) >= 0 ? 1 - uso[j] : uso[j])), bit = occ.map((x) => 1 - x); // bit map: 1 libero, 0 occupato
+      const orfani = B.filter((b, j) => bit[j] === 0 && uso[j] === 0), scoperti = B.filter((b, j) => bit[j] === 1 && uso[j] === 1), cosa = r.int(0, 1), v = cosa === 0 ? orfani.length + scoperti.length : orfani.length, giuste = I(v);
       const el = (l) => (l.length ? l.join(', ') : 'nessuno');
-      return { u: '6.6.2', d: 'Un volume ha i blocchi da 20 a 27. L’inode A indica i blocchi ' + A.join(', ') + '. L’inode B indica ' + (Bb.length === 1 ? 'il blocco ' : 'i blocchi ') + Bb.join(', ') + '. La bitmap, dal blocco 20 al 27, è ' + bit.join(' ') + '. ' + (cosa === 0 ? 'Quanti bit deve modificare la riparazione?' : 'Quanti blocchi orfani trova il verificatore?'), segnaposto: 'Un numero', giuste,
+      return { u: '6.6.2', d: 'Un volume ha i blocchi da 20 a 27. L’inode A indica i blocchi ' + A.join(', ') + '. L’inode B indica ' + (Bb.length === 1 ? 'il blocco ' : 'i blocchi ') + Bb.join(', ') + '. La bit map, con 1 per i blocchi liberi, dal blocco 20 al 27, è ' + bit.join(' ') + '. ' + (cosa === 0 ? 'Quanti bit deve modificare la riparazione?' : 'Quanti blocchi orfani trova il verificatore?'), segnaposto: 'Un numero', giuste,
         ok: 'Blocchi in uso segnati liberi: ' + el(scoperti) + '. Blocchi orfani: ' + el(orfani) + '.' + (cosa === 0 ? ' Bit da modificare: ' + v + '.' : ''),
         diagnosi: DIAG(giuste, cosa === 0 ? [
-          { se: I(orfani.length), msg: 'Questi sono soltanto i blocchi orfani. Vanno corretti anche i bit a 0 dei blocchi che hanno un proprietario.' },
-          { se: I(scoperti.length), msg: 'Questi sono soltanto i blocchi in uso segnati liberi. Vanno corretti anche i bit a 1 dei blocchi privi di proprietario.' },
-          { se: I(bit.filter((x) => x === 1).length), msg: 'Questi sono i bit a 1. La domanda riguarda i bit in disaccordo con gli inode.' }
+          { se: I(orfani.length), msg: 'Questi sono soltanto i blocchi orfani. Vanno corretti anche i bit a 1 dei blocchi che hanno un proprietario.' },
+          { se: I(scoperti.length), msg: 'Questi sono soltanto i blocchi in uso segnati liberi. Vanno corretti anche i bit a 0 dei blocchi privi di proprietario.' },
+          { se: I(bit.filter((x) => x === 0).length), msg: 'Questi sono i bit a 0. La domanda riguarda i bit in disaccordo con gli inode.' }
         ] : [
-          { se: I(scoperti.length), msg: 'Questi sono i blocchi in uso segnati liberi. Un blocco orfano ha il bit a 1 e nessun proprietario.' },
-          { se: I(orfani.length + scoperti.length), msg: 'Queste sono tutte le discordanze. Un blocco orfano ha il bit a 1 e nessun proprietario.' },
-          { se: I(bit.filter((x) => x === 0).length), msg: 'Questi sono i bit a 0. Un blocco orfano ha il bit a 1 e nessun proprietario.' }
+          { se: I(scoperti.length), msg: 'Questi sono i blocchi in uso segnati liberi. Un blocco orfano ha il bit a 0 e nessun proprietario.' },
+          { se: I(orfani.length + scoperti.length), msg: 'Queste sono tutte le discordanze. Un blocco orfano ha il bit a 0 e nessun proprietario.' },
+          { se: I(bit.filter((x) => x === 1).length), msg: 'Questi sono i bit a 1. Un blocco orfano ha il bit a 0 e nessun proprietario.' }
         ]),
         altro: 'Il numero è diverso. Si scriva per ogni blocco il proprietario trovato negli inode, e lo si confronti con il bit.',
-        indizi: ['Blocchi con un proprietario: ' + A.concat(Bb).sort((x, y) => x - y).join(', ') + '.', 'Bit a 1 nella bitmap: ' + el(B.filter((b, j) => bit[j] === 1)) + '.', 'In uso con bit a 0: ' + el(scoperti) + '. Senza proprietario con bit a 1: ' + el(orfani) + '.'],
+        indizi: ['Blocchi con un proprietario: ' + A.concat(Bb).sort((x, y) => x - y).join(', ') + '.', 'Bit a 0 nella bit map: ' + el(B.filter((b, j) => bit[j] === 0)) + '.', 'In uso con bit a 1: ' + el(scoperti) + '. Senza proprietario con bit a 0: ' + el(orfani) + '.'],
         svolgimento: ['In uso secondo gli inode: ' + A.concat(Bb).sort((x, y) => x - y).join(', ') + '.', 'In uso segnati liberi: ' + el(scoperti) + '.', 'Orfani: ' + el(orfani) + '.', cosa === 0 ? 'Bit da modificare: ' + v + '.' : 'Blocchi orfani: ' + v + '.'] };
     },
     // 6.6.3 · valore di un blocco dopo il recupero dal journal

@@ -10,16 +10,16 @@
     (r) => {
       if (r.int(0, 1) === 0) {
         const a = r.int(0, 1), b = r.int(0, 1), c = r.int(0, 1), n = a + b + c, giusto = a * b + a * c + b * c, giuste = I(giusto);
-        return { u: '3.1.1', d: 'Il circuito della maggioranza, AB OR AC OR BC, riceve A = ' + a + ', B = ' + b + ' e C = ' + c + '. Quante delle sue tre porte AND danno 1?', segnaposto: 'Un numero', giuste,
+        return { u: '3.1.1', d: 'Il circuito della maggioranza, A·B + A·C + B·C, riceve A = ' + a + ', B = ' + b + ' e C = ' + c + '. Quante delle sue tre porte AND danno 1?', segnaposto: 'Un numero', giuste,
           ok: n === 3 ? 'Con tre ingressi a 1 ogni coppia è completa.' : n === 2 ? 'Con due ingressi a 1 è completa una sola coppia, quella formata dai due ingressi a 1.' : 'Con meno di due ingressi a 1 nessuna coppia è completa.',
           diagnosi: DIAG(giuste, [
             { se: I(n), msg: 'Questo è il numero degli ingressi a 1. La domanda riguarda le coppie in cui entrambi gli ingressi valgono 1.' },
             { se: I(2), msg: 'Due AND con uscita 1 costituiscono un caso impossibile: richiederebbero tre ingressi a 1, e in tal caso avrebbe uscita 1 anche la terza.' },
             { se: I(n >= 2 ? 1 : 0), msg: 'Questo è il valore della spia. Le AND con uscita 1 vanno contate singolarmente.' }
           ]),
-          altro: 'Il numero è diverso. Si calcoli A AND B, A AND C e B AND C, poi si contino gli 1.',
-          indizi: ['Le coppie sono A con B, A con C, B con C.', 'Una AND dà 1 soltanto con entrambi gli ingressi a 1.', 'A AND B = ' + (a & b) + ', A AND C = ' + (a & c) + ', B AND C = ' + (b & c) + '.'],
-          svolgimento: ['A AND B = ' + (a & b) + '.', 'A AND C = ' + (a & c) + '.', 'B AND C = ' + (b & c) + '. In tutto: ' + giusto + '.'] };
+          altro: 'Il numero è diverso. Si calcolino A·B, A·C e B·C, poi si contino gli 1.',
+          indizi: ['Le coppie sono A con B, A con C, B con C.', 'Una AND dà 1 soltanto con entrambi gli ingressi a 1.', 'A·B = ' + (a & b) + ', A·C = ' + (a & c) + ', B·C = ' + (b & c) + '.'],
+          svolgimento: ['A·B = ' + (a & b) + '.', 'A·C = ' + (a & c) + '.', 'B·C = ' + (b & c) + '. In tutto: ' + giusto + '.'] };
       }
       const CASI = [['almeno due ingressi valgono 1', 4, '011, 101, 110, 111'], ['esattamente due ingressi valgono 1', 3, '011, 101, 110'], ['esattamente un ingresso vale 1', 3, '001, 010, 100'], ['almeno un ingresso vale 1', 7, 'tutte tranne 000'], ['tutti e tre gli ingressi valgono 1', 1, '111'], ['nessun ingresso vale 1', 1, '000'], ['al massimo un ingresso vale 1', 4, '000, 001, 010, 100']];
       const k = r.scegli(CASI), giuste = I(k[1]);
@@ -97,7 +97,7 @@
       const f = r.scegli(['add', 'sub', 'and', 'xor']), a = r.int(1, 255), b = r.int(0, 3) === 0 ? a : r.int(1, 255);
       const C = { add: (a + b) & 255, sub: (a - b) & 255, and: a & b, xor: a ^ b, or: a | b }, NOMI = { add: 'somma', sub: 'differenza A − B', and: 'AND', xor: 'XOR', or: 'OR' }, giusto = C[f], giuste = ESA(giusto, 2);
       const sbagli = ['add', 'sub', 'and', 'xor', 'or'].filter((k) => k !== f).map((k) => ({ se: ESA(C[k], 2), msg: 'Questo è il risultato dell’operazione «' + NOMI[k] + '». Il comando richiede «' + NOMI[f] + '».' }));
-      return { u: '3.1.4', d: 'Un’ALU a otto bit riceve A = ' + H2(a) + ' e B = ' + H2(b) + ' con il comando «' + NOMI[f] + '». Quale byte si presenta in uscita? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1F', giuste,
+      return { u: '3.1.4', d: 'Un’ALU da otto bit riceve A = ' + H2(a) + ' e B = ' + H2(b) + ' con il comando «' + NOMI[f] + '». Quale byte si presenta in uscita? Si risponda in esadecimale.', segnaposto: 'Per esempio 0x1F', giuste,
         ok: (f === 'add' ? a + ' + ' + b + ' = ' + (a + b) + (a + b > 255 ? ', e negli otto bit resta ' + giusto + '.' : '.') : f === 'sub' ? a + ' − ' + b + ' = ' + (a - b) + (a < b ? ', e negli otto bit resta ' + giusto + '.' : '.') : SL.x86.bin8(a) + ' ' + NOMI[f] + ' ' + SL.x86.bin8(b) + ' = ' + SL.x86.bin8(giusto) + '.') + ' ZF vale ' + (giusto === 0 ? 1 : 0) + '.',
         diagnosi: DIAG(giuste, sbagli),
         altro: 'Il byte è diverso. ' + (f === 'add' || f === 'sub' ? 'Si esegua l’operazione sui valori e si conservi il resto modulo 256.' : 'Si scrivano i due byte in binario e si applichi l’operazione posizione per posizione.'),

@@ -7,7 +7,7 @@ SL.registra('3.6.1', {
   richiami: {
     carte: [
       { sim: 'flipflop', da: 'Dall’unità 3.2.2', t: 'Il flip-flop', d: 'Cattura il dato al fronte di salita e lo conserva fino al fronte successivo.' },
-      { sim: 'cpu', da: 'Dall’unità 3.4.1', t: 'Lo stato cambia al fronte', d: 'In SEQ i valori nuovi restano sui fili per tutto il ciclo. I registri li catturano soltanto al fronte.' },
+      { sim: 'cpu', da: 'Dall’unità 3.4.1', t: 'Lo stato cambia al fronte', d: 'Nella CPU a ciclo singolo i valori nuovi restano sui fili per tutto il ciclo. I registri li catturano soltanto al fronte.' },
       { sim: 'tabella', da: 'Dall’unità 3.5.2', t: 'L’istantanea di un ciclo', d: 'In ogni ciclo ciascuno stadio ospita al massimo un’istruzione.' }
     ],
     domanda: { d: 'Prima di proseguire: due registri sono collegati in serie, il primo contiene 7 e il secondo 3. Al fronte ciascuno cattura il proprio ingresso. Che cosa contiene il secondo immediatamente dopo?', o: [
@@ -18,15 +18,15 @@ SL.registra('3.6.1', {
   },
   idea: {
     titolo: 'Un registro fra stadi consecutivi',
-    termini: ['pipe', 'registro di pipeline'],
+    termini: ['cpu con pipeline', 'registro di pipeline'],
     testo: [
-      'Nel capitolo precedente la pipeline era un diagramma; in questo capitolo diviene un circuito. Il processore prende il nome di [[pipe|PIPE]], e deriva da SEQ con una modifica: fra una fase e la successiva è inserito un [[registro di pipeline]]. I registri sono cinque, e prendono il nome dello stadio che alimentano: F, D, E, M e W.',
-      'Un registro di pipeline conserva per un ciclo tutti i dati della propria istruzione: il codice, i registri nominati, la costante, i valori già calcolati. Lo stadio legge tali dati dall’uscita del registro, li elabora, e prepara il risultato all’ingresso del registro successivo. Per tutto il ciclo il registro successivo continua a mostrare i dati dell’istruzione che già lo occupa, e il risultato nuovo attende all’ingresso.',
-      { fig: 'scena', w: 720, h: 112, titolo: 'I cinque registri di PIPE al ciclo 5', nota: 'Ogni registro conserva i dati di un’istruzione. Fra un registro e il successivo opera la logica di uno stadio.', els:
+      'Nel capitolo precedente la pipeline era un diagramma; in questo capitolo diviene un circuito. La CPU prende il nome di [[cpu con pipeline|CPU con pipeline]], e deriva dalla CPU a ciclo singolo con due modifiche: il calcolo del PC è spostato prima del prelievo, come descrive l’unità 3.6.2, e fra uno stadio e il successivo è inserito un [[registro di pipeline]]. Gli stadi divengono cinque, poiché la scelta del PC entra nello stadio F. I registri sono cinque, e prendono il nome dello stadio che alimentano: F, D, E, M e W.',
+      'Un registro di pipeline conserva per un ciclo tutto ciò che lo stadio successivo richiede: i dati, cioè gli operandi e i risultati già calcolati, i campi dell’istruzione, come icode e ifun, e i segnali di controllo. Le informazioni di istruzioni diverse restano così separate. Lo stadio legge tali dati dall’uscita del registro, li elabora, e prepara il risultato all’ingresso del registro successivo. Per tutto il ciclo il registro successivo continua a mostrare i dati dell’istruzione che già lo occupa, e il risultato nuovo attende all’ingresso.',
+      { fig: 'scena', w: 720, h: 112, titolo: 'I cinque registri della CPU con pipeline al ciclo 5', nota: 'Ogni registro conserva i dati di un’istruzione. Fra un registro e il successivo opera la logica di uno stadio.', els:
         SL.pipe.stadi('g', ['I5', 'I4', 'I3', 'I2', 'I1'], { x: 10, y: 8, w: 124, gap: 20, h: 64, et: ['registro F', 'registro D', 'registro E', 'registro M', 'registro W'] })
           .concat([0, 1, 2, 3].map((j) => SL.el.linea('gl' + j, 10 + j * 144 + 124, 40, 10 + (j + 1) * 144, 40, 'on'))) },
       'Al fronte del clock tutti e cinque i registri catturano contemporaneamente il proprio ingresso. Il registro W riceve ciò che lo stadio M ha preparato, M riceve il risultato di E, e così di seguito fino a F, che riceve l’indirizzo del prossimo prelievo. Ogni ingresso è stato preparato a partire dalle uscite precedenti il fronte. Per questa ragione ogni istruzione avanza di una sola posizione: il registro che la riceve ha catturato il dato che il precedente mostrava prima del fronte, e il dato nuovo del precedente compare quando la cattura è già avvenuta.',
-      'Le sigle di PIPE seguono una convenzione. Una lettera maiuscola indica un valore conservato in un registro di pipeline: `M_valA` è il campo valA del registro M. Una lettera minuscola indica un valore che lo stadio sta calcolando nel ciclo corrente: `e_valE` è il risultato che l’ALU produce nello stadio E.'
+      'I nomi dei segnali seguono una convenzione. Una lettera maiuscola indica un valore conservato in un registro di pipeline: `M_valA` è il campo valA del registro M. Una lettera minuscola indica un valore che lo stadio sta calcolando nel ciclo corrente: `e_valE` è il risultato che l’ALU produce nello stadio E. Al fronte il valore calcolato in uno stadio è conservato nel gruppo di registri successivo: `e_valE` diviene `M_valE`.'
     ]
   },
   esperimento: {
@@ -50,7 +50,7 @@ SL.registra('3.6.1', {
     ],
     nota: 'I passi sono sempre cinque. Le istruzioni sono indipendenti, e nessuna deve attendere.',
     previsione: {
-      domanda: (p) => 'Un flusso di ' + p.n + ' istruzioni indipendenti attraversa PIPE. Il ciclo ' + p.c + ' sta per terminare. Quale istruzione occuperà lo stadio W immediatamente dopo il fronte?',
+      domanda: (p) => 'Un flusso di ' + p.n + ' istruzioni indipendenti attraversa la CPU con pipeline. Il ciclo ' + p.c + ' sta per terminare. Quale istruzione occuperà lo stadio W immediatamente dopo il fronte?',
       opzioni: (p) => Array.from(new Set([3, 4, 2].map((j) => SL.unita361.occ(p.n, p.c, j)))).sort((a, b) => a - b).map((v) => [v, v ? 'I' + v : 'Nessuna'])
     },
     confronto: (pred, esito, p) => 'La previsione indicava ' + (pred ? 'I' + pred : 'nessuna istruzione') + '. Dopo il fronte lo stadio W ospita ' + (esito ? 'I' + esito : 'nessuna istruzione') + '. ' + (pred === esito ? 'La previsione coincide con l’esito.' : pred === SL.unita361.occ(p.n, p.c, 4) ? 'Tale è la situazione prima del fronte. Al fronte il contenuto di W è sostituito.' : 'Il registro W cattura l’istruzione che prima del fronte si trovava in M, una posizione più indietro.'),
@@ -105,7 +105,7 @@ SL.registra('3.6.1', {
         { t: 'Il campo valM conservato nel registro W', ok: true, fb: 'La maiuscola iniziale indica un valore conservato in un registro di pipeline.' },
         { t: 'Il valore valM che uno stadio sta calcolando in questo ciclo', fb: 'Un valore in corso di calcolo ha l’iniziale minuscola, come `m_valM`.' },
         { t: 'La parola che lo stadio W scrive nella memoria dei dati', fb: 'Lo stadio W scrive nel banco dei registri. valM è la parola letta dalla memoria nello stadio M, giunta ora al registro W.' }] },
-      { d: 'Un flusso di quattro istruzioni indipendenti entra in PIPE dal ciclo 1. Quale istruzione occupa lo stadio D dopo il fronte che chiude il ciclo 4? Si risponda con il suo numero.', segnaposto: 'Un numero', giuste: ['4', 'i4', 'quattro'],
+      { d: 'Un flusso di quattro istruzioni indipendenti entra nella CPU con pipeline dal ciclo 1. Quale istruzione occupa lo stadio D dopo il fronte che chiude il ciclo 4? Si risponda con il suo numero.', segnaposto: 'Un numero', giuste: ['4', 'i4', 'quattro'],
         ok: 'Al ciclo 4 lo stadio F ospita I4. Al fronte I4 passa in D.',
         diagnosi: [
           { se: ['5', 'i5'], msg: 'Il flusso ha quattro istruzioni: I5 non esiste, e dopo il fronte lo stadio F resta vuoto.' },

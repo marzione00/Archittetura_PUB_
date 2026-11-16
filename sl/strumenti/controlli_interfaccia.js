@@ -6,7 +6,7 @@ const R = path.join(__dirname, '..', '..') + path.sep;
 const lint = fs.readFileSync(R + 'sl/strumenti/controlli.js', 'utf8');
 const REG = vm.runInContext(lint.slice(lint.indexOf('const IMPERATIVI'), lint.indexOf('const registro = []')) + '; REGISTRO', vm.createContext({}));
 let n = 0;
-for (const f of ['unita', 'laboratorio', 'prova', 'rete', 'scena', 'avvio', 'nucleo']) {
+for (const f of ['unita', 'laboratorio', 'prova', 'rete', 'scena', 'avvio', 'intro', 'nucleo']) {
   const src = fs.readFileSync(R + 'sl/js/' + f + '.js', 'utf8');
   const lett = src.match(/'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`/g) || [];
   const visti = new Set();

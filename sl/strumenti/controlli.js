@@ -20,7 +20,7 @@ const TUTTO = process.argv.includes('--tutto');
 const SL = { viste: {}, unita: {}, registra: (id, def) => { SL.unita[id] = def; } };
 const ambiente = vm.createContext({ SL, console });
 const carica = (f) => vm.runInContext(leggi(f), ambiente, { filename: f });
-['sl/js/scena.js', 'sl/dati/corso.js', 'sl/dati/glossario.js', 'sl/dati/telemetria.js', 'sl/dati/macchina.js'].forEach(carica);
+['sl/js/scena.js', 'sl/dati/corso.js', 'sl/dati/glossario.js', 'sl/dati/telemetria.js', 'sl/dati/macchina.js', 'sl/dati/intro.js'].forEach(carica);
 const SIMBOLI = new Set((leggi('sl/js/simboli.js').match(/id=\\?"sl-[a-z0-9-]+/g) || []).map((s) => s.replace(/^.*sl-/, '')));
 const ORDINE = SL.unitaInOrdine.map((u) => u.id);
 fs.readdirSync(path.join(radice, 'sl/unita')).filter((f) => f.endsWith('.js')).sort().forEach((f) => carica('sl/unita/' + f));
@@ -201,6 +201,26 @@ for (const c of capitoli.filter((x) => x.prova)) {
   statProve.push([c.id, def.domande.length, Math.min.apply(null, distinte.map((x) => x.size)), distinte.reduce((a, x) => a + x.size, 0)]);
 }
 
+// Introduzione: struttura delle schede, pagine, segnaposto ed estensione dei testi (fra 40 e 110 parole per scheda).
+{
+  const SEGNAPOSTO = ['SCHEDE', 'LAB', 'MODULI', 'CAPITOLI', 'UNITA', 'PROVE', 'TERMINI', 'N0', 'MPRIMO', 'MULTIMO'];
+  const schede = SL.introduzione || [];
+  if (!schede.length) err('intro', 'introduzione assente');
+  schede.forEach((s, k) => {
+    const dove = 'scheda ' + (k + 1);
+    if (!s.eti || !s.titolo || !Array.isArray(s.testo) || !s.testo.length) { err('intro', dove + ': scheda incompleta'); return; }
+    metti('intro', 'breve', 'titolo', s.titolo); metti('intro', 'breve', dove, s.eti); s.testo.forEach((p) => metti('intro', 'prosa', dove, p));
+    if (s.bivio) s.bivio.forEach((x) => metti('intro', 'breve', dove, x));
+    const parole = s.testo.join(' ').split(/\s+/).length;
+    if (parole < 40 || parole > 110) err('intro', dove + ': ' + parole + ' parole, fuori dall’intervallo da 40 a 110');
+    s.testo.forEach((p) => (p.match(/\{([A-Z0-9]+)\}/g) || []).forEach((x) => { if (!SEGNAPOSTO.includes(x.slice(1, -1))) err('intro', dove + ': segnaposto sconosciuto ' + x); }));
+    if (s.rotta != null && s.rotta !== '#/') { const m = /^#\/u\/([\d.]+)\/([1-5])$/.exec(s.rotta); if (!m || !SL.unita[m[1]]) err('intro', dove + ': pagina inesistente ' + s.rotta); }
+    if (s.bersaglio != null && !(typeof s.bersaglio === 'string' || (Array.isArray(s.bersaglio) && s.bersaglio.every((x) => typeof x === 'string')))) err('intro', dove + ': elemento illuminato non valido');
+    if (s.bersaglio && s.rotta == null) err('intro', dove + ': elemento illuminato senza pagina');
+  });
+  if (schede.length && !schede[schede.length - 1].finale) err('intro', 'l’ultima scheda deve condurre all’inizio del percorso');
+}
+
 // Struttura dei capitoli: guida, almeno due unità, prova e sfide sono obbligatorie, poiché la pagina del capitolo le presenta tutte.
 SL.corso.forEach((m) => m.capitoli.forEach((c) => {
   if (c.diretta) { if (!c.scopo) err('corso', c.id + ': unità diretta priva di scopo'); return; }
@@ -352,7 +372,7 @@ for (const id of Object.keys(testi)) {
 // Il sito adotta la forma impersonale in ogni testo: teoria, laboratori ed esercizi. Lo strumento segnala la seconda persona,
 // la prima plurale, il lessico colloquiale, i superlativi, le formule a effetto e le serie di frasi brevissime.
 // Le unità già riscritte sono elencate in REGISTRO_FATTO: per loro ogni segnalazione è riportata; per le altre si dà il conto.
-const REGISTRO_FATTO = ['0.', '1.', '2.', '3.', '4.', '5.', '6.', 'corso', 'glossario'];
+const REGISTRO_FATTO = ['0.', '1.', '2.', '3.', '4.', '5.', '6.', 'corso', 'glossario', 'intro'];
 const IMPERATIVI = 'Prova|Guarda|Osserva|Scegli|Pensa|Immagina|Nota|Ricorda|Calcola|Scrivi|Leggi|Confronta|Aumenta|Riduci|Cambia|Ripeti|Conta|Cerca|Usa|Parti|Segui|Considera|Controlla|Verifica|Rispondi|Indica|Completa|Sposta|Premi|Apri|Torna|Dividi|Moltiplica|Somma|Sottrai|Aggiungi|Togli|Converti|Applica|Trova|Elenca|Tieni|Ragiona|Annota|Chiediti|Fermati|Lascia|Metti|Prendi|Porta|Ripassa|Rileggi|Riparti|Separa|Traduci|Individua|Stabilisci|Descrivi|Spiega|Fai|Vai|Scorri|Ricava|Ordina|Estrai|Isola|Esegui|Sostituisci|Riscrivi';
 const REGISTRO = [
   ['seconda persona', /(?<![\p{L}’])(saprai|vedrai|sceglierai|potrai|dovrai|troverai|userai|avrai|farai|seguirai|leggerai|scriverai|otterrai|noterai|imparerai|capirai|sarai|vorrai|dirai|conterai|calcolerai|confronterai|proverai|guarderai|osserverai|incontrerai|riconoscerai|hai|avevi|puoi|devi|vuoi|sai|stai|eri|tu|ti|te|tuo|tua|tuoi|tue|fall[oiae]|scrivil[oiae]|contal[oiae]|leggil[oiae]|sommal[oiae]|dividil[oiae]|spostal[oiae]|mettil[oiae]|prendil[oiae]|chiediti|fermati|ricordati|confrontal[oiae]|calcolal[oiae]|trovali|trovalo|cercal[oiae]|usal[oiae]|tienil[oiae]|lascial[oiae]|guardal[oiae]|osserval[oiae]|scorril[oiae])(?![\p{L}’])/iu],

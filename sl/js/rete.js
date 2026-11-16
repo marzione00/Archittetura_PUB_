@@ -24,7 +24,7 @@
     ];
     return '<section class="pannello tacca colonna" style="gap:18px" aria-label="Percorso di studio"><div class="colonna" style="gap:6px"><div class="occhiello">Percorso di studio</div><h2 class="titolo2">Da dove ha inizio lo studio</h2></div>' +
       '<ol class="tappe">' + tappe.map((x, k) => '<li><span class="n" aria-hidden="true">' + (k + 1) + '</span><div><h3 class="titolo3">' + x[0] + '</h3><p>' + x[1] + '</p></div></li>').join('') + '</ol>' +
-      '<div class="riga-bottoni"><a class="bottone primo" href="#/u/' + E(prima) + '">Inizio del percorso · unità ' + E(prima) + '</a><a class="bottone" href="#/u/' + E(ultima) + '">Uso del laboratorio · unità ' + E(ultima) + '</a>' + (conGuida ? '<a class="bottone" href="#/guida">Guida all’uso</a>' : '') + '</div>' +
+      '<div class="riga-bottoni"><a class="bottone primo" href="#/u/' + E(prima) + '">Inizio del percorso · unità ' + E(prima) + '</a><a class="bottone" href="#/u/' + E(ultima) + '">Uso del laboratorio · unità ' + E(ultima) + '</a>' + (conGuida ? '<a class="bottone" href="#/guida">Guida all’uso</a>' : '') + '<button type="button" class="bottone" data-intro>Introduzione al sito</button></div>' +
       '<p class="nota">Il sito non conserva alcun dato. A ogni visita il punto raggiunto si ritrova mediante l’elenco dei moduli oppure la rete.</p></section>';
   };
 

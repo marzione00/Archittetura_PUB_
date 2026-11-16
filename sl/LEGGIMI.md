@@ -33,10 +33,12 @@ sl/js/laboratorio.js  previsione, passi, modi «Osserva» e «Guidato»
 sl/js/unita.js        le cinque fasi di un'unità, figure ed esercizi
 sl/js/prova.js        prove di fine capitolo: varianti, pagina, riepilogo
 sl/js/rete.js         rete del corso in tre dimensioni, pagina di capitolo, glossario, guida all'uso
-sl/js/avvio.js        collegamento dei percorsi e sequenza di avvio
+sl/js/intro.js        introduzione a schede, con il faro sugli elementi della pagina
+sl/js/avvio.js        collegamento dei percorsi e apertura dell'introduzione
 sl/dati/corso.js      mappa di moduli, capitoli e unità
 sl/dati/glossario.js  termini, definizioni e unità che li introduce
 sl/dati/telemetria.js il record «TLM1» usato dal capitolo 1.7: codifica, campi, disegno dei byte
+sl/dati/intro.js      testi, pagine ed elementi illuminati dell'introduzione
 sl/dati/macchina.js   strumenti dei Moduli II, III e IV: registri x86-64, flag, tracce, listati, file di bit, pila, codifica Y86-64, diagrammi di pipeline, flusso di un'eccezione
 sl/unita/<id>.js      un file per unità, caricato soltanto quando serve
 sl/prove/<cap>.js     un file per capitolo con i generatori delle domande
@@ -47,18 +49,25 @@ I percorsi sono `#/` (rete), `#/m/<modulo>`, `#/c/<capitolo>`, `#/u/<unità>/<fa
 
 ## Orientamento
 
-Il sito è pensato per essere consultato senza altre indicazioni. Gli elementi che lo rendono autosufficiente sono quattro.
+Il sito è pensato per essere consultato senza altre indicazioni. Gli elementi che lo rendono autosufficiente sono cinque.
 
-- **Pagina principale.** Sotto il titolo compare il riquadro «Percorso di studio», con i tre passi dello studio e i collegamenti all'unità 0.1, all'unità sull'uso del laboratorio e alla guida. Il riquadro è prodotto dalla funzione `percorso` di `sl/js/rete.js`, che ricava numeri e identificativi dalla mappa del corso, ed è ripetuto nella pagina `#/guida`. Le linguette «Moduli del corso» selezionano un modulo senza passare dalla rete, che sugli schermi stretti risulta ridotta.
+- **Introduzione.** All'apertura della pagina principale compare un'introduzione a schede, descritta nella sezione seguente.
+- **Pagina principale.** Sotto il titolo compare il riquadro «Percorso di studio», con i tre passi dello studio e i collegamenti all'unità 0.1, all'unità sull'uso del laboratorio, alla guida e all'introduzione. Il riquadro è prodotto dalla funzione `percorso` di `sl/js/rete.js`, che ricava numeri e identificativi dalla mappa del corso, ed è ripetuto nella pagina `#/guida`. Le linguette «Moduli del corso» selezionano un modulo senza passare dalla rete, che sugli schermi stretti risulta ridotta.
 - **Scheda del modulo.** Ogni modulo di `sl/dati/corso.js` porta il campo `intro`, con tre parti: `tema` (argomento), `premesse` (prerequisiti) ed `esiti` (elenco di quanto si è in grado di svolgere al termine). I controlli verificano che il campo sia completo, che rispetti il registro dei testi e che ogni capitolo citato fra i prerequisiti sia davvero richiamato da almeno un'unità del modulo.
 - **Pagina del capitolo.** Il capitolo è presentato in tre passi: unità, prova, sfide in terminale. Per ogni unità la pagina mostra l'obiettivo, e sotto la guida elenca i capitoli richiamati. Entrambi i dati sono letti dai file delle unità (`obiettivo` e `richiami.carte[].da`, nella forma «Dall’unità x.y.z»), caricati in anticipo all'apertura del capitolo: non esistono copie da tenere allineate.
 - **Pagina dell'unità.** L'occhiello indica la posizione dell'unità nel capitolo, e ogni fase si apre con la riga «Attività della fase», che dichiara che cosa occorre fare. Al termine dell'ultima unità di un capitolo il comando principale conduce alla prova; la prova conduce al capitolo successivo.
 
 L'indirizzo `#/` mostra la pagina principale completa; l'indirizzo `#/m/<modulo>` mostra il medesimo contenuto senza il riquadro del percorso, così che la scheda del modulo sia raggiungibile con meno scorrimento.
 
-## Sequenza di avvio e guida
+## Introduzione e guida
 
-A ogni apertura della pagina principale compare una sequenza di avvio di circa quattro secondi, che riassume il contenuto del sito e si interrompe con un tasto o con un clic. Poiché il sito non conserva alcun dato, la sequenza non può sapere di essere già stata vista e si ripresenta a ogni caricamento della pagina principale; non compare quando l'indirizzo aperto è quello di un modulo, di un capitolo, di un'unità o di un'altra pagina interna, quando il sistema richiede la riduzione del movimento, né sotto il controllo di uno strumento automatico. I numeri mostrati sono calcolati dalla mappa del corso. La pagina `#/guida` descrive in forma estesa l'organizzazione del sito e le modalità di consultazione.
+A ogni apertura della pagina principale compare un'introduzione di 16 schede, divisa in due parti. Le prime dieci schede, sulla pagina principale, presentano il sito, il metodo, il percorso di studio, i moduli, la rete, la scheda del modulo, l'elenco dei capitoli, la testata e la gestione dei dati; le ultime sei, sull'unità 0.4, illustrano le fasi di un'unità, la previsione, i controlli, l'esecuzione per passi e il bilancio. Ogni scheda illumina l'elemento della pagina al quale si riferisce, e oscura il resto. Il componente è `sl/js/intro.js`; testi, pagine ed elementi illuminati sono in `sl/dati/intro.js`, e i numeri citati nei testi sono calcolati dalla mappa del corso.
+
+La prima scheda offre il comando «Salta intro»; le successive si chiudono con il pulsante posto nell'angolo superiore o con il tasto Esc, e si scorrono anche con le frecce della tastiera. Poiché il sito non conserva alcun dato, l'introduzione non può sapere di essere già stata letta e si ripresenta a ogni caricamento della pagina principale. Non compare quando l'indirizzo aperto è quello di un modulo, di un capitolo, di un'unità o di un'altra pagina interna, né sotto il controllo di uno strumento automatico; con la riduzione del movimento attiva compare senza animazioni. Si riapre dal comando «Introduzione al sito» del riquadro «Percorso di studio», presente anche nella pagina `#/guida`.
+
+Mentre l'introduzione è aperta, la pagina sottostante è resa inerte (attributo `inert`), sicché il fuoco e i clic restano nella scheda. Nella scheda dedicata alla previsione resta attivo soltanto il riquadro illuminato, e il comando «Scheda successiva» si attiva dopo la scelta di un valore. La posizione della scheda è scelta in quest'ordine: sotto o sopra l'elemento, quando entrambi entrano nella finestra; accanto all'elemento, sugli schermi larghi; accostata al bordo inferiore, dal lato opposto all'elemento. Uno spazio provvisorio in fondo alla pagina consente di portare in alto anche gli ultimi elementi. La chiusura riconduce al comando «Inizio del percorso», che riceve il fuoco; l'ultima scheda apre l'unità 0.1. Un cambio di indirizzo non richiesto dall'introduzione, per esempio con il tasto «indietro» del browser, la chiude.
+
+I controlli verificano per ogni scheda la completezza, l'esistenza della pagina indicata, i segnaposto, un'estensione compresa fra 40 e 110 parole e il registro dei testi. La pagina `#/guida` descrive in forma estesa l'organizzazione del sito e le modalità di consultazione.
 
 ## Aggiungere un'unità
 

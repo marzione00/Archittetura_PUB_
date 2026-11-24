@@ -44,7 +44,7 @@ code{font-family:var(--mono);font-size:.94em;color:var(--chiaro);background:var(
 .testa nav a{display:flex;align-items:center;min-height:44px;padding:0 14px;text-decoration:none;color:var(--testo2);border-bottom:2px solid transparent}
 .testa nav a[aria-current]{color:var(--ambra);border-bottom-color:var(--ambra);font-weight:600}
 .piede{border-top:1px solid var(--riga);margin-top:48px}
-.piede .licenza{margin-left:auto}.piede .licenza a{display:inline-block;padding:4px 0;color:var(--ambra)}
+.piede .licenza{margin-left:auto}.piede .licenza a,.piede>.in>a{display:inline-block;padding:4px 0;color:var(--ambra)}
 .piede .in{max-width:1320px;margin:0 auto;padding:22px 24px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;color:var(--muto);font-size:14px}
 main{display:block;outline:none;min-height:100vh}
 .pagina{max-width:1160px;margin:0 auto;padding:36px 24px 56px;display:flex;flex-direction:column;gap:32px}

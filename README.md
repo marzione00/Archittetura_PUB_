@@ -4,6 +4,8 @@ Laboratorio interattivo del corso di architettura dei sistemi, in lingua italian
 
 Indirizzo pubblico: <https://marzione00.github.io/Archittetura_PUB_/>
 
+Edizione ad alta leggibilità: <https://marzione00.github.io/Architettura_PUB_accessibile/>, pubblicata nel repository `Architettura_PUB_accessibile`. Ogni pagina di questa edizione vi rimanda con un collegamento di salto, raggiungibile da tastiera subito dopo «Passaggio al contenuto», e con un collegamento nel piede.
+
 ## Contenuto
 
 Il sito comprende 7 moduli, 41 capitoli e 208 unità. Ogni unità tratta un solo argomento in cinque fasi (richiami, esposizione, esperimento, esecuzione guidata, bilancio) ed è costruita attorno a un esperimento eseguibile un passo alla volta. Ogni capitolo dispone di una prova di fine capitolo in 999 varianti numerate, e il glossario conta 578 termini.

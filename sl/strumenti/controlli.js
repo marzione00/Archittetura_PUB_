@@ -417,7 +417,7 @@ const fuori = anticipi.filter((a) => !ACCETTATI[a.k]);
   const codice = elenco('sl/js', '.js'), contenuti = elenco('sl/dati', '.js').concat(elenco('sl/unita', '.js'), elenco('sl/prove', '.js')), stili = elenco('sl/css', '.css');
   const VIETATE = [[/\beval\s*\(/, 'eval'], [/\bnew\s+Function\b/, 'new Function'], [/\bdocument\.write/, 'document.write'], [/\b(localStorage|sessionStorage|indexedDB)\b/, 'archivi del browser'], [/\bdocument\.cookie\b/, 'cookie'], [/\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|\bsendBeacon\b|\bEventSource\b/, 'richieste di rete'], [/\bimport\s*\(/, 'import dinamico'], [/\bpostMessage\b/, 'postMessage'], [/\bset(Timeout|Interval)\s*\(\s*['"`]/, 'temporizzatore con codice in una stringa'], [/\bjavascript:/i, 'indirizzo javascript:']];
   const SOLO_DATI = [[/\binnerHTML\b|\bouterHTML\b|\binsertAdjacentHTML\b/, 'scrittura diretta di HTML'], [/\bdocument\s*\./, 'accesso al documento'], [/\bwindow\s*\./, 'accesso alla finestra'], [/\blocation\s*\./, 'accesso all’indirizzo']];
-  const ESTERNO = /(?:https?:)?\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)+/gi, AMMESSI = new Set(['http://www.w3.org', 'https://creativecommons.org']);
+  const ESTERNO = /(?:https?:)?\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)+/gi, AMMESSI = new Set(['http://www.w3.org', 'https://creativecommons.org', 'https://marzione00.github.io']); // l'ultimo: collegamenti fra le due edizioni del sito
   const GESTORE = /\son(?:click|dblclick|change|input|load|error|submit|focus|blur|key\w+|mouse\w+|pointer\w+|touch\w+)\s*=\s*\\?["']/i;
   let esaminati = 0;
   const esamina = (f, soloDati) => {

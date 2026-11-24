@@ -7,7 +7,10 @@ window.SL = (() => {
   SL.E = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => mappa[c]);
 
   // Testo delle unità: [[termine]] oppure [[id|testo mostrato]] apre la definizione; `x` è codice.
-  SL.T = (s) => SL.E(s)
+  // Un rimando alla dispensa porta alla pagina che ne riporta lo stato: la prima menzione, fuori dai termini e dal
+  // codice, diventa un collegamento.
+  const rimando = (h) => { let fatto = false; return h.split(/(\[\[[^\]]*\]\]|`[^`]*`)/).map((x, k) => (k % 2 || fatto ? x : x.replace(/\b[Dd]ispensa\b/, (m) => { fatto = true; return '<a href="#/dispensa">' + m + '</a>'; }))).join(''); };
+  SL.T = (s) => rimando(SL.E(s))
     .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, (m, id, t) => '<button type="button" class="termine" data-termine="' + id.trim() + '">' + t + '</button>')
     .replace(/\[\[([^\]]+)\]\]/g, (m, t) => '<button type="button" class="termine" data-termine="' + t.trim().toLowerCase() + '">' + t + '</button>')
     .replace(/(<button type="button" class="termine"[^>]*>[^<]*<\/button>)([.,;:!?»)]+)/g, '<span class="unito">$1$2</span>') // la punteggiatura resta unita al termine

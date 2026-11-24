@@ -47,7 +47,7 @@ sl/prove/<cap>.js     un file per capitolo con i generatori delle domande
 sl/strumenti/         controlli sui contenuti
 ```
 
-I percorsi sono `#/` (rete), `#/m/<modulo>`, `#/c/<capitolo>`, `#/u/<unità>/<fase>`, `#/p/<capitolo>/<variante>`, `#/glossario` e `#/guida`.
+I percorsi sono `#/` (rete), `#/m/<modulo>`, `#/c/<capitolo>`, `#/u/<unità>/<fase>`, `#/p/<capitolo>/<variante>`, `#/glossario`, `#/guida` e `#/dispensa`. La pagina `#/dispensa`, raggiunta dalla voce «Dispensa» della testata, segnala che la dispensa è in costruzione, con un disegno nello stile della rete i cui colori provengono dalle variabili del tema (classi `.cantiere` in `sito.css`); il PDF in `materiali/` resta nel repository, senza collegamenti dal sito.
 
 ## Orientamento
 

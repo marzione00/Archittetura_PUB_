@@ -66,7 +66,7 @@ SL.introduzione = [
     eti: 'Testata', titolo: 'Glossario, guida e dispensa', rotta: '#/', bersaglio: '.testa nav a',
     testo: [
       'La testata è presente in ogni pagina, e la voce «Rete del corso» riconduce alla pagina principale. Il glossario raccoglie i {TERMINI} termini del corso, ciascuno con la definizione e l’unità che lo introduce; nel testo delle unità i termini evidenziati ne mostrano la definizione alla selezione.',
-      'La guida descrive in forma estesa l’organizzazione del sito e le modalità di consultazione. La dispensa, in formato PDF, contiene la trattazione completa degli argomenti, e si apre in una nuova scheda del browser.'
+      'La guida descrive in forma estesa l’organizzazione del sito e le modalità di consultazione. La dispensa, che raccoglierà la trattazione completa degli argomenti, è in costruzione, e la voce «Dispensa» ne riporta lo stato.'
     ]
   },
   {
